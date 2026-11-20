@@ -7,7 +7,8 @@
       "status": "editor-tool",
       "source": "Assets/Editor/EarlyContinuousV40QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "alphabetphysicssurvey-alphabetphysicssurvey",
@@ -16,7 +17,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/AlphabetPhysicsSurvey.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Choose。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Choose。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "balancestatistics-balancestatistics",
@@ -25,7 +27,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/BalanceStatistics.cs",
       "animationTypes": "",
-      "description": "Begin；Update；Save。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Begin；Update；Save。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "balancestatistics-strategy-balancestatistics",
@@ -34,7 +37,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/BalanceStatistics.Strategy.cs",
       "animationTypes": "",
-      "description": "TickStrategy。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TickStrategy。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "balancestatisticsqa-balancestatisticsqa",
@@ -43,7 +47,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/BalanceStatisticsQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Battle；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Battle；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "bannerjellyqa-bannerjellyqa",
@@ -52,7 +57,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/BannerJellyQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "battlejellyqa-battlejellyqa",
@@ -61,7 +67,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/BattleJellyQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "campaignsettlement020qa-campaignsettlement020qa",
@@ -70,7 +77,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CampaignSettlement020QA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "catcosmeticsqa-catcosmeticsqa",
@@ -79,7 +87,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CatCosmeticsQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "catflowqa-catflowqa",
@@ -88,7 +97,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CatFlowQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "celebration020qa-celebration020qa",
@@ -97,7 +107,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Celebration020QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Level；WaitResult；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Level；WaitResult；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chaincollectionqa-chaincollectionqa",
@@ -106,7 +117,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainCollectionQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chaindifficultyresearch-chaindifficultyresearch",
@@ -115,7 +127,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainDifficultyResearch.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；PickGuardShot。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；PickGuardShot。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chaingravityqa-chaingravityqa",
@@ -124,7 +137,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainGravityQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainguardqa-chainguardqa",
@@ -133,7 +147,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainGuardQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainpowerqa-chainpowerqa",
@@ -142,7 +157,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainPowerQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainpresentationqa-chainpresentationqa",
@@ -151,7 +167,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainPresentationQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Level；Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainratingqa-chainratingqa",
@@ -160,7 +177,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainRatingQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainrealtimeqa-chainrealtimeqa",
@@ -169,7 +187,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainRealtimeQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Level；Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainrefillv39qa-chainrefillv39qa",
@@ -178,7 +197,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainRefillV39QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainvisualqa-chainvisualqa",
@@ -187,7 +207,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainVisualQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chainvolleygravityqa-chainvolleygravityqa",
@@ -196,7 +217,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChainVolleyGravityQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Level；Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chapterartpreview-chapterartpreview",
@@ -205,7 +227,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChapterArtPreview.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chinesecheerartqa-chinesecheerartqa",
@@ -214,7 +237,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChineseCheerArtQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "chinesev60outcomeqa-chinesev60outcomeqa",
@@ -223,7 +247,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ChineseV60OutcomeQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "collectionqa-collectionqa",
@@ -232,7 +257,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CollectionQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "collisionhapticsqa-collisionhapticsqa",
@@ -241,7 +267,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CollisionHapticsQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "combatfeedback79qa-combatfeedback79qa",
@@ -250,7 +277,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CombatFeedback79QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Open；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Open；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "cookiecollidergravityqa-cookiecollidergravityqa",
@@ -259,7 +287,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CookieColliderGravityQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "coppernumberqa-coppernumberqa",
@@ -268,7 +297,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/CopperNumberQA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-boardflowplanner-gamesession",
@@ -277,7 +307,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/BoardFlowPlanner.cs",
       "animationTypes": "数学曲线",
-      "description": "FlowRelativeCollision；FlowPositionAt。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "FlowRelativeCollision；FlowPositionAt。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-bosslevel-gamesession",
@@ -286,7 +317,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/BossLevel.cs",
       "animationTypes": "数学曲线",
-      "description": "TickBoss。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TickBoss。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-chaincollectionsession-gamesession",
@@ -295,7 +327,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/ChainCollectionSession.cs",
       "animationTypes": "数学曲线",
-      "description": "TickChainCollection。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TickChainCollection。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-collectionsession-gamesession",
@@ -304,7 +337,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/CollectionSession.cs",
       "animationTypes": "数学曲线",
-      "description": "FallCollectionTreats；TickCollection。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "FallCollectionTreats；TickCollection。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-contentflow-contentloadoperation",
@@ -313,7 +347,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/Core/ContentFlow.cs",
       "animationTypes": "协程",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-contentflow-gamecontent",
@@ -322,7 +357,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/Core/ContentFlow.cs",
       "animationTypes": "协程",
-      "description": "Level；Prefetch；Page；PrepareLevel；PrefetchLevel；PreparePage。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Prefetch；Page；PrepareLevel；PrefetchLevel；PreparePage。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-flowjellysession-flowjellydeform",
@@ -331,7 +367,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/FlowJellySession.cs",
       "animationTypes": "数学曲线",
-      "description": "LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-fusionpresentationsession-gamesession",
@@ -340,7 +377,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/FusionPresentationSession.cs",
       "animationTypes": "数学曲线",
-      "description": "TickFusionPresentation。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TickFusionPresentation。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-gamesession-gamesession",
@@ -349,7 +387,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/GameSession.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "StartSession；PrepareSession；BuildSession；NormalizeAimDirection。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "StartSession；PrepareSession；BuildSession；NormalizeAimDirection。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-mainlineplanner-mainlineplanner",
@@ -358,7 +397,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/Core/MainlinePlanner.cs",
       "animationTypes": "数学曲线",
-      "description": "Evaluate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Evaluate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-openingcampaign-gamesession",
@@ -367,7 +407,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/OpeningCampaign.cs",
       "animationTypes": "协程",
-      "description": "InitializeOpeningGridSteps。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "InitializeOpeningGridSteps。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-openingtargets-gamesession",
@@ -376,7 +417,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/OpeningTargets.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "OpeningCollect。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "OpeningCollect。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-openingthirdsession-gamesession",
@@ -385,7 +427,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/OpeningThirdSession.cs",
       "animationTypes": "数学曲线",
-      "description": "TickOpeningThird。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TickOpeningThird。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-pixeldropsession-pixeldropbody",
@@ -394,7 +437,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/PixelDropSession.cs",
       "animationTypes": "数学曲线",
-      "description": "Tick；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Tick；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-startupattempt77-startupattempt77",
@@ -403,7 +447,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/Core/StartupAttempt77.cs",
       "animationTypes": "协程",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "core-victoryplayback-gamesession",
@@ -412,7 +457,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/Core/VictoryPlayback.cs",
       "animationTypes": "数学曲线",
-      "description": "PresentationDelta。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "PresentationDelta。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "economyv67qa-economyv67qa",
@@ -421,7 +467,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/EconomyV67QA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Open；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Open；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "encouragementdragqa-encouragementdragqa",
@@ -430,7 +477,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/EncouragementDragQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "encouragementqa-encouragementqa",
@@ -439,7 +487,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/EncouragementQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "failureqa-failureqa",
@@ -448,7 +497,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/FailureQA.cs",
       "animationTypes": "协程 数学曲线 序列帧",
-      "description": "Level；Lose；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Lose；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "flightqa-flightqa",
@@ -457,7 +507,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/FlightQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "flightv22qa-flightv22qa",
@@ -466,7 +517,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/FlightV22QA.cs",
       "animationTypes": "协程 数学曲线 弹簧",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "fontgoalloopqa-fontgoalloopqa",
@@ -475,7 +527,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/FontGoalLoopQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；WaitPlaying；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；WaitPlaying；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "fourthgroupqa-fourthgroupqa",
@@ -484,7 +537,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/FourthGroupQA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "gardenbackgroundqa-gardenbackgroundqa",
@@ -493,7 +547,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/GardenBackgroundQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "grouprefill82qa-grouprefill82qa",
@@ -502,7 +557,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/GroupRefill82QA.cs",
       "animationTypes": "协程",
-      "description": "Settle；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Settle；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "homebannerqa-homebannerqa",
@@ -511,7 +567,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/HomeBannerQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "homefeedbackqa-homefeedbackqa",
@@ -520,7 +577,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/HomeFeedbackQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "immediatespecialintro020qa-immediatespecialintro020qa",
@@ -529,7 +587,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ImmediateSpecialIntro020QA.cs",
       "animationTypes": "协程",
-      "description": "Load；DelayResult；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Load；DelayResult；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ingamefeedbackqa-ingamefeedbackqa",
@@ -538,7 +597,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/InGameFeedbackQA.cs",
       "animationTypes": "协程",
-      "description": "Level；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ingotfxqa-ingotfxqa",
@@ -547,7 +607,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/IngotFxQA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "jellybalancer2qa-jellybalancer2qa",
@@ -556,7 +617,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/JellyBalanceR2QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "jellybrickqa-jellybrickqa",
@@ -565,7 +627,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/JellyBrickQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "jellyjourney80qa-jellyjourney80preview",
@@ -574,7 +637,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/JellyJourney80QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "jellyjourney80qa-jellyjourney80qa",
@@ -583,7 +647,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/JellyJourney80QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；OpenMap；Battle；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；OpenMap；Battle；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "jellyribbontexture80qa-jellyribbontexture80qa",
@@ -592,7 +657,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/JellyRibbonTexture80QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "CaptureNative；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "CaptureNative；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "jellyv40qa-jellyv40qa",
@@ -601,7 +667,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/JellyV40QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "jellywallqa-jellywallqa",
@@ -610,7 +677,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/JellyWallQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leaguecalendarpreview-leaguecalendarpreview",
@@ -619,7 +687,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LeagueCalendarPreview.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leaguecalendarqa-leaguecalendarqa",
@@ -628,7 +697,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LeagueCalendarQA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leaguefontpreview-leaguefontpreview",
@@ -637,7 +707,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LeagueFontPreview.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leagueqa-leagueqa",
@@ -646,7 +717,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LeagueQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leaguev66qa-leaguev66qa",
@@ -655,7 +727,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LeagueV66QA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leaguev79qa-leaguev79qa",
@@ -664,7 +737,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LeagueV79QA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-fusioncoreqa-fusioncoreqa",
@@ -673,7 +747,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/FusionCoreQA.cs",
       "animationTypes": "协程",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-fusiondeviceqa-fusiondeviceqa",
@@ -682,7 +757,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/FusionDeviceQA.cs",
       "animationTypes": "协程",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-fusionflowqa-fusionflowqa",
@@ -691,7 +767,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/FusionFlowQA.cs",
       "animationTypes": "协程",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-fusionqa-fusionqa",
@@ -700,7 +777,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/FusionQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；RuleFixtures；LifecycleChecks；BoosterFixtures；EditorBoosterScenarioChecks；NaturalRun；ChooseAngle；RestoreSimulation。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；RuleFixtures；LifecycleChecks；BoosterFixtures；EditorBoosterScenarioChecks；NaturalRun；ChooseAngle；RestoreSimulation。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-fusionrearqa-fusionrearqa",
@@ -709,7 +787,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/FusionRearQA.cs",
       "animationTypes": "协程",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-fusionsuperrangeqa-fusionsuperrangeqa",
@@ -718,7 +797,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/FusionSuperRangeQA.cs",
       "animationTypes": "协程",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-levelbalancepolicy-balancefirepolicy",
@@ -727,7 +807,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/LevelBalancePolicy.cs",
       "animationTypes": "数学曲线",
-      "description": "Choose。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Choose。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-levelbalancerunner-levelbalancerunner",
@@ -736,7 +817,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/LevelBalanceRunner.cs",
       "animationTypes": "协程",
-      "description": "Start；Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-leveleditorapp-leveleditorapp",
@@ -745,7 +827,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/LevelEditorApp.cs",
       "animationTypes": "",
-      "description": "Awake；Update；BeginPlaytest；OnVolley。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Awake；Update；BeginPlaytest；OnVolley。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-leveleditorplaytest-leveleditorplaytest",
@@ -754,7 +837,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/LevelEditorPlaytest.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "leveleditor-openingbalancechecks-openingbalancechecks",
@@ -763,7 +847,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEditor/OpeningBalanceChecks.cs",
       "animationTypes": "数学曲线",
-      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Run。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "levelentry88qa-levelentry88qa",
@@ -772,7 +857,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelEntry88QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Update；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "levelfivesettlementqa-levelfivesettlementqa",
@@ -781,7 +867,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LevelFiveSettlementQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "lifecycleqa-lifecycleqa",
@@ -790,7 +877,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LifecycleQA.cs",
       "animationTypes": "协程",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "loadingqa-loadingqa",
@@ -799,7 +887,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/LoadingQA.cs",
       "animationTypes": "协程",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobile73qa-mobile73qa",
@@ -808,7 +897,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Mobile73QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobileframestats-mobileframestats",
@@ -817,7 +907,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/MobileFrameStats.cs",
       "animationTypes": "协程 数学曲线 序列帧",
-      "description": "Start；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobilev54qa-mobilev54qa",
@@ -826,7 +917,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/MobileV54QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobilev55handoffqa-mobilev55handoffqa",
@@ -835,7 +927,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/MobileV55HandoffQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobilev55stressqa-mobilev55stressqa",
@@ -844,7 +937,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/MobileV55StressQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobilev56brickqa-mobilev56brickqa",
@@ -853,7 +947,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/MobileV56BrickQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobilev57inputqa-mobilev57inputqa",
@@ -862,7 +957,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/MobileV57InputQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "mobilev58outcomeqa-mobilev58outcomeqa",
@@ -871,7 +967,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/MobileV58OutcomeQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "onboardingqa-onboardingqa",
@@ -880,7 +977,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/OnboardingQA.cs",
       "animationTypes": "协程 数学曲线 弹簧",
-      "description": "Capture；Dismiss；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Dismiss；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "opening81qa-opening81qa",
@@ -889,7 +987,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Opening81QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Dismiss；Load；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Dismiss；Load；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "openingeffectsqa-openingeffectsqa",
@@ -898,7 +997,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/OpeningEffectsQA.cs",
       "animationTypes": "协程",
-      "description": "Capture；WaitPage；Dismiss；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；WaitPage；Dismiss；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "optimizationv76qa-optimizationv76qa",
@@ -907,7 +1007,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/OptimizationV76QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Endless；Broken；Nested；FaultAtInitialization；CancelNext；Capture；WaitBattle；Start；Once。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Endless；Broken；Nested；FaultAtInitialization；CancelNext；Capture；WaitBattle；Start；Once。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "packagecleanupqa-packagecleanupqa",
@@ -916,7 +1017,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/PackageCleanupQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "pastelqa-pastelqa",
@@ -925,7 +1027,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/PastelQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "playerhaptics71-playerhaptics71",
@@ -934,7 +1037,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/PlayerHaptics71.cs",
       "animationTypes": "",
-      "description": "TryPulse。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TryPulse。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "playtestmetrics76-playtestmetrics76",
@@ -943,7 +1047,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/PlaytestMetrics76.cs",
       "animationTypes": "数学曲线 序列帧",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "prefetchreuse020qa-appui",
@@ -952,7 +1057,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/PrefetchReuse020QA.cs",
       "animationTypes": "协程",
-      "description": "QATrackedPrefetch。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "QATrackedPrefetch。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "prefetchreuse020qa-prefetchreuse020qa",
@@ -961,7 +1067,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/PrefetchReuse020QA.cs",
       "animationTypes": "协程",
-      "description": "Download；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Download；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "refill80qa-gamesession",
@@ -970,7 +1077,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Refill80QA.cs",
       "animationTypes": "",
-      "description": "QARefillStatus。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "QARefillStatus。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "refill80qa-refill80qa",
@@ -979,7 +1087,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Refill80QA.cs",
       "animationTypes": "协程 弹簧",
-      "description": "Settle；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Settle；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "refillcolumnsqa-refillcolumnsqa",
@@ -988,7 +1097,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/RefillColumnsQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "refillv63qa-refillv63qa",
@@ -997,7 +1107,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/RefillV63QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "resultnosplashf4qa-resultnosplashf4qa",
@@ -1006,7 +1117,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ResultNoSplashF4QA.cs",
       "animationTypes": "协程",
-      "description": "Page；Level；Result；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Page；Level；Result；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "round4audit-round4audit",
@@ -1015,7 +1127,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Round4Audit.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start；AlphaSheets；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start；AlphaSheets；Capture。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "round5demo-round5demo",
@@ -1024,7 +1137,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Round5Demo.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "round6demo-round6demo",
@@ -1033,7 +1147,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Round6Demo.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "secondgroupintegrationqa-secondgroupintegrationqa",
@@ -1042,7 +1157,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SecondGroupIntegrationQA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Level；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Level；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "secondgroupintegrationqa-secondgrouppreview",
@@ -1051,7 +1167,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SecondGroupIntegrationQA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "settingscpreview-settingscpreview",
@@ -1060,7 +1177,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SettingsCPreview.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "settingscqa-settingscqa",
@@ -1069,7 +1187,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SettingsCQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Stable；Capture；LoadBattle；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Stable；Capture；LoadBattle；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "settlement82qa-settlement82qa",
@@ -1078,7 +1197,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/Settlement82QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Resolve；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Resolve；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "sevenspecial80qa-sevenspecial80qa",
@@ -1087,7 +1207,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SevenSpecial80QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "sfxv87qa-sfxv87qa",
@@ -1096,7 +1217,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SfxV87QA.cs",
       "animationTypes": "协程",
-      "description": "Heard；Level；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Heard；Level；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "soundservice-soundservice",
@@ -1105,7 +1227,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/SoundService.cs",
       "animationTypes": "协程 数学曲线 材质",
-      "description": "WarmEffects；Trigger；Speak；Crossfade；Update；SetBusVolume；SaveMix。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "WarmEffects；Trigger；Speak；Crossfade；Update；SetBusVolume；SaveMix。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "specialgenerationaudit-specialgenerationaudit",
@@ -1114,7 +1237,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SpecialGenerationAudit.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "streakrewardv74qa-streakrewardv74qa",
@@ -1123,7 +1247,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/StreakRewardV74QA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "streakv61qa-streakv61qa",
@@ -1132,7 +1257,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/StreakV61QA.cs",
       "animationTypes": "协程 弹簧",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "systemsv64qa-systemsv64qa",
@@ -1141,7 +1267,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/SystemsV64QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Open；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Open；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "thirdgroupqa-thirdgroupqa",
@@ -1150,7 +1277,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/ThirdGroupQA.cs",
       "animationTypes": "协程",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-activitycarousel-activitycarousel",
@@ -1159,7 +1287,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/ActivityCarousel.cs",
       "animationTypes": "DOTween",
-      "description": "Settle。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Settle。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-activityjellymotion-activityjellymotion",
@@ -1168,7 +1297,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/ActivityJellyMotion.cs",
       "animationTypes": "数学曲线 弹簧",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "activity"
     },
     {
       "id": "ui-alphabetintroductionview-boosters-boosterstoryactor",
@@ -1177,7 +1307,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AlphabetIntroductionView.Boosters.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-alphabetintroductionview-alphabetintroductionview",
@@ -1186,7 +1317,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AlphabetIntroductionView.cs",
       "animationTypes": "DOTween",
-      "description": "Begin；Enter；Advance；AdvanceForQA；Cancel；OnDestroy。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Begin；Enter；Advance；AdvanceForQA；Cancel；OnDestroy。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-alphabetintroductionview-motion-alphabetintroductionview",
@@ -1195,7 +1327,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AlphabetIntroductionView.Motion.cs",
       "animationTypes": "",
-      "description": "AdvanceMotion。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "AdvanceMotion。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-alphabettweenextensions-alphabettweenextensions",
@@ -1204,7 +1337,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AlphabetTweenExtensions.cs",
       "animationTypes": "DOTween",
-      "description": "DOAnchorPos；DOAnchorPosY；DOFade；DOFade。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "DOAnchorPos；DOAnchorPosY；DOFade；DOFade。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-alphabet-appui",
@@ -1213,7 +1347,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.Alphabet.cs",
       "animationTypes": "协程",
-      "description": "ShowAlphabetIntroductions。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShowAlphabetIntroductions。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-boosterunlocks-appui",
@@ -1222,7 +1357,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.BoosterUnlocks.cs",
       "animationTypes": "协程",
-      "description": "ShowBoosterUnlocks。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShowBoosterUnlocks。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-chapteropening70-appui",
@@ -1231,7 +1367,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.ChapterOpening70.cs",
       "animationTypes": "协程",
-      "description": "OpenChapterOnHome；ReturnHomeAfterChapterResult。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "OpenChapterOnHome；ReturnHomeAfterChapterResult。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-contentloading-appui",
@@ -1240,7 +1377,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.ContentLoading.cs",
       "animationTypes": "协程",
-      "description": "PrefetchFollowingLevel；PrepareOutcomeRoutine；RunLevelLoad；PrepareMenuContentRoutine。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "PrefetchFollowingLevel；PrepareOutcomeRoutine；RunLevelLoad；PrepareMenuContentRoutine。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-appui",
@@ -1249,7 +1387,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.cs",
       "animationTypes": "DOTween 协程 数学曲线",
-      "description": "Update；ShowPage；StartIntroWhenVisible；DismissIntro；StartPreparedLevel；HideTutorialLater；OpenModalMotion；CloseModal；Pop；CountWallet；FlyCoins；FlyCoin；WalletPulse；Fireworks；Spark；Confetti；Toast；QAWaitForLevel。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；ShowPage；StartIntroWhenVisible；DismissIntro；StartPreparedLevel；HideTutorialLater；OpenModalMotion；CloseModal；Pop；CountWallet；FlyCoins；FlyCoin；WalletPulse；Fireworks；Spark；Confetti；Toast；QAWaitForLevel。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-leagueactivity-appui",
@@ -1258,7 +1397,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.LeagueActivity.cs",
       "animationTypes": "数学曲线",
-      "description": "TickLeagueActivity。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TickLeagueActivity。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-leagueflow-appui",
@@ -1267,7 +1407,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.LeagueFlow.cs",
       "animationTypes": "",
-      "description": "TickLeagueFlow。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "TickLeagueFlow。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-playersettings71-appui",
@@ -1276,7 +1417,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.PlayerSettings71.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "FitSettingsModal77。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "FitSettingsModal77。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-settingsc-appui",
@@ -1285,7 +1427,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.SettingsC.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "LayoutSettingsSheetC。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "LayoutSettingsSheetC。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "modal"
     },
     {
       "id": "ui-appui-shop-appui",
@@ -1294,7 +1437,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.Shop.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "ShopEnter；OpenReferenceModal；DrawDressing；CosmeticSpark。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShopEnter；OpenReferenceModal；DrawDressing；CosmeticSpark。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-streakreward-appui",
@@ -1303,7 +1447,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.StreakReward.cs",
       "animationTypes": "协程",
-      "description": "ShowCampaignStreakReward。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShowCampaignStreakReward。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-streakreward-streakrewardglow",
@@ -1312,7 +1457,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.StreakReward.cs",
       "animationTypes": "数学曲线",
-      "description": "OnPopulateMesh。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "OnPopulateMesh。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-streakreward-streakrewardpresentation",
@@ -1321,7 +1467,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.StreakReward.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Play。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Play。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-appui-tutorial-appui",
@@ -1330,7 +1477,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/AppUI.Tutorial.cs",
       "animationTypes": "协程",
-      "description": "ShowFirstBounceIntroduction。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShowFirstBounceIntroduction。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-battlehudsummary-battlehudsummary",
@@ -1339,7 +1487,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/BattleHUDSummary.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-battleinterfacetour-appui",
@@ -1348,7 +1497,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/BattleInterfaceTour.cs",
       "animationTypes": "协程",
-      "description": "ShowBattleInterfaceTour。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShowBattleInterfaceTour。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-battleinterfacetour-battleinterfacetour",
@@ -1357,7 +1507,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/BattleInterfaceTour.cs",
       "animationTypes": "数学曲线",
-      "description": "Begin；Place；Advance；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Begin；Place；Advance；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-battlejellyart-collectionflightmotion",
@@ -1366,7 +1517,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/BattleJellyArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Apply。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Apply。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "reward"
     },
     {
       "id": "ui-battlescoremeter-battlescoremeter",
@@ -1375,7 +1527,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/BattleScoreMeter.cs",
       "animationTypes": "数学曲线",
-      "description": "OnBall；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "OnBall；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-battleuiart-battleaimhint",
@@ -1384,7 +1537,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/BattleUIArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-bosshud-bosshud",
@@ -1393,7 +1547,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/BossHUD.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-chaincollectionhud-chaincollectionhud",
@@ -1402,7 +1557,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/ChainCollectionHUD.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-chaincollectionhud-chaintaskcard",
@@ -1411,7 +1567,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/ChainCollectionHUD.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-chainratingview-chainratingview",
@@ -1420,7 +1577,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/ChainRatingView.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-chapteropening70-chapteropening70",
@@ -1429,7 +1587,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/ChapterOpening70.cs",
       "animationTypes": "数学曲线",
-      "description": "Sample；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Sample；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-collectiongoalentrance-appui",
@@ -1438,7 +1597,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/CollectionGoalEntrance.cs",
       "animationTypes": "协程",
-      "description": "ShowCollectionGoalEntrance。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShowCollectionGoalEntrance。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-collectiongoalentrance-collectiongoalentrance",
@@ -1447,7 +1607,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/CollectionGoalEntrance.cs",
       "animationTypes": "数学曲线",
-      "description": "Render；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Render；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "goal"
     },
     {
       "id": "ui-encouragementdrag-encouragementdrag",
@@ -1456,7 +1617,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/EncouragementDrag.cs",
       "animationTypes": "数学曲线",
-      "description": "LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "drag"
     },
     {
       "id": "ui-failurecatanimation-failurecatanimation",
@@ -1465,7 +1627,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/FailureCatAnimation.cs",
       "animationTypes": "数学曲线 序列帧",
-      "description": "FrameAt；Get。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "FrameAt；Get。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "failurecat"
     },
     {
       "id": "ui-failurepresentation-failurepresentation",
@@ -1474,7 +1637,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/FailurePresentation.cs",
       "animationTypes": "数学曲线 序列帧",
-      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "failure"
     },
     {
       "id": "ui-gametypography-gametypography",
@@ -1483,7 +1647,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/UI/GameTypography.cs",
       "animationTypes": "材质",
-      "description": "Outline；Heading。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Outline；Heading。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-goalcelebration-goalcelebration",
@@ -1492,7 +1657,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/GoalCelebration.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-homefeedbackview-homefeedbackview",
@@ -1501,7 +1667,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/HomeFeedbackView.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；Pop。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Pop。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-homewordmarkwiggle-homewordmarkwiggle",
@@ -1510,7 +1677,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/HomeWordmarkWiggle.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "wordmark"
     },
     {
       "id": "ui-ingamefeedbackview-ingamefeedbackview",
@@ -1519,7 +1687,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/InGameFeedbackView.cs",
       "animationTypes": "数学曲线",
-      "description": "LateUpdate；AnimateCheer。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "LateUpdate；AnimateCheer。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-jellychapterorb-jellychapterorb",
@@ -1528,7 +1697,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/JellyChapterOrb.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-jellyjourney80-jellyjourney80",
@@ -1537,7 +1707,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/JellyJourney80.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "MotionClock；Sway；PullJelly；EndJellyDrag；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "MotionClock；Sway；PullJelly；EndJellyDrag；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-jellyjourneymotion80-jellylevelmotion80",
@@ -1546,7 +1717,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/JellyJourneyMotion80.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "Clock；Entrance；OnPointerDown；Release；Apply。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Clock；Entrance；OnPointerDown；Release；Apply。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-jellyjourneymotion80-jellyrouteribbon80",
@@ -1555,7 +1727,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/JellyJourneyMotion80.cs",
       "animationTypes": "数学曲线",
-      "description": "Configure；RefreshMotion；OnPopulateMesh。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Configure；RefreshMotion；OnPopulateMesh。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-jellylogointro-jellyglyph",
@@ -1564,7 +1737,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/JellyLogoIntro.cs",
       "animationTypes": "DOTween 协程 数学曲线",
-      "description": "Begin；Impact。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Begin；Impact。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "logo"
     },
     {
       "id": "ui-jellylogointro-jellylogointro",
@@ -1573,7 +1747,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/JellyLogoIntro.cs",
       "animationTypes": "DOTween 协程 数学曲线",
-      "description": "Begin；ReleaseAfterLanding。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Begin；ReleaseAfterLanding。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "logo"
     },
     {
       "id": "ui-journeyart-chaptertransitionpreview",
@@ -1582,7 +1757,8 @@
       "status": "inactive-preview",
       "source": "Assets/Scripts/UI/JourneyArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Sample；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Sample；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-leaguebannerstatus-leaguebannerstatus",
@@ -1591,7 +1767,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/LeagueBannerStatus.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-leaguematchpresentation-leaguematchpresentation",
@@ -1600,7 +1777,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/LeagueMatchPresentation.cs",
       "animationTypes": "数学曲线",
-      "description": "Build；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Build；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-leaguemotionart-leaguemedalpresentation",
@@ -1609,7 +1787,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/LeagueMotionArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "medal"
     },
     {
       "id": "ui-leaguerankingview-leaguejelly",
@@ -1618,7 +1797,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/LeagueRankingView.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-leaguerankingview-leaguerankingview",
@@ -1627,7 +1807,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/LeagueRankingView.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "Update；UpdateClock；Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；UpdateClock；Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-lessoncollectionflight-lessoncollectionflight",
@@ -1636,7 +1817,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/LessonCollectionFlight.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-loadingpresentation-loadingpresentation",
@@ -1645,7 +1827,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/LoadingPresentation.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；Hop；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Hop；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "loading"
     },
     {
       "id": "ui-openingintroduction-appui",
@@ -1654,7 +1837,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/OpeningIntroduction.cs",
       "animationTypes": "协程",
-      "description": "ShowOpeningIntroduction。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "ShowOpeningIntroduction。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-openingintroduction-openingruledemo",
@@ -1663,7 +1847,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/OpeningIntroduction.cs",
       "animationTypes": "数学曲线",
-      "description": "Render；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Render；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-paintingcollectionpresentation-paintingcollectionpresentation",
@@ -1672,7 +1857,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/PaintingCollectionPresentation.cs",
       "animationTypes": "数学曲线",
-      "description": "Begin；Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Begin；Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-playabletutorialguide-playabletutorialguide",
@@ -1681,7 +1867,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/PlayableTutorialGuide.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-referencechapterview-chapterhomeview",
@@ -1690,7 +1877,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/ReferenceChapterView.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Transition。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Transition。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-resultaudiotimeline-resultaudiotimeline",
@@ -1699,7 +1887,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/ResultAudioTimeline.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "victory"
     },
     {
       "id": "ui-round6nav-round6nav",
@@ -1708,7 +1897,8 @@
       "status": "legacy-route-disabled",
       "source": "Assets/Scripts/UI/Round6Nav.cs",
       "animationTypes": "DOTween 协程 数学曲线",
-      "description": "Select；StartPopAfterVisibleFrame；RenderPop。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Select；StartPopAfterVisibleFrame；RenderPop。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-scoregainpresentation-scoregainpresentation",
@@ -1717,7 +1907,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/ScoreGainPresentation.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-settingsswitch77-settingsswitch77",
@@ -1726,7 +1917,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/SettingsSwitch77.cs",
       "animationTypes": "DOTween",
-      "description": "Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "switch"
     },
     {
       "id": "ui-starchargeview-starchargeview",
@@ -1735,7 +1927,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/StarChargeView.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "SetImmediate；Advance；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "SetImmediate；Advance；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "charge"
     },
     {
       "id": "ui-tutorialmotionboard-tutorialmotionboard",
@@ -1744,7 +1937,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/TutorialMotionBoard.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "Configure；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Configure；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-uibounce-jellybuttonmesh",
@@ -1753,7 +1947,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/UIBounce.cs",
       "animationTypes": "",
-      "description": "Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-uibounce-uibounce",
@@ -1762,7 +1957,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/UIBounce.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "Update；Animate；IdleWiggle。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Animate；IdleWiggle。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "press"
     },
     {
       "id": "ui-uicraft-uicraft",
@@ -1771,7 +1967,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/UI/UICraft.cs",
       "animationTypes": "数学曲线",
-      "description": "Flower。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Flower。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "ui-uicraft-uifloat",
@@ -1780,7 +1977,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/UICraft.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "float"
     },
     {
       "id": "ui-victorycatanimation-victorycatanimation",
@@ -1789,7 +1987,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/VictoryCatAnimation.cs",
       "animationTypes": "数学曲线 序列帧",
-      "description": "FrameAt；Get。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "FrameAt；Get。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "victorycat"
     },
     {
       "id": "ui-victoryfinale-victoryfinale",
@@ -1798,7 +1997,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/VictoryFinale.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "Begin；Update；Advance。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Begin；Update；Advance。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "number"
     },
     {
       "id": "ui-victorypresentation-victorypresentation",
@@ -1807,7 +2007,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/VictoryPresentation.cs",
       "animationTypes": "数学曲线 序列帧",
-      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "victory"
     },
     {
       "id": "ui-victorypresentation-stars-victorypresentation",
@@ -1816,7 +2017,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/UI/VictoryPresentation.Stars.cs",
       "animationTypes": "数学曲线",
-      "description": "RenderHeaderStars。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "RenderHeaderStars。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "victory"
     },
     {
       "id": "ui-victoryroundpreparation-victoryroundpreparation",
@@ -1825,7 +2027,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/UI/VictoryRoundPreparation.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "victoryfinaleqa-victoryfinalepreview",
@@ -1834,7 +2037,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/VictoryFinaleQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "victoryfinaleqa-victoryfinaleqa",
@@ -1843,7 +2047,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/VictoryFinaleQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；StartLevel；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；StartLevel；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "victoryqa-victoryqa",
@@ -1852,7 +2057,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/VictoryQA.cs",
       "animationTypes": "协程 序列帧",
-      "description": "Level；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "victoryrace020qa-victoryrace020qa",
@@ -1861,7 +2067,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/VictoryRace020QA.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "victoryspeedr3qa-victoryspeedr3qa",
@@ -1870,7 +2077,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/VictorySpeedR3QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Level；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Level；Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "wechatadaptation87qa-wechatadaptation87qa",
@@ -1879,7 +2087,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/WeChatAdaptation87QA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；CaptureGoldFrames；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；CaptureGoldFrames；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "windowsdemorecorder-demorecorderbootstrap",
@@ -1888,7 +2097,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/WindowsDemoRecorder.cs",
       "animationTypes": "协程",
-      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "windowsdemorecorder-windowsdemorecorder",
@@ -1897,7 +2107,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/WindowsDemoRecorder.cs",
       "animationTypes": "协程",
-      "description": "CaptureDisplayedFrames。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "CaptureDisplayedFrames。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-abilityart-abilityframefx",
@@ -1906,7 +2117,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/AbilityArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-boarddisplay-boarddisplay",
@@ -1915,7 +2127,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/World/BoardDisplay.cs",
       "animationTypes": "数学曲线",
-      "description": "Y。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Y。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-boardsurface-boardsurface",
@@ -1924,7 +2137,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/World/BoardSurface.cs",
       "animationTypes": "材质",
-      "description": "Initialize；QAParity。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Initialize；QAParity。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-bossbody-bossbody",
@@ -1933,7 +2147,8 @@
       "status": "mixed-physics-presentation-review",
       "source": "Assets/Scripts/World/BossBody.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-camerajuice-camerajuice",
@@ -1942,7 +2157,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/CameraJuice.cs",
       "animationTypes": "数学曲线",
-      "description": "Impact；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Impact；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chaincubeart-chainbondview",
@@ -1951,7 +2167,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainCubeArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chaincubeart-chaincubeburst",
@@ -1960,7 +2177,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainCubeArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chaincubeart-chaincubeidle",
@@ -1969,7 +2187,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainCubeArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chaincubeart-chaincubeview",
@@ -1978,7 +2197,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainCubeArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chainvisualart-chainbrickview",
@@ -1987,7 +2207,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainVisualArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Tick；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Tick；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chainvisualart-chainglint",
@@ -1996,7 +2217,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainVisualArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chainvisualart-chainidlesprite",
@@ -2005,7 +2227,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainVisualArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Tick；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Tick；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chainvisualart-chainspritefx",
@@ -2014,7 +2237,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainVisualArt.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-chainvisualart-chainstoneview",
@@ -2023,7 +2247,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ChainVisualArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-combatfeedback79-combatfeedback79",
@@ -2032,7 +2257,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/CombatFeedback79.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "EmphasizeSpecial；Initialize；Cue；RequestStop；Update；AdvanceParticles；LateUpdate；ReleaseClock；ReleaseSlow。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "EmphasizeSpecial；Initialize；Cue；RequestStop；Update；AdvanceParticles；LateUpdate；ReleaseClock；ReleaseSlow。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-electriccircuit-electriccircuit",
@@ -2041,7 +2267,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/ElectricCircuit.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；UpdateLines。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；UpdateLines。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-fusionballbudgetview-fusionballbudgetview",
@@ -2050,7 +2277,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/FusionBallBudgetView.cs",
       "animationTypes": "数学曲线",
-      "description": "Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Refresh。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-gameplayflight-flighttrail",
@@ -2059,7 +2287,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/GameplayFlight.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "Configure；BindYarn；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Configure；BindYarn；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-gardensceneart-gardensceneart",
@@ -2068,7 +2297,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/World/GardenSceneArt.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "Upload；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Upload；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-ingotspecialfx-ingotspecialfx",
@@ -2077,7 +2307,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/IngotSpecialFx.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "Play；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Play；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-jellybrickart-jellypoppool",
@@ -2086,7 +2317,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/JellyBrickArt.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-jellymotion-jellymotion",
@@ -2095,7 +2327,8 @@
       "status": "source-route-reviewed",
       "source": "Assets/Scripts/World/JellyMotion.cs",
       "animationTypes": "数学曲线",
-      "description": "HitStretch；FloatOffset；FloatScale；FloatAngle。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "HitStretch；FloatOffset；FloatScale；FloatAngle。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": "hit"
     },
     {
       "id": "world-jellywallframe-jellywallframe",
@@ -2104,7 +2337,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/JellyWallFrame.cs",
       "animationTypes": "数学曲线",
-      "description": "Envelope；Influence；PulseShape；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Envelope；Influence；PulseShape；LateUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-juicegardenview-juicegardenview",
@@ -2113,7 +2347,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/JuiceGardenView.cs",
       "animationTypes": "DOTween 数学曲线",
-      "description": "Impact；Tether；Callout；PawFlick；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Impact；Tether；Callout；PawFlick；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-mainlineart-mainlinebrickview",
@@ -2122,7 +2357,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/MainlineArt.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-mainlineart-mainlinecanvas",
@@ -2131,7 +2367,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/MainlineArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-mainlineart-mainlineframefx",
@@ -2140,7 +2377,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/MainlineArt.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-openingcookieboxview-openingcookieboxview",
@@ -2149,7 +2387,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/OpeningCookieBoxView.cs",
       "animationTypes": "数学曲线",
-      "description": "Tick。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Tick。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-openingcopperart-openingcoppereffect",
@@ -2158,7 +2397,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/OpeningCopperArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-openingcopperart-openingcopperview",
@@ -2167,7 +2407,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/OpeningCopperArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-openingthirdart-openingthirddirector",
@@ -2176,7 +2417,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/OpeningThirdArt.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-openingyarnart-openingyarneffect",
@@ -2185,7 +2427,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/OpeningYarnArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-openingyarnart-openingyarnview",
@@ -2194,7 +2437,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/OpeningYarnArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Tick。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Tick。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-paintingboard-paintingboard",
@@ -2203,7 +2447,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/PaintingBoard.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Render。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-physicsbodies-ballbody",
@@ -2212,7 +2457,8 @@
       "status": "mixed-physics-presentation-review",
       "source": "Assets/Scripts/World/PhysicsBodies.cs",
       "animationTypes": "数学曲线",
-      "description": "FixedUpdate；Update；OnCollisionEnter2D。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "FixedUpdate；Update；OnCollisionEnter2D。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-physicsbodies-brickbody",
@@ -2221,7 +2467,8 @@
       "status": "mixed-physics-presentation-review",
       "source": "Assets/Scripts/World/PhysicsBodies.cs",
       "animationTypes": "数学曲线 材质",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-physicsbodies-movingobstacle",
@@ -2230,7 +2477,8 @@
       "status": "mixed-physics-presentation-review",
       "source": "Assets/Scripts/World/PhysicsBodies.cs",
       "animationTypes": "数学曲线",
-      "description": "FixedUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "FixedUpdate。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-pixelpieceart-pixelpieceart",
@@ -2239,7 +2487,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/World/PixelPieceArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Points；Sprite。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Points；Sprite。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-rearcatlauncher-rearcatlauncher",
@@ -2248,7 +2497,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/RearCatLauncher.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-sevenspecialart-sevenspecialfx",
@@ -2257,7 +2507,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/SevenSpecialArt.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-sevenspecialart-sevenspecialidle",
@@ -2266,7 +2517,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/SevenSpecialArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-sevenspecialcinematics-sevensuctionfx",
@@ -2275,7 +2527,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/SevenSpecialCinematics.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；Advance。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Advance。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-sevenspecialcinematics-sevenwindup",
@@ -2284,7 +2537,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/SevenSpecialCinematics.cs",
       "animationTypes": "数学曲线",
-      "description": "Update；Advance。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update；Advance。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-streakballart-streakimpactpool",
@@ -2293,7 +2547,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/StreakBallArt.cs",
       "animationTypes": "",
-      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-worldart-worldart",
@@ -2302,7 +2557,8 @@
       "status": "non-animation",
       "source": "Assets/Scripts/World/WorldArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Sprite。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Sprite。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "world-worldart-worldfx",
@@ -2311,7 +2567,8 @@
       "status": "requires-route-review",
       "source": "Assets/Scripts/World/WorldArt.cs",
       "animationTypes": "数学曲线",
-      "description": "Emit；Update。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Emit；Update。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     },
     {
       "id": "yarnqa-yarnqa",
@@ -2320,7 +2577,8 @@
       "status": "test-fixture",
       "source": "Assets/Scripts/YarnQA.cs",
       "animationTypes": "协程 数学曲线",
-      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。"
+      "description": "Capture；Start。完整源码、方法指纹与候选调用位置见 source-map.json。",
+      "galleryEntry": ""
     }
   ]
 }

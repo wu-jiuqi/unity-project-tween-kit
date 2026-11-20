@@ -23,6 +23,7 @@ def main():
 - 玩家程序：Unity {runtime['unityVersion']}，{runtime['platform']}；{runtime['passed']}项通过、{runtime['failed']}项失败、{len(runtime['errors'])}个运行错误。
 - 独立空工程：只导入导出的unitypackage，{clean['scripts']}个脚本、{clean['prefabs']}个组合预制体，{clean['missingScripts']}个缺失脚本；结果{clean['result']}。
 - 自动验证覆盖：指针按压/拖拽取消点击、禁用/失焦归位、全部示例时钟暂停、弹窗开合重入及非等比scale、即时与正常结果一致、保存/载入及类型拒绝、重播保留调参、时间轴冻结与续播、开关write恰好一次、借入容器归还、Logo重入及非均匀帧时长。
+- 0.2.0流程回归覆盖：原生主动作、搜索空态及恢复、切换条目清理反馈与暂停、来源档案隔离与返回、满星后新一轮体验、恢复默认不影响其他项，以及放大舞台的进入和返回。
 - 独立导入的预制体构建在Editor中执行；未把它写成完整的独立玩家流程测试，也未执行真人5分钟首次接入计时。
 - 真实被测文件集、退出码和运行报告哈希见[player-run.json](player-run.json)；来源与展馆代码身份见[build-inputs.json](build-inputs.json)；导入包身份见[clean-import-run.json](clean-import-run.json)。
 - 隐藏窗口ScreenCapture全黑，未作为视觉通过或发布预览图。可见原生窗口的检查证据另放visual目录；工具调用中的可见窗口观察与自动事件派发是两种不同证据。

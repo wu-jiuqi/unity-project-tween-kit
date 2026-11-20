@@ -65,7 +65,7 @@ def main():
         if ('spring' in code or 'velocity' in code) and 'step' in code:tags.append('弹簧')
         if 'FrameAt' in code or 'frames[' in code:tags.append('序列帧')
         if 'SetFloat(' in code or 'SetColor(' in code:tags.append('材质')
-        entries.append({'id':f['id'],'title':f['class']+' / '+Path(f['source']).stem,'category':f.get('category','待核对'),'status':f['usageStatus'],'source':f['source'],'animationTypes':' '.join(tags),'description':'；'.join(m['name'] for m in f['methods'])+'。完整源码、方法指纹与候选调用位置见 source-map.json。'})
+        entries.append({'id':f['id'],'title':f['class']+' / '+Path(f['source']).stem,'category':f.get('category','待核对'),'status':f['usageStatus'],'galleryEntry':f.get('galleryEntry',f.get('subsetDelivery',{}).get('galleryEntry','')),'source':f['source'],'animationTypes':' '.join(tags),'description':'；'.join(m['name'] for m in f['methods'])+'。完整源码、方法指纹与候选调用位置见 source-map.json。'})
     write(project/'Assets/Resources/ProjectTweenKit/archive.json',{'entries':entries})
     # Metadata is stable for generated archive and canonical asset root as well.
     for p in [generated,project/'Assets/Resources',project/'Assets/Resources/ProjectTweenKit',project/'Assets/Resources/ProjectTweenKit/archive.json']:stable_meta(p,project/'Assets')

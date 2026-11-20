@@ -1,37 +1,31 @@
 {
   "method": "computer-use sky native bounded-window capture, after source and runtime validation",
-  "testedPlayerRunSha256": "bd8b63168d5c9b724cc9663175cefbf5fd7f6c4f7559ab4e75b8885a8f0db9b8",
+  "testedPlayerRunSha256": "d02184ed655638a3abb1547729e3fbb01e0dcc339196c0c4c69b0a891a29ebed",
   "images": [
     {
-      "path": "evidence/visual/logo.png",
-      "sha256": "7f0ba690b889b514f2995c2aa1c2efc9f5e015f640f527281781e8507bcaaae1"
-    },
-    {
       "path": "evidence/visual/modal-closed.png",
-      "sha256": "643c916c7e24fbcf1edf87e1aef1057de240c171bc02a9ad1022ae21e97ea529"
+      "sha256": "0fa6b029a8324f42179425a1abf819da38bb8d4f976d70e05b986184ddf4f85a"
     },
     {
       "path": "evidence/visual/modal-open.png",
-      "sha256": "867d74073ce57fd692e18a50fdf7bc9aa88aaa1322cfafa4952e146b463fad77"
+      "sha256": "58cad94a217901777fe0bb727a03944f532324b4adebc23ac092108265e5ff30"
     },
     {
-      "path": "evidence/visual/press-click.png",
-      "sha256": "5ce9b0664d3c2670f534fb50f2c99362b6d77998d670f99998d3010d2a035fa2"
-    },
-    {
-      "path": "evidence/visual/press.png",
-      "sha256": "fa05f71dda15b2307627094826023029f2786178f9a4c4ac110537bd109209e4"
+      "path": "evidence/visual/overview.png",
+      "sha256": "9ac1bb5622416b1933ebf15ffb23e7aefd8cb11a6a3ca0ac7e2d94d70db57ba6"
     }
   ],
   "observed": [
-    "Original C-style button and Chinese font render in visible Windows gallery.",
-    "Actual pointer drag returned without click callback; normal click displayed the local-only callback.",
-    "Source/type filters and parameter panel labels are readable.",
-    "Modal open and done-close work through real UI; open button and footer do not overlap.",
-    "Original four-glyph logo and typewriter quote are visible."
+    "Final native UGUI three-column layout, original C artwork and Chinese labels render in the visible Windows gallery.",
+    "Operation guide, stage, main action, playback controls and parameter tab have distinct fixed locations.",
+    "The final modal opens from the main action and closes with its real Done button.",
+    "Visible scrollbar handles remain inside their tracks."
   ],
+  "automatedEvidence": "runtime-verification.json covers search, archive return, parameter IO, focus-view lifecycle and input-focus rules; these are not all claimed as native-input checks.",
   "limits": [
-    "Native interaction checks sample representative entries, not all 19 workflows or all original game call sites.",
+    "Native checks sample representative entries, not all workflows or original game call sites.",
+    "Final precise numeric keyboard-entry verification was interrupted: the window became minimized and recovery repeatedly reported user input detected. No native numeric-entry pass is claimed.",
+    "Earlier v0.1.0 screenshots are preserved separately as historical evidence and are not final-build captures.",
     "Hidden-window black screenshots are excluded."
   ]
 }

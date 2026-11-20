@@ -21,7 +21,7 @@
     "Run recipient onboarding and full original-scene trigger coverage; bind final packages and all evidence to the final tested build."
   ],
   "runtimeChecks": {
-    "passed": 83,
+    "passed": 103,
     "failed": 0,
     "errors": 0
   },

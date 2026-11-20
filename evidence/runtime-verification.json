@@ -1,6 +1,6 @@
 {
     "unityVersion": "6000.0.26f1",
-    "applicationVersion": "0.1.0",
+    "applicationVersion": "0.2.0",
     "platform": "WindowsPlayer",
     "checks": [
         {
@@ -332,11 +332,91 @@
             "passed": true
         },
         {
+            "name": "manual example gives gesture instruction",
+            "passed": true
+        },
+        {
+            "name": "selecting example clears old feedback and pause",
+            "passed": true
+        },
+        {
+            "name": "native main action opens modal",
+            "passed": true
+        },
+        {
+            "name": "same main action closes modal",
+            "passed": true
+        },
+        {
+            "name": "search empty state is accurate",
+            "passed": true
+        },
+        {
+            "name": "search finds switch without changing current example",
+            "passed": true
+        },
+        {
+            "name": "clearing search restores all examples",
+            "passed": true
+        },
+        {
+            "name": "source browser hides live demonstration",
+            "passed": true
+        },
+        {
+            "name": "return from source browser rebuilds experience",
+            "passed": true
+        },
+        {
+            "name": "rapid charge actions reach full before reset",
+            "passed": true
+        },
+        {
+            "name": "full charge can begin a new demonstration",
+            "passed": true
+        },
+        {
+            "name": "restore defaults applies to current item",
+            "passed": true
+        },
+        {
+            "name": "restore defaults retains another item tuning",
+            "passed": true
+        },
+        {
+            "name": "focus view expands the stage",
+            "passed": true
+        },
+        {
+            "name": "return from focus retains the same demo",
+            "passed": true
+        },
+        {
+            "name": "editing search blocks playback shortcuts",
+            "passed": true
+        },
+        {
+            "name": "main action releases submit focus to prevent duplicate space action",
+            "passed": true
+        },
+        {
+            "name": "leaving focus preserves borrowed target hierarchy and running entry",
+            "passed": true
+        },
+        {
+            "name": "scrollbar handle stays inside visible track: Effect directory",
+            "passed": true
+        },
+        {
+            "name": "scrollbar handle stays inside visible track: Parameter scroll",
+            "passed": true
+        },
+        {
             "name": "no runtime errors",
             "passed": true
         }
     ],
     "errors": [],
-    "passed": 83,
+    "passed": 103,
     "failed": 0
 }

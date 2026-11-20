@@ -1,5 +1,7 @@
 # 接入与依赖
 
+为新项目选择动画时，先读[设计选型与迁移](design-reuse.md)。下表负责具体接线；原素材是运行基准，宿主可以保留交互设计并替换自己的视觉资源。
+
 适用 Unity 6（源项目声明6000.0.26f1，验证以记录中的实际编辑器版本为准）。默认需要 UGUI 2.0.0（含TMP）、Audio、JSON、ImageConversion、UI；附带的原版 DOTween 模块还需要 Unity Physics / Physics2D。没有接入 GameSession、AppUI、LocalProfile、支付、广告或网络。
 
 ## 首次使用，目标约5分钟

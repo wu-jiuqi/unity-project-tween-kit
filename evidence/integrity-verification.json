@@ -1,5 +1,5 @@
 {
-  "passed": 2456,
+  "passed": 2457,
   "failed": 0,
   "fullAcceptancePassed": false,
   "checks": [
@@ -12265,6 +12265,11 @@
     },
     {
       "name": "tested gallery source assets/sample-project/Assets/Gallery/Gallery.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested gallery source assets/sample-project/Assets/Gallery/GalleryUI.cs",
       "passed": true,
       "detail": ""
     },
