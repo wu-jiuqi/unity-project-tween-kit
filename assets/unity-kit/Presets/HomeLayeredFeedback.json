@@ -1,0 +1,51 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.HomeLayeredFeedback",
+    "settings": [
+        {
+            "field": "Strength",
+            "type": "System.Single",
+            "value": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "IdleAmplitude",
+            "type": "System.Single",
+            "value": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "PopFrequency",
+            "type": "System.Single",
+            "value": 17.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Damping",
+            "type": "System.Single",
+            "value": 4.699999809265137,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Duration",
+            "type": "System.Single",
+            "value": 1.350000023841858,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

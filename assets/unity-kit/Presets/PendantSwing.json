@@ -1,0 +1,42 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.PendantSwing",
+    "settings": [
+        {
+            "field": "Spring",
+            "type": "System.Single",
+            "value": 30.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Damping",
+            "type": "System.Single",
+            "value": 3.5999999046325685,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "MaxAngle",
+            "type": "System.Single",
+            "value": 36.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "ImpulseStrength",
+            "type": "System.Single",
+            "value": 120.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

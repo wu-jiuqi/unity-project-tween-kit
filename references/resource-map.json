@@ -1188,5 +1188,265 @@
     "packagedMetaSha256": "12c4cedc0458b1c5abf1c4da49879644d752d7b0f85e69e866d0d44bec44ed71",
     "reason": "ChainRatingView original star/spark image",
     "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleJellyV5/vine-star-junction.png",
+    "target": "assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-junction.png",
+    "sha256": "d0058c18d5dea3b95e809ff77a6e751eed2181fd7dd1d17fc547acc1b73f1d95",
+    "sourceGuid": "618d57365d80efa4fb46e02f5802869d",
+    "packagedMetaSha256": "a86576c4870aaba1b03ddef564f14e7549a2cf85a8f96227ed195440f4af1008",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "main-project"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleJellyV5/vine-star-stem.png",
+    "target": "assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-stem.png",
+    "sha256": "58e3fada6eec7ca41867d706e40f9289fa4043b36db44042a1d4aaf62693fe00",
+    "sourceGuid": "57de53c7767667c49a88b5d15f74930d",
+    "packagedMetaSha256": "c0b4bb25fd85d0d51076005cedd0346c199759e79b1825e0dae242f0612ff9fb",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "main-project"
+  },
+  {
+    "source": "Assets/Resources/Art/OnboardingV1/layout.json",
+    "target": "assets/unity-kit/Resources/Art/OnboardingV1/layout.json",
+    "sha256": "7d0ef0338ca6d11dbad9c75e5e171f400b0a905470d12f5e5c5d6b77eba6243a",
+    "sourceGuid": "c461f3a1e95134642b2186da8ffd227c",
+    "packagedMetaSha256": "9892d40228556f89e0700e3d00e0edce092f08fc976131ab270d01b4e3a9fc93",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "main-project"
+  },
+  {
+    "source": "Assets/Resources/Art/OnboardingV1/02-gesture-atlas.png",
+    "target": "assets/unity-kit/Resources/Art/OnboardingV1/02-gesture-atlas.png",
+    "sha256": "12a9eef36a7a69d93ed79a243d07f929b8e02c73c17a1edc330e1a3a72154272",
+    "sourceGuid": "52d90b2134d91114f8ce953c0e73f797",
+    "packagedMetaSha256": "9bde8f9efc75d17074805e93eb251924a0d0a5227843500c3565d17023bdc388",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "main-project"
+  },
+  {
+    "source": "Assets/Resources/Art/TutorialV41/target-outline.png",
+    "target": "assets/unity-kit/Resources/Art/TutorialV41/target-outline.png",
+    "sha256": "1716b2972121fda411cecb9fe0bebe8be465949c9bb4b949b70bfa22d43c5b5f",
+    "sourceGuid": "285f9ff9a81dde64bbabbae4913e9796",
+    "packagedMetaSha256": "d7bb12a80a8b43909f12a79e76da31d4c4d32d03bba0467ddfcccea9c68441c0",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "main-project"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleUIV42/swipe-gesture.png",
+    "target": "assets/unity-kit/Resources/Art/BattleUIV42/swipe-gesture.png",
+    "sha256": "f96c0fdee1b8c67e146f279972f0cd212201ccd76c5008c624a8f599e502c15b",
+    "sourceGuid": "2b1f4f17bfdf38846aee4cbd128f76fb",
+    "packagedMetaSha256": "3c3f8473c7cbb037e0219b7f75ee548b28c22a835c6c780a94134d80aea730fb",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "main-project"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/background.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/background.png",
+    "sha256": "16c0def3f782e0b87f56d7524cbca2b8782845cdc7d594072af4757cbcde5943",
+    "sourceGuid": "7519b3f80358d4640a438e2da742cfbd",
+    "packagedMetaSha256": "fcbd83e63febe5fd5e0b7663a6c192991e2414ed053a448df07fdf309d6f1f5b",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/box.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/box.png",
+    "sha256": "7a09ffd335e1749cd9c8bc84eac1459b1b875b99ce719e87c242fa410a702547",
+    "sourceGuid": "fe8be031932867946a9fd54af8682082",
+    "packagedMetaSha256": "86fba52b6dba1311f5fd5792d9b59aa239e3bd2ec068c7ba0c468ef5facd10c4",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-anticipate.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/cat-anticipate.png",
+    "sha256": "82baa8b8edc3fb34286269b59071cac25db4b7c7bea81729f1edcc4326ab0622",
+    "sourceGuid": "729da6f6008e65646961da44b8e7bc2a",
+    "packagedMetaSha256": "44bd242a6858b4ad78cb07b011c65c8c8c8d6d4a11636d7c173c1fe09c1533f3",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-celebrate.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/cat-celebrate.png",
+    "sha256": "a6dcb753204ab8bd833e73516c02a8a59e87c4b7ff78ec724bf655f1b66cf408",
+    "sourceGuid": "0a72b2c3a154e2844963dc90f188b6ac",
+    "packagedMetaSha256": "2c108909e42aa7b528086f8c48f359257885b6a6c033f3e953d96cfeecfffa0f",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-idle.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/cat-idle.png",
+    "sha256": "b208717aba23b1d1b2e83286881ef30f5826aa3ba4384d685a35490b9fb45d8e",
+    "sourceGuid": "6b438f86261c0604abd5618279cf705f",
+    "packagedMetaSha256": "68b5d6f70d3e993105b731f1f82a5dedc90c45894634a92ff7464e363e4c69f3",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-settle.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/cat-settle.png",
+    "sha256": "8c16ddd9da3a0b2d0b8a8c38e8af42cf44f07cea649f2750c1909b061750d131",
+    "sourceGuid": "c7cedc7ff32fcae42bd8408f90251ff9",
+    "packagedMetaSha256": "957bc3dd2233e2ee692c6d55866848c38c8883fe3a148f80abd49c9cc1511dc4",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-wave.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/cat-wave.png",
+    "sha256": "62f000c288b810b71e42de41dfff87261296f855afcb8dc878bd9b32d5baebbd",
+    "sourceGuid": "70aa80489220bb04aa5a3f097f75f386",
+    "packagedMetaSha256": "b40975086acd0c6b06038f007c857a6e590b1bc680688e0f109ddb6c39c4aebe",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/island.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/island.png",
+    "sha256": "85a12dd0cd5f35a549402bc578c34f36fc80e08a1c145eb5ffb71236b7451ad9",
+    "sourceGuid": "02675d47316e82c40b879f4430cfc89d",
+    "packagedMetaSha256": "16f7e5242241ff2e7e44241fa1d1191953bf7e82c31cdedbe8a35115dcb4b656",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/jelly-blue.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/jelly-blue.png",
+    "sha256": "b62fbacfbd2da662ea012a90d5f7af8fd3cc6e87eb4e4b37f8a6c1f769a93637",
+    "sourceGuid": "53890ccd3d2ac0446a0b1e06689cac3f",
+    "packagedMetaSha256": "1acaa22c91fc1c4d4e35cc2ba59fe4b966beeeddaeef8aef6a7377830df5937c",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/jelly-blush.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/jelly-blush.png",
+    "sha256": "2b1af75b8cc3133f973b450fb747663c74b4db4d8fc1fb1c92e9119d322e9938",
+    "sourceGuid": "b526747c9916ba349b14b7df2929b715",
+    "packagedMetaSha256": "d7fb0da9aa7239dd9441fce7e6e9c3fb5c5a3fad5eeb0d31065e438b9b0aceec",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/jelly-yellow.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/jelly-yellow.png",
+    "sha256": "a0af3cb8838f772c3e208f2800c64a0237aa04399b0ef7f030d5a54427de485b",
+    "sourceGuid": "15d4ad57b8e61f748b7f587f6f359edb",
+    "packagedMetaSha256": "64696ad77acd0578ead9c43dc2d51bbfe024a4cf6a469a491bfced460b720daf",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-chai.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/logo-chai.png",
+    "sha256": "d1ed475a19f986c70b503793459c7f3c781fa824dddffa937eed7a0fdc397fd8",
+    "sourceGuid": "7d058422052c8c54caa6cb0b98e66f71",
+    "packagedMetaSha256": "a026865df8843eee070866b3fe8681f94b23e85aff9bb0c15c0140013d164bfa",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-miao.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/logo-miao.png",
+    "sha256": "89ca6bc5657622091266c89304d5b78273eb231533a5c22cae3232b45eaecf50",
+    "sourceGuid": "03e8d832866067a4b835cb6e2d03455b",
+    "packagedMetaSha256": "ec732b7b9dce14bb81b9018b65cace545cdee4bd7adfd4afbbb67ee8a9c4472a",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-tan.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/logo-tan.png",
+    "sha256": "f019a67c53f479a71aefcee75cff7ddc30d46579664d25a1076ba11e53c5af1d",
+    "sourceGuid": "dd00c99434471ff4dab123aeb7b6fa7a",
+    "packagedMetaSha256": "3bec6325da417f8ecebed4c43b2f98f84aff9c1a624af1e9f7387fcbc6f9070a",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-xiang.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/logo-xiang.png",
+    "sha256": "d869d0ff60910f369559eeada51bdd139ed2d48d60e0050039065a1e0fbbd128",
+    "sourceGuid": "bdf1081e05623b34998e3466f37f9226",
+    "packagedMetaSha256": "aa23a34fce9267b0d304a902b00de40040787424a6296c087fc21821b5a8f530",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-fill.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/progress-fill.png",
+    "sha256": "31bbcfa19320824804c61cea6908fb5be6deca794592c268a257f2d787252976",
+    "sourceGuid": "7e6282a3e452f1c42b5b415a0bc72f71",
+    "packagedMetaSha256": "9fa08ba9675829c7506128472b32150d223c860f2f8eaabbc6f355f57edc0fd2",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-marble.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/progress-marble.png",
+    "sha256": "f1ca219bc0cfa0b97b07504e4815f58d4ffb3a25d5abbc6aa5192528f38600ff",
+    "sourceGuid": "155b09a331f1a8e4ebad9de3aa3ee75c",
+    "packagedMetaSha256": "1c992af3c338ae4886d40c4fea641868268605fb8dc1c200880ca5acf011ca8e",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-paw.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/progress-paw.png",
+    "sha256": "ef073390a54b68ef99d77e5b1ab2a97ce6c6019f63d268493c81791e041d5731",
+    "sourceGuid": "a6a823c66dff5f444b115c289476fff9",
+    "packagedMetaSha256": "119165e02a86814eae0eaebb95bbb07bea2c8867d93f92cb1667a6b16adb8282",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-sparkle.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/progress-sparkle.png",
+    "sha256": "b8f3cfa335c59d8e6d0cd14ef51cf8557ab8fbdd52e4605c7942d463598d6f3f",
+    "sourceGuid": "58c3d3f00fa459741abbde340a7afc3c",
+    "packagedMetaSha256": "658c30da81dc85cfbf5cc5c77defb422c511f71f77adac82c78ab304b2e02ab1",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
+  },
+  {
+    "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-track.png",
+    "target": "assets/unity-kit/Resources/Art/StartupLoading/progress-track.png",
+    "sha256": "0e324752d7e5b2c6902f9a81743299d7eb347d2468a67671a89bb66d0c39721e",
+    "sourceGuid": "82f89733430eecf4d9ecb6d667aaf020",
+    "packagedMetaSha256": "6b7acda8c2480904618d583f6befb048d1c25786524ee1d4e3b41a168dbd5ef5",
+    "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
+    "license": "Project artwork; see references/licenses.md",
+    "scope": "project-platform"
   }
 ]

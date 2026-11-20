@@ -4,12 +4,12 @@
   "fullAcceptancePassed": false,
   "sourceProject": "BounceGarden/BounceGarden",
   "workingVersion": "0.4.0",
-  "deliveredGalleryEntries": 26,
+  "deliveredGalleryEntries": 36,
   "stageStatus": {
     "1": "source scan and partial semantic inventory complete; current-route audit incomplete",
     "2": "representative extraction and runnable gallery available; validation records govern passing state",
     "3": "remaining candidate extraction and host recipe work pending",
-    "4": "26-entry prompt-oriented gallery; source navigation removed; complete catalogue extraction still pending",
+    "4": "36-entry gallery with parameter display/export; all 96 reference recipes dispositioned; project-wide extraction remains partial",
     "5": "independent import tested per evidence; human five-minute onboarding trial not performed",
     "6": "four preview artifacts; final full-coverage release not approved as complete"
   },
@@ -21,14 +21,14 @@
     "Run recipient onboarding and full original-scene trigger coverage; bind final packages and all evidence to the final tested build."
   ],
   "runtimeChecks": {
-    "passed": 175,
+    "passed": 247,
     "failed": 0,
     "errors": 0
   },
   "independentImport": {
     "result": "passed",
-    "scripts": 50,
-    "prefabs": 9,
+    "scripts": 62,
+    "prefabs": 11,
     "missingScripts": 0,
     "errors": []
   },
@@ -41,5 +41,12 @@
     "inactive-preview": 1,
     "legacy-route-disabled": 1,
     "mixed-physics-presentation-review": 4
+  },
+  "reference96Comparison": {
+    "covered": 26,
+    "partial": 13,
+    "added": 12,
+    "excluded": 34,
+    "pending": 11
   }
 }

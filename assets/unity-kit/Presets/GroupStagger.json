@@ -1,0 +1,33 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.GroupStagger",
+    "settings": [
+        {
+            "field": "Duration",
+            "type": "System.Single",
+            "value": 0.20000000298023225,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Interval",
+            "type": "System.Single",
+            "value": 0.017999999225139619,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "StartScale",
+            "type": "System.Single",
+            "value": 0.9800000190734863,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

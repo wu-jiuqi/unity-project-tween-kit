@@ -391253,6 +391253,16 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "pagenav",
+          "component": "PageSlide",
+          "methods": [
+            "ShowPage"
+          ],
+          "adaptation": "仅提取0.27秒OutCubic页面轨道；等价归一化曲线替代DOTween宿主序列；导航、输入和路由归宿主"
+        }
       ]
     },
     {
@@ -398474,6 +398484,16 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "stagger",
+          "component": "GroupStagger",
+          "methods": [
+            "ShopEnter"
+          ],
+          "adaptation": "保持.98起始比例、.20秒OutCubic、.018逐项延迟；初始scale向量由绑定对象捕获"
+        }
       ]
     },
     {
@@ -406990,6 +407010,17 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "pendulum",
+          "component": "PendantSwing",
+          "methods": [
+            "Advance",
+            "Impulse"
+          ],
+          "adaptation": "提取纯视觉四子步弹簧；默认示例冲量120，保留30/3.6/36度/-.25；碰撞影响由宿主换算后输入"
+        }
       ]
     },
     {
@@ -407175,6 +407206,16 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "hintfade",
+          "component": "HintFade",
+          "methods": [
+            "BattleAimHint.Update"
+          ],
+          "adaptation": "提取每秒2透明度变化；宿主传Visible，不监听游戏事件，所有提示组不挡射线"
+        }
       ]
     },
     {
@@ -416470,6 +416511,17 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "homefeedback",
+          "component": "HomeLayeredFeedback",
+          "methods": [
+            "Update",
+            "Pop"
+          ],
+          "adaptation": "保留分层位移、比例、相位及衰减，绑定宿主视觉层；不读取连胜、登录或文案业务"
+        }
       ]
     },
     {
@@ -425099,6 +425151,16 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "breath",
+          "component": "DecorativeBreath",
+          "methods": [
+            "Update"
+          ],
+          "adaptation": "仅提取徽章1+.035sin(3t)；不包含匹配、排行、日期或确认保存"
+        }
       ]
     },
     {
@@ -427213,6 +427275,16 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "rankmove",
+          "component": "RankReorder",
+          "methods": [
+            "Refresh"
+          ],
+          "adaptation": "保持.48秒OutCubic行位移；主机传目标名次；原排行读取、头像工厂、声音与方向箭头不在此组件中"
+        }
       ]
     },
     {
@@ -433596,6 +433668,16 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
+      ],
+      "additionalDeliveries": [
+        {
+          "galleryEntry": "guide",
+          "component": "TutorialGesture",
+          "methods": [
+            "Update"
+          ],
+          "adaptation": "提取手势/触点/目标框曲线；起终点由宿主输入，移除游戏瞄准、存档和教学完成业务"
+        }
       ]
     },
     {

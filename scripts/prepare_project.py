@@ -54,7 +54,7 @@ def main():
     for name in ['ProjectVersion.txt','ProjectSettings.asset','AudioManager.asset','GraphicsSettings.asset','QualitySettings.asset','TimeManager.asset','InputManager.asset','TagManager.asset','Physics2DSettings.asset']:
         p=src/'ProjectSettings'/name
         if p.exists():shutil.copy2(p,settings/name)
-    write(project/'Assets/Resources/ProjectTweenKit/prompts.json',json.loads((KIT/'references/prompt-library.json').read_text(encoding='utf-8')))
+    write(project/'Assets/Resources/ProjectTweenKit/parameters.json',json.loads((KIT/'references/parameter-catalog.json').read_text(encoding='utf-8')))
     write(KIT/'references/materialization.json',{'canonical':'assets/unity-kit','generated':'assets/sample-project/Assets/ProjectTweenKit','files':{p.relative_to(kit).as_posix():sha(p) for p in sorted(kit.rglob('*')) if p.is_file()}})
     print('Prepared clean project:',project)
 if __name__=='__main__':main()

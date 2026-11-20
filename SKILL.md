@@ -1,19 +1,17 @@
 ---
 name: unity-project-tween-kit
-description: 为新的Unity项目复用补间动画设计，按交互需求选择效果、复制动画Prompt与关键参数、替换宿主素材并接入可运行组件；覆盖按压、弹窗、收集、计分、文字与入场编排。
+description: 为新的Unity项目复用补间动画设计，按交互需求选择效果、导出当前参数、替换宿主素材并接入同源组件；覆盖按压、弹窗、收集、计分、Loading进度、文字与入场编排。
 ---
 
 # Unity 项目动画工具包
 
-主要用于后续项目复用动画设计：根据新宿主的交互目的，选择触发方式、节奏、曲线、对象分层和中断规则，再接入同一套组件并替换宿主素材。原项目与展馆提供可运行的设计基准。
+用于后续项目复用动画设计与组件：先匹配交互目的，再保留合适的节奏、曲线、对象分层和中断规则，绑定宿主对象并调参。当前36个展馆条目使用同一份交付代码。
 
-做新项目时先读 [设计选型与迁移](references/design-reuse.md)，再读取选中方案的 [动画Prompt与参数写法](references/animation-prompts.md)、接入行和生命周期。展馆只展示效果、参数与迁移Prompt。
+- **选型**：先读[设计选型与迁移](references/design-reuse.md)，按需读[参数基准](references/parameters.md)、[接入](references/integration.md)与[生命周期](references/lifecycle.md)。沿用接收项目的视觉规范；原素材提供可运行基准。
+- **接入新项目**：检查Unity/UGUI、输入系统与已有DOTween，避免重复导入同名库。按需导入包内组件、依赖和示例，绑定宿主视觉子层；奖励、导航、任务与存档仍由宿主管理。
+- **调参与导出**：展馆“参数显示”只列当前值、单位和固定曲线基准。“一键复制参数导出”同时复制JSON并保存到参数目录；JSON兼容`MotionPreset.Load(path).Apply(component)`、`PresetLoader`和Editor参数工具。可调值在`settings`，固定参数说明不覆盖它们；对象引用由宿主绑定。观察速度不写成组件参数。
+- **Loading**：读[Loading接线](references/loading-progress.md)。`SetProgress`输入单调任务进度，完成信号前最多显示99%；所有必需任务与可用首帧完成后才调用`Complete`。中断保持进度，恢复不重复提交任务。不用计时器伪造加载进度。
+- **验证**：实际运行宿主接线，覆盖连续操作、暂停恢复、关闭和销毁；说明已验证行为。展馆重播不执行宿主业务。改算法或时序时记录与基准的差异。
+- **维护**：`assets/unity-kit`是唯一组件源；克隆后用`materialize.py`准备示例。来源复查读[覆盖记录](references/coverage-audit.md)；96项参考的适用/排除/待整理见[取舍表](references/reference96-comparison.md)。维护指纹与构建流程见[验证文档](references/validation.md)。来源证据供内部核对，不是展馆界面。
 
-- **给新项目生成实施Prompt**：选择对应效果，说明视觉目标、真实触发、曲线与关键参数、中断重入行为。展馆的“复制Prompt与当前参数”可带出实调值；按宿主上下文具体化对象绑定，沿用宿主视觉风格。不要求接收者定位原项目源码。
-- **选择复用形式并接入**：读 [接入说明](references/integration.md)。独立组件挂载绑定；组合示例保留原资源；业务编排按明确的宿主合同对接。先确认 [生命周期](references/lifecycle.md)，再绑定目标与事件。
-- **应用到新项目**：先检查宿主已有组件、视觉规范、坐标系与输入方式；按设计选型表匹配需求。保留一份原参数基准，再在宿主对象上绑定和调参，记录有意改变的节奏或交互语义。交付实际接线及暂停、连续操作、关闭后的验证结果。
-- **体验与调参**：运行 Windows 展馆；交互条目等待真实操作。保存的 JSON 对应同一个交付组件，可通过 `MotionPreset.Apply`、`PresetLoader` 或 Unity 的 `Tween Kit/Component parameters` 载入。重播与采样只改变表现。
-- **维护时复查遗漏**：运行 `scripts/inventory.py --source <主Unity工程>`、`scripts/catalog.py` 和 `scripts/audit_coverage.py --source <主Unity工程>`；读 [复查记录](references/coverage-audit.md) 与 [核对流程](references/validation.md)。内部指纹和调用链用于维护核对。未提取候选不能称为可交付组件。
-- **验证与打包**：以 `assets/unity-kit` 为唯一组件源。新克隆用`materialize.py`物化组件，无需原游戏；维护者更新来源时用`prepare_project.py --source ...`。Unity `KitBuild.Build` 导出同一批组件。运行来源/GUID/同源核对、玩家运行验证及独立导入，再用 `package.py` 生成四类交付和逐文件哈希。
-
-保持原曲线、节奏及交互语义；算法或生命周期变化必须进入差异记录。不要把原项目业务代码或实验代码放进默认动画运行时。素材遵守 [来源与授权记录](references/licenses.md)，保留原图、导入meta、运行时切片数据与帧时序。
+保留图片透明度、切片、九宫格、尺寸和帧时长。项目素材优先；确需补图时沿用宿主已确认的视觉规则。素材来源与许可见[记录](references/licenses.md)。未提取的候选不能称为可交付组件。

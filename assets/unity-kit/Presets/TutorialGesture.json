@@ -1,0 +1,51 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.TutorialGesture",
+    "settings": [
+        {
+            "field": "From",
+            "type": "UnityEngine.Vector2",
+            "value": 0.0,
+            "x": -200.0,
+            "y": -110.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "To",
+            "type": "UnityEngine.Vector2",
+            "value": 0.0,
+            "x": 180.0,
+            "y": 120.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Period",
+            "type": "System.Single",
+            "value": 4.400000095367432,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "StartDelay",
+            "type": "System.Single",
+            "value": 0.6000000238418579,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "MoveDuration",
+            "type": "System.Single",
+            "value": 1.2999999523162842,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

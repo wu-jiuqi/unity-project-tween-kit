@@ -1,0 +1,60 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.LoadingProgress",
+    "settings": [
+        {
+            "field": "FillSpeed",
+            "type": "System.Single",
+            "value": 0.3199999928474426,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "MaxFrameDelta",
+            "type": "System.Single",
+            "value": 0.05000000074505806,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "CompletionDuration",
+            "type": "System.Single",
+            "value": 0.41999998688697817,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "CompletionAmplitude",
+            "type": "System.Single",
+            "value": 0.04500000178813934,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "TravelWidth",
+            "type": "System.Single",
+            "value": 636.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "MarbleLift",
+            "type": "System.Single",
+            "value": 14.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

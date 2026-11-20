@@ -15,10 +15,10 @@ public sealed partial class Gallery {
  static readonly Color Ink=new Color32(108,76,59,255),Muted=new Color32(153,129,108,255),Mint=new Color32(81,149,130,255),Paper=new Color32(255,251,242,255);
  RectTransform chrome,viewport,listContent,parameterContent,detailsContent,examplesPanel,focusRoot,focusViewport;
  Text exampleCount,selectedTitle,selectedCategory,instruction,stepLabel,stateLabel,notice,primaryLabel,pauseText,speedText,timelineLabel,parameterHint,rightTitle,directHint;
- Button primaryButton,pauseButton,restartButton,saveButton,loadButton,resetButton,parametersTab,integrationTab;
+ Button primaryButton,pauseButton,restartButton,saveButton,loadButton,resetButton,parametersTab,parameterSummaryTab;
  InputField searchField;Dropdown categoryMenu,typeMenu;Slider timeSlider;
- Toggle instantToggle,muteToggle;RectTransform timelineRow;bool uiSync,integrationVisible,hasTriggered,focusedStage;
- Text focusTitle,focusHint,focusActionText,focusPauseText,focusDirectHint;Button focusAction,copyPromptButton,presetFolderButton;
+ Toggle instantToggle,muteToggle;RectTransform timelineRow;bool uiSync,parameterSummaryVisible,hasTriggered,focusedStage;
+ Text focusTitle,focusHint,focusActionText,focusPauseText,focusDirectHint;Button focusAction,copyParametersButton,presetFolderButton;
  Action primaryAction;float triggeredAt;int uiWidth,uiHeight;
  readonly Dictionary<string,MotionPreset> defaults=new Dictionary<string,MotionPreset>();
  readonly Dictionary<int,Text> exampleLabels=new Dictionary<int,Text>();
@@ -32,6 +32,7 @@ public sealed partial class Gallery {
  public Button MainActionButton=>primaryButton;
  public InputField SearchInput=>searchField;
  public string FeedbackText=>message;
+ public string PlaybackState=>StateDescription();
  public bool StageShown=>demo!=null&&demo.activeInHierarchy;
  public Button ParameterResetButton=>resetButton;
  public bool ShortcutsAvailable {get{var go=EventSystem.current!=null?EventSystem.current.currentSelectedGameObject:null;return go==null||(go.GetComponent<InputField>()==null&&go.GetComponentInParent<Dropdown>()==null&&go.GetComponent<Toggle>()==null);}}
@@ -71,13 +72,13 @@ public sealed partial class Gallery {
   timelineRow=Rect(examplesPanel,"Timeline controls",8,790,862,64);timelineLabel=Label(timelineRow,"时间轴",0,0,862,24,15,Muted);
   timeSlider=Range(timelineRow,0,32,860,24,0,1,0,v=>{if(!uiSync)Seek(v);});
 
-  parametersTab=Button(chrome,"调参数",1224,127,165,43,()=>ShowIntegration(false),true,18);
-  integrationTab=Button(chrome,"动画 Prompt",1395,127,165,43,()=>ShowIntegration(true),false,18);
+  parametersTab=Button(chrome,"调参数",1224,127,165,43,()=>ShowParameterSummary(false),true,18);
+  parameterSummaryTab=Button(chrome,"参数显示",1395,127,165,43,()=>ShowParameterSummary(true),false,18);
   rightTitle=Label(chrome,"本项参数",1228,186,329,35,24);
   parameterHint=Label(chrome,"拖动滑条或精确输入；更改保留在当前效果。",1228,229,326,54,17,Muted);
   parameterContent=Scroll(chrome,"Parameter scroll",1226,295,329,438);
-  detailsContent=Scroll(chrome,"Animation prompt",1226,234,329,600);
-  copyPromptButton=Button(chrome,"复制 Prompt 与当前参数",1226,847,331,48,CopyPrompt,true,17);
+  detailsContent=Scroll(chrome,"Parameter summary",1226,234,329,600);
+  copyParametersButton=Button(chrome,"一键复制参数导出",1226,847,331,48,CopyParameters,true,17);
   resetButton=Button(chrome,"恢复本项默认",1226,754,331,48,ResetCurrentParameters,false,18);
   saveButton=Button(chrome,"保存本项",1226,813,161,48,SavePreset,false,18);loadButton=Button(chrome,"载入本项",1395,813,162,48,LoadPreset,false,18);
   instantToggle=Check(chrome,"即时完成对照",1231,876,207,v=>{immediate=v;Report(v?"已切到即时完成。再次触发会直接到达相同结果。":"已恢复原动画。再次触发可观察完整过程。");});
@@ -120,20 +121,20 @@ public sealed partial class Gallery {
   if(chrome==null)return;
   selectedTitle.text=Current.title;selectedCategory.text=Current.category+"  /  "+(index+1).ToString("00")+" · "+Entries.Length;
   instruction.text=Instructions(Current.id);stepLabel.text=Current.interactive?"第 2 步  ·  动手体验":"第 2 步  ·  已按原场景自动播放";
-  if(parameters){RebuildParameters();RebuildIntegration();}
-  ShowIntegration(integrationVisible);RefreshSelection();ResizeStage();
+  if(parameters){RebuildParameters();RebuildParameterSummary();}
+  ShowParameterSummary(parameterSummaryVisible);RefreshSelection();ResizeStage();
  }
- void ShowIntegration(bool show){
-  integrationVisible=show;bool notes=show;parameterContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(!notes);detailsContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(notes);copyPromptButton.gameObject.SetActive(notes);
+ void ShowParameterSummary(bool show){
+  parameterSummaryVisible=show;bool notes=show;parameterContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(!notes);detailsContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(notes);copyParametersButton.gameObject.SetActive(notes);
   parameterHint.gameObject.SetActive(!notes);resetButton.gameObject.SetActive(!notes);saveButton.gameObject.SetActive(!notes);loadButton.gameObject.SetActive(!notes);instantToggle.gameObject.SetActive(!notes&&SupportsInstant);presetFolderButton.gameObject.SetActive(!notes);
-  rightTitle.text=notes?"复用这项动画":"本项参数";Tab(parametersTab,!notes);Tab(integrationTab,notes);
+  rightTitle.text=notes?"参数与曲线":"本项参数";Tab(parametersTab,!notes);Tab(parameterSummaryTab,notes);
 
  }
- void RebuildIntegration(){
-  ClearUI(detailsContent);promptLabel=Label(detailsContent,BuildPrompt(),2,0,322,1000,18);promptLabel.verticalOverflow=VerticalWrapMode.Overflow;UpdatePrompt();
+ void RebuildParameterSummary(){
+  ClearUI(detailsContent);parameterSummaryLabel=Label(detailsContent,BuildParametersText(),2,0,322,1000,18);parameterSummaryLabel.verticalOverflow=VerticalWrapMode.Overflow;UpdateParameterSummary();
  }
 
- bool SupportsInstant=>new[]{"modal","reward","number","hit","charge","scoreimpact","themedissolve"}.Contains(Current.id);
+ bool SupportsInstant=>new[]{"modal","reward","number","hit","charge","scoreimpact","themedissolve","pagenav"}.Contains(Current.id);
  void UpdateInterface(){
   if(chrome==null)return;if(uiWidth!=Screen.width||uiHeight!=Screen.height)ResizeInterface();
   bool editing=!ShortcutsAvailable;
@@ -142,11 +143,12 @@ public sealed partial class Gallery {
   primaryButton.gameObject.SetActive(HasMainAction);directHint.gameObject.SetActive(!HasMainAction);primaryButton.interactable=HasMainAction;primaryLabel.text=PrimaryCaption();pauseText.text=KitClock.Paused?"继续播放":"暂停";
   speedText.text="观察 "+KitClock.Speed.ToString("0.##")+"×";uiSync=true;muteToggle.SetIsOnWithoutNotify(SoundService.Muted);instantToggle.SetIsOnWithoutNotify(immediate);
   timelineRow.gameObject.SetActive(Current.timeline);if(Current.timeline){timeSlider.maxValue=Mathf.Max(.001f,TimelineDuration);if(!KitClock.Paused&&hasTriggered)timeline=Mathf.Clamp(elapsed-triggeredAt,0,TimelineDuration);timeSlider.SetValueWithoutNotify(timeline);timelineLabel.text="时间轴  "+timeline.ToString("0.00")+" / "+TimelineDuration.ToString("0.00")+" s   ·   拖动后暂停，点“继续播放”续播";}
-  uiSync=false;stateLabel.text=StateDescription();notice.text=integrationVisible?"复制后可交给 AI，用于你的新项目。":"保存的 JSON 可用于导入后的同一组件。";
-  foreach(var refresh in parameterUpdates)refresh();if(integrationVisible)UpdatePrompt();copyPromptButton.GetComponentInChildren<Text>().text=Time.unscaledTime<promptCopiedUntil?"已复制，可粘贴到新项目":"复制 Prompt 与当前参数";
+  uiSync=false;stateLabel.text=StateDescription();notice.text=parameterSummaryVisible?"导出 JSON 可载入新项目的同一组件。":"保存的 JSON 可用于导入后的同一组件。";
+  foreach(var refresh in parameterUpdates)refresh();if(parameterSummaryVisible)UpdateParameterSummary();copyParametersButton.GetComponentInChildren<Text>().text=Time.unscaledTime<parametersCopiedUntil?parametersCopyFeedback:"一键复制参数导出";
  }
  string StateDescription(){
   if(KitClock.Paused)return "已暂停  ·  点击“继续播放”继续观察";
+  if(component is LoadingProgress progress)return progress.Failed?"模拟中断  ·  进度已保持，点击舞台中间按钮恢复":progress.IsComplete?"模拟任务全部完成  ·  100%，可重置重新体验":"模拟任务进度  "+progress.Percent+"%  ·  不会按等待时间虚增，完成信号前最多99%";
   if(!string.IsNullOrEmpty(message)){string value=message.Length>102?message.Substring(0,99)+"…":message;return value;}
   if(component is ModalMotion modal)return modal.IsOpen?"弹窗已打开  ·  点击面板内“完成”关闭":"等待打开  ·  点击下方“打开弹窗”";
   if(component is StarChargeView charge)return "当前充能 "+Mathf.RoundToInt(charge.Fill*100)+"%  ·  "+(charge.Fill>=.999f?"再次点击可从 0% 重新体验":"点击下方按钮增加 25%");
@@ -157,7 +159,7 @@ public sealed partial class Gallery {
   if(!Current.interactive&&elapsed-triggeredAt>=duration)return "本轮演示已完成  ·  点击“再看一次”重新观看";
   return Current.interactive?"等待你的操作  ·  "+Instructions(Current.id):"自动演示中  ·  可暂停、慢放或重新开始";
  }
- string PrimaryCaption(){if(Current.id=="modal"&&component is ModalMotion modal)return modal.IsOpen?"关闭弹窗":"打开弹窗";switch(Current.id){case "reward":return "开始收集";case "scoreimpact":return "加分并变色放大";case "scoregain":return "增加 +120";case "taskarrival":return "收集一个目标";case "moves":return "步数 -1";case "rating":return "播放连击评价";case "leaguejelly":return "更新排行卡";case "themedissolve":return "切换背景";case "number":return "开始滚分";case "hit":return "触发受击";case "charge":return "充能 +25%";default:return Current.interactive?"请直接操作舞台":"再看一次 / 空格";}}
+ string PrimaryCaption(){if(Current.id=="modal"&&component is ModalMotion modal)return modal.IsOpen?"关闭弹窗":"打开弹窗";switch(Current.id){case "loadingprogress":case "startuploading":return "模拟任务进度 +20%";case "pagenav":return "切换页面";case "stagger":return "播放分组入场";case "rankmove":return "更新名次顺序";case "guide":return "模拟操作 / 恢复指示";case "hintfade":return "操作提示显隐";case "homefeedback":return "播放欢迎语入场";case "pendulum":return "施加交替冲量";case "reward":return "开始收集";case "scoreimpact":return "加分并变色放大";case "scoregain":return "增加 +120";case "taskarrival":return "收集一个目标";case "moves":return "步数 -1";case "rating":return "播放连击评价";case "leaguejelly":return "更新排行卡";case "themedissolve":return "切换背景";case "number":return "开始滚分";case "hit":return "触发受击";case "charge":return "充能 +25%";default:return Current.interactive?"请直接操作舞台":"再看一次 / 空格";}}
  static string Instructions(string id){switch(id){
   case "scoreimpact":return "点击加分，观察数字变金色、放大再回落；可调高亮颜色。";
   case "scoregain":return "快速连点增加，看加分合并后轻微放大、上浮并淡出。";
@@ -166,6 +168,16 @@ public sealed partial class Gallery {
   case "rating":return "选择评价等级后播放，观察彩色字图与星光爆发。";
   case "leaguejelly":return "点击更新，观察排行卡片抖动后回到原来的姿态。";
   case "themedissolve":return "点击切换背景，观察旧背景平滑淡出、新背景露出。";
+  case "loadingprogress":return "用模拟任务输入推进；点舞台里的“任务完成”才允许到100%。";
+  case "startuploading":return "原微信启动页：模拟进度、任务完成和中断恢复；可放大舞台。";
+  case "pagenav":return "点击切换页面；连续点击观察从当前位置反向接续。";
+  case "stagger":return "点击播放商品分组入场；原动画很轻，可慢速观察并调参。";
+  case "rankmove":return "点击更新名次顺序；每行保持身份，平滑移动到宿主给定的位置。";
+  case "guide":return "观察循环手势；点击模拟玩家操作，手势隐藏，再次点击恢复。";
+  case "hintfade":return "点击切换操作前后状态，观察提示组平滑淡出或恢复。";
+  case "homefeedback":return "观察轻微呼吸；点击播放标题、副文案与装饰的分层弹入。";
+  case "pendulum":return "点击从两侧交替施力，观察纯视觉星星挂件的阻尼摆动。";
+  case "breath":return "徽章自动轻微呼吸；可调整幅度和角速度，禁用时归位。";
   case "press":return "移入按钮 → 按住拖动 → 松手，看它回弹。";
   case "switch":return "直接点击舞台里的开关，观察滑块与轨道变化。";
   case "modal":return "点击下方“打开弹窗”，再点面板里的“完成”。";
@@ -185,7 +197,7 @@ public sealed partial class Gallery {
   default:return "自动展示奖章飞入与名次变化；可重新开始观看。";
  }}
  void ResizeInterface(){uiWidth=Screen.width;uiHeight=Screen.height;chrome.localScale=Vector3.one*Mathf.Min(uiWidth/1600f,uiHeight/1000f);ResizeStage();}
- void ResizeStage(){if(viewport==null)return;float height=Current.tall?2340:1250;if(new[]{"press","switch","number","float","scoreimpact","scoregain","moves","taskarrival","rating","leaguejelly"}.Contains(Current.id))height=650;if(Current.id=="drag"||Current.id=="activity")height=800;if(Current.id=="hit"||Current.id=="wordmark")height=750;if(component is FrameSequence)height=1000;if(Current.id=="modal")height=1700;if(Current.id=="logo"||Current.id=="loading")height=1650;var view=StageViewport;stage.localScale=Vector3.one*Mathf.Min((view.rect.width-35)/1080f,(view.rect.height-28)/height);}
+ void ResizeStage(){if(viewport==null)return;float height=Current.tall?2340:1250;if(new[]{"press","switch","number","float","scoreimpact","scoregain","moves","taskarrival","rating","leaguejelly","loadingprogress","hintfade","homefeedback","pendulum","breath"}.Contains(Current.id))height=650;if(Current.id=="drag"||Current.id=="activity"||Current.id=="pagenav"||Current.id=="stagger"||Current.id=="rankmove"||Current.id=="guide")height=800;if(Current.id=="loadingprogress")height=850;if(Current.id=="startuploading")height=2200;if(Current.id=="hit"||Current.id=="wordmark")height=750;if(component is FrameSequence)height=1000;if(Current.id=="modal")height=1700;if(Current.id=="logo"||Current.id=="loading")height=1650;var view=StageViewport;stage.localScale=Vector3.one*Mathf.Min((view.rect.width-35)/1080f,(view.rect.height-28)/height);}
 
  void ResetCurrentParameters(){if(component==null||!defaults.TryGetValue(Current.id,out var preset))return;preset.Apply(component);retained[Current.id]=preset;Replay();Report("已恢复本项默认参数。");}
 
@@ -215,11 +227,32 @@ public sealed partial class Gallery {
   }
   bool any=y>0;parameterContent.sizeDelta=new Vector2(329,Mathf.Max(120,y));resetButton.interactable=saveButton.interactable=loadButton.interactable=any;
   parameterHint.text=any?"滑条实时调整，也可输入精确数值。再次触发比较效果。":"此演出保留项目固定编排。可用暂停、慢速和重新开始观察。";
-  if(!any)Label(parameterContent,"原始节奏已保留\n\n打开“动画 Prompt”可复制设计要求和关键参数。",2,8,319,190,20,Muted);
+  if(!any)Label(parameterContent,"原始节奏已保留\n\n打开“参数显示”可复制设计要求和关键参数。",2,8,319,190,20,Muted);
  }
  struct ParameterSpec{public string title,unit;public float min,max;public ParameterSpec(string t,string u,float a,float b){title=t;unit=u;min=a;max=b;}}
- static string ParameterName(string name){switch(name){case "Loop":return "循环播放";case "Victory":return "使用胜利猫帧";case "Kind":return "轨迹类型";default:return name;}}
+ static string ParameterName(string name){switch(name){case "Loop":return "循环播放";case "Victory":return "使用胜利猫帧";case "Kind":return "轨迹类型";case "Visible":return "显示操作提示";default:return name;}}
  static ParameterSpec Spec(string field){switch(field){
+  case "FillSpeed":return new ParameterSpec("进度追赶速度","比例/秒",.01f,2);
+  case "MaxFrameDelta":return new ParameterSpec("进度单帧上限","秒",.001f,.1f);
+  case "CompletionDuration":return new ParameterSpec("完成脉冲时长","秒",.05f,2);
+  case "CompletionAmplitude":return new ParameterSpec("完成脉冲幅度","倍",0,.3f);
+  case "TravelWidth":return new ParameterSpec("进度行程宽度","单位",100,1000);
+  case "MarbleLift":return new ParameterSpec("完成弹珠抬升","单位",0,80);
+  case "Interval":return new ParameterSpec("逐项错峰间隔","秒",0,.4f);
+  case "StartScale":return new ParameterSpec("入场起始比例","倍",.6f,1);
+  case "Stride":return new ParameterSpec("排行行距","单位",80,250);
+  case "Period":return new ParameterSpec("循环周期","秒",2,8);
+  case "StartDelay":return new ParameterSpec("手势开始延迟","秒",0,2);
+  case "MoveDuration":return new ParameterSpec("手势移动时长","秒",.1f,3);
+  case "Speed":return new ParameterSpec("透明度变化速度","每秒",.1f,10);
+  case "Strength":return new ParameterSpec("分层入场强度","倍",0,2);
+  case "IdleAmplitude":return new ParameterSpec("闲置呼吸强度","倍",0,2);
+  case "PopFrequency":return new ParameterSpec("衰减振动角频率","rad/s",1,30);
+  case "Spring":return new ParameterSpec("弹性系数","",1,200);
+  case "Damping":return new ParameterSpec("阻尼系数","",.1f,20);
+  case "MaxAngle":return new ParameterSpec("最大摆角","度",1,60);
+  case "ImpulseStrength":return new ParameterSpec("视觉冲量强度","",0,240);
+  case "AngularSpeed":return new ParameterSpec("呼吸角速度","rad/s",.1f,8);
   case "HoverDuration":return new ParameterSpec("悬停过渡","秒",.02f,1);
   case "ExitDuration":return new ParameterSpec("移出回弹","秒",.02f,1.5f);
   case "PressDuration":return new ParameterSpec("按下时长","秒",.02f,1);
@@ -244,7 +277,7 @@ public sealed partial class Gallery {
   case "Delay":return new ParameterSpec("触发延迟","秒",0,2);
   case "From":return new ParameterSpec("起始数值","分",0,100000);
   case "To":return new ParameterSpec("结束数值","分",0,100000);
-  case "Amplitude":case "Magnitude":return new ParameterSpec("变化幅度","倍",0,3);
+  case "Amplitude":return new ParameterSpec("变化幅度","倍",0,1);case "Magnitude":return new ParameterSpec("变化幅度","倍",0,3);
   case "amplitude":return new ParameterSpec("浮动幅度","单位",0,35);
   case "speed":return new ParameterSpec("浮动角速度","rad/s",.1f,6);
   case "phase":return new ParameterSpec("起始相位","rad",0,6.283f);

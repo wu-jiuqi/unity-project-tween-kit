@@ -1,0 +1,116 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+// Local startup art: no dependency on the remote groups this screen prepares.
+public sealed class StartupLoadingView86:MonoBehaviour {
+ static readonly string[] Tips={"猫咪正在伸懒腰…","给果冻方块充点弹力…","把小纸箱摆摆整齐…","擦亮今天的幸运弹珠…","让薄荷浮岛轻轻飘起来…","藏好一份拆箱小惊喜…","给快乐加一点软乎乎…","猫爪准备，瞄准快乐…","下一次弹跳，会有惊喜…","带上好心情，一起出发…"};
+ readonly Dictionary<string,Sprite> sprites=new Dictionary<string,Sprite>();
+ readonly List<RectTransform> letters=new List<RectTransform>(),jellies=new List<RectTransform>();
+ RectTransform island,cat,box,ball,fill,background,content,progressRoot,progressMarble,progressShine;Image catImage,progressFill;TMPro.TMP_Text tip,number;float age,progress,targetProgress,completionAge;bool complete,failed,suspended;
+ readonly List<RectTransform> progressStars=new List<RectTransform>();
+ public RectTransform ContentRoot=>content;
+ Sprite Art(string key){if(sprites.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/StartupLoading/"+key);if(t==null)throw new InvalidOperationException("Missing startup art "+key);return sprites[key]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100);}
+ RectTransform Picture(Transform parent,string key,float x,float y,float width){var s=Art(key);var image=UICraft.Box(parent,key,x,y,width,width*s.rect.height/s.rect.width,Color.white);image.sprite=s;image.raycastTarget=false;return image.rectTransform;}
+ static float Y(float top)=>800-top;
+ public void Build(){
+  UICraft.Box(transform,"Startup mint backdrop",0,0,6000,6000,new Color32(229,245,223,255),false,true);
+  background=Picture(transform,"background",0,0,900);
+  content=UICraft.Root(transform,"Safe startup content",0,0,900,1600);
+  for(int i=0;i<4;i++)letters.Add(Picture(content,new[]{"logo-miao","logo-tan","logo-chai","logo-xiang"}[i],-283+i*182,Y(440)+Art(new[]{"logo-miao","logo-tan","logo-chai","logo-xiang"}[i]).rect.height/Art(new[]{"logo-miao","logo-tan","logo-chai","logo-xiang"}[i]).rect.width*91,182));
+  island=UICraft.Root(content,"Floating startup scene",0,0,900,1600);
+  Bottom(island,"island",0,1168,840);
+  jellies.Add(Bottom(island,"jelly-blush",-271,1015,120));jellies.Add(Bottom(island,"jelly-blue",-165,1018,121));jellies.Add(Bottom(island,"jelly-yellow",-225,915,114));
+  cat=Bottom(island,"cat-idle",6,1000,490);catImage=cat.GetComponent<Image>();box=Bottom(island,"box",260,1035,262);
+  ball=UICraft.Box(island,"Golden startup ball",-145,Y(1060),64,64,new Color32(248,207,52,255),true).rectTransform;UICraft.Box(ball,"Ball highlight",-10,12,17,17,new Color32(255,249,205,255),true);
+  UICraft.Flower(island,-276,Y(1055),68,new Color32(255,251,234,255));UICraft.Flower(island,295,Y(1075),54,new Color32(255,251,234,255));
+  progressRoot=UICraft.Root(content,"Jelly loading progress",0,Y(1270),700,150);
+  Picture(progressRoot,"progress-track",0,0,700);
+  fill=Picture(progressRoot,"progress-fill",0,8,636);fill.sizeDelta=new Vector2(636,82);progressFill=fill.GetComponent<Image>();progressFill.type=Image.Type.Filled;progressFill.fillMethod=Image.FillMethod.Horizontal;progressFill.fillOrigin=0;
+  Picture(progressRoot,"progress-paw",-358,2,64).localRotation=Quaternion.Euler(0,0,-12);
+  progressShine=Picture(progressRoot,"progress-sparkle",0,14,30);
+  progressMarble=Picture(progressRoot,"progress-marble",-318,8,78);
+  for(int i=0;i<6;i++){var star=Picture(progressRoot,"progress-sparkle",318,8,24+i%2*8);star.gameObject.SetActive(false);progressStars.Add(star);}
+  tip=UICraft.Label(content,"",0,Y(1378),840,52,29,UICraft.Ink);number=UICraft.Label(content,"0%",0,Y(1438),600,58,40,UICraft.Ink);SetProgress(0);RenderProgress();
+ }
+ RectTransform Bottom(Transform parent,string key,float x,float bottom,float width){var r=Picture(parent,key,x,Y(bottom),width);r.pivot=new Vector2(.5f,0);return r;}
+ public int Percent=>IsComplete?100:Mathf.Min(99,Mathf.FloorToInt(progress*100+.0001f));
+ public bool IsComplete=>complete&&progress>=1;
+ public void SetProgress(float value){targetProgress=Mathf.Max(targetProgress,Mathf.Clamp(value,0,.99f));}
+ public void Complete(){complete=true;targetProgress=1;}
+ // Cap a stalled frame too: returning from synchronous loading must not jump.
+ public static float AdvanceProgress(float shown,float target,float delta)=>Mathf.MoveTowards(shown,Mathf.Max(shown,target),.32f*Mathf.Clamp(delta,0,.05f));
+ public void Failure(string message){failed=true;tip.text=message;}
+ public void Resume(){failed=false;}
+ void RenderProgress(){progressFill.fillAmount=progress;number.text=Percent+"%";}
+ void AnimateProgress(float dt){
+  if(IsComplete)completionAge+=dt;
+  float pulse=IsComplete?Mathf.Sin(Mathf.Clamp01(completionAge/.42f)*Mathf.PI)*.045f:Mathf.Sin(age*2.5f)*.004f;
+  progressRoot.localScale=new Vector3(1+pulse,1-pulse*.55f,1);
+  progressMarble.anchoredPosition=new Vector2(-318+636*progress,8+(!IsComplete?Mathf.Sin(age*4)*2:Mathf.Sin(Mathf.Clamp01(completionAge/.42f)*Mathf.PI)*14));
+  progressMarble.localRotation=Quaternion.Euler(0,0,IsComplete?0:Mathf.Sin(age*2)*5);progressMarble.localScale=Vector3.one*(1+(IsComplete?pulse:Mathf.Sin(age*3)*.018f));
+  progressShine.gameObject.SetActive(progress>.04f&&!IsComplete&&!failed);progressShine.anchoredPosition=new Vector2(-318+636*progress*Mathf.Repeat(age*.32f,1),17);progressShine.localScale=Vector3.one*(.7f+.3f*Mathf.Sin(age*3));
+  for(int i=0;i<progressStars.Count;i++){var star=progressStars[i];bool show=IsComplete&&completionAge<.48f;star.gameObject.SetActive(show);if(!show)continue;float p=Mathf.Clamp01(completionAge/.48f),a=(i*60+15)*Mathf.Deg2Rad;star.anchoredPosition=new Vector2(318,8)+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*(25+65*p);star.localScale=Vector3.one*Mathf.Sin(p*Mathf.PI);}
+ }
+ void LateUpdate(){
+  var root=(RectTransform)transform;if(background==null||root.rect.width<=0||root.rect.height<=0)return;
+  var art=Art("background");float cover=Mathf.Max(root.rect.width/art.rect.width,root.rect.height/art.rect.height);
+  background.sizeDelta=art.rect.size*cover;
+  var pixels=new Vector2Int(Screen.width,Screen.height);var safe=WeChatLayoutMetrics.ContentSafeArea(Screen.safeArea,pixels);
+  float units=root.rect.width/Mathf.Max(1,Screen.width);
+  content.localScale=Vector3.one*Mathf.Min(safe.width*units/900,safe.height*units/1600);
+  content.anchoredPosition=(safe.center-new Vector2(Screen.width,Screen.height)*.5f)*units;
+ }
+ static float Hop(float t,float delay,float period){float p=Mathf.Repeat(t-delay,period);return p<.65f?Mathf.Sin(p/.65f*Mathf.PI):0;}
+ void Update(){
+  if(!failed&&!suspended){progress=AdvanceProgress(progress,targetProgress,Time.unscaledDeltaTime);RenderProgress();}
+  if(!failed&&!IsComplete&&!suspended)age+=Mathf.Min(.1f,Time.unscaledDeltaTime);
+  if(!failed&&!suspended)AnimateProgress(Mathf.Min(.05f,Time.unscaledDeltaTime));
+  if(!failed)tip.text=IsComplete?"准备好了，喵！":Tips[(int)(age/2.8f)%Tips.Length];
+  island.anchoredPosition=Vector2.up*Mathf.Sin(age*Mathf.PI*2/4.8f)*9;
+  for(int i=0;i<letters.Count;i++){var p=letters[i].anchoredPosition;p.y=Y(440)+letters[i].sizeDelta.y*.5f+Hop(age,i*.17f,5.8f)*14;letters[i].anchoredPosition=p;}
+  float phase=age%9,bounce=Hop(age,1.8f,9);string pose=phase<1.8f?"idle":phase<2.3f?"anticipate":phase<2.9f?"celebrate":phase<4?"settle":phase<5.8f?"idle":phase<7.5f?"wave":"idle";
+  catImage.sprite=Art("cat-"+pose);cat.anchoredPosition=new Vector2(6,Y(1000)+bounce*27);float breath=Mathf.Sin(age*Mathf.PI*2/3.1f);cat.localScale=new Vector3(1-breath*.008f-bounce*.025f,1+breath*.012f+bounce*.045f,1);cat.localRotation=Quaternion.Euler(0,0,phase>5.8f&&phase<7.5f?Mathf.Sin(age*Mathf.PI*2)*1.4f:0);
+  ball.anchoredPosition=new Vector2(-145,Y(1060)+Hop(age,.8f,3.2f)*32);
+  box.anchoredPosition=new Vector2(260,Y(1035)+Hop(age,3.5f,6)*9);box.localRotation=Quaternion.Euler(0,0,Mathf.Sin(age*Mathf.PI*2/5.1f)*1.1f);
+  for(int i=0;i<jellies.Count;i++){var p=jellies[i].anchoredPosition;p.y=Y(new[]{1015,1018,915}[i])+Hop(age,2.6f+i*.15f,4.8f)*13;jellies[i].anchoredPosition=p;}
+ }
+ void OnApplicationPause(bool value){suspended=value;}
+ void OnDestroy(){foreach(var s in sprites.Values)if(s!=null)Destroy(s);}
+}
+public partial class AppUI {
+ public IEnumerator PrepareStartupPages86(Action<int> prepared){
+  ShowPage("home",false);yield return null;yield return null;
+  if(CurrentPage!="home")throw new InvalidOperationException("Startup home page did not become ready");
+  Canvas.ForceUpdateCanvases();prepared(8);
+ }
+ public void StartHomePrefetch020(){
+  if((CurrentPage!="home"&&CurrentPage!="chapters")||contentLoad!=null||contentPrefetch!=null)return;
+  var operation=new ContentLoadOperation();contentPrefetch=operation;
+  StartCoroutine(PrefetchHomeLevel020(operation,viewGeneration,Profile.HomeLevelIndex));
+ }
+ partial void StartIdleContentPrefetch(){if(HomeContentStartup.StartupHomeReady)StartHomePrefetch020();}
+ IEnumerator PrefetchHomeLevel020(ContentLoadOperation operation,int generation,int index){
+  try{
+  yield return new WaitForSecondsRealtime(1);
+  if(operation.Cancelled||generation!=viewGeneration||(CurrentPage!="home"&&CurrentPage!="chapters"))yield break;
+  // Prepare the current playable level first; foreground entry joins it.
+  prefetchMenuPage=null;prefetchLevelIndex=index;
+  yield return operation.Run(GameContent.PrefetchLevel(index));
+  if(operation.Succeeded&&contentLoad==null&&generation==viewGeneration&&(CurrentPage=="home"||CurrentPage=="chapters")){
+   prefetchLevelIndex=-1;prefetchMenuPage="chapters";
+   yield return operation.Run(GameContent.PreparePage("chapters"));
+   if(!operation.Succeeded||contentLoad!=null||generation!=viewGeneration)yield break;
+   Debug.Log("BOUNCE_MAP_PREFETCH ready");
+   prefetchMenuPage="result-lose";yield return operation.Run(GameContent.PreparePage("result-lose"));
+   if(!operation.Succeeded||contentLoad!=null||generation!=viewGeneration)yield break;
+   if(index+1<OpeningCampaign.Count){prefetchMenuPage=null;prefetchLevelIndex=index+1;yield return operation.Run(GameContent.PrefetchLevel(index+1));}
+  }
+  }finally{FinishPrefetch(operation);}
+  if(!operation.Cancelled)Debug.Log("BOUNCE_HOME_PREFETCH "+(operation.Succeeded?"ready":"retry-on-entry")+" level="+(index+1));
+ }
+
+}
+}

@@ -1,15 +1,135 @@
 {
-  "passed": 2611,
+  "passed": 2905,
   "failed": 0,
   "fullAcceptancePassed": false,
   "checks": [
     {
-      "name": "gallery uses maintained prompt library",
+      "name": "gallery uses maintained parameter notes",
       "passed": true,
       "detail": ""
     },
     {
-      "name": "every delivered entry has one prompt",
+      "name": "every delivered entry has parameter notes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "gallery no longer ships AI prompt data",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "all 96 reference recipes reviewed exactly once",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "reference matrix links only delivered examples",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot loadingprogress",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component loadingprogress",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot startuploading",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component startuploading",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot pagenav",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component pagenav",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot stagger",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component stagger",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot rankmove",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component rankmove",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot guide",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component guide",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot hintfade",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component hintfade",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot homefeedback",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component homefeedback",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot pendulum",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component pendulum",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental snapshot breath",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "supplemental component breath",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "platform startup host snapshot",
       "passed": true,
       "detail": ""
     },
@@ -6429,6 +6549,66 @@
       "detail": ""
     },
     {
+      "name": "extraction assets/unity-kit/Runtime/LoadingProgress.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/StartupLoadingPresentation.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/PageSlide.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/GroupStagger.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/RankReorder.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/TutorialGesture.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/HintFade.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/HomeLayeredFeedback.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/PendantSwing.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/DecorativeBreath.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/OnboardingArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/TutorialArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "resource assets/unity-kit/Plugins/DOTween/DOTween.dll",
       "passed": true,
       "detail": ""
@@ -8184,6 +8364,396 @@
       "detail": ""
     },
     {
+      "name": "resource assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-junction.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-junction.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-junction.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-stem.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-stem.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-stem.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/OnboardingV1/layout.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/OnboardingV1/layout.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/OnboardingV1/layout.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/OnboardingV1/02-gesture-atlas.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/OnboardingV1/02-gesture-atlas.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/OnboardingV1/02-gesture-atlas.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/TutorialV41/target-outline.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/TutorialV41/target-outline.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/TutorialV41/target-outline.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/BattleUIV42/swipe-gesture.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/BattleUIV42/swipe-gesture.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/BattleUIV42/swipe-gesture.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/background.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/background.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/background.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/box.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/box.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/box.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/cat-anticipate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/cat-anticipate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/cat-anticipate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/cat-celebrate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/cat-celebrate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/cat-celebrate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/cat-idle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/cat-idle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/cat-idle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/cat-settle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/cat-settle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/cat-settle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/cat-wave.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/cat-wave.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/cat-wave.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/island.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/island.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/island.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/jelly-blue.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/jelly-blue.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/jelly-blue.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/jelly-blush.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/jelly-blush.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/jelly-blush.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/jelly-yellow.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/jelly-yellow.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/jelly-yellow.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/logo-chai.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/logo-chai.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/logo-chai.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/logo-miao.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/logo-miao.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/logo-miao.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/logo-tan.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/logo-tan.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/logo-tan.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/logo-xiang.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/logo-xiang.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/logo-xiang.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/progress-fill.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/progress-fill.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/progress-fill.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/progress-marble.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/progress-marble.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/progress-marble.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/progress-paw.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/progress-paw.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/progress-paw.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/progress-sparkle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/progress-sparkle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/progress-sparkle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/StartupLoading/progress-track.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/StartupLoading/progress-track.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/StartupLoading/progress-track.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Editor.meta",
       "passed": true,
       "detail": ""
@@ -8244,6 +8814,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Examples/LoadingProgress.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Examples/Modal.prefab.meta",
       "passed": true,
       "detail": ""
@@ -8274,6 +8849,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Examples/StartupLoading.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Examples/Switch.prefab.meta",
       "passed": true,
       "detail": ""
@@ -8289,7 +8869,27 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Presets/DecorativeBreath.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Presets/FrameSequence.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/GroupStagger.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/HintFade.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/HomeLayeredFeedback.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -8309,6 +8909,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Presets/LoadingProgress.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Presets/ModalMotion.json.meta",
       "passed": true,
       "detail": ""
@@ -8320,6 +8925,21 @@
     },
     {
       "name": "valid GUID Presets/NumberRoll.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/PageSlide.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/PendantSwing.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/RankReorder.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -8345,6 +8965,11 @@
     },
     {
       "name": "valid GUID Presets/ThemeDissolve.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/TutorialGesture.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -8394,6 +9019,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Runtime/DecorativeBreath.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Runtime/ExamplePrefab.cs.meta",
       "passed": true,
       "detail": ""
@@ -8405,6 +9035,21 @@
     },
     {
       "name": "valid GUID Runtime/FrameSequence.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/GroupStagger.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/HintFade.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/HomeLayeredFeedback.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -8424,6 +9069,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Runtime/LoadingProgress.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Runtime/ModalMotion.cs.meta",
       "passed": true,
       "detail": ""
@@ -8439,12 +9089,32 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Runtime/OnboardingArt.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/PageSlide.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/PendantSwing.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Runtime/PresetIO.cs.meta",
       "passed": true,
       "detail": ""
     },
     {
       "name": "valid GUID Runtime/PresetLoader.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/RankReorder.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -8469,12 +9139,27 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Runtime/StartupLoadingPresentation.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Runtime/TaskArrival.cs.meta",
       "passed": true,
       "detail": ""
     },
     {
       "name": "valid GUID Runtime/ThemeDissolve.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/TutorialArt.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/TutorialGesture.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -8904,6 +9589,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/BattleUIV42.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/ChineseV59.meta",
       "passed": true,
       "detail": ""
@@ -8944,6 +9634,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/OnboardingV1.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/Pastel.meta",
       "passed": true,
       "detail": ""
@@ -8955,6 +9650,16 @@
     },
     {
       "name": "valid GUID Resources/Art/SettingsC.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/TutorialV41.meta",
       "passed": true,
       "detail": ""
     },
@@ -9154,12 +9859,27 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/BattleJellyV5/vine-star-junction.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/BattleJellyV5/vine-star-off.png.meta",
       "passed": true,
       "detail": ""
     },
     {
       "name": "valid GUID Resources/Art/BattleJellyV5/vine-star-on.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/BattleJellyV5/vine-star-stem.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/BattleUIV42/swipe-gesture.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -9239,6 +9959,16 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/OnboardingV1/02-gesture-atlas.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/OnboardingV1/layout.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/Pastel/PastelArtData.json.meta",
       "passed": true,
       "detail": ""
@@ -9270,6 +10000,111 @@
     },
     {
       "name": "valid GUID Resources/Art/SettingsC/atlas.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/background.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/box.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/cat-anticipate.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/cat-celebrate.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/cat-idle.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/cat-settle.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/cat-wave.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/island.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/jelly-blue.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/jelly-blush.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/jelly-yellow.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/logo-chai.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/logo-miao.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/logo-tan.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/logo-xiang.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/progress-fill.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/progress-marble.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/progress-paw.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/progress-sparkle.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/StartupLoading/progress-track.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/TutorialV41/target-outline.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -9569,6 +10404,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Examples/LoadingProgress.prefab",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Examples/LoadingProgress.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Examples/Modal.prefab",
       "passed": true,
       "detail": ""
@@ -9629,6 +10474,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Examples/StartupLoading.prefab",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Examples/StartupLoading.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Examples/Switch.prefab",
       "passed": true,
       "detail": ""
@@ -9654,12 +10509,52 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Presets/DecorativeBreath.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/DecorativeBreath.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Presets/FrameSequence.json",
       "passed": true,
       "detail": ""
     },
     {
       "name": "shared implementation Presets/FrameSequence.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/GroupStagger.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/GroupStagger.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/HintFade.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/HintFade.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/HomeLayeredFeedback.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/HomeLayeredFeedback.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -9694,6 +10589,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Presets/LoadingProgress.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/LoadingProgress.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Presets/ModalMotion.json",
       "passed": true,
       "detail": ""
@@ -9720,6 +10625,36 @@
     },
     {
       "name": "shared implementation Presets/NumberRoll.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/PageSlide.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/PageSlide.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/PendantSwing.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/PendantSwing.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/RankReorder.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/RankReorder.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -9770,6 +10705,16 @@
     },
     {
       "name": "shared implementation Presets/ThemeDissolve.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/TutorialGesture.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/TutorialGesture.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -9844,6 +10789,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Runtime/DecorativeBreath.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/DecorativeBreath.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Runtime/ExamplePrefab.cs",
       "passed": true,
       "detail": ""
@@ -9865,6 +10820,36 @@
     },
     {
       "name": "shared implementation Runtime/FrameSequence.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/GroupStagger.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/GroupStagger.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/HintFade.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/HintFade.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/HomeLayeredFeedback.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/HomeLayeredFeedback.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -9899,6 +10884,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Runtime/LoadingProgress.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/LoadingProgress.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Runtime/ModalMotion.cs",
       "passed": true,
       "detail": ""
@@ -9929,6 +10924,36 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Runtime/OnboardingArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/OnboardingArt.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/PageSlide.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/PageSlide.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/PendantSwing.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/PendantSwing.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Runtime/PresetIO.cs",
       "passed": true,
       "detail": ""
@@ -9945,6 +10970,16 @@
     },
     {
       "name": "shared implementation Runtime/PresetLoader.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/RankReorder.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/RankReorder.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -9989,6 +11024,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Runtime/StartupLoadingPresentation.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/StartupLoadingPresentation.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Runtime/TaskArrival.cs",
       "passed": true,
       "detail": ""
@@ -10005,6 +11050,26 @@
     },
     {
       "name": "shared implementation Runtime/ThemeDissolve.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/TutorialArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/TutorialArt.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/TutorialGesture.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/TutorialGesture.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -10804,6 +11869,11 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/BattleUIV42.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/ChineseV59.meta",
       "passed": true,
       "detail": ""
@@ -10844,6 +11914,11 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/OnboardingV1.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/Pastel.meta",
       "passed": true,
       "detail": ""
@@ -10855,6 +11930,16 @@
     },
     {
       "name": "shared implementation Resources/Art/SettingsC.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/TutorialV41.meta",
       "passed": true,
       "detail": ""
     },
@@ -11214,6 +12299,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-junction.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-junction.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-off.png",
       "passed": true,
       "detail": ""
@@ -11230,6 +12325,26 @@
     },
     {
       "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-on.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-stem.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-stem.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleUIV42/swipe-gesture.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleUIV42/swipe-gesture.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -11374,6 +12489,26 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/OnboardingV1/02-gesture-atlas.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/OnboardingV1/02-gesture-atlas.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/OnboardingV1/layout.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/OnboardingV1/layout.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/Pastel/PastelArtData.json",
       "passed": true,
       "detail": ""
@@ -11435,6 +12570,216 @@
     },
     {
       "name": "shared implementation Resources/Art/SettingsC/atlas.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/background.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/background.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/box.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/box.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-anticipate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-anticipate.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-celebrate.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-celebrate.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-idle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-idle.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-settle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-settle.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-wave.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/cat-wave.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/island.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/island.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/jelly-blue.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/jelly-blue.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/jelly-blush.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/jelly-blush.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/jelly-yellow.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/jelly-yellow.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-chai.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-chai.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-miao.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-miao.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-tan.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-tan.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-xiang.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/logo-xiang.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-fill.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-fill.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-marble.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-marble.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-paw.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-paw.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-sparkle.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-sparkle.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-track.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/StartupLoading/progress-track.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/TutorialV41/target-outline.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/TutorialV41/target-outline.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -11854,6 +13199,16 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/HintFade.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/OnboardingArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/Extracted/AlphabetTweenExtensions.cs",
       "passed": true,
       "detail": ""
@@ -11869,12 +13224,22 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/LoadingProgress.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/ThemeDissolve.cs",
       "passed": true,
       "detail": ""
     },
     {
       "name": "exported exact component Assets/ProjectTweenKit/Plugins/DOTween/Modules/DOTweenModulePhysics.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/TutorialArt.cs",
       "passed": true,
       "detail": ""
     },
@@ -11899,6 +13264,11 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/TutorialGesture.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/SoundService.cs",
       "passed": true,
       "detail": ""
@@ -11915,6 +13285,11 @@
     },
     {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/NumberRoll.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/HomeLayeredFeedback.cs",
       "passed": true,
       "detail": ""
     },
@@ -11950,6 +13325,11 @@
     },
     {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/Extracted/VictoryCatAnimation.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/PageSlide.cs",
       "passed": true,
       "detail": ""
     },
@@ -12004,6 +13384,11 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/StartupLoadingPresentation.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/RewardFlight.cs",
       "passed": true,
       "detail": ""
@@ -12014,7 +13399,17 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/DecorativeBreath.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/Extracted/JellyLogoIntro.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/RankReorder.cs",
       "passed": true,
       "detail": ""
     },
@@ -12044,12 +13439,22 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/PendantSwing.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/PresetIO.cs",
       "passed": true,
       "detail": ""
     },
     {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/Extracted/FailurePresentation.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/GroupStagger.cs",
       "passed": true,
       "detail": ""
     },
@@ -12804,6 +14209,11 @@
       "detail": ""
     },
     {
+      "name": "tested kit source Runtime/DecorativeBreath.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "tested kit source Runtime/ExamplePrefab.cs",
       "passed": true,
       "detail": ""
@@ -12949,6 +14359,21 @@
       "detail": ""
     },
     {
+      "name": "tested kit source Runtime/GroupStagger.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/HintFade.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/HomeLayeredFeedback.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "tested kit source Runtime/JellyHit.cs",
       "passed": true,
       "detail": ""
@@ -12960,6 +14385,11 @@
     },
     {
       "name": "tested kit source Runtime/LeagueJelly.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/LoadingProgress.cs",
       "passed": true,
       "detail": ""
     },
@@ -12979,12 +14409,32 @@
       "detail": ""
     },
     {
+      "name": "tested kit source Runtime/OnboardingArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/PageSlide.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/PendantSwing.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "tested kit source Runtime/PresetIO.cs",
       "passed": true,
       "detail": ""
     },
     {
       "name": "tested kit source Runtime/PresetLoader.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/RankReorder.cs",
       "passed": true,
       "detail": ""
     },
@@ -13009,12 +14459,27 @@
       "detail": ""
     },
     {
+      "name": "tested kit source Runtime/StartupLoadingPresentation.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "tested kit source Runtime/TaskArrival.cs",
       "passed": true,
       "detail": ""
     },
     {
       "name": "tested kit source Runtime/ThemeDissolve.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/TutorialArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/TutorialGesture.cs",
       "passed": true,
       "detail": ""
     },
@@ -13034,7 +14499,12 @@
       "detail": ""
     },
     {
-      "name": "tested gallery source assets/sample-project/Assets/Gallery/GalleryPrompts.cs",
+      "name": "tested gallery source assets/sample-project/Assets/Gallery/GalleryParameters.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested gallery source assets/sample-project/Assets/Gallery/GallerySupplemental.cs",
       "passed": true,
       "detail": ""
     },

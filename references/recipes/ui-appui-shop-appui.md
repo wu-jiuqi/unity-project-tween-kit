@@ -6,7 +6,11 @@
 文件 SHA-256：`524b27ee4444ddff4e0e47f8edaee9e1c4d9d28fbf5513c2db5601d0494b386f`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.Shop.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
+
+- `GroupStagger` / `stagger`：保持.98起始比例、.20秒OutCubic、.018逐项延迟；初始scale向量由绑定对象捕获
+
+接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。
 
 ## 源方法、参数与曲线
 

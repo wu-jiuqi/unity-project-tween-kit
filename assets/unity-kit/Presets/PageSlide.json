@@ -1,0 +1,24 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.PageSlide",
+    "settings": [
+        {
+            "field": "Destination",
+            "type": "UnityEngine.Vector2",
+            "value": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Duration",
+            "type": "System.Single",
+            "value": 0.27000001072883608,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

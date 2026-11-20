@@ -6,7 +6,11 @@
 文件 SHA-256：`aef2773f232632afb25debb34374b5036bed8d539969d3cc5c3fcd029ea9b6b5`
 [原始源码快照](../source/Assets/Scripts/UI/HomeFeedbackView.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
+
+- `HomeLayeredFeedback` / `homefeedback`：保留分层位移、比例、相位及衰减，绑定宿主视觉层；不读取连胜、登录或文案业务
+
+接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。
 
 ## 源方法、参数与曲线
 

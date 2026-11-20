@@ -6,7 +6,11 @@
 文件 SHA-256：`d3a8c4c850781f1a9e0e4dd2cab54ac95920856ba9b6cb331efd181c8f0183f4`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
+
+- `PageSlide` / `pagenav`：仅提取0.27秒OutCubic页面轨道；等价归一化曲线替代DOTween宿主序列；导航、输入和路由归宿主
+
+接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。
 
 ## 源方法、参数与曲线
 

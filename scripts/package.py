@@ -9,7 +9,7 @@ def zipfiles(path,items):
 def files(root):return [p for p in root.rglob('*') if p.is_file() and not any(x in IGNORED for x in p.relative_to(root).parts)]
 def main():
     subprocess.run(['python',str(KIT/'scripts/validate.py')],check=True)
-    dist=KIT/'dist';version='0.3.0-preview';skill=dist/f'unity-project-tween-kit-{version}.zip';sample=dist/f'TweenKit-SampleProject-{version}.zip';windows=dist/f'TweenKit-Windows-{version}.zip'
+    dist=KIT/'dist';version='0.4.0-preview';skill=dist/f'unity-project-tween-kit-{version}.zip';sample=dist/f'TweenKit-SampleProject-{version}.zip';windows=dist/f'TweenKit-Windows-{version}.zip'
     selected=[KIT/'SKILL.md',KIT/'README.md']
     for folder in ['references','scripts','assets/unity-kit','assets/sample-project','evidence']:selected+=files(KIT/folder)
     # The default skill includes the independent sample without Library caches.

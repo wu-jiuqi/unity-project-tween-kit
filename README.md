@@ -4,12 +4,14 @@
 
 主要用途是在后续Unity项目中复用这些补间动画的设计：从交互需求选方案，保留节奏、曲线与反馈规则，换用新项目的视觉对象并继续调参。[新项目设计选型与迁移](references/design-reuse.md)。
 
-0.3.0将右侧改为可复制的动画Prompt与当前参数，移除展馆源码定位和来源档案。新增分数变色放大、加分合并上浮、目标到达印章、步数挤压、连击评价星光、排行卡抖动与背景换景，共26项。[操作说明](references/gallery-ui.md) · [本轮全工程复查](references/coverage-audit.md)。
+0.4.0将右侧改为“参数显示”，支持“一键复制参数导出”：复制当前JSON并保存文件，可用同一套MotionPreset载入。对照参考仓库96项后新增10个适用条目，累计36项；包括独立Loading进度条、完整微信启动页、页面横移、分组入场、排行重排、教学手势、提示淡出、欢迎语分层、挂件摆动与徽章呼吸。全部使用项目现有素材。
 
-**当前为阶段预览，尚未完成全量覆盖验收。** 已提供26个可体验条目，以及内部来源扫描、差异和资源/GUID映射；未提取、未确认入口和物理/业务混合项均显式列出。
+[96项逐条对照与取舍](references/reference96-comparison.md) · [Loading接线](references/loading-progress.md) · [参数基准](references/parameters.md)
+
+**当前为阶段预览，尚未完成全量覆盖验收。** 已提供36个可体验条目，以及内部来源扫描、差异和资源/GUID映射；未提取、未确认入口和物理/业务混合项均显式列出。
 
 - [Skill入口](SKILL.md)
-- [动画Prompt与关键参数](references/animation-prompts.md)
+- [参数显示与JSON导出](references/parameters.md)
 - [来源目录与覆盖进度](references/catalog.md)
 - [首次导入与逐项接线](references/integration.md)
 - [Windows展馆操作流程](references/gallery-ui.md)

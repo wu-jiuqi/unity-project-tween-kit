@@ -1,0 +1,340 @@
+{
+  "entries": [
+    {
+      "key": "01-0",
+      "atlas": "01-common-ui-atlas",
+      "x": 57,
+      "y": 800,
+      "w": 509,
+      "h": 396
+    },
+    {
+      "key": "01-1",
+      "atlas": "01-common-ui-atlas",
+      "x": 648,
+      "y": 863,
+      "w": 529,
+      "h": 247
+    },
+    {
+      "key": "01-2",
+      "atlas": "01-common-ui-atlas",
+      "x": 112,
+      "y": 432,
+      "w": 381,
+      "h": 217
+    },
+    {
+      "key": "01-3",
+      "atlas": "01-common-ui-atlas",
+      "x": 655,
+      "y": 388,
+      "w": 490,
+      "h": 358
+    },
+    {
+      "key": "01-4",
+      "atlas": "01-common-ui-atlas",
+      "x": 52,
+      "y": 100,
+      "w": 514,
+      "h": 192
+    },
+    {
+      "key": "01-5",
+      "atlas": "01-common-ui-atlas",
+      "x": 645,
+      "y": 92,
+      "w": 534,
+      "h": 202
+    },
+    {
+      "key": "02-0",
+      "atlas": "02-gesture-atlas",
+      "x": 130,
+      "y": 1072,
+      "w": 272,
+      "h": 366
+    },
+    {
+      "key": "02-1",
+      "atlas": "02-gesture-atlas",
+      "x": 638,
+      "y": 1072,
+      "w": 259,
+      "h": 365
+    },
+    {
+      "key": "02-2",
+      "atlas": "02-gesture-atlas",
+      "x": 81,
+      "y": 583,
+      "w": 360,
+      "h": 350
+    },
+    {
+      "key": "02-3",
+      "atlas": "02-gesture-atlas",
+      "x": 602,
+      "y": 577,
+      "w": 307,
+      "h": 389
+    },
+    {
+      "key": "02-4",
+      "atlas": "02-gesture-atlas",
+      "x": 91,
+      "y": 139,
+      "w": 344,
+      "h": 275
+    },
+    {
+      "key": "02-5",
+      "atlas": "02-gesture-atlas",
+      "x": 559,
+      "y": 62,
+      "w": 389,
+      "h": 390
+    },
+    {
+      "key": "03-0",
+      "atlas": "03-goal-moves-atlas",
+      "x": 109,
+      "y": 1139,
+      "w": 299,
+      "h": 286
+    },
+    {
+      "key": "03-1",
+      "atlas": "03-goal-moves-atlas",
+      "x": 589,
+      "y": 1180,
+      "w": 345,
+      "h": 201
+    },
+    {
+      "key": "03-2",
+      "atlas": "03-goal-moves-atlas",
+      "x": 58,
+      "y": 596,
+      "w": 397,
+      "h": 401
+    },
+    {
+      "key": "03-3",
+      "atlas": "03-goal-moves-atlas",
+      "x": 555,
+      "y": 632,
+      "w": 418,
+      "h": 314
+    },
+    {
+      "key": "03-4",
+      "atlas": "03-goal-moves-atlas",
+      "x": 83,
+      "y": 73,
+      "w": 351,
+      "h": 394
+    },
+    {
+      "key": "03-5",
+      "atlas": "03-goal-moves-atlas",
+      "x": 547,
+      "y": 125,
+      "w": 413,
+      "h": 263
+    },
+    {
+      "key": "04-0",
+      "atlas": "04-yarn-lesson-atlas",
+      "x": 52,
+      "y": 1071,
+      "w": 408,
+      "h": 395
+    },
+    {
+      "key": "04-1",
+      "atlas": "04-yarn-lesson-atlas",
+      "x": 554,
+      "y": 1069,
+      "w": 426,
+      "h": 406
+    },
+    {
+      "key": "04-2",
+      "atlas": "04-yarn-lesson-atlas",
+      "x": 35,
+      "y": 560,
+      "w": 448,
+      "h": 435
+    },
+    {
+      "key": "04-3",
+      "atlas": "04-yarn-lesson-atlas",
+      "x": 537,
+      "y": 576,
+      "w": 456,
+      "h": 404
+    },
+    {
+      "key": "04-4",
+      "atlas": "04-yarn-lesson-atlas",
+      "x": 41,
+      "y": 53,
+      "w": 447,
+      "h": 425
+    },
+    {
+      "key": "04-5",
+      "atlas": "04-yarn-lesson-atlas",
+      "x": 598,
+      "y": 94,
+      "w": 345,
+      "h": 369
+    },
+    {
+      "key": "05-0",
+      "atlas": "05-box-lesson-atlas",
+      "x": 139,
+      "y": 859,
+      "w": 400,
+      "h": 388
+    },
+    {
+      "key": "05-1",
+      "atlas": "05-box-lesson-atlas",
+      "x": 694,
+      "y": 859,
+      "w": 398,
+      "h": 388
+    },
+    {
+      "key": "05-2",
+      "atlas": "05-box-lesson-atlas",
+      "x": 136,
+      "y": 447,
+      "w": 406,
+      "h": 389
+    },
+    {
+      "key": "05-3",
+      "atlas": "05-box-lesson-atlas",
+      "x": 688,
+      "y": 448,
+      "w": 409,
+      "h": 387
+    },
+    {
+      "key": "05-4",
+      "atlas": "05-box-lesson-atlas",
+      "x": 148,
+      "y": 124,
+      "w": 379,
+      "h": 202
+    },
+    {
+      "key": "05-5",
+      "atlas": "05-box-lesson-atlas",
+      "x": 686,
+      "y": 37,
+      "w": 413,
+      "h": 382
+    },
+    {
+      "key": "06-0",
+      "atlas": "06-lucky-cat-lesson-atlas",
+      "x": 171,
+      "y": 870,
+      "w": 386,
+      "h": 360
+    },
+    {
+      "key": "06-1",
+      "atlas": "06-lucky-cat-lesson-atlas",
+      "x": 695,
+      "y": 870,
+      "w": 382,
+      "h": 360
+    },
+    {
+      "key": "06-2",
+      "atlas": "06-lucky-cat-lesson-atlas",
+      "x": 154,
+      "y": 459,
+      "w": 415,
+      "h": 363
+    },
+    {
+      "key": "06-3",
+      "atlas": "06-lucky-cat-lesson-atlas",
+      "x": 691,
+      "y": 457,
+      "w": 392,
+      "h": 365
+    },
+    {
+      "key": "06-4",
+      "atlas": "06-lucky-cat-lesson-atlas",
+      "x": 188,
+      "y": 78,
+      "w": 376,
+      "h": 271
+    },
+    {
+      "key": "06-5",
+      "atlas": "06-lucky-cat-lesson-atlas",
+      "x": 686,
+      "y": 48,
+      "w": 392,
+      "h": 342
+    },
+    {
+      "key": "07-0",
+      "atlas": "07-copper-lesson-atlas",
+      "x": 176,
+      "y": 905,
+      "w": 356,
+      "h": 358
+    },
+    {
+      "key": "07-1",
+      "atlas": "07-copper-lesson-atlas",
+      "x": 667,
+      "y": 905,
+      "w": 356,
+      "h": 358
+    },
+    {
+      "key": "07-2",
+      "atlas": "07-copper-lesson-atlas",
+      "x": 176,
+      "y": 437,
+      "w": 356,
+      "h": 416
+    },
+    {
+      "key": "07-3",
+      "atlas": "07-copper-lesson-atlas",
+      "x": 667,
+      "y": 494,
+      "w": 356,
+      "h": 359
+    },
+    {
+      "key": "07-4",
+      "atlas": "07-copper-lesson-atlas",
+      "x": 176,
+      "y": 84,
+      "w": 356,
+      "h": 353
+    },
+    {
+      "key": "07-5",
+      "atlas": "07-copper-lesson-atlas",
+      "x": 682,
+      "y": 96,
+      "w": 326,
+      "h": 325
+    }
+  ]
+}

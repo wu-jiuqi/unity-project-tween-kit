@@ -1,7 +1,7 @@
 {
     "result": "passed",
-    "scripts": 50,
-    "prefabs": 9,
+    "scripts": 62,
+    "prefabs": 11,
     "missingScripts": 0,
     "errors": []
 }

@@ -1,0 +1,74 @@
+using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+#if UNITY_WEBGL && !UNITY_EDITOR
+using WeChatWASM;
+#endif
+namespace BounceGarden {
+// Only staged into the WeChat export. Local fonts keep this screen independent
+// of the home artwork it is loading; a failed request remains retryable.
+public sealed class HomeContentStartup : MonoBehaviour {
+ public static bool StartupHomeReady {get;private set;}
+ // Compatibility for older editor fixtures; this now means the home first frame.
+ public static bool StartupMenusReady86=>StartupHomeReady;
+ Action ready; bool busy,sdkReady,appCreated; StartupLoadingView86 view; TMPro.TMP_Text status; GameObject retry;
+ public static void Begin(Action ready){
+  StartupHomeReady=false;
+  var loader=new GameObject("Home content startup").AddComponent<HomeContentStartup>();
+  DontDestroyOnLoad(loader.gameObject);loader.ready=ready;loader.Build();loader.StartCoroutine(loader.Load());
+ }
+ void Build(){
+  var canvas=gameObject.AddComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=30000;
+  var scaler=gameObject.AddComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(900,1600);scaler.matchWidthOrHeight=.5f;
+  gameObject.AddComponent<GraphicRaycaster>();
+  if(EventSystem.current==null){var events=new GameObject("Startup events",typeof(EventSystem),typeof(StandaloneInputModule));events.transform.SetParent(transform,false);}
+  view=gameObject.AddComponent<StartupLoadingView86>();view.Build();view.SetProgress(1f/8);
+  status=UICraft.Label(view.ContentRoot,"",0,-600,800,90,30,UICraft.Ink);status.gameObject.SetActive(false);
+  var hit=UICraft.Root(view.ContentRoot,"重试",0,-720,400,100);retry=hit.gameObject;
+  hit.gameObject.AddComponent<Image>().color=new Color32(202,221,157,255);
+  hit.gameObject.AddComponent<Button>().onClick.AddListener(()=>{if(!busy)StartCoroutine(Load());});
+  UICraft.Label(hit,"重试",0,0,380,100,44,UICraft.Ink);retry.SetActive(false);
+ }
+ IEnumerator Load(){
+  if(busy)yield break;busy=true;view.Resume();retry.SetActive(false);status.text="正在准备花园…";
+  yield return null;
+  if(!sdkReady){
+   status.text="正在连接花园…";var attempt=new StartupAttempt77();
+   yield return attempt.Run((ok,fail)=>BounceWeChatRuntime.StartGame(ok,fail));
+   if(!attempt.Succeeded){BounceWeChatRuntime.CancelInitialization();ShowFailure("连接暂未完成，请重试。");yield break;}
+   sdkReady=true;view.SetProgress(2f/8);
+  }
+  status.text="正在准备花园…";
+  MobileStartup72.Mark("loading-home");
+  int completed=0;var groups=WeChatContent.StartupGroups;
+  foreach(var group in groups){
+   var operation=new ContentLoadOperation();yield return operation.Run(WeChatContent.PrepareGroups(new[]{group}));
+   if(!operation.Succeeded||WeChatContent.LastError!=null){ShowFailure("资源准备未完成，请重试。");yield break;}
+   view.SetProgress((2+3f*(++completed)/groups.Length)/8f);
+  }
+  if(!appCreated){try{ready();appCreated=true;}catch(Exception error){Debug.LogException(error);ShowFailure("花园准备未完成，请重试。");yield break;}}
+  var app=FindFirstObjectByType<AppUI>();
+  if(app==null){ShowFailure("花园准备未完成，请重试。");yield break;}
+  var pages=new ContentLoadOperation();yield return pages.Run(app.PrepareStartupPages86(n=>view.SetProgress(n/8f)));
+  if(!pages.Succeeded){ShowFailure("页面准备未完成，请重试。");yield break;}
+  // Home is ready; optional pages and first-level content must not delay interaction.
+  StartupHomeReady=true;view.Complete();while(!view.IsComplete)yield return null;yield return new WaitForSecondsRealtime(.5f);busy=false;
+  MobileStartup72.Mark("home-ready");
+  app.StartHomePrefetch020();
+  var startupEvents=GetComponentInChildren<EventSystem>();
+  if(startupEvents!=null){var currentApp=FindFirstObjectByType<AppUI>();if(currentApp!=null)startupEvents.transform.SetParent(currentApp.transform,false);}
+#if UNITY_WEBGL && !UNITY_EDITOR
+  WX.HideLoadingPage();
+  WX.ReportGameStart();
+#endif
+  Destroy(gameObject);
+ }
+ void ShowFailure(string text){busy=false;view.Failure(text);status.text=text;retry.SetActive(true);
+#if UNITY_WEBGL && !UNITY_EDITOR
+  WX.HideLoadingPage();
+#endif
+ }
+}
+}

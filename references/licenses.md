@@ -15,3 +15,6 @@
 DOTween官网列出对原版与修改版的不同分发条件。因此不分发源项目加过defines的ModuleUtils，保留同版本核心DLL，并使用本地原始发行包的模块和原readme。具体文件哈希在资源映射中，不以Github当前HEAD的不同DLL替换源项目运行时。
 
 本工具包尚未为项目原有代码、美术或音频新增一份覆盖全部内容的公共许可证。最终公开发布验收中，应逐项确认项目素材与交付录音的再分发范围。此处是实际证据状态，不能将“运行示例可加载”写成“所有素材已取得统一许可”。
+
+
+0.4.0新增示例继续使用项目已有StartupLoading、OnboardingV1、TutorialV41、BattleUIV42和藤蔓挂件素材。启动页PNG及meta来自同一BounceBusters项目已导出的微信工程资源，沿用原GUID和导入设置，映射中的source以../../Builds开头；不将其冒充主Assets文件。没有导入unity-ui-tween仓库美术，也没有新生成图。许可判断继续沿用上面的项目素材记录。

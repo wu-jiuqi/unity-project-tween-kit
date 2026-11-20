@@ -6,7 +6,11 @@
 文件 SHA-256：`2f3bea325bad77b03e38784bbd30b2772a48c4524b04dac3efb74db847d72747`
 [原始源码快照](../source/Assets/Scripts/UI/PlayableTutorialGuide.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
+
+- `TutorialGesture` / `guide`：提取手势/触点/目标框曲线；起终点由宿主输入，移除游戏瞄准、存档和教学完成业务
+
+接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。
 
 ## 源方法、参数与曲线
 

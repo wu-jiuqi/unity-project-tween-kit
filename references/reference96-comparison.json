@@ -1,0 +1,807 @@
+{
+  "referenceRepository": "https://github.com/wu-jiuqi/unity-ui-tween",
+  "referenceBranch": "origin/codex/recipe-gallery-96",
+  "referenceCommit": "fa3f07e8c3ca1ba7f7ba9aa40d2c190c25b90146",
+  "catalogPath": "Assets/TweenGallery/Resources/recipe-catalog.json",
+  "catalogSha256": "7bdbcdc07c9234fb93029e6b4005cfb5be99a322643b011b040e8701f38cbd29",
+  "recipesReviewed": 96,
+  "counts": {
+    "covered": 26,
+    "partial": 13,
+    "added": 12,
+    "excluded": 34,
+    "pending": 11
+  },
+  "artPolicy": "Only existing BounceBusters project art; no art imported from the reference repository and no new art generated.",
+  "scope": "By-purpose comparison, not a claim to reproduce all 96 reference demonstrations.",
+  "entries": [
+    {
+      "id": "01.01",
+      "name": "界面进入",
+      "status": "covered",
+      "galleryIds": [
+        "victory",
+        "failure",
+        "logo"
+      ],
+      "reason": "已有页面入场编排；保持项目既有节奏"
+    },
+    {
+      "id": "01.02",
+      "name": "界面退出",
+      "status": "partial",
+      "galleryIds": [
+        "modal",
+        "pagenav"
+      ],
+      "reason": "已有弹窗退出和页面横移；未另做通用整页退出"
+    },
+    {
+      "id": "01.03",
+      "name": "同级页面替换",
+      "status": "added",
+      "galleryIds": [
+        "pagenav"
+      ],
+      "reason": "补项目实际0.27秒横移，保留项目设计而非照抄参考交叉淡化"
+    },
+    {
+      "id": "01.04",
+      "name": "父子页面导航",
+      "status": "partial",
+      "galleryIds": [
+        "modal"
+      ],
+      "reason": "子页面通过宿主弹窗合同接入，没有另建导航历史栈"
+    },
+    {
+      "id": "01.05",
+      "name": "共享元素",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有卡片详情展开场景；真实容器迁移已由目标开场覆盖"
+    },
+    {
+      "id": "01.06",
+      "name": "HUD 显隐",
+      "status": "partial",
+      "galleryIds": [
+        "hintfade"
+      ],
+      "reason": "本轮只补非交互提示组；完整HUD与按钮输入门控未提取"
+    },
+    {
+      "id": "01.07",
+      "name": "分组错峰",
+      "status": "added",
+      "galleryIds": [
+        "stagger"
+      ],
+      "reason": "补原商店0.20秒入场和每项0.018秒错峰"
+    },
+    {
+      "id": "01.08",
+      "name": "布局变化",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "安全区布局以即时正确为先，未添加布局迁移动画"
+    },
+    {
+      "id": "02.01",
+      "name": "弹窗出现",
+      "status": "covered",
+      "galleryIds": [
+        "modal"
+      ],
+      "reason": "项目实际弹窗入场"
+    },
+    {
+      "id": "02.02",
+      "name": "弹窗关闭",
+      "status": "covered",
+      "galleryIds": [
+        "modal"
+      ],
+      "reason": "项目实际关闭与输入门控合同"
+    },
+    {
+      "id": "02.03",
+      "name": "侧边抽屉",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前玩家界面没有侧边抽屉"
+    },
+    {
+      "id": "02.04",
+      "name": "底部面板",
+      "status": "partial",
+      "galleryIds": [
+        "modal"
+      ],
+      "reason": "设置面板已有开合；不额外改成底部抽屉"
+    },
+    {
+      "id": "02.05",
+      "name": "下拉展开",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前玩家界面无下拉展开场景；展馆筛选控件不算游戏效果"
+    },
+    {
+      "id": "02.06",
+      "name": "悬停提示",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "不为触屏游戏新增悬停提示玩法"
+    },
+    {
+      "id": "02.07",
+      "name": "弹窗内容替换",
+      "status": "partial",
+      "galleryIds": [
+        "modal"
+      ],
+      "reason": "复用当前子页开合，内容替换与页面历史由宿主处理"
+    },
+    {
+      "id": "02.08",
+      "name": "拒绝关闭反馈",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前没有拒绝关闭的交互规则"
+    },
+    {
+      "id": "03.01",
+      "name": "展开",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有需提取的通用展开容器"
+    },
+    {
+      "id": "03.02",
+      "name": "收起",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有需提取的通用折叠容器"
+    },
+    {
+      "id": "03.03",
+      "name": "内容驱动尺寸",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "内容布局由宿主负责，未新增内容驱动尺寸效果"
+    },
+    {
+      "id": "03.04",
+      "name": "分隔条吸附",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有可拖动分隔条"
+    },
+    {
+      "id": "03.05",
+      "name": "容器强调",
+      "status": "covered",
+      "galleryIds": [
+        "taskarrival"
+      ],
+      "reason": "目标卡的到达脉冲与完成印章"
+    },
+    {
+      "id": "03.06",
+      "name": "内容交叉替换",
+      "status": "added",
+      "galleryIds": [
+        "pagenav"
+      ],
+      "reason": "页面内容随实际轨道横移替换；背景另有themedissolve"
+    },
+    {
+      "id": "03.07",
+      "name": "空态转实态",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "不为展示新增空背包/列表填充业务"
+    },
+    {
+      "id": "03.08",
+      "name": "卡片翻面",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "用户明确排除卡片翻牌"
+    },
+    {
+      "id": "04.01",
+      "name": "页签下划线",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前页签采用原有底板，不新增下划线视觉"
+    },
+    {
+      "id": "04.02",
+      "name": "键盘焦点框",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有玩家键盘焦点框需求"
+    },
+    {
+      "id": "04.03",
+      "name": "页签内容切换",
+      "status": "partial",
+      "galleryIds": [
+        "pagenav"
+      ],
+      "reason": "页面切换可复用横移；商店栏目重建不冒充已做交叉切换"
+    },
+    {
+      "id": "04.04",
+      "name": "步骤连接线",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "无步骤连接线控件"
+    },
+    {
+      "id": "04.05",
+      "name": "面包屑增加",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "无面包屑导航"
+    },
+    {
+      "id": "04.06",
+      "name": "分页响应",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "原活动栏Settle强制page=0，不能据此承诺完整分页"
+    },
+    {
+      "id": "04.07",
+      "name": "筛选标签切换",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "商店筛选当前是即时重建，未另加标签过渡"
+    },
+    {
+      "id": "04.08",
+      "name": "选中光环",
+      "status": "partial",
+      "galleryIds": [
+        "breath"
+      ],
+      "reason": "已补视觉呼吸；地图节点选中整套仍待提取"
+    },
+    {
+      "id": "05.01",
+      "name": "Hover 进入",
+      "status": "covered",
+      "galleryIds": [
+        "press"
+      ],
+      "reason": "原UIBounce悬停进入"
+    },
+    {
+      "id": "05.02",
+      "name": "Hover 离开",
+      "status": "covered",
+      "galleryIds": [
+        "press"
+      ],
+      "reason": "原UIBounce移出归位"
+    },
+    {
+      "id": "05.03",
+      "name": "按下压缩",
+      "status": "covered",
+      "galleryIds": [
+        "press"
+      ],
+      "reason": "原UIBounce按下压缩"
+    },
+    {
+      "id": "05.04",
+      "name": "松开恢复",
+      "status": "covered",
+      "galleryIds": [
+        "press"
+      ],
+      "reason": "原UIBounce松开回弹"
+    },
+    {
+      "id": "05.05",
+      "name": "点击脉冲",
+      "status": "covered",
+      "galleryIds": [
+        "press"
+      ],
+      "reason": "真实按下释放驱动反馈，不叠加第二份按钮缩放"
+    },
+    {
+      "id": "05.06",
+      "name": "按住后移出",
+      "status": "covered",
+      "galleryIds": [
+        "press"
+      ],
+      "reason": "拖出取消点击"
+    },
+    {
+      "id": "05.07",
+      "name": "禁用与启用",
+      "status": "partial",
+      "galleryIds": [
+        "press"
+      ],
+      "reason": "禁用清理归位已验证；没有新加禁用形变曲线"
+    },
+    {
+      "id": "05.08",
+      "name": "长按蓄力",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有长按蓄力UI，不把游戏瞄准改成该交互"
+    },
+    {
+      "id": "06.01",
+      "name": "开关",
+      "status": "covered",
+      "galleryIds": [
+        "switch"
+      ],
+      "reason": "项目开关滑动与read/write合同"
+    },
+    {
+      "id": "06.02",
+      "name": "复选框",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前没有独立复选框动画需求"
+    },
+    {
+      "id": "06.03",
+      "name": "单选",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前没有单选表单动画需求"
+    },
+    {
+      "id": "06.04",
+      "name": "输入聚焦",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有玩家输入表单聚焦动效需求"
+    },
+    {
+      "id": "06.05",
+      "name": "输入失焦",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有玩家输入表单失焦动效需求"
+    },
+    {
+      "id": "06.06",
+      "name": "校验失败",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "不引入表单校验失败流程"
+    },
+    {
+      "id": "06.07",
+      "name": "校验成功",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "不引入表单校验成功流程"
+    },
+    {
+      "id": "06.08",
+      "name": "滑块气泡",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "设置音量滑块沿用原控件，不新增滑块气泡"
+    },
+    {
+      "id": "07.01",
+      "name": "首屏进入",
+      "status": "added",
+      "galleryIds": [
+        "stagger"
+      ],
+      "reason": "复用实际商品入场；排行已有leaguejelly错峰"
+    },
+    {
+      "id": "07.02",
+      "name": "插入",
+      "status": "covered",
+      "galleryIds": [
+        "leaguejelly"
+      ],
+      "reason": "排行新行有原果冻入场；不新增背包插入业务"
+    },
+    {
+      "id": "07.03",
+      "name": "删除",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前排行删行直接移除，不虚构原有删行补间"
+    },
+    {
+      "id": "07.04",
+      "name": "重排",
+      "status": "added",
+      "galleryIds": [
+        "rankmove"
+      ],
+      "reason": "按稳定身份平滑移动到宿主新名次"
+    },
+    {
+      "id": "07.05",
+      "name": "筛选变化",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "筛选后重建列表仍由宿主负责，尚未提取变化编排"
+    },
+    {
+      "id": "07.06",
+      "name": "滚动吸附",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "暂不把原单页活动栏包装成完整滚动吸附"
+    },
+    {
+      "id": "07.07",
+      "name": "边界回弹",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "地图边界回弹是实际候选，尚未拆出独立示例"
+    },
+    {
+      "id": "07.08",
+      "name": "跳转指定条目",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "FocusPlayer当前即时定位，保持原行为"
+    },
+    {
+      "id": "08.01",
+      "name": "拾起",
+      "status": "covered",
+      "galleryIds": [
+        "drag",
+        "activity"
+      ],
+      "reason": "已有按住时视觉反馈；不提供物品拾取业务"
+    },
+    {
+      "id": "08.02",
+      "name": "跟手",
+      "status": "covered",
+      "galleryIds": [
+        "drag"
+      ],
+      "reason": "欢迎语真实指针拖动"
+    },
+    {
+      "id": "08.03",
+      "name": "有效提示",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有背包/物品有效放置槽"
+    },
+    {
+      "id": "08.04",
+      "name": "无效提示",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有物品无效放置槽"
+    },
+    {
+      "id": "08.05",
+      "name": "合法吸附",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有合法落点吸附玩法"
+    },
+    {
+      "id": "08.06",
+      "name": "无效回弹",
+      "status": "covered",
+      "galleryIds": [
+        "drag"
+      ],
+      "reason": "原弹簧释放归位；非背包落点校验"
+    },
+    {
+      "id": "08.07",
+      "name": "排序让位",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "不增加拖拽排序业务"
+    },
+    {
+      "id": "08.08",
+      "name": "取消恢复",
+      "status": "covered",
+      "galleryIds": [
+        "drag",
+        "press"
+      ],
+      "reason": "取消、禁用和失焦归位"
+    },
+    {
+      "id": "09.01",
+      "name": "数值追逐",
+      "status": "covered",
+      "galleryIds": [
+        "number"
+      ],
+      "reason": "单段滚分"
+    },
+    {
+      "id": "09.02",
+      "name": "货币增减",
+      "status": "covered",
+      "galleryIds": [
+        "scoregain",
+        "number"
+      ],
+      "reason": "增量合并与数值显示；钱包业务由宿主负责"
+    },
+    {
+      "id": "09.03",
+      "name": "生命扣减拖尾",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "BossHUD只有原血量追赶，机制HUD不直接计入当前主线交付"
+    },
+    {
+      "id": "09.04",
+      "name": "治疗填充",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "当前主线没有治疗填充UI"
+    },
+    {
+      "id": "09.05",
+      "name": "跨级经验",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有跨级经验系统"
+    },
+    {
+      "id": "09.06",
+      "name": "倒计时临界提示",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "联赛倒计时存在，但临界强调不是现有已交付效果"
+    },
+    {
+      "id": "09.07",
+      "name": "未知时长加载",
+      "status": "covered",
+      "galleryIds": [
+        "loading",
+        "startuploading"
+      ],
+      "reason": "未知等待期间只播装饰，进度不按时间虚增"
+    },
+    {
+      "id": "09.08",
+      "name": "已知进度完成",
+      "status": "added",
+      "galleryIds": [
+        "loadingprogress",
+        "startuploading"
+      ],
+      "reason": "补微信启动层原进度与完成信号门控"
+    },
+    {
+      "id": "10.01",
+      "name": "Toast",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "当前Toast是静态定时提示，未把参考动效冒充项目原实现"
+    },
+    {
+      "id": "10.02",
+      "name": "成功反馈",
+      "status": "covered",
+      "galleryIds": [
+        "taskarrival",
+        "rating",
+        "medal"
+      ],
+      "reason": "目标完成、评级与奖励表现"
+    },
+    {
+      "id": "10.03",
+      "name": "错误反馈",
+      "status": "partial",
+      "galleryIds": [
+        "loadingprogress"
+      ],
+      "reason": "中断保持和错误文字有示例；未新增错误抖动"
+    },
+    {
+      "id": "10.04",
+      "name": "警告强调",
+      "status": "partial",
+      "galleryIds": [
+        "moves"
+      ],
+      "reason": "步数变化有反馈；低步数声音不冒充视觉警告"
+    },
+    {
+      "id": "10.05",
+      "name": "角标更新",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "主页角标跳动尚未单独提取"
+    },
+    {
+      "id": "10.06",
+      "name": "加载转重试",
+      "status": "added",
+      "galleryIds": [
+        "loadingprogress",
+        "startuploading"
+      ],
+      "reason": "模拟中断/恢复与明确完成；网络重试由宿主执行"
+    },
+    {
+      "id": "10.07",
+      "name": "教学指示",
+      "status": "added",
+      "galleryIds": [
+        "guide"
+      ],
+      "reason": "原手势、触点与目标强调；移除自动瞄准和存档"
+    },
+    {
+      "id": "10.08",
+      "name": "锚定提示跟随",
+      "status": "partial",
+      "galleryIds": [
+        "goal",
+        "guide"
+      ],
+      "reason": "目标坐标由宿主更新；不另建悬停提示跟随系统"
+    },
+    {
+      "id": "11.01",
+      "name": "奖励卡揭示",
+      "status": "covered",
+      "galleryIds": [
+        "victory"
+      ],
+      "reason": "原奖励卡分层出现，不使用翻牌"
+    },
+    {
+      "id": "11.02",
+      "name": "星级展示",
+      "status": "covered",
+      "galleryIds": [
+        "victory",
+        "charge"
+      ],
+      "reason": "原星级与星星充能"
+    },
+    {
+      "id": "11.03",
+      "name": "宝箱揭晓",
+      "status": "pending",
+      "galleryIds": [],
+      "reason": "鱼干箱开盖是项目场景候选；不导入参考宝箱皮肤"
+    },
+    {
+      "id": "11.04",
+      "name": "货币飞入 HUD",
+      "status": "covered",
+      "galleryIds": [
+        "reward"
+      ],
+      "reason": "实际收集物飞向HUD"
+    },
+    {
+      "id": "11.05",
+      "name": "成就归位",
+      "status": "covered",
+      "galleryIds": [
+        "goal"
+      ],
+      "reason": "真实目标容器归位；不新增成就业务"
+    },
+    {
+      "id": "11.06",
+      "name": "升级强调",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "没有经验升级强调场景"
+    },
+    {
+      "id": "11.07",
+      "name": "排名重排",
+      "status": "added",
+      "galleryIds": [
+        "rankmove"
+      ],
+      "reason": "原排行行位移，最终名次为输入"
+    },
+    {
+      "id": "11.08",
+      "name": "跳过结算收尾",
+      "status": "partial",
+      "galleryIds": [
+        "victory"
+      ],
+      "reason": "组件已有Finish，展馆未单列完整跳过结算流程"
+    },
+    {
+      "id": "12.01",
+      "name": "呼吸",
+      "status": "added",
+      "galleryIds": [
+        "breath",
+        "homefeedback"
+      ],
+      "reason": "补原徽章呼吸与欢迎语分层呼吸"
+    },
+    {
+      "id": "12.02",
+      "name": "悬浮",
+      "status": "covered",
+      "galleryIds": [
+        "float"
+      ],
+      "reason": "原装饰猫正弦漂浮"
+    },
+    {
+      "id": "12.03",
+      "name": "旋转",
+      "status": "partial",
+      "galleryIds": [
+        "victory"
+      ],
+      "reason": "组合有旋转/光环编排，未新增孤立恒速转圈图标"
+    },
+    {
+      "id": "12.04",
+      "name": "摆动",
+      "status": "added",
+      "galleryIds": [
+        "pendulum"
+      ],
+      "reason": "原星星挂件四子步视觉弹簧"
+    },
+    {
+      "id": "12.05",
+      "name": "光环呼吸",
+      "status": "covered",
+      "galleryIds": [
+        "breath"
+      ],
+      "reason": "同一呼吸组件可绑定项目现有光环；不另造素材"
+    },
+    {
+      "id": "12.06",
+      "name": "间歇扫光",
+      "status": "added",
+      "galleryIds": [
+        "loadingprogress"
+      ],
+      "reason": "原进度填充内的循环扫光与端点弹珠"
+    },
+    {
+      "id": "12.07",
+      "name": "闭合路径巡游",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "无闭合路径巡游场景"
+    },
+    {
+      "id": "12.08",
+      "name": "指针视差",
+      "status": "excluded",
+      "galleryIds": [],
+      "reason": "触屏项目未使用指针视差，不新增该交互"
+    }
+  ]
+}

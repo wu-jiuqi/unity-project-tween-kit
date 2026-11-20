@@ -1,6 +1,6 @@
 {
     "unityVersion": "6000.0.26f1",
-    "applicationVersion": "0.3.0",
+    "applicationVersion": "0.4.0",
     "platform": "WindowsPlayer",
     "checks": [
         {
@@ -316,6 +316,126 @@
             "passed": true
         },
         {
+            "name": "loadingprogress: component exists",
+            "passed": true
+        },
+        {
+            "name": "loadingprogress: pause clock",
+            "passed": true
+        },
+        {
+            "name": "loadingprogress: pause pose",
+            "passed": true
+        },
+        {
+            "name": "startuploading: component exists",
+            "passed": true
+        },
+        {
+            "name": "startuploading: pause clock",
+            "passed": true
+        },
+        {
+            "name": "startuploading: pause pose",
+            "passed": true
+        },
+        {
+            "name": "pagenav: component exists",
+            "passed": true
+        },
+        {
+            "name": "pagenav: pause clock",
+            "passed": true
+        },
+        {
+            "name": "pagenav: pause pose",
+            "passed": true
+        },
+        {
+            "name": "stagger: component exists",
+            "passed": true
+        },
+        {
+            "name": "stagger: pause clock",
+            "passed": true
+        },
+        {
+            "name": "stagger: pause pose",
+            "passed": true
+        },
+        {
+            "name": "rankmove: component exists",
+            "passed": true
+        },
+        {
+            "name": "rankmove: pause clock",
+            "passed": true
+        },
+        {
+            "name": "rankmove: pause pose",
+            "passed": true
+        },
+        {
+            "name": "guide: component exists",
+            "passed": true
+        },
+        {
+            "name": "guide: pause clock",
+            "passed": true
+        },
+        {
+            "name": "guide: pause pose",
+            "passed": true
+        },
+        {
+            "name": "hintfade: component exists",
+            "passed": true
+        },
+        {
+            "name": "hintfade: pause clock",
+            "passed": true
+        },
+        {
+            "name": "hintfade: pause pose",
+            "passed": true
+        },
+        {
+            "name": "homefeedback: component exists",
+            "passed": true
+        },
+        {
+            "name": "homefeedback: pause clock",
+            "passed": true
+        },
+        {
+            "name": "homefeedback: pause pose",
+            "passed": true
+        },
+        {
+            "name": "pendulum: component exists",
+            "passed": true
+        },
+        {
+            "name": "pendulum: pause clock",
+            "passed": true
+        },
+        {
+            "name": "pendulum: pause pose",
+            "passed": true
+        },
+        {
+            "name": "breath: component exists",
+            "passed": true
+        },
+        {
+            "name": "breath: pause clock",
+            "passed": true
+        },
+        {
+            "name": "breath: pause pose",
+            "passed": true
+        },
+        {
             "name": "press deforms only visual",
             "passed": true
         },
@@ -444,7 +564,7 @@
             "passed": true
         },
         {
-            "name": "prompt mode retains live demonstration",
+            "name": "parameter summary retains live demonstration",
             "passed": true
         },
         {
@@ -484,11 +604,11 @@
             "passed": true
         },
         {
-            "name": "scrollbar handle stays inside visible track: Effect directory",
+            "name": "scrollbar handle stays inside visible track: Parameter scroll",
             "passed": true
         },
         {
-            "name": "scrollbar handle stays inside visible track: Parameter scroll",
+            "name": "scrollbar handle stays inside visible track: Effect directory",
             "passed": true
         },
         {
@@ -508,11 +628,19 @@
             "passed": true
         },
         {
-            "name": "prompt uses current duration and color",
+            "name": "parameter export contains the current component and entry",
             "passed": true
         },
         {
-            "name": "copy prompt exports complete live settings",
+            "name": "exported JSON reapplies tuned time and RGBA without baseline overrides",
+            "passed": true
+        },
+        {
+            "name": "one click copies and writes identical parameter JSON",
+            "passed": true
+        },
+        {
+            "name": "one-click exported file loads through existing preset loader",
             "passed": true
         },
         {
@@ -592,107 +720,267 @@
             "passed": true
         },
         {
-            "name": "press: complete reusable prompt without local source navigation",
+            "name": "loading caps a stalled frame to original maximum advance",
             "passed": true
         },
         {
-            "name": "switch: complete reusable prompt without local source navigation",
+            "name": "loading target never goes backwards",
             "passed": true
         },
         {
-            "name": "modal: complete reusable prompt without local source navigation",
+            "name": "loading cannot display 100 before completion signal",
             "passed": true
         },
         {
-            "name": "reward: complete reusable prompt without local source navigation",
+            "name": "loading reaches 100 only after task completion",
             "passed": true
         },
         {
-            "name": "number: complete reusable prompt without local source navigation",
+            "name": "loading status reflects completion instead of stale feedback",
             "passed": true
         },
         {
-            "name": "logo: complete reusable prompt without local source navigation",
+            "name": "loading failure holds the current fill",
             "passed": true
         },
         {
-            "name": "wordmark: complete reusable prompt without local source navigation",
+            "name": "loading resumes from held progress",
             "passed": true
         },
         {
-            "name": "loading: complete reusable prompt without local source navigation",
+            "name": "loading pause freezes fill",
             "passed": true
         },
         {
-            "name": "float: complete reusable prompt without local source navigation",
+            "name": "loading disable restores zero and clears completion",
             "passed": true
         },
         {
-            "name": "drag: complete reusable prompt without local source navigation",
+            "name": "full startup and standalone bar share the exact delivered driver",
             "passed": true
         },
         {
-            "name": "activity: complete reusable prompt without local source navigation",
+            "name": "full startup failure forwards to the same progress state",
             "passed": true
         },
         {
-            "name": "hit: complete reusable prompt without local source navigation",
+            "name": "full startup retry preserves driver identity",
             "passed": true
         },
         {
-            "name": "goal: complete reusable prompt without local source navigation",
+            "name": "page slide has a visible intermediate state",
             "passed": true
         },
         {
-            "name": "charge: complete reusable prompt without local source navigation",
+            "name": "page reversal reaches last requested position",
             "passed": true
         },
         {
-            "name": "victorycat: complete reusable prompt without local source navigation",
+            "name": "stagger preserves original two-percent scale entry",
             "passed": true
         },
         {
-            "name": "failurecat: complete reusable prompt without local source navigation",
+            "name": "stagger returns every item to its own layout scale",
             "passed": true
         },
         {
-            "name": "victory: complete reusable prompt without local source navigation",
+            "name": "rank rows move while retaining their object identities",
             "passed": true
         },
         {
-            "name": "failure: complete reusable prompt without local source navigation",
+            "name": "rank reversal retains the host layout origin and final order",
             "passed": true
         },
         {
-            "name": "medal: complete reusable prompt without local source navigation",
+            "name": "invalid host rank permutation is rejected",
             "passed": true
         },
         {
-            "name": "scoreimpact: complete reusable prompt without local source navigation",
+            "name": "real input suppression hides tutorial visuals without submitting gameplay",
             "passed": true
         },
         {
-            "name": "scoregain: complete reusable prompt without local source navigation",
+            "name": "tutorial resumes its visible instruction",
             "passed": true
         },
         {
-            "name": "taskarrival: complete reusable prompt without local source navigation",
+            "name": "tutorial pause freezes the hand pose",
             "passed": true
         },
         {
-            "name": "moves: complete reusable prompt without local source navigation",
+            "name": "inactive instruction fades without intercepting input",
             "passed": true
         },
         {
-            "name": "rating: complete reusable prompt without local source navigation",
+            "name": "instruction can fade back in",
             "passed": true
         },
         {
-            "name": "leaguejelly: complete reusable prompt without local source navigation",
+            "name": "home layered entry moves its title visual",
             "passed": true
         },
         {
-            "name": "themedissolve: complete reusable prompt without local source navigation",
+            "name": "home layered stop restores the original layout",
+            "passed": true
+        },
+        {
+            "name": "pendant spring responds inside its angular limit",
+            "passed": true
+        },
+        {
+            "name": "pendant disable clears angle and restores rotation",
+            "passed": true
+        },
+        {
+            "name": "badge breath changes only its visual scale",
+            "passed": true
+        },
+        {
+            "name": "badge disable restores its original scale",
+            "passed": true
+        },
+        {
+            "name": "press: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "switch: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "modal: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "reward: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "number: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "logo: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "wordmark: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "loading: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "float: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "drag: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "activity: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "hit: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "goal: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "charge: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "victorycat: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "failurecat: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "victory: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "failure: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "medal: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "scoreimpact: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "scoregain: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "taskarrival: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "moves: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "rating: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "leaguejelly: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "themedissolve: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "loadingprogress: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "startuploading: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "pagenav: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "stagger: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "rankmove: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "guide: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "hintfade: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "homefeedback: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "pendulum: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "breath: loadable current parameter export without prompt or source navigation",
             "passed": true
         },
         {
@@ -705,6 +993,6 @@
         }
     ],
     "errors": [],
-    "passed": 175,
+    "passed": 247,
     "failed": 0
 }

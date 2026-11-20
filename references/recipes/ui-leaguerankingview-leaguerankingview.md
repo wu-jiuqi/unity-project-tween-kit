@@ -6,7 +6,11 @@
 文件 SHA-256：`e02ec449c21cb64354b47245aee1f660e2a05b161062dc9e25a30388c720d753`
 [原始源码快照](../source/Assets/Scripts/UI/LeagueRankingView.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
+
+- `RankReorder` / `rankmove`：保持.48秒OutCubic行位移；主机传目标名次；原排行读取、头像工厂、声音与方向箭头不在此组件中
+
+接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。
 
 ## 源方法、参数与曲线
 

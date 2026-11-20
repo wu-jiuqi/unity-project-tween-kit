@@ -4,7 +4,7 @@
 
 ## 从需求选方案
 
-下表指向已交付组件。按目的选择，可复制的描述与参数写法读[动画Prompt](animation-prompts.md)，具体接口和单位读[接入表](integration.md)，实际算法及原值查对应来源记录。
+下表指向已交付组件。按目的选择，参数基准读[参数说明](parameters.md)，具体接口和单位读[接入表](integration.md)，实际算法及原值查对应来源记录。
 
 | 新项目的交互目的 | 选择 | 迁移时保留的设计关系 | 宿主要提供什么 |
 |---|---|---|---|
@@ -17,6 +17,10 @@
 | 连续加分不刷屏 | `ScoreGain` | .07秒重新计时合并，提示再上浮淡出 | 正整数增量、文字和CanvasGroup |
 | 目标/步数变化有反馈 | `TaskArrival`、`MovesFeedback` | 视觉层挤压、完成印章；进度仍由宿主决定 | 更新后的数值、完成布尔值、视觉子层 |
 | 评价、排行或换景 | `CheerBurst`、`LeagueJelly`、`ThemeDissolve` | 字图爆发、衰减抖动或旧背景SmoothStep淡出 | 评级、数据更新事件或新旧背景 |
+| 真实加载进度需要平滑呈现 | `LoadingProgress`、`StartupLoadingPresentation` | 单调追赶、完成门控、弹珠与完成星光 | 宿主任务进度和明确的Complete信号 |
+| 页面与列表更新更连贯 | `PageSlide`、`GroupStagger`、`RankReorder` | 横移、原比例错峰、稳定身份的行位移 | 页面目标坐标、视觉层、新顺序 |
+| 教学与轻提示不干扰操作 | `TutorialGesture`、`HintFade` | 手势与目标强调、活动后提示淡出 | 指示起终点、真实输入状态 |
+| 闲置装饰和欢迎语更有层次 | `DecorativeBreath`、`PendantSwing`、`HomeLayeredFeedback` | 相对原姿态呼吸、视觉弹簧与分层延迟 | 独立视觉层、宿主冲量或入场事件 |
 | 标题或品牌有入场记忆点 | `JellyLogoIntro`、`HomeWordmarkWiggle` | 逐字错峰、落定或周期波浪 | 自己的字图、布局与允许播放的时机 |
 | 插画持续有轻微生命感 | `UIFloat` | 基准位置上的周期偏移与相位 | 独立视觉层、适配尺寸后的幅度 |
 | 卡片或拖拽反馈更柔软 | `ActivityJellyMotion`、`EncouragementDrag` | 弹性与阻尼共同控制回弹；松手和取消能归位 | 视觉层、指针转发或拖拽对象、业务门控 |

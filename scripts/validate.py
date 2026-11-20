@@ -5,11 +5,22 @@ from inventory import KIT,sha,write
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--source',type=Path);ap.add_argument('--require-full',action='store_true');a=ap.parse_args();checks=[]
     def check(name,ok,detail=''):checks.append({'name':name,'passed':bool(ok),'detail':detail})
-    prompts=json.loads((KIT/'references/prompt-library.json').read_text(encoding='utf-8'))
-    galleryPrompts=json.loads((KIT/'assets/sample-project/Assets/Resources/ProjectTweenKit/prompts.json').read_text(encoding='utf-8'))
-    check('gallery uses maintained prompt library',prompts==galleryPrompts)
+    parameters=json.loads((KIT/'references/parameter-catalog.json').read_text(encoding='utf-8'))
+    galleryParameters=json.loads((KIT/'assets/sample-project/Assets/Resources/ProjectTweenKit/parameters.json').read_text(encoding='utf-8'))
+    check('gallery uses maintained parameter notes',parameters==galleryParameters)
     ids=re.findall(r'\bE\("([a-z]+)"',(KIT/'assets/sample-project/Assets/Gallery/Gallery.cs').read_text(encoding='utf-8-sig'))
-    check('every delivered entry has one prompt',sorted(ids)==sorted(p['id'] for p in prompts['entries']))
+    check('every delivered entry has parameter notes',sorted(ids)==sorted(p['id'] for p in parameters['entries']))
+    check('gallery no longer ships AI prompt data',not (KIT/'assets/sample-project/Assets/Resources/ProjectTweenKit/prompts.json').exists())
+    comparison=json.loads((KIT/'references/reference96-comparison.json').read_text(encoding='utf-8'))
+    check('all 96 reference recipes reviewed exactly once',len(comparison['entries'])==96 and len({e['id'] for e in comparison['entries']})==96)
+    check('reference matrix links only delivered examples',all(i in ids for e in comparison['entries'] for i in e['galleryIds']))
+    extra=json.loads((KIT/'references/supplemental-deliveries.json').read_text(encoding='utf-8'))
+    for entry in extra['entries']:
+        check('supplemental snapshot '+entry['galleryEntry'],sha(KIT/entry['snapshot'])==entry['sourceSha256'])
+        check('supplemental component '+entry['galleryEntry'],sha(KIT/entry['target'])==entry['targetSha256'])
+        if a.source:check('supplemental source drift '+entry['galleryEntry'],sha(a.source/entry['source'])==entry['sourceSha256'])
+    host=extra['platformHostEvidence'];check('platform startup host snapshot',sha(KIT/host['snapshot'])==host['sha256'])
+    if a.source:check('platform startup host drift',sha(a.source/host['source'])==host['sha256'])
     check('gallery no longer packages source archive',not (KIT/'assets/sample-project/Assets/Resources/ProjectTweenKit/archive.json').exists())
     data=json.loads((KIT/'references/source-map.json').read_text(encoding='utf-8'))
     fingerprints=json.loads((KIT/'references/source-fingerprints.json').read_text(encoding='utf-8'))
@@ -26,7 +37,7 @@ def main():
         if item.get('sourceGuid'):
             meta=p.with_name(p.name+'.meta');check('original resource GUID '+item['target'],meta.exists() and ('guid: '+item['sourceGuid']) in meta.read_text(encoding='utf-8-sig'))
         if item.get('packagedMetaSha256'):check('resource importer fingerprint '+item['target'],sha(p.with_name(p.name+'.meta'))==item['packagedMetaSha256'])
-        if a.source and item['source'].startswith('Assets/'):
+        if a.source and (item['source'].startswith('Assets/') or item.get('scope')=='project-platform'):
             original=a.source/item['source'];meta=original.with_name(original.name+'.meta');targetMeta=p.with_name(p.name+'.meta')
             check('resource matches live source '+item['target'],original.exists() and sha(original)==sha(p))
             if meta.exists():check('resource import settings unchanged '+item['target'],targetMeta.exists() and sha(meta)==sha(targetMeta))

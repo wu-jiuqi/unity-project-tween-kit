@@ -46,8 +46,12 @@ LEGACY=['Pop','CountWallet','FlyCoins','FlyCoin','WalletPulse','Fireworks','Spar
 
 def main():
     data=json.loads((KIT/'references/source-map.json').read_text(encoding='utf-8'));entries=[]
+    extraPath=KIT/'references/supplemental-deliveries.json'
+    supplemental=json.loads(extraPath.read_text(encoding='utf-8'))['entries'] if extraPath.exists() else []
     for f in data['families']:
         cls=f['class'].split('.')[-1];review=REVIEWS.get(cls)
+        extras=[r for r in supplemental if r['source']==f['source'] and r.get('owner')==cls]
+        if extras:f['additionalDeliveries']=[{k:r[k] for k in ['galleryEntry','component','methods','adaptation']} for r in extras]
         if f['classification']=='runtime-candidate' and cls in NOT_ANIMATIONS:
             f['usageStatus']='non-animation';f['scopeReason']=NOT_ANIMATIONS[cls]
         elif f['classification']=='runtime-candidate' and review:
@@ -71,6 +75,10 @@ def main():
         lines=[f"# {f['class']} · {Path(f['source']).stem}",'',f"状态：`{f['usageStatus']}`；交付：`{f['deliveryStatus']}`。",'',f"源文件：`{f['source']}`",f"文件 SHA-256：`{f['fileSha256']}`",f"[原始源码快照](../source/{f['source']}.txt)",'']
         if review and f['usageStatus']=='source-route-reviewed':
             lines += [f'用在哪里：{review[2]}',f'触发操作：{review[3]}',f'导入组件：`ProjectTweenKit.{review[4]}`；展馆 ID：`{review[5]}`。',f'复用形式：{review[1]}。绑定、调用与停止见 [接入](../integration.md) / [生命周期](../lifecycle.md)。','']
+        elif extras:
+            lines+=['本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。','']
+            for r in extras:lines += [f"- `{r['component']}` / `{r['galleryEntry']}`：{r['adaptation']}"]
+            lines += ['','接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。','']
         else:lines+=['此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。','']
         lines+=['## 源方法、参数与曲线','']
         for m in f['methods']:

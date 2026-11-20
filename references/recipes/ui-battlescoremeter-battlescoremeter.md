@@ -6,7 +6,11 @@
 文件 SHA-256：`ebe6d6a89afdedf69eb5408b3d7b3868911ef4524e835afba8ef8176b049da52`
 [原始源码快照](../source/Assets/Scripts/UI/BattleScoreMeter.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
+
+- `PendantSwing` / `pendulum`：提取纯视觉四子步弹簧；默认示例冲量120，保留30/3.6/36度/-.25；碰撞影响由宿主换算后输入
+
+接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。
 
 ## 源方法、参数与曲线
 

@@ -37,7 +37,7 @@ public sealed partial class Gallery {
    var next=ExtraArt(root,"NativeV50/background-picnic",0,0,853,1844);var previous=ExtraArt(root,"NativeV50/background-alphabet",0,0,853,1843);var group=previous.gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;var c=root.gameObject.AddComponent<ThemeDissolve>();c.Previous=group;component=c;bool picnic=true;
    primaryAction=()=>{next.sprite=ExtraSprite("NativeV50/background-"+(picnic?"picnic":"alphabet"));previous.sprite=ExtraSprite("NativeV50/background-"+(picnic?"alphabet":"picnic"));picnic=!picnic;c.Play(immediate);};play=c.Play;sample=c.Sample;break;
   }
-  default:throw new System.InvalidOperationException("No demonstration for "+Current.id);
+  default:BuildSupplemental(root);break;
  }}
 }
 }

@@ -6,7 +6,11 @@
 文件 SHA-256：`6d2a42eadf7cf4f89ff9cef546194f4e43e340075f37e9c88fcc163ba8b3f9d1`
 [原始源码快照](../source/Assets/Scripts/UI/LeagueMatchPresentation.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
+
+- `DecorativeBreath` / `breath`：仅提取徽章1+.035sin(3t)；不包含匹配、排行、日期或确认保存
+
+接线与边界见[接入](../integration.md)和[补充交付记录](../supplemental-deliveries.json)。
 
 ## 源方法、参数与曲线
 

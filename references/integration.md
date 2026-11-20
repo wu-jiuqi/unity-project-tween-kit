@@ -53,9 +53,26 @@
 | 排行卡抖动 | `LeagueJelly`挂视觉层；`Play(wait)` | duration=.65秒，wait以秒计；重入、禁用恢复原比例和旋转 |
 | 背景换景 | 新背景在下层，旧背景CanvasGroup绑定`ThemeDissolve.Previous`；`Play()` | Duration=.8秒；`StopAndRestore()`显示旧图；回收和导航归宿主 |
 
-这7项均由同一份随包组件驱动展馆。加分、任务进度与剩余步数只是输入；组件不修改业务状态。[对应Prompt与参数写法](animation-prompts.md)。
+这7项均由同一份随包组件驱动展馆。加分、任务进度与剩余步数只是输入；组件不修改业务状态。[对应参数基准](parameters.md)。
 
-## 参数文件
+## 0.4.0补入的适用效果
+
+| 组件 | 绑定/入口 | 关键值与边界 |
+|---|---|---|
+| LoadingProgress | `Create(parent)`或绑定填充/弹珠/扫光/星光/数字；`SetProgress / Complete / Failure / Resume` | .32比例/秒，.05秒帧上限；完成前最多99%。[完整接线](loading-progress.md) |
+| StartupLoadingPresentation | `Build()`，通过`Progress`操作同一个LoadingProgress | 原竖屏构图，宿主负责安全区和真实任务 |
+| PageSlide | Target绑定页面轨道，`Go(destination)` | .27秒OutCubic，从当前位置接续；路由由宿主负责 |
+| GroupStagger | Targets绑定视觉层数组，`Play()` | .20秒、.018错峰、.98起始比例；不更改实际布局 |
+| RankReorder | Rows绑定稳定身份的行，`Reorder(ranks)`传0起始排列 | .48秒OutCubic，Stride为行距；不计算名次 |
+| TutorialGesture | Hand/Ring/Outline/Group，From/To为父级坐标；`SetInputActive(bool)` | 4.4秒周期，.6秒等待、1.3秒位移；不自动瞄准 |
+| HintFade | Group绑定提示组，Visible控制显隐 | 透明度每秒变化2；不拦截输入 |
+| HomeLayeredFeedback | Title/Detail/Decoration；`Play()` | 副文案延迟.13秒，17/4.7衰减；仅修改视觉层 |
+| PendantSwing | Target绑定挂点，`Impulse(direction)` | 30弹性/3.6阻尼/四子步/36度；无物理或伤害 |
+| DecorativeBreath | Target绑定徽章，启用自动运行 | .035幅度，3 rad/s；停止归位 |
+
+上述默认值保留项目设计。所有对象引用都需由接收宿主提供；停止/禁用行为见生命周期文档。
+
+## 参数文件与一键导出
 
 展馆文件在 `Application.persistentDataPath/presets/<条目>.json`。参数JSON包含schemaVersion、组件完整类型名及公开数值/布尔/向量/RGBA颜色字段；对象引用由接收工程绑定。载入会拒绝其他类型与未知字段，先验证再整体应用。`PresetLoader`应绑定实际生成后的组件；组合预制体可在`ExamplePrefab.Build()`后调用`MotionPreset.Load(path).Apply(example.Component)`。
 
@@ -64,3 +81,8 @@
 `assets/unity-kit`是唯一维护源；示例工程中的`Assets/ProjectTweenKit`由脚本生成，禁止分叉维护。提取了原运行类时，其完整命名空间/门控/时间源适配见`extraction-diffs.json`。新宿主适配器`ModalMotion`、`RewardFlight`、`NumberRoll`、`JellyHit`及`FrameSequence`分别链接上表中的原方法；差异见`adaptations.md`。
 
 复杂页面适配还涉及容器排序、输入门控、generation失效、真实安全区、业务事件去重。不能统一承诺一键接入；待核对项按来源页继续拆分后才能估算工作量。
+
+
+“一键复制参数导出”会复制并写入当前条目的JSON，文件路径与“保存本项”相同。导出保留schemaVersion=1、component和settings，附带entryId、title、timeSource、referenceParameterNotes；原MotionPreset读取器会忽略额外说明字段，只应用settings。固定参数说明不会覆盖用户调好的字段值。
+
+公开数组中的Unity对象引用、运行状态与展馆观察速度不会导出。固定编排没有公开字段时，settings为空，参考参数只供核对；不能把修改说明文本当成已经修改运行算法。

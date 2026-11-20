@@ -1,0 +1,16 @@
+using UnityEngine;
+using UnityEngine.UI;
+namespace ProjectTweenKit {
+public static class TutorialArt {
+ static Sprite focusFrame;
+ public static Sprite Get(string name)=>Resources.Load<Sprite>("Art/TutorialV41/"+name);
+ public static Image Picture(Transform parent,string name,string key,Vector2 pos,Vector2 size){var image=UICraft.Box(parent,name,pos.x,pos.y,size.x,size.y,Color.white);image.sprite=Get(key);image.preserveAspect=true;image.raycastTarget=false;
+  if(key=="target-outline"){
+   if(focusFrame==null){var source=image.sprite;if(source==null)throw new System.InvalidOperationException("Tutorial focus frame missing");var r=source.rect;focusFrame=Sprite.Create(source.texture,r,Vector2.one*.5f,source.pixelsPerUnit,0,SpriteMeshType.FullRect,new Vector4(r.width*.39f,r.height*.39f,r.width*.39f,r.height*.39f));focusFrame.name="Nine-slice tutorial gold frame";}
+   image.sprite=focusFrame;image.type=Image.Type.Sliced;image.preserveAspect=false;image.fillCenter=false;image.pixelsPerUnitMultiplier=2;
+  }
+  return image;
+ }
+}
+}
+

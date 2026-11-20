@@ -40,7 +40,17 @@ public sealed partial class Gallery:MonoBehaviour {
   E("moves","剩余步数挤压反馈","文字与数值","UI/ChainCollectionHUD.cs","宿主步数改变时触发","MovesFeedback.Target → 独立步数视觉层","0.5秒OutBack入场；0.3秒正弦挤压±2.5%；不改变业务步数。",true),
   E("rating","连击评价与星光爆发","奖励与目标","UI/ChainRatingView.cs","宿主判定评级后触发","CheerBurst → 字图、CanvasGroup与13个星光","1.8秒；0.45→1.12→1倍，按评级散开4/7/10/13颗星。",true),
   E("leaguejelly","排行卡片果冻抖动","控件交互","UI/LeagueRankingView.cs","名次或积分更新时触发","LeagueJelly 挂视觉子层，固定点击根","0.65秒；sin(5πt)×exp(-4t)×(1-t)，横9%/纵12%，旋转2.2度。",true),
-  E("themedissolve","主页背景平滑换景","页面与布局","UI/ReferenceChapterView.cs","点击切换两张原背景","ThemeDissolve.Previous → 旧背景CanvasGroup；新背景在下层","0.8秒SmoothStep淡去旧背景；前景和命中层不跟随透明度。",true,true,true)
+  E("themedissolve","主页背景平滑换景","页面与布局","UI/ReferenceChapterView.cs","点击切换两张原背景","ThemeDissolve.Previous → 旧背景CanvasGroup；新背景在下层","0.8秒SmoothStep淡去旧背景；前景和命中层不跟随透明度。",true,true,true),
+  E("loadingprogress","Loading 果冻进度条","文字与数值","../../Tools/Platform/WeChat/StartupLoadingView86.cs","模拟任务进度到达后平滑追赶；任务完成后才到100%","LoadingProgress → Fill / Marble / Shine / Stars / Number","每秒追赶32%，单帧最多0.05秒；完成0.42秒脉冲，6星爆发。",true),
+  E("startuploading","微信启动 Loading 整页","页面与布局","../../Tools/Platform/WeChat/StartupLoadingView86.cs","原启动页图层与进度；模拟完成/中断/恢复","StartupLoadingPresentation.Build；调参对象为同一个LoadingProgress","原猫咪五姿态、浮岛、字标和文案；进度不随时间虚增。",true,false,true),
+  E("pagenav","同级页面横向切换","页面与布局","UI/AppUI.cs","点击切换；连续操作从当前位置接续","PageSlide.Target → 页面轨道；宿主决定目标位置","0.27秒OutCubic；不执行导航业务。",true),
+  E("stagger","商店分组错峰入场","页面与布局","UI/AppUI.Shop.cs","点击播放三组商品入场","GroupStagger.Targets → 原布局视觉层","0.98→1，0.20秒OutCubic，每项错开0.018秒。",true),
+  E("rankmove","排行榜名次平滑重排","页面与布局","UI/LeagueRankingView.cs","宿主先给新顺序，点击更新显示","RankReorder.Rows → 稳定身份的行对象；Reorder传每行新名次","0.48秒OutCubic；中断从当前位置接续，不计算积分和名次。",true),
+  E("guide","教学手势与目标强调","控件交互","UI/PlayableTutorialGuide.cs","循环指示；模拟真实操作时隐藏","TutorialGesture → 手势、触点、目标框、CanvasGroup","4.4秒一轮；延迟0.6秒后1.3秒SmoothStep拖动；不自动瞄准。",true),
+  E("hintfade","操作后提示平滑淡出","页面与布局","UI/BattleUIArt.cs","模拟已操作/等待操作切换提示","HintFade.Group → 非交互提示组","alpha每秒变化2；隐藏提示不挡住输入。",true),
+  E("homefeedback","欢迎语分层入场与呼吸","文字与数值","UI/HomeFeedbackView.cs","点击播放分层弹入；平时轻微呼吸","HomeLayeredFeedback → Title / Detail / Decoration","副文案延后0.13秒；cos(17t)×exp(-4.7t)衰减；1.35秒收尾。",true),
+  E("pendulum","星星挂件受力摆动","持续表现","UI/BattleScoreMeter.cs","点击从两侧交替施加视觉冲量","PendantSwing.Target → 挂点；不绑定碰撞体","弹性30、阻尼3.6、四子步、限角36度、碰边反弹系数0.25。",true),
+  E("breath","联赛徽章轻微呼吸","持续表现","UI/LeagueMatchPresentation.cs","进入后持续运行","DecorativeBreath.Target → 徽章视觉","1 + 0.035×sin(3t)，禁用还原原比例。")
  };
  static Entry E(string id,string title,string cat,string source,string trigger,string binding,string notes,bool interactive=false,bool timeline=false,bool tall=false)=>new Entry{id=id,title=title,category=cat,source=source,trigger=trigger,binding=binding,notes=notes,interactive=interactive,timeline=timeline,tall=tall};
  public Entry Current=>Entries[index];public MonoBehaviour CurrentComponent=>component;
@@ -48,7 +58,7 @@ public sealed partial class Gallery:MonoBehaviour {
  int index,filter,typeFilter;bool immediate;float elapsed,timeline;string search="",message="",lastCue="";Vector2 scroll,inspectorScroll;Font guiFont;
  readonly string[] categories={"全部","控件交互","页面与布局","文字与数值","奖励与目标","持续表现","场景表现","配套编排"};
  readonly string[] animationTypes={"全部类型","DOTween","协程","数学曲线","弹簧","序列帧","材质"};
- static string TypesFor(string id)=>id=="press"||id=="switch"||id=="modal"?"DOTween":id=="logo"?"DOTween 协程 数学曲线":id=="activity"||id=="drag"?"弹簧 数学曲线":id=="victorycat"||id=="failurecat"?"序列帧":id=="victory"||id=="failure"?"序列帧 数学曲线":id=="charge"?"材质 数学曲线":"数学曲线";
+ static string TypesFor(string id)=>id=="pendulum"?"弹簧 数学曲线":id=="press"||id=="switch"||id=="modal"?"DOTween":id=="logo"?"DOTween 协程 数学曲线":id=="activity"||id=="drag"?"弹簧 数学曲线":id=="victorycat"||id=="failurecat"?"序列帧":id=="victory"||id=="failure"?"序列帧 数学曲线":id=="charge"?"材质 数学曲线":"数学曲线";
  readonly Dictionary<string,MotionPreset> retained=new Dictionary<string,MotionPreset>();
  void Awake(){Application.targetFrameRate=60;Application.runInBackground=true;KitClock.Manual=true;KitClock.Reset();DOTween.Init(false,true,LogBehaviour.ErrorsOnly);SoundService.Cue+=OnCue;
   if(Camera.main==null){var camera=new GameObject("Main Camera",typeof(Camera));camera.tag="MainCamera";camera.GetComponent<Camera>().clearFlags=CameraClearFlags.SolidColor;camera.GetComponent<Camera>().backgroundColor=new Color(.98f,.96f,.92f);}
@@ -91,7 +101,7 @@ public sealed partial class Gallery:MonoBehaviour {
  }}
  public void Seek(float seconds){if(!Current.timeline)return;KitClock.Sampling=true;try{Select(index);if(Current.id=="modal"){sample?.Invoke(seconds);}else{play?.Invoke(false);if(component is RewardFlight r)r.Seek(seconds);else if(component is NumberRoll n)n.Seek(seconds);else if(component is JellyHit j)j.Seek(seconds);else if(component is FrameSequence f)f.Seek(seconds);else if(component is ScoreImpact si)si.Seek(seconds);else if(component is ThemeDissolve td){td.Seek(seconds);}}timeline=seconds;hasTriggered=true;triggeredAt=elapsed-seconds;KitClock.Paused=true;RefreshInterface(false);}finally{KitClock.Sampling=false;}}
  float TimelineDuration=>component is ModalMotion m?m.OpenDuration:component is RewardFlight r?r.Duration:component is NumberRoll n?n.Duration:component is JellyHit j?j.Duration:component is FrameSequence f?f.Duration:component is ScoreImpact si?si.Duration:component is ThemeDissolve td?td.Duration:0;
- string PresetPath=>Path.Combine(Application.persistentDataPath,"presets",Current.id+".json");
+ string PresetPath {get{var args=Environment.GetCommandLineArgs();int at=Array.IndexOf(args,"--evidence");string root=args.Contains("--verify-kit")&&at>=0&&at+1<args.Length?args[at+1]:Application.persistentDataPath;return Path.Combine(root,"presets",Current.id+".json");}}
  public void SavePreset(){if(component==null)return;try{MotionPreset.Capture(component).Save(PresetPath);Report("参数已保存："+PresetPath);}catch(Exception e){Report("保存失败："+e.Message);}}
  public void LoadPreset(){try{MotionPreset.Load(PresetPath).Apply(component);Report("已载入本项参数，再次触发即可观察。");RefreshInterface();}catch(Exception e){Report("载入失败："+e.Message);}}
  void OnDestroy(){SoundService.Cue-=OnCue;KitClock.Manual=false;KitClock.Paused=false;KitClock.Speed=1;}

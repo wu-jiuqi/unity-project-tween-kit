@@ -4,8 +4,11 @@
 
 ```powershell
 python scripts/inventory.py --source <主Unity工程> --unity <Unity的Editor目录>
+python scripts/register_supplemental.py --source <主Unity工程>
 python scripts/catalog.py
 python scripts/audit_coverage.py --source <主Unity工程>
+python scripts/compare_recipes96.py --reference <unity-ui-tween检出目录>
+python scripts/document_parameters.py
 python scripts/extract.py --source <主Unity工程> --dotween-standard <原版DOTween1.3.045目录>
 python scripts/prepare_project.py --source <主Unity工程>
 <Unity.exe> -batchmode -nographics -quit -projectPath <仓库>/assets/sample-project -executeMethod KitBuild.Build -logFile <仓库>/work/build.log
@@ -36,3 +39,6 @@ python scripts/package.py
 `validate.py`默认检验已构建交付是否自洽，不将尚未核对的候选强行判成通过。`--require-full`还要求`acceptance.json`的全量验收通过；未完成时退出失败。`package.py`当前只产出标记为preview的阶段包，不会将它登记为完成全部动画的正式版。
 
 还需要逐个处理`requires-route-review`、混合物理/视觉与未解析的动态调用，核对当前45关、页面与条件入口，再扩大交付与展馆。物理模拟、业务计时、编辑器/QA/预览与已停用旧导航分别登记。完成范围最终取自经复核的实际清单。
+
+
+0.4.0还验证：36项参数说明与运行时数据一致、复制/写文件内容相同、导出JSON可由旧MotionPreset载入、固定参数说明不覆盖当前值、96项逐条取舍无重复且仅链接实际交付条目，以及平台启动源码/资源的实时指纹。新增范围使用register_supplemental记录，重跑原extract.py之后应保留并重新登记这些补充资源和适配器，不以基础提取清单覆盖它们。

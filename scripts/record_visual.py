@@ -1,28 +1,20 @@
-"""Index observed final-player captures; distinguish native and automated evidence."""
+"""Index final-player native captures separately from automated event tests."""
 from inventory import KIT,write,sha
 
 def main():
-    files=sorted((KIT/'evidence/visual').glob('*.png'))
-    write(KIT/'evidence/visual-checks.json',{
-        'method':'computer-use sky native bounded-window capture, after source and runtime validation',
-        'testedPlayerRunSha256':sha(KIT/'evidence/player-run.json'),
-        'images':[{'path':p.relative_to(KIT).as_posix(),'sha256':sha(p)} for p in files],
-        'observed':[
-            'Final native UGUI three-column layout, original C artwork and Chinese labels render in the visible Windows gallery.',
-            'Operation guide, stage, main action, playback controls and parameter tab have distinct fixed locations.',
-            'Search typed through native input filters to the newly delivered score color/scale effect.',
-            'The score timeline at its midpoint shows the enlarged gold number; a real main-action click increases the demonstration from 12,000 to 12,120 and restores its original color and scale.',
-            'The Animation Prompt tab shows the matching design, trigger, baseline parameters, current parameters with explicit precedence, and cleanup rules, without source navigation.',
-            'The copy button gives visible success feedback even while the animation is paused.',
-            'Visible scrollbar handles remain inside their tracks.',
-        ],
-        'automatedEvidence':'runtime-verification.json covers all 26 prompts, current-parameter clipboard contents, RGBA round trip, new effect curves/cleanup/reentry, parameter IO, focus-view lifecycle and input-focus rules; these are not all claimed as native-input checks.',
-        'limits':[
-            'Native checks sample representative entries, not all workflows or original game call sites.',
-            'Final-build native checks exercise search text, timeline, main-action input, prompt navigation and copy acknowledgment; they do not cover every numeric field.',
-            'Earlier v0.1.0 and v0.2.0 screenshots are historical evidence and are not final-build captures.',
-            'Hidden-window black screenshots are excluded.',
-        ]})
-    print('Indexed',len(files),'native-window captures')
-
+ files=sorted((KIT/'evidence/visual').glob('*.png'))
+ write(KIT/'evidence/visual-checks.json',{
+  'method':'computer-use sky native bounded-window capture after exact-player runtime checks',
+  'testedPlayerRunSha256':sha(KIT/'evidence/player-run.json'),
+  'images':[{'path':p.relative_to(KIT).as_posix(),'sha256':sha(p)} for p in files],
+  'observed':[
+   'The native gallery exposes Parameter display and One-click parameter copy/export; the former Animation Prompt/source archive navigation is absent.',
+   'The original project loading track, fill, paw, marble and numeric label render together; native task input advances the shown percentage.',
+   'The full startup view uses the original title, cat poses, island, box, background and progress driver while preserving the original portrait proportions.',
+   'Parameter summary shows current values with units, fixed curve notes and component type; the export button acknowledges copying and writing JSON.',
+   'The complete startup view visibly holds at 99 percent pending its completion signal; native task input and the required-task completion action are distinct.',
+  ],
+  'automatedEvidence':'runtime-verification.json verifies all 36 parameter exports, clipboard/file equality, legacy MotionPreset loading, current RGBA/time values, loading monotonicity/99% completion gate/failure/pause, host-origin-preserving rank changes and all delivered component lifecycle regressions.',
+  'limits':['Native checks sample workflows and do not reproduce all 96 reference recipes.','The reference comparison is by project relevance and effect family, not frame-for-frame reproduction.','Older version captures remain historical evidence; hidden-window black captures are excluded.']})
+ print('Indexed',len(files),'final native captures')
 if __name__=='__main__':main()
