@@ -1,0 +1,42 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ readonly Dictionary<int,OpeningCookieBoxView> openingCookies=new Dictionary<int,OpeningCookieBoxView>();
+ public int OpeningCookiesReleased {get;private set;}
+ public int OpeningCookiePending=>openingCookies.Values.Count(b=>b!=null&&b.Brick.Alive&&b.Remaining==0);
+ public bool OpeningCookieBrick(BrickBody b)=>b!=null&&b.Definition.reveal=="opening-cookie";
+ void SpawnOpeningCookieBox(OpeningPiece p){
+  CreateBrick(new BrickSpawn{position=ChainGridRules.Center(p.c,p.r,2),size=CookieBoxArtView.CollisionSize,hp=1,colorIndex=0,referenceCol=p.c,referenceRow=p.r,reveal="opening-cookie",kind=BrickKind.Normal},0);
+  var brick=CollectionBricks.Last();var box=brick.gameObject.AddComponent<OpeningCookieBoxView>();box.Initialize(this,brick,p.capacity);openingCookies[brick.Id]=box;
+ }
+ bool OpeningBlockCookie(BrickBody b){if(!IsOpening||!OpeningCookieBrick(b))return false;ChainBlocks++;ChainMessage="消除点心盒上下左右的砖块，收集小鱼干";changed=true;return true;}
+ bool OpeningHitCookie(BrickBody b,int strength=1){
+  if(!IsOpening||!OpeningCookieBrick(b)||!b.Alive)return false;
+  if(openingCookies.TryGetValue(b.Id,out var box))OpeningCookieApply(box,0,OpeningAttackId,Mathf.Max(strength,OpeningAttackStrength));return true;
+ }
+ void OpeningCookieAdjacent(Vector2 position,long batch,int strength){
+  float pitch=CollectionLevels.Pitch,tolerance=pitch*.13f;
+  foreach(var box in openingCookies.Values.ToArray())if(box!=null&&box.Brick.Alive&&!RefillProtected(box.Brick))for(int slot=0;slot<4;slot++){
+   var d=box.Cell(slot)-position;bool adjacent=Mathf.Abs(Mathf.Abs(d.x)-pitch)<tolerance&&Mathf.Abs(d.y)<tolerance||Mathf.Abs(Mathf.Abs(d.y)-pitch)<tolerance&&Mathf.Abs(d.x)<tolerance;
+   if(adjacent)OpeningCookieApply(box,slot,batch,strength);
+  }
+ }
+ void OpeningCookieArea(Func<Vector2,Vector2,bool> contains,int strength){
+  if(!IsOpening)return;long batch=OpeningAttackId;
+  foreach(var box in openingCookies.Values.ToArray())if(box!=null&&box.Brick.Alive&&!RefillProtected(box.Brick)&&!box.Brick.GetComponent<ChainTileVisibility>().Hidden)
+   for(int slot=0;slot<4;slot++)if(contains(box.Cell(slot),Vector2.one*.38f))OpeningCookieApply(box,slot,batch,Mathf.Max(strength,OpeningAttackStrength));
+ }
+ void OpeningCookieApply(OpeningCookieBoxView box,int slot,long batch,int strength){
+  if(!box.Brick.Alive)return;int released=box.Collect(slot,batch,strength);if(released==0)return;
+  StrategyEmit(new StrategyEvent{kind="layer",target=StrategyBrickId(box.Brick),targetKind="cookie_box",amount=released});OpeningCookiesReleased+=released;SoundService.Play("cookie_box_release");CombatFeel?.VisualImpact();
+  for(int i=0;i<released;i++){
+   OpeningCollect("cookie",box.Cell(slot));
+  }
+  changed=true;
+ }
+ internal void OpeningRetireCookie(OpeningCookieBoxView box){if(!box.Brick.Alive)return;SoundService.Play("cookie_box_empty");rules.DamageTarget(box.Brick.Id,int.MaxValue,out _);box.Brick.Remove();BreakCount++;AddScore(ScoreRules.Break);ScheduleChainGravity();changed=true;}
+}
+}

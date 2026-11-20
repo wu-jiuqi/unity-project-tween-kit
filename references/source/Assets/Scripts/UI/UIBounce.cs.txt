@@ -1,0 +1,77 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using DG.Tweening;
+
+namespace BounceGarden {
+// Keep the hit rectangle fixed. Only its artwork follows the elastic pose.
+public class UIBounce : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
+ IPointerDownHandler, IPointerUpHandler, IInitializePotentialDragHandler,
+ IBeginDragHandler, IDragHandler, IEndDragHandler {
+ public RectTransform Target;
+ public float IdleInterval;
+ public int IdlePulseCount { get; private set; }
+ Button button; AppUI app; Tween motion; Vector3 restScale; Vector2 restPosition;
+ Quaternion restRotation; JellyButtonMesh[] meshes;
+ Vector2 start, pull; float pose, shear, idleTime;
+ bool initialized, hovered, held, dragged, focused=true; int pointer=-999;
+ bool Ready => button!=null && button.IsActive() && button.IsInteractable();
+ bool MotionAllowed => FeedbackProfile.Active.enabledFeedback;
+ void Start(){Initialize();}
+ void Initialize(){if(initialized||Target==null)return;initialized=true;button=GetComponent<Button>();app=GetComponentInParent<AppUI>();
+  restScale=Target.localScale;restPosition=Target.anchoredPosition;restRotation=Target.localRotation;
+  var graphics=Target.GetComponentsInChildren<Graphic>(true);meshes=new JellyButtonMesh[graphics.Length];
+  for(int i=0;i<graphics.Length;i++){meshes[i]=graphics[i].gameObject.AddComponent<JellyButtonMesh>();meshes[i].Owner=this;}
+ }
+ void Update(){Initialize();if(!initialized)return;
+  if(!focused||!Ready||!MotionAllowed){if(held||hovered||pose!=0||pull!=Vector2.zero)ResetState();idleTime=0;return;}
+  if(IdleInterval<=0)return;
+  if(held||hovered||(app!=null&&!app.HomeMotionAllowed)){idleTime=0;return;}
+  idleTime+=Time.unscaledDeltaTime;
+  if(idleTime>=IdleInterval){idleTime=0;IdlePulseCount++;IdleWiggle();}
+ }
+ void Animate(float target,float duration,Ease ease){motion?.Kill();if(!MotionAllowed){pose=0;pull=Vector2.zero;Render();return;}
+  float from=pose;Vector2 fromPull=pull;float t=0;
+  motion=DOTween.To(()=>t,v=>{t=v;pose=Mathf.LerpUnclamped(from,target,v);pull=Vector2.LerpUnclamped(fromPull,Vector2.zero,v);Render();},1,duration).SetEase(ease).SetUpdate(true);
+ }
+ void Render(){if(!initialized)return;
+  float press=Mathf.Max(0,-pose),hover=Mathf.Max(0,pose);
+  Target.localScale=Vector3.Scale(restScale,new Vector3(1+hover*.035f-press*.025f+Mathf.Abs(pull.x)*.045f-Mathf.Abs(pull.y)*.025f,1+hover*.035f-press*.09f+Mathf.Abs(pull.y)*.055f-Mathf.Abs(pull.x)*.025f,1));
+  Target.anchoredPosition=restPosition+new Vector2(pull.x*12,hover*3-press*3+pull.y*10);
+  Target.localRotation=restRotation*Quaternion.Euler(0,0,-pull.x*2.8f);shear=pull.x*.065f;
+  foreach(var mesh in meshes)if(mesh!=null)mesh.Refresh();
+ }
+ public void Deform(ref Vector3 point,Transform source){if(Mathf.Abs(shear)<.0001f)return;
+  Vector3 local=Target.InverseTransformPoint(source.TransformPoint(point));local.x+=(local.y-Target.rect.center.y)*shear;
+  point=source.InverseTransformPoint(Target.TransformPoint(local));
+ }
+ public void OnPointerEnter(PointerEventData e){Initialize();if(!Ready)return;hovered=true;idleTime=0;if(!held)Animate(1,.16f,Ease.OutBack);}
+ public void OnPointerExit(PointerEventData e){hovered=false;if(!held)Animate(0,.32f,Ease.OutElastic);}
+ public void OnPointerDown(PointerEventData e){Initialize();if(!Ready||held||e.button!=PointerEventData.InputButton.Left)return;
+  held=true;dragged=false;pointer=e.pointerId;idleTime=0;
+  RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)transform,e.position,e.pressEventCamera,out start);
+  Animate(-1,.10f,Ease.OutQuad);
+ }
+ public void OnInitializePotentialDrag(PointerEventData e){e.useDragThreshold=true;}
+ public void OnBeginDrag(PointerEventData e){if(held&&e.pointerId==pointer){dragged=true;e.eligibleForClick=false;}}
+ public void OnDrag(PointerEventData e){if(!held||e.pointerId!=pointer||!Ready||!MotionAllowed)return;motion?.Kill();
+  RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)transform,e.position,e.pressEventCamera,out var point);
+  var delta=point-start;var size=((RectTransform)transform).rect.size;
+  pull=new Vector2((float)System.Math.Tanh(delta.x/Mathf.Max(40,size.x*.25f)),(float)System.Math.Tanh(delta.y/Mathf.Max(40,size.y*.4f)));pose=-1;e.eligibleForClick=false;Render();
+ }
+ public void OnPointerUp(PointerEventData e){if(!held||e.pointerId!=pointer)return;if(dragged)e.eligibleForClick=false;
+  held=false;hovered&=e.pointerId<0;pointer=-999;idleTime=0;Animate(hovered?1:0,.48f,Ease.OutElastic);
+ }
+ public void OnEndDrag(PointerEventData e){OnPointerUp(e);}
+ void IdleWiggle(){motion?.Kill();float t=0;motion=DOTween.To(()=>t,v=>{t=v;float wave=Mathf.Sin(v*Mathf.PI*8)*Mathf.Sin(v*Mathf.PI)*(1-v);pose=wave*.7f;pull=new Vector2(wave*.32f,0);Render();},1,.7f).SetEase(Ease.Linear).SetUpdate(true).OnComplete(()=>{pose=0;pull=Vector2.zero;Render();});}
+ void ResetState(){motion?.Kill();motion=null;held=hovered=dragged=false;pointer=-999;pose=0;pull=Vector2.zero;idleTime=0;if(initialized)Render();}
+ void OnApplicationFocus(bool focus){focused=focus;if(!focus)ResetState();}
+ void OnApplicationPause(bool pause){if(pause)ResetState();}
+ void OnDisable(){ResetState();}
+}
+public sealed class JellyButtonMesh : BaseMeshEffect {
+ public UIBounce Owner;
+ public void Refresh(){if(graphic!=null)graphic.SetVerticesDirty();}
+ public override void ModifyMesh(VertexHelper mesh){if(!IsActive()||Owner==null)return;UIVertex vertex=default(UIVertex);for(int i=0;i<mesh.currentVertCount;i++){mesh.PopulateUIVertex(ref vertex,i);Owner.Deform(ref vertex.position,transform);mesh.SetUIVertex(vertex,i);}}
+}
+}

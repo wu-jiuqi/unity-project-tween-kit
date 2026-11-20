@@ -1,0 +1,86 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ const float FlowBoardSpeed=11f,FlowEntrySpeed=22f,FlowSupplyGrace=.22f;
+ struct FlowTimeBound {public float Slope,Offset;public FlowTimeBound(float slope,float offset){Slope=slope;Offset=offset;}}
+ readonly FlowTimeBound[] flowLower=new FlowTimeBound[4],flowUpper=new FlowTimeBound[4];
+ readonly List<Vector2> flowForbidden=new List<Vector2>(256);
+ // A reservation is an owner route and its space-time sweep, not one scalar
+ // "busy until" for a whole column. Adjacent equal-speed bricks may travel
+ // together; crossing routes still wait until their rectangles are separated.
+ static bool ClipFlowStart(float coefficient,float rhs,ref float lo,ref float hi){if(Mathf.Abs(coefficient)<.000001f)return rhs>=-.000001f;if(coefficient>0)hi=Mathf.Min(hi,rhs/coefficient);else lo=Mathf.Max(lo,rhs/coefficient);return hi>lo+.000001f;}
+ bool FlowForbiddenStart(Vector2 from,Vector2 to,float duration,Vector2 otherFrom,Vector2 otherVelocity,float otherStart,float otherEnd,float half,out Vector2 interval){
+  float lo=-1e12f,hi=1e12f;int lower=2,upper=0;flowLower[0]=new FlowTimeBound(1,0);flowLower[1]=new FlowTimeBound(0,otherStart);if(!float.IsPositiveInfinity(duration))flowUpper[upper++]=new FlowTimeBound(1,duration);
+  if(!float.IsPositiveInfinity(otherEnd))flowUpper[upper++]=new FlowTimeBound(0,otherEnd);
+  Vector2 velocity=float.IsPositiveInfinity(duration)?Vector2.zero:(to-from)/duration,k=from-otherFrom+otherVelocity*otherStart,w=velocity-otherVelocity;
+  for(int axis=0;axis<2;axis++){
+   if(Mathf.Abs(w[axis])<.000001f){if(!ClipFlowStart(-velocity[axis],half-k[axis],ref lo,ref hi)||!ClipFlowStart(velocity[axis],half+k[axis],ref lo,ref hi)){interval=default;return false;}}
+   else{float slope=velocity[axis]/w[axis],a=(-half-k[axis])/w[axis],b=(half-k[axis])/w[axis];flowLower[lower++]=new FlowTimeBound(slope,Mathf.Min(a,b));flowUpper[upper++]=new FlowTimeBound(slope,Mathf.Max(a,b));}
+  }
+  // Eliminate the shared time coordinate: every lower bound must be below
+  // every upper bound. Their intersection is the forbidden departure range.
+  for(int i=0;i<lower;i++)for(int j=0;j<upper;j++)if(!ClipFlowStart(flowLower[i].Slope-flowUpper[j].Slope,flowUpper[j].Offset-flowLower[i].Offset,ref lo,ref hi)){interval=default;return false;}
+  interval=new Vector2(lo,hi);return true;
+ }
+ void AddFlowConflict(Vector2 from,Vector2 to,float duration,Vector2 q,Vector2 velocity,float start,float end,float half,float earliest){
+  if(end<earliest)return;var finish=float.IsPositiveInfinity(end)?q:q+velocity*(end-start);var lo=Vector2.Min(q,finish);var hi=Vector2.Max(q,finish);
+  if(Mathf.Max(from.x,to.x)<=lo.x-half||Mathf.Min(from.x,to.x)>=hi.x+half||Mathf.Max(from.y,to.y)<=lo.y-half||Mathf.Min(from.y,to.y)>=hi.y+half)return;
+  if(velocity.sqrMagnitude<.00000001f){
+   // Most neighbours are stationary. A slab intersection gives their exact
+   // departure interval without the two-variable traffic projection.
+   float enter=0,exit=1;var delta=to-from;bool intersects=true;
+   for(int axis=0;axis<2;axis++){float p=from[axis]-q[axis],v=delta[axis];if(Mathf.Abs(v)<.000001f){if(Mathf.Abs(p)>=half){intersects=false;break;}}else{float a=(-half-p)/v,b=(half-p)/v;enter=Mathf.Max(enter,Mathf.Min(a,b));exit=Mathf.Min(exit,Mathf.Max(a,b));if(enter>=exit){intersects=false;break;}}}
+   if(intersects){var blocked=new Vector2(start-duration*exit,end-duration*enter);if(blocked.y>=earliest)flowForbidden.Add(blocked);}
+   if(Mathf.Abs(to.x-q.x)<half&&Mathf.Abs(to.y-q.y)<half&&end-duration>=earliest)flowForbidden.Add(new Vector2(-1e12f,end-duration));
+   return;
+  }
+  if(FlowForbiddenStart(from,to,duration,q,velocity,start,end,half,out var interval)&&interval.y>=earliest)flowForbidden.Add(interval);
+  // Arriving safely is insufficient: this destination is occupied until a
+  // subsequent segment is committed. Do not arrive early and park in the
+  // middle of another owner's future crossing.
+  if(FlowForbiddenStart(to,to,float.PositiveInfinity,q,velocity,start,end,half,out var tail)){tail-=Vector2.one*duration;if(tail.y>=earliest)flowForbidden.Add(tail);}
+ }
+ float FlowDeparture(FlowDraftPiece own,Vector2 from,Vector2 to,float duration,float earliest){
+  // Supply has no collider until it settles, so fixed ceilings cannot block it.
+  if(RefillActive&&(own.Incoming||own.Piece!=null&&own.Piece.RefillProtected))return earliest;
+  if(duration<.00001f)return earliest;flowForbidden.Clear();
+  var lo=Vector2.Min(from,to);var hi=Vector2.Max(from,to);
+  foreach(var other in flowDraft){if(other==own)continue;float half=CollectionLevels.Pitch*(own.Size+other.Size)*.5f-.035f;if(hi.x<=other.Lo.x-half||lo.x>=other.Hi.x+half||hi.y<=other.Lo.y-half||lo.y>=other.Hi.y+half)continue;var route=other.Route;
+   if(route==null||route.Path==null||route.Path.Count==0){AddFlowConflict(from,to,duration,other.Source,Vector2.zero,simulationClock,float.PositiveInfinity,half,earliest);continue;}
+   Vector2 p=route.From;float cursor=simulationClock;
+   for(int i=0;i<route.Path.Count;i++){
+    float a=route.PathStarts[i],b=route.PathEnds[i];Vector2 q=route.Path[i];if(a>cursor)AddFlowConflict(from,to,duration,p,Vector2.zero,cursor,a,half,earliest);
+    if(b>simulationClock&&b>a)AddFlowConflict(from,to,duration,p,(q-p)/(b-a),a,b,half,earliest);p=q;cursor=Mathf.Max(cursor,b);
+   }
+   AddFlowConflict(from,to,duration,p,Vector2.zero,cursor,float.PositiveInfinity,half,earliest);
+  }
+  flowForbidden.Sort((a,b)=>a.x.CompareTo(b.x));float at=earliest;
+  foreach(var interval in flowForbidden){if(interval.x>at+.00001f)break;if(interval.y>=at-.00001f)at=interval.y+.0001f;}
+  if(at>simulationClock+60)throw new InvalidOperationException(FlowDepartureFailure(own,from,to,duration,earliest,at));
+  return at;
+ }
+ string FlowDepartureFailure(FlowDraftPiece own,Vector2 from,Vector2 to,float duration,float earliest,float at){
+  var text=new System.Text.StringBuilder("No legal flow departure for "+own.Col+","+own.Row);
+  text.Append(" clock=").Append(simulationClock.ToString("R")).Append(" from=").Append(from.ToString("F6")).Append(" to=").Append(to.ToString("F6"))
+   .Append(" duration=").Append(duration.ToString("R")).Append(" earliest=").Append(earliest.ToString("R")).Append(" result=").Append(at.ToString("R"));
+  text.Append(" forbidden=");foreach(var interval in flowForbidden)text.Append(interval.ToString("F6")).Append(';');
+  var lo=Vector2.Min(from,to);var hi=Vector2.Max(from,to);
+  foreach(var n in flowDraft){float half=CollectionLevels.Pitch*(own.Size+n.Size)*.5f-.035f;if(n!=own&&(hi.x<=n.Lo.x-half||lo.x>=n.Hi.x+half||hi.y<=n.Lo.y-half||lo.y>=n.Hi.y+half))continue;
+   text.Append("\n").Append(n==own?"OWN ":"OTHER ").Append(n.Col).Append(',').Append(n.Row).Append(" size=").Append(n.Size).Append(" source=").Append(n.Source.ToString("F6"));
+   var route=n.Route;if(route==null){text.Append(" stationary");continue;}text.Append(" routeFrom=").Append(route.From.ToString("F6"));
+   if(route.Path!=null)for(int i=0;i<route.Path.Count;i++)text.Append(" ->").Append(route.Path[i].ToString("F6")).Append('@').Append(route.PathStarts[i].ToString("R")).Append('-').Append(route.PathEnds[i].ToString("R"));
+  }return text.ToString();
+ }
+ float FlowContactSpeed(FlowDraftPiece n,int c,int r){
+  // Contact drag is deterministic and belongs to the route. Kinematic bodies
+  // cannot obtain this effect by changing PhysicsMaterial friction alone.
+  int contacts=0;for(int y=r;y<r+n.Size;y++){if(c>0&&flowCells[c-1,y]!=null&&flowCells[c-1,y]!=n)contacts++;if(c+n.Size<9&&flowCells[c+n.Size,y]!=null&&flowCells[c+n.Size,y]!=n)contacts++;}
+  return FlowBoardSpeed/(1+.08f*contacts);
+ }
+ void DraftTimedSegment(FlowDraftPiece n,Vector2 from,Vector2 to,float speed,float earliest){
+  var route=EditFlowRoute(n);float duration=Vector2.Distance(from,to)/speed;if(duration<.00001f)return;float at=FlowDeparture(n,from,to,duration,earliest);route.Path.Add(to);route.PathStarts.Add(at);route.PathEnds.Add(at+duration);route.To=to;n.Lo=Vector2.Min(n.Lo,Vector2.Min(from,to));n.Hi=Vector2.Max(n.Hi,Vector2.Max(from,to));
+ }
+}
+}

@@ -1,0 +1,26 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+public sealed class ColorMatchHUD:MonoBehaviour {
+ GameSession session;readonly Button[] buttons=new Button[3];TMP_Text hint;
+ public void Initialize(GameSession game){
+  session=game;var root=(RectTransform)transform;
+  UICraft.Label(root,"SAME COLOR CLEARS - OTHER COLORS BOUNCE",0,682,930,50,25,UICraft.Ink);
+  for(int i=0;i<3;i++){
+   int c=i;buttons[i]=UICraft.Button(root,ColorMatchArt.Names[i],(i-1)*290,-970,270,102,ColorMatchArt.Palette[i],()=>session.SelectColor(c),28);
+   var face=buttons[i].transform.Find("ButtonVisual/Face").GetComponent<Image>();face.sprite=ColorMatchArt.Button(i);face.type=Image.Type.Sliced;
+   var label=buttons[i].GetComponentInChildren<TMP_Text>();label.rectTransform.anchoredPosition=new Vector2(30,0);label.rectTransform.sizeDelta=new Vector2(186,74);
+   var icon=UICraft.Box(buttons[i].transform.Find("ButtonVisual"),"Matching ball",-84,0,60,60,Color.white);icon.sprite=YarnArt.Ball(ColorMatchArt.YarnVariant(i));icon.preserveAspect=true;
+  }
+  hint=UICraft.Label(root,"",0,-1040,940,48,24,UICraft.Ink);
+  session.StateChanged+=Refresh;Refresh();
+ }
+ void Refresh(){if(session==null)return;
+  for(int i=0;i<3;i++){buttons[i].interactable=session.IsPlaying&&!session.IsPaused&&session.Shots>0&&session.PendingBurstBalls==0;
+   buttons[i].GetComponentInChildren<TMP_Text>().text=(session.SelectedColor==i?"> ":"")+ColorMatchArt.Names[i]+(session.SelectedColor==i?" <":"");}
+  hint.text="NEXT: "+ColorMatchArt.Names[session.SelectedColor]+" x5   /   FREE COLOR SWITCH";
+ }
+ void OnDestroy(){if(session!=null)session.StateChanged-=Refresh;}
+}
+}

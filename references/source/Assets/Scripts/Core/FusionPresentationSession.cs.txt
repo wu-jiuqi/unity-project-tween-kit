@@ -1,0 +1,40 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public sealed partial class GameSession {
+ // Goal identity is credited before the flight starts. These objects are visual
+ // receipts only: skipping, restarting or finishing an animation never credits twice.
+ sealed class FusionGoalFlight {public Transform View;public Vector2 Start;public string Kind;public float Age;}
+ readonly List<FusionGoalFlight> fusionGoalFlights=new List<FusionGoalFlight>();
+ public bool FusionBonded(FusionRuntimePiece piece)=>fusionBonds.Values.Any(group=>group.Contains(piece));
+ void ClearFusionPresentation(){foreach(var flight in fusionGoalFlights)if(flight.View!=null)Destroy(flight.View.gameObject);fusionGoalFlights.Clear();}
+ void ShowFusionGoalFlight(string id,string kind){
+  var source=fusionPieces.Values.FirstOrDefault(p=>p.GoalIds.Contains(id));
+  if(source==null||world==null)return;
+  Vector2 position=source.Position;Transform view;
+  if(kind=="fish"||kind=="toy")view=ChainCollectionArt.Loot(world,kind=="fish"?1:2,position,.48f,96);
+  else{view=new GameObject("Collected fusion jelly").transform;view.SetParent(world,false);view.position=position;view.localScale=Vector3.one*.48f;var sprite=JellyCollectionArt.Sprite(1);ChainVisualArt.Draw(view,"Goal receipt",sprite,1f/Mathf.Max(.01f,sprite.bounds.size.x),96);}
+  fusionGoalFlights.Add(new FusionGoalFlight{View=view,Start=position,Kind=kind});
+  SoundService.Play("container_open");
+ }
+ void TickFusionPresentation(float dt){
+  // Fusion dispatch replaces TickChainCollection, so it owns the same beam pool.
+  foreach(var beam in chainBeams.ToArray()){
+   beam.Life-=dt;if(beam.View==null){chainBeams.Remove(beam);continue;}
+   if(beam.Life<=0){Destroy(beam.View.gameObject);chainBeams.Remove(beam);continue;}
+   var sprite=beam.View.GetComponent<SpriteRenderer>();if(sprite!=null){var color=sprite.color;color.a=beam.StartAlpha*Mathf.Clamp01(beam.Life/beam.Duration);sprite.color=color;}
+  }
+  foreach(var flight in fusionGoalFlights.ToArray()){
+   if(flight.View==null){fusionGoalFlights.Remove(flight);continue;}
+   flight.Age+=dt;float t=Mathf.Clamp01(flight.Age/.55f);int index=flight.Kind=="fish"?1:2;
+   Vector2 destination=flight.Kind=="jelly"?(JellyLootDestination!=null?JellyLootDestination(1):new Vector2(-2.4f,7.95f)):(ChainLootDestination!=null?ChainLootDestination(index):new Vector2(index==1?-1.35f:1.6f,7.95f));
+   flight.View.position=Vector2.Lerp(flight.Start,destination,t*t)+Vector2.up*(Mathf.Sin(t*Mathf.PI)*.6f);
+   flight.View.localScale=Vector3.one*Mathf.Lerp(.48f,.24f,t);
+   if(t<1)continue;
+   SoundService.Play("collect_arrive");ChainVisualArt.Glint(this,destination,3,.25f);Destroy(flight.View.gameObject);fusionGoalFlights.Remove(flight);
+  }
+ }
+}
+}

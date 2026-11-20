@@ -1,0 +1,37 @@
+using System;
+using UnityEngine;
+
+namespace BounceGarden {
+// A real SDK adapter may assign Show and report its completion on the Unity main thread.
+// The existing local demonstration remains the fallback until an SDK is configured.
+public static class RewardedContinueAds {
+    public static Action<Action<MockOutcome>> Show;
+}
+public partial class AppUI {
+    bool continueAdPending;
+    void WatchContinueAd() {
+        if(results==null||won||qaResult||continueAdPending||!Session.CanContinue)return;
+        var presentation=results.GetComponent<FailurePresentation>();if(presentation==null||!presentation.Ready)return;
+        continueAdPending=true;var owner=results;int generation=viewGeneration,sessionGeneration=Session.Generation;bool resolved=false;
+        Action<MockOutcome> resolve=outcome=>{
+            if(resolved)return;resolved=true;
+            if(owner==null||results!=owner||generation!=viewGeneration||sessionGeneration!=Session.Generation)return;
+            continueAdPending=false;
+            if(outcome!=MockOutcome.Completed){Toast(outcome==MockOutcome.Cancelled?"广告已取消，未增加次数。":"广告暂不可用，请重试。");return;}
+            if(!Session.TryContinueAfterAd())return;
+            RemoveModal(false);owner.gameObject.SetActive(false);Destroy(owner.gameObject);results=null;skipResult=null;viewGeneration++;
+            SoundService.CancelTransient();SoundService.Music(Session.IsBossTrial?"bgm_boss":"bgm_gameplay");SoundService.Play("continue_restore");SoundService.Speak("vo_continue_zh",80);resultKey=Guid.NewGuid().ToString("N");hudRoot.gameObject.SetActive(true);RefreshHUD();Toast("增加5次机会，继续加油！");
+        };
+        if(RewardedContinueAds.Show!=null){try{RewardedContinueAds.Show(resolve);}catch(Exception e){Debug.LogWarning("Rewarded continue unavailable: "+e.Message);resolve(MockOutcome.Failed);}return;}
+        OpenModal("本地广告演示",new Color32(151,96,49,255),930,1030);var adModal=modal;
+        UICraft.Label(modal,"当前尚未接入广告服务。\n请选择模拟播放结果。",0,220,820,180,35);
+        Action<MockOutcome> complete=outcome=>{if(modal!=adModal)return;RemoveModal(false);resolve(outcome);};
+        UICraft.Button(modal,"模拟看完 · +5次",0,19,740,127,UICraft.Green,()=>complete(MockOutcome.Completed),44);
+        UICraft.Button(modal,"取消",-195,-155,350,118,UICraft.Blue,()=>complete(MockOutcome.Cancelled),38);
+        UICraft.Button(modal,"模拟失败",195,-155,350,118,new Color32(225,91,66,255),()=>complete(MockOutcome.Failed),38);
+        // Closing X behaves exactly like cancelling playback.
+        var close=modal.Find("Button X").GetComponent<UnityEngine.UI.Button>();close.onClick.RemoveAllListeners();close.onClick.AddListener(()=>complete(MockOutcome.Cancelled));
+        UICraft.Label(modal,"保留棋盘 · 增加5次机会 · 每关限一次",0,-334,830,90,31);
+    }
+}
+}

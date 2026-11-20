@@ -1,0 +1,23 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class MobileV55HandoffQA:MonoBehaviour {
+ string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--mobile-v55-handoff"))new GameObject("Volley handoff audit").AddComponent<MobileV55HandoffQA>();}
+ void Check(bool condition,string name){checks++;if(!condition)failures++;File.AppendAllText(dir+"/checks.txt",(condition?"PASS ":"FAIL ")+name+"\n");}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(1);FindFirstObjectByType<AppUI>().QANavigate("home");
+  var g=new GameObject("Handoff fixture").AddComponent<GameSession>();g.enabled=false;g.QAIgnoreFocusLoss=true;var mode=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;Time.timeScale=0;
+  foreach(int level in new[]{0,11,28}){
+   g.StartLevel(level);Check(g.TryShoot(Vector2.up),"first release accepted stage "+(level+1));g.QAAdvanceOneStep();int charged=g.Shots;
+   Check(g.PendingBurstBalls==4,"first volley keeps five balls");Check(g.TryShoot(new Vector2(.3f,1)),"early next release is retained");Check(g.ChainLaunchQueued&&g.Shots==charged,"buffer does not charge a move early");Check(!g.TryShoot(Vector2.up),"only one next volley can be queued");
+   int tick=0;while(g.Shots==charged&&tick++<40)g.QAAdvanceOneStep();Check(g.Shots==charged-1&&tick<=34&&!g.ChainLaunchQueued,"buffer fires automatically at original 0.55-second cadence");Check(g.SpawnCount==6&&g.PendingBurstBalls==4,"handoff does not drop or duplicate balls");
+   Check(g.TryShoot(Vector2.up),"following release buffers");g.SetPaused(true);Check(!g.ChainLaunchQueued,"pause cancels pending input");g.SetPaused(false);int shots=g.Shots;for(int i=0;i<45;i++)g.QAAdvanceOneStep();Check(g.Shots==shots,"resume never fires a cancelled release");
+   Check(g.CollectionBricks.All(b=>!b.GetComponent<Rigidbody2D>().useFullKinematicContacts),"board excludes redundant kinematic contacts");g.StopLevel();Check(!g.ChainLaunchQueued,"navigation clears retained input");yield return null;
+  }
+  Time.timeScale=1;Physics2D.simulationMode=mode;File.WriteAllText(dir+"/result.json",$"{{\"checks\":{checks},\"failures\":{failures},\"errors\":{errors}}}");Application.Quit(failures+errors==0?0:1);
+ }
+}
+}

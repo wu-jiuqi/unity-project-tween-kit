@@ -1,0 +1,28 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class PaintingBoard:MonoBehaviour {
+ public const float PaintOpacity=.45f;
+ sealed class Mark {public SpriteRenderer renderer;public float age;public Vector3 scale;public bool revealed;}
+ readonly Dictionary<int,Mark> marks=new Dictionary<int,Mark>();GameSession owner;
+ public int RevealedCount{get;private set;}
+ public int MarkCount=>marks.Count;
+ public void Initialize(GameSession game){
+  owner=game;var center=(PaintingLevel.Center(0,0)+PaintingLevel.Center(11,11))*.5f;
+  var paper=new GameObject("Plain painting paper");paper.transform.SetParent(transform,false);paper.transform.localPosition=center;
+  var paperRenderer=paper.AddComponent<SpriteRenderer>();paperRenderer.sprite=PaintingArt.Image("paper");paperRenderer.color=new Color32(248,242,233,255);paperRenderer.sortingOrder=-8;paperRenderer.sharedMaterial=WorldArt.BoardMaterial;paper.transform.localScale=Vector3.one*(7.68f/paperRenderer.sprite.bounds.size.x);
+  foreach(var b in game.CurrentLevel.bricks){
+   var go=new GameObject("Paint stamp "+b.referenceRow+" "+b.referenceCol);go.transform.SetParent(transform,false);go.transform.localPosition=b.position+PaintingArt.Offset(b.referenceRow,b.referenceCol);
+   var sr=go.AddComponent<SpriteRenderer>();sr.sprite=PaintingArt.Stamp(b.referenceRow,b.referenceCol);sr.sharedMaterial=WorldArt.BoardMaterial;
+   sr.sortingOrder=b.colorIndex==0?0:b.colorIndex==2?1:b.colorIndex==1?2:3;sr.color=Color.white;go.SetActive(false);
+   marks[b.referenceRow*12+b.referenceCol]=new Mark{renderer=sr,scale=Vector3.one*(game.Board.CellWidth/.60f)};
+  }
+ }
+ public void Reveal(BrickBody brick){
+  if(!marks.TryGetValue(brick.Definition.referenceRow*12+brick.Definition.referenceCol,out var mark)||mark.revealed)return;
+  mark.revealed=true;mark.age=0;RevealedCount++;mark.renderer.gameObject.SetActive(true);Render(mark);
+ }
+ void Update(){if(owner==null||owner.IsPaused)return;foreach(var m in marks.Values)if(m.revealed&&m.age<.26f){m.age+=Time.deltaTime;Render(m);}}
+ void Render(Mark mark){float u=Mathf.Clamp01(mark.age/.26f);float scale=.4f+.6f*(1-Mathf.Pow(1-u,3))+.06f*Mathf.Sin(u*Mathf.PI);mark.renderer.transform.localScale=mark.scale*scale;mark.renderer.color=new Color(1,1,1,PaintOpacity*Mathf.Min(1,u*3));}
+}
+}

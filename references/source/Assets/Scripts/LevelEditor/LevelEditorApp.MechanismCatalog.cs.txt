@@ -1,0 +1,25 @@
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+public sealed partial class LevelEditorApp {
+ bool mechanismCatalogOpen;
+ string mechanismCatalogQuery = "";
+ void DrawMechanismCatalog(ref float y) {
+#if BOUNCE_LEVEL_EDITOR
+  mechanismCatalogOpen = FusionFold("完整机制表 / 实现边界", mechanismCatalogOpen, ref y);
+  if (!mechanismCatalogOpen) return;
+  mechanismCatalogQuery = TextField("搜索名称、规则或作用", mechanismCatalogQuery, ref y);
+  var style = new GUIStyle(small) { wordWrap = true };
+  string note = "以下为机制规格与现有支持范围，不表示全部已通过试玩验收。仅规划机制尚不能放置或试玩。";
+  float h = style.CalcHeight(new GUIContent(note), 278);
+  GUI.Label(new Rect(0,y,278,h),note,style); y += h + 12;
+  foreach (var row in EditorMechanismCatalog.Rows) {
+   string content = row[0] + " · " + row[1] + "\n触发：" + row[2] + "\n作用：" + row[3] + "\n限制：" + row[4];
+   if (!string.IsNullOrWhiteSpace(mechanismCatalogQuery) && content.IndexOf(mechanismCatalogQuery, System.StringComparison.OrdinalIgnoreCase) < 0) continue;
+   h = style.CalcHeight(new GUIContent(content),278);
+   GUI.Label(new Rect(0,y,278,h),content,style); y += h + 18;
+  }
+#endif
+ }
+}
+}

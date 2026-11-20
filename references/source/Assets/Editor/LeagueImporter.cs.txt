@@ -1,0 +1,5 @@
+using UnityEditor;
+using UnityEngine;
+public sealed class LeagueImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/LeagueV1/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Single;t.alphaSource=TextureImporterAlphaSource.FromInput;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.isReadable=false;t.sRGBTexture=true;t.npotScale=TextureImporterNPOTScale.None;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=1024;t.textureCompression=TextureImporterCompression.Uncompressed;}
+}

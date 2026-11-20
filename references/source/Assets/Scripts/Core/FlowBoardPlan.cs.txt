@@ -1,0 +1,112 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ // These coordinates belong to the draft. ChainGridPiece.Row/Col remain the
+ // committed destination; Rigidbody2D.position is always the physical position.
+ sealed class FlowDraftPiece {
+  public ChainGridPiece Piece;public int Col,Row,Size;public bool Fixed,Incoming,Edited;
+  public Vector2 Source,Lo,Hi;public GridMotion Route;public int Frozen;
+ }
+ readonly List<FlowDraftPiece> flowDraft=new List<FlowDraftPiece>(96);
+ readonly List<FlowDraftPiece> flowDraftPool=new List<FlowDraftPiece>(96);
+ readonly FlowDraftPiece[,] flowCells=new FlowDraftPiece[9,9];
+ readonly int[,] flowSnapshot=new int[9,9];
+ readonly bool[,] flowProtectedSnapshot=new bool[9,9];
+ readonly int[] flowLinks=new int[9];
+ bool flowHasSnapshot;
+ public int FlowPlanColumns{get;private set;}public int FlowPlanWaves{get;private set;}
+ public int FlowPreservedRoutes{get;private set;}public int FlowSkippedPlans{get;private set;}
+ public int FlowPlanRevision{get;private set;}
+ void ClearFlowBoardPlan(){FlowSideSlides=0;flowHasSnapshot=false;flowDraft.Clear();Array.Clear(flowCells,0,flowCells.Length);foreach(var n in flowDraftPool){n.Piece=null;n.Route=null;}FlowPlanColumns=FlowPlanWaves=FlowPreservedRoutes=FlowSkippedPlans=FlowPlanRevision=0;}
+ FlowDraftPiece AddFlowDraft(ChainGridPiece piece,int col,int row){
+  int index=flowDraft.Count;if(index==flowDraftPool.Count)flowDraftPool.Add(new FlowDraftPiece());var n=flowDraftPool[index];
+  n.Piece=piece;n.Col=col;n.Row=row;n.Size=piece!=null?piece.Size:1;n.Fixed=piece!=null&&FixedChainPiece(piece);n.Incoming=piece==null;n.Edited=false;n.Route=null;n.Frozen=0;n.Lo=n.Hi=n.Source=piece!=null?ChainPiecePosition(piece):Vector2.zero;flowDraft.Add(n);return n;
+ }
+ static int FlowColumns(int col,int size){int mask=0;for(int c=Mathf.Max(0,col);c<Mathf.Min(9,col+size);c++)mask|=1<<c;return mask;}
+ static int CompareFlowDraft(FlowDraftPiece a,FlowDraftPiece b){int order=(b.Row+b.Size).CompareTo(a.Row+a.Size);if(order==0)order=b.Size.CompareTo(a.Size);return order!=0?order:a.Col.CompareTo(b.Col);}
+ void MarkFlowDraft(FlowDraftPiece n,bool occupied){for(int y=n.Row;y<n.Row+n.Size;y++)for(int x=n.Col;x<n.Col+n.Size;x++)flowCells[x,y]=occupied?n:null;}
+ bool DraftTopClear(int c,int r){for(int y=0;y<r;y++)if(flowCells[c,y]!=null||FlowReserved(c,y))return false;return true;}
+ bool DraftColumnHasSpace(int c){int count=0,capacity=0;for(int r=0;r<ChainGridRules.Rows;r++)if(!FlowReserved(c,r)){capacity++;if(flowCells[c,r]!=null)count++;}return count<capacity;}
+ GridMotion EditFlowRoute(FlowDraftPiece n){
+  if(n.Edited)return n.Route;n.Edited=true;var old=n.Route;
+  var route=new GridMotion{View=n.Piece!=null?n.Piece.transform:null,From=old!=null?old.From:n.Source,To=old!=null?old.To:n.Source,Arrival=n.Incoming||(old!=null&&old.Arrival),Path=new List<Vector2>(),PathStarts=new List<float>(),PathEnds=new List<float>()};
+  if(old!=null&&old.Path!=null&&old.PathStarts!=null){route.Path.AddRange(old.Path);route.PathStarts.AddRange(old.PathStarts);route.PathEnds.AddRange(old.PathEnds);route.PathIndex=old.PathIndex;n.Frozen=route.Path.Count;}
+  else if(old!=null){route.From=n.Source;route.Path.Add(old.To);route.PathStarts.Add(simulationClock);route.PathEnds.Add(simulationClock+Vector2.Distance(n.Source,old.To)/BoardFlowSpeed);n.Frozen=1;}
+  return n.Route=route;
+ }
+ public int FlowSideSlides {get;private set;}
+ void DraftMove(FlowDraftPiece n,int c,int r){
+  if(c!=n.Col)FlowSideSlides++;
+  var route=EditFlowRoute(n);Vector2 from=ChainGridRules.Center(n.Col,n.Row,n.Size),to=ChainGridRules.Center(c,r,n.Size);float at=route.PathEnds.Count>0?route.PathEnds[route.PathEnds.Count-1]:simulationClock;
+  DraftTimedSegment(n,from,to,FlowContactSpeed(n,c,r),at);
+  MarkFlowDraft(n,false);n.Col=c;n.Row=r;MarkFlowDraft(n,true);
+ }
+ int FlowDirtyColumns(){
+  int dirty=flowHasSnapshot?0:511;Array.Clear(flowLinks,0,9);
+  for(int r=0;r<9;r++)for(int c=0;c<9;c++){
+   var n=flowCells[c,r];int owner=n!=null?n.Piece.GetInstanceID():0;bool blocked=FlowReserved(c,r);
+   if(flowSnapshot[c,r]!=owner||flowProtectedSnapshot[c,r]!=blocked)dirty|=1<<c;
+  }
+  // Columns are independent until a wide piece or live
+  // route couples them. This deliberately overestimates the affected region.
+  foreach(var n in flowDraft){int mask=FlowColumns(n.Col,n.Size);if(n.Route!=null){Vector2 from=ChainPiecePosition(n.Piece);mask|=FlowPointColumns(from,n.Size);if(n.Route.Path!=null)for(int i=n.Route.PathIndex;i<n.Route.Path.Count;i++)mask|=FlowPointColumns(n.Route.Path[i],n.Size);else mask|=FlowPointColumns(n.Route.To,n.Size);}for(int c=0;c<9;c++)if((mask&(1<<c))!=0)flowLinks[c]|=mask;}
+  // A destroyed moving piece can have a destination in a different column
+  // from the passage it was physically blocking. Wake both ends of its sweep.
+  foreach(var route in chainMotions)if(route.View!=null&&!route.View.gameObject.activeInHierarchy){int size=route.View.GetComponent<ChainGridPiece>().Size;dirty|=FlowPointColumns(route.From,size)|FlowPointColumns(route.To,size);if(route.Path!=null)for(int i=route.PathIndex;i<route.Path.Count;i++)dirty|=FlowPointColumns(route.Path[i],size);}
+  int previous;do{previous=dirty;for(int c=0;c<9;c++)if((dirty&(1<<c))!=0)dirty|=flowLinks[c];}while(previous!=dirty);return dirty;
+ }
+ static int FlowPointColumns(Vector2 point,int size){float half=(size-1)*.5f;int c=Mathf.RoundToInt(point.x/CollectionLevels.Pitch+4-half);return FlowColumns(c,size);}
+ int DraftSupply(int scope){
+  int selected=-1;
+  if(RefillActive){
+   if(!RefillSupplyReady||flowDraft.Exists(n=>n.Incoming))return 0;
+   var columnsAvailable=new List<int>(9);
+   for(int c=0;c<9;c++)if(DraftColumnHasSpace(c))columnsAvailable.Add(c);
+   if(columnsAvailable.Count==0){RefillSupplyBlocked();return 0;}
+   if(refillRandom==null)refillRandom=new System.Random(unchecked(Generation*104729+LevelIndex*7919+80));
+   selected=columnsAvailable[refillRandom.Next(columnsAvailable.Count)];
+  }
+  int columns=0;
+  for(int c=0;c<9;c++)if((scope&(1<<c))!=0&&(selected<0||selected==c))for(int r=8;r>=0;r--)if(flowCells[c,r]==null&&!FlowReserved(c,r)&&(RefillActive||DraftTopClear(c,r))){
+   if(FusionActive&&!FusionCanSupply(flowDraft.FindAll(n=>n.Incoming).Count))continue;
+   var n=AddFlowDraft(null,c,r);float y=CollectionLevels.Top+CollectionLevels.Pitch*.5f+.45f;
+   float x=ChainGridRules.Center(c,r).x;
+   foreach(var other in flowDraft)if(other!=n&&Mathf.Abs(other.Source.x-x)<CollectionLevels.Pitch*(other.Size+1)*.5f-.025f)y=Mathf.Max(y,other.Source.y+CollectionLevels.Pitch*(other.Size+1)*.5f+.025f);
+   n.Lo=n.Hi=n.Source=new Vector2(x,y);var route=EditFlowRoute(n);route.From=n.Source;
+   Vector2 gate=new Vector2(n.Source.x,CollectionLevels.Top+CollectionLevels.Pitch*.65f),to=ChainGridRules.Center(c,r);
+   DraftTimedSegment(n,n.Source,gate,FlowEntrySpeed,simulationClock+(RefillActive?0:FlowSupplyGrace));
+   n.Frozen=1; // Preserve the fast exterior/dragged interior speed transition.
+   DraftTimedSegment(n,gate,to,FlowContactSpeed(n,c,r),route.PathEnds[route.PathEnds.Count-1]);
+   MarkFlowDraft(n,true);columns|=1<<c;
+   if(RefillActive)return columns;
+  }return columns;
+ }
+ void CaptureFlowSnapshot(){Array.Clear(flowSnapshot,0,flowSnapshot.Length);foreach(var n in flowDraft)for(int r=n.Row;r<n.Row+n.Size;r++)for(int c=n.Col;c<n.Col+n.Size;c++)flowSnapshot[c,r]=n.Piece.GetInstanceID();for(int r=0;r<9;r++)for(int c=0;c<9;c++)flowProtectedSnapshot[c,r]=FlowReserved(c,r);flowHasSnapshot=true;}
+ void PlanFlowBoard(){
+  long started=System.Diagnostics.Stopwatch.GetTimestamp();chainGravityDirty=false;flowDraft.Clear();Array.Clear(flowCells,0,flowCells.Length);FlowPlanColumns=FlowPlanWaves=FlowPreservedRoutes=0;
+  var pieces=ChainPieces();foreach(var p in pieces){var n=AddFlowDraft(p,p.Col,p.Row);foreach(var route in chainMotions)if(route.View==p.transform){n.Route=route;n.Lo=Vector2.Min(n.Lo,route.From);n.Hi=Vector2.Max(n.Hi,route.From);if(route.Path!=null)foreach(var point in route.Path){n.Lo=Vector2.Min(n.Lo,point);n.Hi=Vector2.Max(n.Hi,point);}break;}MarkFlowDraft(n,true);}
+  int scope=RefillSupplyReady?511:FlowDirtyColumns();for(int c=0;c<9;c++)if((scope&(1<<c))!=0)FlowPlanColumns++;
+  if(scope==0){FlowSkippedPlans++;FlowLastPlanMilliseconds=(System.Diagnostics.Stopwatch.GetTimestamp()-started)*1000.0/System.Diagnostics.Stopwatch.Frequency;return;}
+  int pending=scope;for(int wave=0;pending!=0&&wave<81;wave++){
+   FlowPlanWaves++;flowDraft.Sort(CompareFlowDraft);
+   foreach(var n in flowDraft){if(n.Fixed||(FlowColumns(n.Col,n.Size)&pending)==0)continue;
+    // Test the new bottom strip while the complete old footprint stays owned.
+    int row=n.Row;while(row+n.Size<9){bool free=true;for(int c=n.Col;c<n.Col+n.Size;c++)if(flowCells[c,row+n.Size]!=null)free=false;if(!free||FlowReserved(n.Col,row+1,n.Size))break;row++;}if(row!=n.Row)DraftMove(n,n.Col,row);
+   }
+   pending=DraftSupply(scope);
+  }
+  // Validate the complete draft before touching any live target coordinates,
+  // spawning objects or replacing paths. 2x2 footprints commit as a unit.
+  var occupied=new bool[9,9];foreach(var n in flowDraft){if(!GridFits(occupied,n.Col,n.Row,n.Size))throw new InvalidOperationException("Overlapping flow draft");for(int r=n.Row;r<n.Row+n.Size;r++)for(int c=n.Col;c<n.Col+n.Size;c++)occupied[c,r]=true;}
+  RetireDeadChainBricks();chainMotions.Clear();var inherited=new Dictionary<Transform,int>();pieces.Clear();
+  foreach(var n in flowDraft){
+   if(n.Incoming){chainSupplySerial++;SpawnChainCell(n.Col,n.Row,0,RefillActive?1:0,BrickKind.Normal);n.Piece=CollectionBricks[CollectionBricks.Count-1].GetComponent<ChainGridPiece>();var body=n.Piece.GetComponent<Rigidbody2D>();body.position=n.Source;if(RefillActive)RefillSupplyCommitted(n.Piece);n.Piece.GetComponent<ChainTileVisibility>().Refresh();n.Route.View=n.Piece.transform;}
+   var p=n.Piece;p.Col=n.Col;p.Row=n.Row;pieces.Add(p);
+   if(n.Route!=null){if(n.Edited){p.MotionVersion++;n.Route.Version=p.MotionVersion;p.FallAt=simulationClock;inherited[p.transform]=n.Frozen;}else{FlowPreservedRoutes++;inherited[p.transform]=n.Route.Path!=null?n.Route.Path.Count:0;}chainMotions.Add(n.Route);}
+  }
+  SimplifyFlowRoutes(pieces,inherited);CaptureFlowSnapshot();ChainRefills++;FlowPlanRevision++;ChainFalling=chainMotions.Count>0;Physics2D.SyncTransforms();changed=true;FlowLastPlanMilliseconds=(System.Diagnostics.Stopwatch.GetTimestamp()-started)*1000.0/System.Diagnostics.Stopwatch.Frequency;
+ }
+}
+}

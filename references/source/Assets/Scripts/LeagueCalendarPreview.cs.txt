@@ -1,0 +1,14 @@
+using System;
+using System.Linq;
+using System.Collections;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class LeagueCalendarPreview:MonoBehaviour {
+ sealed class Clock:ILeagueClock {public long now;public long UtcSeconds=>now;}
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(RuntimeQA.IsIsolated&&Environment.GetCommandLineArgs().Contains("--league-calendar-preview"))new GameObject("Isolated league preview").AddComponent<LeagueCalendarPreview>();}
+ IEnumerator Start(){yield return new WaitForSecondsRealtime(3);var app=FindFirstObjectByType<AppUI>();app.QANavigate("home");bool returning=Environment.GetCommandLineArgs().Contains("--preview-return");
+  long now=DateTimeOffset.UtcNow.ToUnixTimeSeconds();var clock=new Clock{now=returning?now-7*86400:now};var c=new ResourceLeagueConfigProvider().Load();app.Profile.ConfigureLeague(new JsonLeagueConfigProvider(()=>JsonUtility.ToJson(c)),clock);
+  for(int i=0;i<10;i++)app.Profile.CommitAlphabetWin("preview-"+i,i,10000);clock.now=now;app.Profile.ReadLeague(true);
+ }
+}
+}

@@ -1,0 +1,1 @@
+namespace BounceGarden {public partial class AppUI {public void OpenPixelDropPicker(){OpenAlphabetStagePage(0);}}}

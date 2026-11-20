@@ -1,0 +1,41 @@
+using System;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public static class LeagueSelfTests {
+ public sealed class Clock:ILeagueClock {public long Now=1900000000;public long UtcSeconds=>Now;}
+ public sealed class ConfigProvider:ILeagueConfigProvider {public LeagueConfig Value=new LeagueConfig();public LeagueConfig Load()=>LeagueConfig.Clone(Value);}
+ public sealed class Store:IProfileStorage {public string Json;public bool Fail;public bool Exists=>Json!=null;public string Read()=>Json;public void Write(string json){if(Fail)throw new System.IO.IOException("Injected storage failure");Json=json;}}
+ public static string RunAll(){int checks=0;Action<bool,string> check=(ok,name)=>{checks++;if(!ok)throw new Exception("League test: "+name);};
+  var provider=new ConfigProvider();var clock=new Clock();var profile=new LocalProfile();profile.ConfigureLeague(provider,clock);var initial=profile.ReadLeague();check(initial.entries.Length==21,"21 participants");check(initial.player.medals==0&&initial.player.rank>1,"zero medals not a fixed fourth place");
+  string id=initial.periodId;var rivalIds=string.Join(",",initial.entries.Where(e=>!e.player).Select(e=>e.id).OrderBy(x=>x));
+  int startRank=initial.player.rank;check(profile.AddTestMedals(),"test grant succeeds");check(profile.Badges==1&&profile.Coins==400&&profile.UnlockedLevel==0,"test grant only adds medals");check(profile.ReadLeague().player.rank<startRank,"test grant changes actual rank");
+  for(int i=0;i<50;i++)profile.AddTestMedals();check(profile.ReadLeague().player.rank==1,"player can lead; rivals do not rubber band");
+  int count=profile.Badges;check(profile.CommitBase("win",0)&&profile.Badges==count+1,"base win adds existing medal");check(!profile.CommitBase("win",0)&&profile.Badges==count+1,"duplicate win cannot add medal");check(profile.CommitAdBonus("win")&&profile.Badges==count+1,"ad never grants medal");check(profile.GrantPurchase("purchase",10)&&profile.Badges==count+1,"purchase never grants medal");
+  var restored=LocalProfile.ImportForQA(profile.ExportForQA());restored.ConfigureLeague(provider,clock);var loaded=restored.ReadLeague();check(loaded.periodId==id&&loaded.player.medals==profile.Badges,"league and medals survive reload");check(string.Join(",",loaded.entries.Where(e=>!e.player).Select(e=>e.id).OrderBy(x=>x))==rivalIds,"same saved roster");
+  clock.Now+=9*86400L;var expired=profile.ReadLeague(true);check(expired.reward!=null&&expired.reward.periodId==id,"expired league produces pending snapshot");check(expired.player.medals==count+1,"cumulative medals never reset");check(expired.periodId!=id,"new cohort replaces finished one");
+  int coins=profile.Coins,medals=profile.Badges;var reward=expired.reward;check(profile.ClaimLeagueReward(reward.periodId),"claim reward");check(profile.Coins==coins+reward.coins&&profile.Badges==medals,"reward changes coins but not medals");check(!profile.ClaimLeagueReward(reward.periodId),"duplicate claim rejected");check(profile.OwnsAvatar(reward.avatarId)&&profile.OwnsFrame(reward.frameId),"top five grants both cosmetic IDs");
+  check(profile.EquipLeagueCosmetics(reward.avatarId,""),"avatar can equip independently");check(profile.EquippedFrameId=="","empty frame accepted");check(profile.EquipLeagueCosmetics("",reward.frameId),"frame can equip independently");check(!profile.EquipLeagueCosmetics("not-owned",reward.frameId),"cannot equip unowned avatar");
+  var saved=LocalProfile.ImportForQA(profile.ExportForQA());check(saved.EquippedFrameId==reward.frameId&&saved.OwnsAvatar(reward.avatarId),"equipment and ownership persist");check(!saved.ClaimLeagueReward(reward.periodId),"claim ledger survives reload");
+  var legacy=LocalProfile.ImportForQA("{\"schema\":1,\"coins\":901,\"badges\":24,\"unlockedLevel\":7,\"soundEnabled\":false,\"committedKeys\":[\"legacy/base\"]}");check(legacy.Coins==901&&legacy.Badges==24&&legacy.UnlockedLevel==7&&!legacy.SoundEnabled&&legacy.HasBaseReward("legacy"),"v1 migration preserves wallet progress settings ledger");check(legacy.ExportForQA().Contains("\"schema\":2"),"migration writes v2 envelope");
+  var config=new LeagueConfig();var state=new LeagueState();LeagueEngine.Open(state,config,clock.Now,24);var p=state.current;p.rivals[0].initialMedals=25;p.rivals[1].initialMedals=25;var sorted=LeagueEngine.Standings(p,24);check(sorted.Select(e=>e.rank).SequenceEqual(Enumerable.Range(1,21)),"ties use unique stable ranks");check(25-24+1==2,"strict pass needs two medals");var ordering=string.Join(",",sorted.Select(e=>e.id));check(ordering==string.Join(",",LeagueEngine.Standings(p,24).Select(e=>e.id)),"stable tie ordering");
+  double elapsed=p.elapsed;long observed=p.lastObserved;LeagueEngine.Advance(state,observed-600,24,true);check(p.elapsed==elapsed&&p.lastObserved==observed,"rollback never rewinds clock");
+  // All opponents cross the player's total in the first minute: offline rank cap must stop before the fourth crossing.
+  for(int i=0;i<p.rivals.Length;i++){p.rivals[i].initialMedals=24;p.rivals[i].events=new[]{60d+i*10};}int before=LeagueEngine.Standings(p,24).First(e=>e.player).rank;
+  LeagueEngine.Advance(state,observed+3*86400,24,true);int after=LeagueEngine.Standings(p,24).First(e=>e.player).rank;check(after-before<=3,"offline cannot lose more than three places");check(p.elapsed<=6*3600,"offline max six hours");double protectedTime=p.elapsed;LeagueEngine.Advance(state,p.lastObserved,24,true);check(p.elapsed==protectedTime,"discarded offline time never replays");
+  var crossing=new LeagueState();LeagueEngine.Open(crossing,config,clock.Now,999);var cp=crossing.current;cp.lastObserved=cp.endsAt-30;double previously=cp.elapsed;LeagueEngine.Advance(crossing,cp.endsAt+9*86400,999,true);check(Math.Abs(cp.elapsed-previously-30)<.01,"crossing end only advances time before cutoff");check(crossing.current==null&&!crossing.rewards[0].eligible,"inactive period cannot farm rewards");
+  var frozen=new LeagueState();LeagueEngine.Open(frozen,config,clock.Now,24);config.rewardTiers[0].coins=9999;check(frozen.current.config.rewardTiers[0].coins==300,"configuration copied at start");
+  var shortConfig=new LeagueConfig();shortConfig.rivalCount=7;var shortState=new LeagueState();LeagueEngine.Open(shortState,shortConfig,clock.Now,12);check(LeagueEngine.Standings(shortState.current,12).Length==8,"rival count configurable");
+  var invalid=new LeagueConfig();invalid.rivalCount=0;bool rejected=false;try{invalid.Validate();}catch(InvalidOperationException){rejected=true;}check(rejected,"invalid configuration rejected");
+  var high=new LeagueState();LeagueEngine.Open(high,new LeagueConfig(),clock.Now,int.MaxValue);check(LeagueEngine.Standings(high.current,int.MaxValue).All(e=>e.medals>=0),"maximum medal total does not overflow");
+  var replay=LocalProfile.ImportForQA(profile.ExportForQA());replay.ConfigureLeague(provider,clock);check(!replay.CommitBase("win",0)&&replay.Badges==profile.Badges,"original transaction ledger preserved through league changes");
+  var store=new Store();var durable=LocalProfile.Load(store);durable.ConfigureLeague(provider,clock);check(durable.GrantMedals("event-medals",40),"external medal grant interface");check(!durable.GrantMedals("event-medals",40)&&durable.Badges==40,"external medal grant idempotency");
+  clock.Now+=8*86400L;var due=durable.ReadLeague(true).reward;int wallet=durable.Coins;string beforeSave=store.Json;store.Fail=true;bool logger=Debug.unityLogger.logEnabled;bool accepted;
+  try{Debug.unityLogger.logEnabled=false;accepted=durable.ClaimLeagueReward(due.periodId);}finally{Debug.unityLogger.logEnabled=logger;}
+  check(!accepted&&durable.Coins==wallet&&!durable.OwnsAvatar(due.avatarId)&&!durable.OwnsFrame(due.frameId),"failed reward write rolls back wallet and both cosmetics");check(store.Json==beforeSave,"failed reward write preserves prior save");
+  store.Fail=false;var retry=LocalProfile.Load(store);retry.ConfigureLeague(provider,clock);check(retry.ClaimLeagueReward(due.periodId),"pending reward can retry after reload");
+  var jsonProvider=new JsonLeagueConfigProvider(()=>JsonUtility.ToJson(shortConfig));check(jsonProvider.Load().rivalCount==7,"JSON configuration provider interface");
+  return "PASS: "+checks+" league model / migration / transactions checks";
+ }
+}
+}

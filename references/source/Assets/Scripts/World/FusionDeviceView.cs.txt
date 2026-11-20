@@ -1,0 +1,103 @@
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+namespace BounceGarden
+{
+    /// <summary>Small, readable state display attached to the actual colliding device.</summary>
+    public sealed class FusionDeviceView : MonoBehaviour
+    {
+        TMP_Text title, status, direction, protection;
+        SpriteRenderer plate;
+        readonly List<SpriteRenderer> links = new List<SpriteRenderer>();
+        readonly List<SpriteRenderer> lamps = new List<SpriteRenderer>();
+        Color tint;
+        float pitch;
+
+        public void Initialize(string kind, Color color)
+        {
+            tint = color;
+            pitch = CollectionLevels.Pitch;
+            var root = new GameObject("Fusion device state").transform;
+            root.SetParent(transform, false);
+            plate = WorldArt.Draw(root, "Device plate", "circle", Vector2.zero,
+                Vector2.one * pitch * .79f, new Color(color.r, color.g, color.b, .94f), 45);
+            title = WorldArt.Text(root, "Device label", Label(kind), new Vector2(0, pitch * .1f), .036f, Color.white, 48);
+            status = WorldArt.Text(root, "Device stock", "", new Vector2(0, -pitch * .2f), .027f, Color.white, 49);
+            direction = WorldArt.Text(root, "Device direction", "", new Vector2(pitch * .31f, pitch * .17f), .036f, Color.white, 49);
+            protection = WorldArt.Text(root, "Device protection", "", new Vector2(-pitch * .3f, pitch * .3f), .027f, Color.white, 51);
+            // Native HP numbers are not the device's charge or inventory.
+            foreach (var text in GetComponentsInChildren<TMP_Text>(true))
+                if (text.name == "HP" || text.name == "NumberShadow") text.enabled = false;
+            for (int i = 0; i < 6; i++)
+            {
+                var lamp = WorldArt.Draw(root, "Charge lamp", "circle", Vector2.zero,
+                    Vector2.one * pitch * .065f, Color.white, 50);
+                lamp.enabled = false;
+                lamps.Add(lamp);
+            }
+        }
+
+        public void SetProtection(bool ice, bool armor)
+        {
+            if (protection == null) return;
+            protection.text = ice ? "冰" : armor ? "甲" : "";
+            protection.color = ice ? new Color(.65f, .95f, 1) : new Color(1, .91f, .55f);
+        }
+
+        public void Refresh(string text, int charge, int threshold, int stock, Vector2 arrow, bool spent)
+        {
+            if (status == null) return;
+            status.text = text ?? "";
+            plate.color = spent ? new Color(.48f, .52f, .56f, .8f) : tint;
+            direction.text = arrow.sqrMagnitude < .01f ? "" :
+                Mathf.Abs(arrow.x) > Mathf.Abs(arrow.y) ? (arrow.x > 0 ? "→" : "←") : (arrow.y > 0 ? "↑" : "↓");
+            int shown = Mathf.Clamp(threshold, 0, lamps.Count);
+            for (int i = 0; i < lamps.Count; i++)
+            {
+                lamps[i].enabled = !spent && i < shown;
+                if (i >= shown) continue;
+                lamps[i].transform.localPosition = new Vector3((i - (shown - 1) * .5f) * pitch * .085f, -pitch * .055f, 0);
+                // Larger configured thresholds retain an exact textual counter.
+                lamps[i].color = charge >= Mathf.CeilToInt((i + 1f) * threshold / shown)
+                    ? new Color(1, .97f, .56f) : new Color(.2f, .24f, .3f, .72f);
+            }
+        }
+
+        public void SetLinks(IList<Vector2> destinations, bool ready)
+        {
+            int count = destinations == null ? 0 : destinations.Count;
+            while (links.Count < count)
+                links.Add(WorldArt.Draw(transform, "Visible device connection", "brick", Vector2.zero,
+                    new Vector2(.1f, .035f), tint, 9));
+            for (int i = 0; i < links.Count; i++)
+            {
+                var line = links[i];
+                line.enabled = i < count;
+                if (i >= count) continue;
+                Vector2 local = transform.InverseTransformPoint(destinations[i]);
+                line.transform.localPosition = local * .5f;
+                line.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(local.y, local.x) * Mathf.Rad2Deg);
+                Vector2 bounds = line.sprite.bounds.size;
+                line.transform.localScale = new Vector3(local.magnitude / bounds.x, .035f / bounds.y, 1);
+                line.color = new Color(tint.r, tint.g, tint.b, ready ? .7f : .3f);
+            }
+        }
+
+        static string Label(string kind)
+        {
+            switch (kind)
+            {
+                case "producer": return "补给";
+                case "cannon": return "机关炮";
+                case "vine": return "花藤";
+                case "battery": return "电池";
+                case "key": return "钥匙";
+                case "gate": return "门锁";
+                case "assistant": return "猫爪罐";
+                case "reward": return "奖励";
+                default: return kind;
+            }
+        }
+    }
+}

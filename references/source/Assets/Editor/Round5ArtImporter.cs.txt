@@ -1,0 +1,27 @@
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+public sealed class Round5ArtImporter:AssetPostprocessor { void OnPreprocessTexture(){
+if(!assetPath.StartsWith("Assets/Resources/Art/Round5/"))return;
+var t=(TextureImporter)assetImporter;t.maxTextureSize=4096;t.textureCompression=TextureImporterCompression.Uncompressed;t.mipmapEnabled=false;t.filterMode=FilterMode.Bilinear;t.isReadable=false;
+if(Path.GetFileName(assetPath)=="grass_uniform_albedo.png"){t.textureType=TextureImporterType.Default;t.wrapMode=TextureWrapMode.Repeat;t.alphaIsTransparency=false;t.mipmapEnabled=true;t.filterMode=FilterMode.Trilinear;t.anisoLevel=2;return;}
+t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Multiple;t.spritePixelsPerUnit=100;t.alphaIsTransparency=true;t.wrapMode=TextureWrapMode.Clamp;
+switch(Path.GetFileName(assetPath)){
+case "blocks_blue_orange_final.png":
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="blue_star",rect=new Rect(93,182,638,709),pivot=new Vector2(0.5f,0.4499294781382228f),alignment=9},
+new SpriteMetaData{name="orange_star",rect=new Rect(807,182,636,709),pivot=new Vector2(0.5f,0.4485190409026798f),alignment=9},
+};
+#pragma warning restore 0618
+break;
+case "blocks_yellow_ivory_black.png":
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="yellow_blank",rect=new Rect(85,43,580,621),pivot=new Vector2(0.5f,0.46698872785829304f),alignment=9},
+new SpriteMetaData{name="ivory_star",rect=new Rect(799,43,576,621),pivot=new Vector2(0.5f,0.46376811594202894f),alignment=9},
+new SpriteMetaData{name="black_blank",rect=new Rect(1506,43,579,622),pivot=new Vector2(0.5f,0.46543408360128613f),alignment=9},
+};
+#pragma warning restore 0618
+break;
+}}}

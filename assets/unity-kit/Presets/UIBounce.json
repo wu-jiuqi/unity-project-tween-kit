@@ -1,0 +1,62 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.UIBounce",
+    "settings": [
+        {
+            "field": "IdleInterval",
+            "type": "System.Single",
+            "value": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "HoverDuration",
+            "type": "System.Single",
+            "value": 0.1599999964237213,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "ExitDuration",
+            "type": "System.Single",
+            "value": 0.3199999928474426,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "PressDuration",
+            "type": "System.Single",
+            "value": 0.10000000149011612,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "ReleaseDuration",
+            "type": "System.Single",
+            "value": 0.47999998927116396,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "IdleDuration",
+            "type": "System.Single",
+            "value": 0.699999988079071,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "Magnitude",
+            "type": "System.Single",
+            "value": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    ]
+}

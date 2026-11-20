@@ -1,0 +1,27 @@
+using System;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ public void SetLeagueSource(ILeagueSource value){LeagueSource=value??throw new ArgumentNullException(nameof(value));foreach(var page in pages.Values)if(page!=null)page.GetComponentInChildren<LeagueRankingView>()?.SetSource(value);}
+ // Public testing interface: no level unlock, coin grant or fake victory is involved.
+ public bool AddMedalForTesting(){bool ok=LeagueSource.AddTestMedals();Toast(ok?"+"+Profile.LeagueSettings.testMedals+"枚奖章 · "+Profile.Badges+"枚累计":"奖章保存失败。");RefreshLeagueViews();return ok;}
+ void RefreshLeagueViews(){foreach(var page in pages.Values)if(page!=null){var view=page.GetComponentInChildren<LeagueRankingView>();if(view!=null)view.Refresh(false);}if(!playing)TopBar(headerSlot,CurrentPage=="home");RefreshWallet();}
+ public void OpenLeagueRewards(){
+  var state=LeagueSource.Read();if(state==null){Toast("通关第10关后解锁花园联赛");return;}var c=state.config;var pending=state.reward;
+  OpenModal(pending!=null?c.copy.claim:"联赛奖励",UICraft.Blue,940,1300);
+  bool hasCosmetics=pending==null||!string.IsNullOrEmpty(pending.avatarId)||!string.IsNullOrEmpty(pending.frameId);
+  if(hasCosmetics){CatCosmeticCatalog.Create(modal,pending?.avatarResource??c.cosmetic.avatarResource,pending?.frameResource??c.cosmetic.frameResource,0,385,290);UICraft.Label(modal,"头像与头像框",0,225,800,80,38);}else{UICraft.Art(modal,"LeagueV1/reward_coins",0,360,330,250);UICraft.Label(modal,"金币",0,225,800,80,38);}
+  if(pending!=null){
+   UICraft.Label(modal,"本期排名：第"+pending.rank+"\n"+pending.coins+" 金币"+(Profile.LeagueDuplicateCoins(pending)>0?"\n重复装扮补偿 +"+Profile.LeagueDuplicateCoins(pending)+" 金币":"")+(string.IsNullOrEmpty(pending.avatarId)?"":" + 头像与头像框"),0,70,820,180,40);
+   UICraft.Button(modal,c.copy.claim,0,-145,720,130,UICraft.Green,()=>{int duplicate=Profile.LeagueDuplicateCoins(pending);if(!LeagueSource.Claim(pending.periodId)){Toast("奖励保存失败。");return;}SoundService.Play("reward_claim");if(!string.IsNullOrEmpty(pending.avatarId)||!string.IsNullOrEmpty(pending.frameId))SoundService.Play("cat_reward_surprise");RefreshLeagueViews();OpenLeagueRewardClaimed(pending,duplicate);},44);
+  }else{
+   string tiers=string.Join("\n",c.rewardTiers.Select((t,i)=>(i==0?"#1":"#"+(c.rewardTiers[i-1].throughRank+1)+"–"+t.throughRank)+"   "+t.coins+" 金币"+(t.cosmetics?" + 头像与头像框":"")));
+   UICraft.Label(modal,tiers,0,-5,850,280,31);UICraft.Label(modal,"本期获章即可参与领奖。\n北京时间固定7天一期，本期奖章重置。\n主线首通+1；每日重玩最多3枚。\n同分按本期固定顺序；离线对手不增长。",0,-260,840,190,27);
+   if(Profile.OwnedAvatarIds.Count>0||Profile.OwnedFrameIds.Count>0)UICraft.Button(modal,"更换装扮",0,-445,680,105,UICraft.Green,OpenLeagueCustomization,38);
+  }
+ }
+ void OpenLeagueRewardClaimed(LeagueReward reward,int duplicate=0){OpenModal("奖励已领取",UICraft.Blue,900,950);UICraft.Label(modal,"+"+(reward.coins+duplicate)+" 金币",0,190,750,100,52);if(!string.IsNullOrEmpty(reward.avatarId)){CatCosmeticCatalog.Create(modal,reward.avatarResource,reward.frameResource,0,0,290);UICraft.Button(modal,Profile.LeagueSettings.copy.equip,0,-250,650,125,UICraft.Green,()=>{LeagueSource.Equip(reward.avatarId,reward.frameId);RefreshLeagueViews();CloseModal();},44);}else UICraft.Button(modal,"完成",0,-220,600,120,UICraft.Blue,CloseModal);}
+ public void OpenLeagueCustomization(){OpenDressing();}
+}
+}

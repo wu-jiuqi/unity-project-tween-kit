@@ -1,0 +1,80 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace BounceGarden.LevelEditing
+{
+    // Authoring projects select a rules template, independently of how many
+    // campaign levels happen to ship with the game. Keep the palette and data
+    // validator on this registry when adding a supported runtime brick.
+    public static class LevelEditorRuleCatalog
+    {
+        public const int FormatVersion = 2;
+        public static string RulesVersion { get { return GameVersion.Name; } }
+        public static IReadOnlyList<string> ChapterIds { get; } = Array.AsReadOnly(new[] { "Alphabet", "Picnic", "Snow" });
+
+        static readonly Dictionary<string, string[]> kinds = new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            { "Alphabet", new[] { "N", "F", "T", "L", "B", "K", "A", "S", "R", "chest" } },
+            { "Picnic", new[] { "N", "J", "T", "C", "Q", "X", "R", "L", "B", "D" } },
+            { "Snow", new[] { "N", "F", "T", "C", "X", "O", "S", "L", "B" } }
+        };
+
+        public static bool SupportsChapter(string chapter) { return chapter != null && kinds.ContainsKey(chapter); }
+        public static string[] GetKinds(string chapter)
+        {
+            string[] values;
+            if (chapter == null || !kinds.TryGetValue(chapter, out values)) throw new ArgumentException("当前运行时不支持规则模板：" + chapter);
+            return (string[])values.Clone();
+        }
+        public static bool SupportsKind(string chapter, string kind)
+        {
+            string[] values;
+            return chapter != null && kinds.TryGetValue(chapter, out values) && values.Contains(kind == "Chest" ? "chest" : kind);
+        }
+        public static string ChapterName(string chapter)
+        {
+            return chapter == "Alphabet" ? "字母规则" : chapter == "Picnic" ? "野餐规则" : chapter == "Snow" ? "冬日规则" : chapter ?? "未知规则";
+        }
+        public static string FusionKindName(string kind)
+        {
+            switch (kind)
+            {
+                case "normal": return "普通砖"; case "fish": return "小鱼"; case "toy": return "玩具"; case "jelly": return "果冻";
+                case "rear": return "背击砖（顶部入口）";
+                case "stone": return "固定石"; case "armor": return "护甲砖"; case "ice": return "附冰砖"; case "chest": return "出货箱";
+                case "basket": return "出货篮"; case "cookie": return "饼干链"; case "lemon": return "柠檬"; case "strawberry": return "草莓";
+                case "snowball": return "雪球"; case "snowdrift": return "雪堆"; case "cocoa": return "暖可可";
+                case "line_h": return "横向激光"; case "line_v": return "纵向激光"; case "cross": return "十字激光";
+                case "bomb": return "炸弹"; case "link": return "链接工具"; case "soda": return "汽水";
+                case "producer": return "有限生产器"; case "cannon": return "旁消炮"; case "vine": return "连锁花藤";
+                case "battery": return "工具电池"; case "key": return "钥匙"; case "gate": return "关联门";
+                case "assistant": return "猫爪罐"; case "reward": return "奖励发生器";
+                default: return string.IsNullOrEmpty(kind) ? "未知机制" : kind;
+            }
+        }
+        public static string KindName(string chapter, string kind)
+        {
+            switch (kind)
+            {
+                case "Chest": case "chest": return "大箱子";
+                case "N": return "普通砖";
+                case "F": return "小鱼";
+                case "T": return chapter == "Picnic" ? "草莓" : "玩具";
+                case "L": return "激光";
+                case "B": return "炸弹";
+                case "K": return "链接";
+                case "A": return "护甲砖";
+                case "S": return chapter == "Snow" ? "雪堆" : "石块";
+                case "R": return "背击砖";
+                case "J": return "柠檬";
+                case "C": return chapter == "Picnic" ? "饼干" : "可可";
+                case "Q": return "野餐篮";
+                case "X": return "锚点";
+                case "D": return "汽水";
+                case "O": return "雪球";
+                default: return string.IsNullOrEmpty(kind) ? "未知砖块" : kind;
+            }
+        }
+    }
+}

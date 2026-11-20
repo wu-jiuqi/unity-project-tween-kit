@@ -1,0 +1,12 @@
+using UnityEditor;
+using UnityEngine;
+public sealed class CatCosmeticsImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){
+  if(!assetPath.StartsWith("Assets/Resources/Art/CatCosmeticsV3/"))return;
+  var texture=(TextureImporter)assetImporter;texture.textureType=TextureImporterType.Sprite;texture.spriteImportMode=SpriteImportMode.Single;texture.alphaSource=TextureImporterAlphaSource.FromInput;texture.alphaIsTransparency=true;texture.mipmapEnabled=false;texture.isReadable=false;texture.sRGBTexture=true;texture.npotScale=TextureImporterNPOTScale.None;texture.wrapMode=TextureWrapMode.Clamp;texture.filterMode=FilterMode.Bilinear;
+  // The largest in-game preview is 290 design pixels. Preserve the full-resolution
+  // PNG source, while avoiding 20 x 1254-square runtime textures for small icons.
+  texture.maxTextureSize=512;texture.textureCompression=TextureImporterCompression.Uncompressed;
+  var settings=new TextureImporterSettings();texture.ReadTextureSettings(settings);settings.spriteMeshType=SpriteMeshType.FullRect;settings.spriteAlignment=9;settings.spritePivot=new Vector2(.5f,.5f);texture.SetTextureSettings(settings);
+ }
+}

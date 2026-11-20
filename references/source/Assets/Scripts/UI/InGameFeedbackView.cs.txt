@@ -1,0 +1,77 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.TextCore.LowLevel;
+namespace BounceGarden {
+public sealed class InGameFeedbackView:MonoBehaviour {
+ // Icons are separate sprites, avoiding missing OS emoji glyphs.
+ public static readonly string[] Messages={
+  "有{0}位小伙伴和你一起闯关", "猫咪都看入迷啦！", "这个角度，能一直弹下去吧！", "果冻哗啦啦，太解压啦！",
+  "弹一弹，快乐一点点", "多弹几下，多点快乐！", "给这次反弹鼓个掌！", "再弹一下，还有小惊喜！",
+  "小毛线球，活力满满！", "放松一下，享受这一刻", "猫咪为你留了一朵小花", "忙里偷闲，刚刚好",
+  "把小烦恼统统弹走！", "这一局，有猫咪陪着你"};
+ static TMP_FontAsset font;
+ static Sprite plate;
+ public static string CheerText(int tier)=>ChineseArt.Rating(tier);
+ bool cheersEnabled=true;
+ GameSession owner;int generation,messageIndex;System.Random random;
+ InGameFeedbackState state=new InGameFeedbackState();
+ RectTransform lane,bullet,cheerRoot;CanvasGroup bulletGroup,cheerGroup;Image icon,cheerImage;TMP_Text caption;
+ readonly RectTransform[] sparks=new RectTransform[13];readonly Image[] sparkImages=new Image[13];
+ float bulletAge,bulletWidth;bool bulletVisible,stopped;string audience;
+ public InGameFeedbackState State=>state;
+ public bool BulletVisible=>bulletVisible;
+ public float BulletX=>bullet.anchoredPosition.x;
+ public float BulletAge=>bulletAge;
+ public int VisibleTier {get;private set;}=-1;
+ public string Audience=>audience;
+ public TMP_Text Caption=>caption;
+ public Sprite VisibleArt=>cheerImage==null?null:cheerImage.sprite;
+ public void Initialize(GameSession session,bool withCheers=true){
+  cheersEnabled=withCheers;
+  owner=session;generation=owner.Generation;random=new System.Random(Guid.NewGuid().GetHashCode());audience=random.Next(860,2681).ToString("N0",System.Globalization.CultureInfo.InvariantCulture);
+  var group=gameObject.AddComponent<CanvasGroup>();group.interactable=false;group.blocksRaycasts=false;
+  if(font==null)font=GameTypography.Font;
+  if(plate==null){var t=Resources.Load<Texture2D>("Art/InGameFeedbackV1/danmaku-plate");if(t==null)throw new InvalidOperationException("In-game feedback plate is not ready");plate=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,new Vector4(20,20,20,20));}
+  lane=UICraft.Root(transform,"Danmaku viewport",0,owner.IsChainCollection?700:944,842,48);lane.gameObject.AddComponent<RectMask2D>();
+  bullet=UICraft.Root(lane,"Danmaku bubble",0,0,640,48);bullet.pivot=new Vector2(0,.5f);bulletGroup=bullet.gameObject.AddComponent<CanvasGroup>();
+  var background=bullet.gameObject.AddComponent<Image>();background.sprite=plate;background.type=Image.Type.Sliced;background.raycastTarget=false;background.pixelsPerUnitMultiplier=1f;
+  caption=UICraft.Label(bullet,"",0,0,600,46,27,Color.white,TextAnchor.MiddleLeft);caption.font=font;caption.color=Color.white;caption.enableAutoSizing=false;caption.textWrappingMode=TextWrappingModes.NoWrap;caption.richText=false;caption.overflowMode=TextOverflowModes.Truncate;
+  icon=UICraft.Box(bullet,"Inline emoji art",0,0,34,34,Color.white);icon.type=Image.Type.Simple;icon.preserveAspect=true;icon.raycastTarget=false;
+  bullet.gameObject.SetActive(false);
+  cheerRoot=UICraft.Root(transform,"Chain encouragement",0,-340,900,220);cheerGroup=cheerRoot.gameObject.AddComponent<CanvasGroup>();
+  cheerImage=ChineseArt.Cheer(cheerRoot,900,220);
+  for(int i=0;i<sparks.Length;i++){var s=UICraft.Art(cheerRoot,"pastel/fx_spark",0,0,30,30);sparkImages[i]=s;sparks[i]=s.rectTransform;}
+  cheerRoot.gameObject.SetActive(false);owner.Feedback+=OnFeedback;
+ }
+ void OnFeedback(Vector2 point,string cue){if(stopped||owner.Generation!=generation||!owner.IsPlaying||owner.IsPaused)return;if(cue=="shoot")state.Shoot();else if(cue=="break"&&cheersEnabled)state.Break();}
+ void LateUpdate(){
+  if(owner==null||owner.Generation!=generation||!owner.IsPlaying){StopPresentation();return;}
+  if(stopped||owner.IsPaused)return;
+  float dt=Time.deltaTime;state.Advance(dt);
+  if(state.TryCheer(out int tier))ShowCheer(tier);
+  if(state.CheerActive)AnimateCheer();else{VisibleTier=-1;cheerRoot.gameObject.SetActive(false);}
+  if(bulletVisible){bulletAge+=dt;bullet.anchoredPosition=new Vector2(Mathf.Lerp(lane.rect.width*.5f,-lane.rect.width*.5f-bulletWidth,Mathf.Clamp01(bulletAge/6f)),0);bulletGroup.alpha=state.CheerActive?.25f:1f;if(bulletAge>=6f){bulletVisible=false;bullet.gameObject.SetActive(false);}}
+  if(!bulletVisible&&state.TryBullet(owner.ActiveBalls>0,18f+(float)random.NextDouble()*10f))ShowBullet();
+ }
+ void ShowBullet(){
+  int index=messageIndex==0?0:1+(messageIndex-1)%(Messages.Length-1);messageIndex++;
+  caption.text=string.Format(Messages[index],audience);caption.ForceMeshUpdate();float textWidth=caption.GetPreferredValues(caption.text).x;bulletWidth=Mathf.Min(800,textWidth+94);
+  bullet.sizeDelta=new Vector2(bulletWidth,48);caption.rectTransform.sizeDelta=new Vector2(bulletWidth-94,46);caption.rectTransform.anchoredPosition=new Vector2(-27,0);
+  icon.rectTransform.anchoredPosition=new Vector2(bulletWidth*.5f-32,0);
+  icon.sprite=index%3==0?YarnArt.Ball(owner.YarnVariant):ProductionArt.Get(index%3==1?"pastel/cat_avatar":"pastel/fx_spark");
+  bulletAge=0;bulletVisible=true;bullet.anchoredPosition=new Vector2(lane.rect.width*.5f,0);bulletGroup.alpha=1;bullet.gameObject.SetActive(true);
+ }
+ void ShowCheer(int tier){SoundService.Play(new[]{"rating_nice","rating_great","rating_amazing","rating_incredible"}[tier]);VisibleTier=tier;ChineseArt.SetCheer(cheerImage,tier);cheerImage.rectTransform.sizeDelta=new Vector2(new[]{650f,735f,865f,910f}[tier],220);cheerRoot.gameObject.SetActive(true);for(int i=0;i<sparks.Length;i++)sparks[i].gameObject.SetActive(i<4+tier*3);}
+ void AnimateCheer(){
+  float t=state.CheerAge/1.5f,scale=1f;if(t<.15f){float q=t/.15f;scale=Mathf.Lerp(.35f,1.12f,q);}else if(t<.28f){float q=(t-.15f)/.13f;scale=Mathf.Lerp(1.12f,.96f,q);}else if(t<.4f){float q=(t-.28f)/.12f;scale=Mathf.Lerp(.96f,1f,q);}
+  float fade=Mathf.Clamp01((1-t)/.28f);cheerGroup.alpha=Mathf.Min(Mathf.Clamp01(t/.12f),fade);cheerImage.rectTransform.localScale=new Vector3(scale,scale,1);cheerRoot.anchoredPosition=new Vector2(0,-340+Mathf.Max(0,t-.72f)/.28f*48);
+  for(int i=0;i<sparks.Length;i++){float angle=i*2.399f;float distance=(150+VisibleTier*28)*Mathf.Clamp01(t/.85f);sparks[i].anchoredPosition=new Vector2(Mathf.Cos(angle)*(cheerImage.rectTransform.rect.width*.43f+distance*.28f),Mathf.Sin(angle)*(cheerImage.rectTransform.rect.height*.40f+distance*.18f));sparks[i].localScale=Vector3.one*Mathf.Lerp(1,.35f,t);sparkImages[i].color=new Color(1,1,1,Mathf.Clamp01((1-t)/.5f));}
+ }
+ public void StopPresentation(){if(stopped)return;stopped=true;bulletVisible=false;VisibleTier=-1;state=new InGameFeedbackState();if(bullet!=null)bullet.gameObject.SetActive(false);if(cheerRoot!=null)cheerRoot.gameObject.SetActive(false);}
+ void OnEnable(){if(owner!=null&&owner.IsPlaying&&stopped){generation=owner.Generation;stopped=false;state=new InGameFeedbackState();}}
+ void OnDisable(){StopPresentation();}
+ void OnDestroy(){if(owner!=null)owner.Feedback-=OnFeedback;}
+}
+}

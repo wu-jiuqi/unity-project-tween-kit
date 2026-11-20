@@ -1,0 +1,7 @@
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ const string PaintingKey="collection/painting/fox_001";
+ public bool HasFoxPainting=>committed.Contains(PaintingKey);
+ public bool CollectFoxPainting(){return HasFoxPainting||Commit(PaintingKey,0,0,UnlockedLevel);}
+}
+}

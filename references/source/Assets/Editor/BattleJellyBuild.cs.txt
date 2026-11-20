@@ -1,0 +1,10 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class BattleJellyBuild {
+ public static void Windows(){Debug.Log("BATTLE_GOALS_VALIDATE "+BounceGarden.OpeningCampaign.Validate());BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);var root=new DirectoryInfo(Application.dataPath).Parent.Parent.Parent.FullName;var path=Path.Combine(root,"Builds/BattleHUD-v87-r3/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(path));var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("BATTLE_BUILD "+r.summary.result+" errors="+r.summary.totalErrors);if(r.summary.result!=BuildResult.Succeeded)throw new Exception("Battle build failed");}
+}
+public sealed class BattleJellyImporter:AssetPostprocessor {void OnPreprocessTexture(){if(!assetPath.Contains("/Art/BattleJellyV5/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.textureShape=TextureImporterShape.Texture2D;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.npotScale=TextureImporterNPOTScale.None;t.filterMode=FilterMode.Bilinear;t.wrapMode=TextureWrapMode.Clamp;t.maxTextureSize=1024;t.textureCompression=TextureImporterCompression.Uncompressed;}}

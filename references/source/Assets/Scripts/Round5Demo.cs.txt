@@ -1,0 +1,24 @@
+using System;using System.Collections;using System.IO;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+// Opt-in scripted input into the running game. Actual physics and actual final
+// framebuffer/audio recording; never QAResult or forced target destruction.
+public sealed class Round5Demo:MonoBehaviour {
+ AppUI app;string dir;WindowsDemoRecorder recorder;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){var a=Environment.GetCommandLineArgs();if(Array.IndexOf(a,"--round5-demo")>=0&&RuntimeQA.IsIsolated)new GameObject("Round5 scripted demo").AddComponent<Round5Demo>();}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--demo-out")+1];yield return new WaitForSecondsRealtime(1);app=FindFirstObjectByType<AppUI>();recorder=FindFirstObjectByType<WindowsDemoRecorder>();recorder.StartEvidence();
+  Note("Automated aim and UI-button invocations, not human mouse input. Real-time final framebuffer and AudioListener mix. No forced outcomes. QA memory-only profile.");
+  yield return new WaitForSecondsRealtime(1.2f);app.QAStartLevel(0);yield return new WaitForSecondsRealtime(1.2f);app.Session.Ground.SetDebug(true);yield return new WaitForSecondsRealtime(2);app.Session.Ground.SetDebug(false);
+  int volleys=0;while(app.Session.IsPlaying&&volleys<20){if(app.Session.Shots>0&&app.Session.PendingBurstBalls==0){var aim=AimAt(Lowest());app.Session.SetAim(aim);yield return new WaitForSecondsRealtime(.35f);app.QADragAim(aim);volleys++;}yield return new WaitForSecondsRealtime(.85f);}
+  bool won=app.Session.RemainingTargets==0;Note("Level1 natural win="+won+" volleys="+volleys+" hits="+app.Session.HitCount+" breaks="+app.Session.BreakCount);
+  yield return new WaitForSecondsRealtime(6);if(won&&app.RewardReady){app.CollectReward();yield return new WaitForSecondsRealtime(2);}Note("Wallet="+app.Profile.Coins+" badges="+app.Profile.Badges);
+  app.QAStartLevel(2);yield return new WaitForSecondsRealtime(1.2f);app.Session.Ground.SetDebug(true);yield return new WaitForSecondsRealtime(2);app.Session.Ground.SetDebug(false);
+  for(int i=0;i<5&&app.Session.IsPlaying;i++){var aim=AimAt(Lowest());app.Session.SetAim(aim);yield return new WaitForSecondsRealtime(.7f);app.QADragAim(aim);yield return new WaitForSecondsRealtime(1);}
+  yield return new WaitForSecondsRealtime(2);Invoke("Button =");yield return new WaitForSecondsRealtime(1);Invoke("Button Resume");yield return new WaitForSecondsRealtime(1);Invoke("Button =");yield return new WaitForSecondsRealtime(.5f);Invoke("Button Restart");yield return new WaitForSecondsRealtime(1.2f);Note("Round27 restart shots="+app.Session.Shots+" targets="+app.Session.RemainingTargets);
+  Invoke("Button =");yield return new WaitForSecondsRealtime(.5f);Invoke("Button Home");yield return new WaitForSecondsRealtime(1.5f);recorder.StopEvidence();Note("Finished");yield return null;Application.Quit(won?0:3);
+ }
+ void Note(string text){File.AppendAllText(Path.Combine(dir,"demo-run.txt"),Time.realtimeSinceStartup.ToString("F3",System.Globalization.CultureInfo.InvariantCulture)+" "+text+"\n");}
+ void Invoke(string name){foreach(var b in FindObjectsByType<Button>(FindObjectsSortMode.None))if(b.name==name){b.onClick.Invoke();return;}Note("MISSING BUTTON "+name);}
+ Vector2 Lowest(){BrickBody best=null;foreach(var b in FindObjectsByType<BrickBody>(FindObjectsSortMode.None))if(b.Alive&&(best==null||b.transform.position.y<best.transform.position.y-.05f||(Mathf.Abs(b.transform.position.y-best.transform.position.y)<.05f&&Mathf.Abs(b.transform.position.x)<Mathf.Abs(best.transform.position.x))))best=b;return best!=null?(Vector2)best.transform.position:Vector2.up;}
+ Vector2 AimAt(Vector2 target){return (target-app.Session.LauncherPosition).normalized;}
+}
+}

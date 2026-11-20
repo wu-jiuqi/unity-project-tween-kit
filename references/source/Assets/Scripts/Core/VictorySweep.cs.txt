@@ -1,0 +1,21 @@
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public bool VictoryBoardSwept{get;private set;}
+ public void ConvertVictorySteps(int amount){if(IsPlaying||!rules.Won)return;rules.SpendVictorySteps(amount);}
+ public void SweepVictoryBoard(){
+  if(IsPlaying||!rules.Won||VictoryBoardSwept)return;VictoryBoardSwept=true;VictorySettlementActive=false;rules.VictoryDamageEnabled=false;IsPaused=true;
+  refillRemaining=0;refillFull=refillEmptyEdge=false;chainReplacementRewards.Clear();strategyRewardOrigins.Clear();ClearBufferedChainShot();queuedShot=null;
+  foreach(var b in CollectionBricks)if(b!=null&&b.Alive)b.Remove(false);
+  foreach(var t in ChainTools){t.Consumed=true;t.Waiting=false;if(t.View!=null)t.View.gameObject.SetActive(false);}ChainTools.Clear();
+  foreach(var b in allBalls)if(b!=null)b.Deactivate();active.Clear();
+  foreach(var loot in chainLoot)if(loot.View!=null)loot.View.gameObject.SetActive(false);chainLoot.Clear();
+  foreach(var m in ChainMinis)if(m.View!=null)m.View.gameObject.SetActive(false);ChainMinis.Clear();
+  if(fx!=null)fx.gameObject.SetActive(false);
+  foreach(var f in world.GetComponentsInChildren<SevenSpecialFx>())f.gameObject.SetActive(false);
+  foreach(var f in world.GetComponentsInChildren<SevenWindup>())f.gameObject.SetActive(false);
+  foreach(var f in world.GetComponentsInChildren<SevenSuctionFx>())f.gameObject.SetActive(false);
+  rules.ClearVictoryTargets();changed=true;
+ }
+}
+}

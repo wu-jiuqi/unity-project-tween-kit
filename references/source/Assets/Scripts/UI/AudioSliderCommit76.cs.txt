@@ -1,0 +1,9 @@
+using UnityEngine;
+using UnityEngine.EventSystems;
+namespace BounceGarden {
+public sealed class AudioSliderCommit76:MonoBehaviour,IPointerUpHandler,IEndDragHandler {
+ public void OnPointerUp(PointerEventData data){SoundService.SaveMix();}
+ public void OnEndDrag(PointerEventData data){SoundService.SaveMix();}
+ void OnDisable(){SoundService.SaveMix();}
+}
+}

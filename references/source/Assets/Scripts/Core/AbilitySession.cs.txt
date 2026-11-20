@@ -1,0 +1,78 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ readonly List<BrickBody> abilityBricks=new List<BrickBody>();
+ readonly Queue<BrickSpawn> chainQueue=new Queue<BrickSpawn>();
+ readonly List<BallAbility> upcoming=new List<BallAbility>();
+ int selectedSlot;
+ public bool IsAbilityRoute=>CurrentLevel!=null&&CurrentLevel.abilityRoute;
+ public BallAbility SelectedAbility=>upcoming.Count>0?upcoming[Mathf.Min(selectedSlot,upcoming.Count-1)]:BallAbility.Heavy;
+ public int SelectedSlot=>selectedSlot;
+ public int ChoiceCount=>Mathf.Min(3,Mathf.Min(Shots,upcoming.Count));
+ public BallAbility Choice(int index)=>upcoming[Mathf.Clamp(index,0,upcoming.Count-1)];
+ public bool AbilityAvailable {
+  get{if(!IsAbilityRoute||!IsPlaying||IsPaused)return false;foreach(var b in active.Values)if(!b.AbilityUsed)return true;return false;}
+ }
+ void ResetAbilities(){abilityBricks.Clear();chainQueue.Clear();upcoming.Clear();selectedSlot=0;if(IsAbilityRoute)upcoming.AddRange(CurrentLevel.ballQueue);}
+ public bool SelectAbility(int slot){if(!IsAbilityRoute||!IsPlaying||IsPaused||queuedShot.HasValue||ActiveBalls>0||slot<0||slot>=ChoiceCount)return false;selectedSlot=slot;UpdateLoadedAbility();changed=true;StateChanged?.Invoke();return true;}
+ void UpdateLoadedAbility(){if(loadedBall!=null&&IsAbilityRoute)loadedBall.GetComponent<SpriteRenderer>().sprite=AbilityArt.Ball(SelectedAbility,0);}
+ public bool ActivateAbility(){
+  if(!AbilityAvailable)return false;
+  // Snapshot because bloom/split changes the live collection.
+  foreach(var b in new List<BallBody>(active.Values))if(!b.AbilityUsed){b.ActivateAbility();changed=true;StateChanged?.Invoke();return true;}return false;
+ }
+ public void SplitAbilityBall(BallBody original){
+  Vector2 p=original.Body.position,d=original.Body.linearVelocity.normalized;BallAbility kind=original.Ability;
+  // Keep the original as the center strand; two children cost no shot.
+  original.MakeStrand();
+  foreach(float angle in new[]{-20f,20f}){
+   var b=pool.Count>0?pool.Pop():CreateBall();int id=nextBallId++;
+   Vector2 v=Quaternion.Euler(0,0,angle)*d;
+   b.Initialize(id,Generation,p,v*CurrentLevel.ballSpeed,0);b.SetAbility(kind);b.MakeStrand();
+   if(rules.AddSplitBall(id)){active.Add(id,b);SpawnCount++;}else{b.Deactivate();pool.Push(b);}
+  }
+  PlayAbilityFx(p,0,1.0f);
+ }
+ public void BloomAbilityBall(BallBody ball){
+  Vector2 p=ball.Body.position;var cell=Board.Nearest(p);
+  ApplyArea(cell.y,cell.x,false,6,3);DrainChains();PlayAbilityFx(Board.CellToLocal(cell.x,cell.y),2,Board.CellWidth*3);
+  LoseBall(ball,p);
+ }
+ void HitAbilityBrick(BrickBody brick,BallBody ball,Vector2 point){
+  if(brick.Definition.kind==BrickKind.Stone){EmitFeedback(point,"wall",Color.gray);PlayAbilityFx(point,0,.55f);return;}
+  int damage=ball.DirectDamage();ApplyAbilityDamage(brick,damage,true);DrainChains();ball.RecordAbilityHit();
+ }
+ // Shells are separate events: no overflow on a shell-breaking contact.
+ public bool ApplyAbilityDamage(BrickBody brick,int damage,bool direct){
+  if(!IsAbilityRoute||!IsPlaying||IsPaused||brick==null||!brick.Alive||brick.Definition.kind==BrickKind.Stone)return false;
+  if(brick.ShellIntact){
+   if(brick.Definition.kind==BrickKind.Frost&&!direct)return false;
+   SoundService.Play(brick.Definition.kind==BrickKind.Frost?"ice_break":"armor_break");brick.BreakShell();noDamageTime=0;HitCount++;changed=true;PlayAbilityFx(brick.transform.position,brick.Definition.kind==BrickKind.Frost?1:0,Board.CellWidth*1.5f);EmitFeedback(brick.transform.position,"hit",brick.Tint);return true;
+  }
+  if(!rules.DamageTarget(brick.Id,damage,out bool destroyed))return false;
+  noDamageTime=0;HitCount++;changed=true;
+  if(!destroyed){brick.Damage(rules.Health(brick.Id));EmitFeedback(brick.transform.position,"hit",brick.Tint);return true;}
+  BreakCount++;var def=brick.Definition;
+  if(brick.UsesJelly)fx.PlayJelly(brick);else PlayAbilityFx(brick.transform.position,def.kind==BrickKind.Rainbow?3:2,Board.CellWidth*1.4f);
+  brick.Remove();EmitFeedback(brick.transform.position,"break",brick.Tint);
+  if(def.kind==BrickKind.Bomb||def.kind==BrickKind.Rainbow)chainQueue.Enqueue(def);
+  return true;
+ }
+ void ApplyArea(int row,int col,bool entireRow,int centerDamage,int otherDamage){
+  // Catalog insertion is row/column ordered; every source visits each live target once.
+  foreach(var b in abilityBricks){if(!b.Alive)continue;var d=b.Definition;
+   int dr=Mathf.Abs(d.referenceRow-row),dc=Mathf.Abs(d.referenceCol-col);
+   if(entireRow?dr==0:dr<=1&&dc<=1)ApplyAbilityDamage(b,dr==0&&dc==0?centerDamage:otherDamage,false);
+  }
+ }
+ public void DrainChains(){
+  if(chainQueue.Count==0)return;rules.BeginDamageChain();
+  try{while(chainQueue.Count>0){var d=chainQueue.Dequeue();bool row=d.kind==BrickKind.Rainbow;
+   PlayAbilityFx(d.position,row?3:2,row?Board.CellWidth*9:Board.CellWidth*3,row);
+   ApplyArea(d.referenceRow,d.referenceCol,row,row?2:3,row?2:3);
+  }}finally{rules.CompleteDamageChain();}
+ }
+ public void PlayAbilityFx(Vector2 position,int row,float size,bool wide=false){if(world==null)return;var go=new GameObject("Ability sequence FX");go.transform.SetParent(world,false);go.transform.position=position;go.AddComponent<AbilityFrameFx>().Initialize(this,row,size,wide);}
+}
+}

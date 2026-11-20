@@ -1,0 +1,138 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden
+{
+    public static class BossLevel
+    {
+        public const int Index = 14;
+        public const int MaxHealth = 80;
+        public const float Pitch = .78f;
+        public const float BossY = 5.35f;
+        public static Vector2 Cell(int col, int row) => new Vector2((col - 4) * Pitch, 3.5f - row * Pitch);
+        public static LevelData Create()
+        {throw new System.InvalidOperationException("Legacy routes are archived in v37");}
+    }
+
+    public sealed partial class GameSession
+    {
+        public bool IsBossTrial => CurrentLevel != null && CurrentLevel.bossTrial;
+        public BossBody Boss { get; private set; }
+        int bossId, bossShots, bossActions;
+        float bossActionTime, bossDefeatTime;
+        Vector2 bossMoveFrom, bossMoveTo;
+        bool bossDefeatPending;
+        readonly List<BrickBody> bossRefills = new List<BrickBody>();
+        public int BossHealth => Boss != null ? rules.Health(bossId) : 0;
+        public int BossPhase => BossHealth > 52 ? 1 : BossHealth > 24 ? 2 : 3;
+        public int BossShotCount => bossShots;
+        public int BossActions => bossActions;
+        public bool BossActing => Boss != null && bossActionTime > 0;
+        public bool BossDefeating => Boss != null && bossDefeatPending;
+        public bool BossBlocksShot => Boss != null && (bossShots >= 3 || BossActing || BossDefeating);
+        public int BossCombo { get; private set; }
+        float bossComboClock;
+        public int BossRefillCount { get { int count = 0; foreach (var b in bossRefills) if (b != null && b.Alive) count++; return count; } }
+        public Vector2 BossNextPosition => new Vector2(BossPhase == 1 ? 0 : bossActions % 3 == 0 ? -1.56f : bossActions % 3 == 1 ? 1.56f : 0f, BossLevel.BossY);
+
+        void StartBoss()
+        {
+            if (!IsBossTrial) return;
+            bossId = nextTargetId++;
+            rules.RegisterTarget(bossId, BossLevel.MaxHealth);
+            rules.SetPrimaryObjective(bossId);
+            var go = new GameObject("Pudding King - ordinary collision target");
+            go.transform.SetParent(world, false);
+            Boss = go.AddComponent<BossBody>();
+            Boss.Initialize(this, bounce);
+        }
+
+        void ClearBoss()
+        {
+            Boss = null; bossId = bossShots = bossActions = BossCombo = 0;
+            bossActionTime = bossDefeatTime = bossComboClock = 0;
+            bossDefeatPending = false; bossRefills.Clear();
+        }
+
+        void OnBossBurst()
+        {
+            if (Boss == null) return;
+            bossShots++; changed = true;
+            if (bossShots >= 3) SetAim(null);
+        }
+
+        void TickBoss(float dt)
+        {
+            if (Boss == null) return;
+            bossComboClock += dt;
+            if (bossComboClock > 2f && BossCombo != 0) { BossCombo = 0; changed = true; }
+            if (bossDefeatPending)
+            {
+                bossDefeatTime += dt;
+                if (bossDefeatTime >= BossBody.DefeatDuration)
+                {
+                    rules.CompleteTargetStage();
+                    // Leave the flag set until outcome; no pending balls can spawn into the outro.
+                }
+                return;
+            }
+            if (bossActionTime > 0)
+            {
+                bossActionTime = Mathf.Max(0, bossActionTime - dt);
+                float t = 1 - bossActionTime / BossBody.ActionDuration;
+                Boss.transform.position = Vector2.Lerp(bossMoveFrom, bossMoveTo, t * t * (3 - 2 * t));
+                if (bossActionTime == 0)
+                {
+                    Boss.transform.position = bossMoveTo;
+                    if (BossPhase == 3) RefillBossBricks();
+                    bossShots = 0; bossActions++; changed = true;
+                    Physics2D.SyncTransforms();
+                }
+                return;
+            }
+            if (bossShots >= 3 && ActiveBalls == 0 && PendingBurstBalls == 0 && Shots > 0)
+            {
+                bossMoveFrom = Boss.transform.position; bossMoveTo = BossNextPosition;
+                bossActionTime = BossBody.ActionDuration;
+                SoundService.Play("boss_action");Boss.Play(2); SetAim(null); changed = true;
+            }
+        }
+
+        void RefillBossBricks()
+        {
+            bossRefills.RemoveAll(b => b == null || !b.Alive);
+            int added = 0;
+            // Interior cells only: both edge corridors and the whole upper lane stay open.
+            for (int k = 0; k < 15 && added < 2 && BossRefillCount < 6; k++)
+            {
+                int slot = (k + bossActions * 2) % 15;
+                Vector2 p = BossLevel.Cell(2 + slot % 5, 3 + slot / 5);
+                bool occupied = false;
+                foreach (var b in world.GetComponentsInChildren<BrickBody>())
+                    if (b.Alive && ((Vector2)b.transform.position - p).sqrMagnitude < .01f) { occupied = true; break; }
+                if (occupied) continue;
+                CreateBrick(new BrickSpawn { position = p, hp = 1, kind = BrickKind.Normal }, 0);
+                // The newest registered brick has this id; keep only supplemental targets.
+                foreach (var b in world.GetComponentsInChildren<BrickBody>())
+                    if (b.Id == nextTargetId - 1) { bossRefills.Add(b); break; }
+                added++;
+            }
+        }
+
+        public void HitBoss(BossBody target, BallBody ball, Vector2 contact)
+        {
+            if (!IsPlaying || IsPaused || BossDefeating || target != Boss || ball == null || !ball.Active || ball.SessionGeneration != Generation) return;
+            long key = ((long)bossId << 32) | (uint)ball.Id;
+            if (!contactsThisStep.Add(key) || !rules.DamageTarget(bossId, 1, out bool dead)) return;
+            HitCount++; noDamageTime = 0; bossComboClock = 0; BossCombo++;
+            changed = true;
+            SoundService.Play(dead?"boss_defeat":"boss_hit");Boss.Play(dead ? 3 : 1);
+            EmitFeedback(contact, "hit", new Color(1, .78f, .4f));
+            if (!dead) return;
+            bossDefeatPending = true; bossDefeatTime = 0;
+            rules.BeginTargetStage(); queuedShot = null; SetAim(null);
+            foreach (var b in active.Values) if (b != null) b.Body.simulated = false;
+            Boss.DisableCollision();
+        }
+    }
+}

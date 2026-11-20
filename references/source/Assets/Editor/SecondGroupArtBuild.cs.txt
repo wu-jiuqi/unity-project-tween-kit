@@ -1,0 +1,57 @@
+using System;
+using System.IO;
+using System.Linq;
+using BounceGarden;
+using UnityEditor;
+using UnityEngine;
+
+public static class SecondGroupArtBuild {
+ const string Art="Assets/Resources/Art/SecondGroupProduction";
+ static int checks;
+ static void Check(bool ok,string label){checks++;if(!ok)throw new InvalidOperationException("Second-group production art: "+label);}
+ [MenuItem("Bounce Garden/Art/Build and validate whole 2x2 box")]
+ public static void BuildAndValidate(){
+  foreach(var path in Directory.GetFiles(Art,"*.png")){
+   var importer=(TextureImporter)AssetImporter.GetAtPath(path.Replace('\\','/'));
+   importer.textureType=TextureImporterType.Default;importer.textureShape=TextureImporterShape.Texture2D;importer.sRGBTexture=true;importer.alphaSource=TextureImporterAlphaSource.FromInput;
+   importer.alphaIsTransparency=true;importer.mipmapEnabled=false;importer.wrapMode=TextureWrapMode.Clamp;
+   importer.filterMode=FilterMode.Bilinear;importer.npotScale=TextureImporterNPOTScale.None;
+   importer.maxTextureSize=512;importer.textureCompression=TextureImporterCompression.Uncompressed;
+   var settings=importer.GetDefaultPlatformTextureSettings();settings.maxTextureSize=512;settings.textureCompression=TextureImporterCompression.Uncompressed;importer.SetPlatformTextureSettings(settings);
+   importer.SaveAndReimport();
+  }
+  var data=SecondGroupArt.Data;
+  Check(data.boxCells==2&&Mathf.Abs(data.pitch-CollectionLevels.Pitch)<.00001f,"grid pitch and 2x2 footprint");
+  Check(Mathf.Abs(data.boxBody-(2*data.pitch-(data.pitch-data.ordinaryBody)))<.00001f,"same outside gutter as ordinary tile");
+  var root=new GameObject("CookieBox2x2 · one rigid whole object");
+  try {
+   var grid=root.AddComponent<ChainGridPiece>();grid.Size=2;
+   var collider=root.AddComponent<BoxCollider2D>();collider.size=CookieBoxArtView.CollisionSize;
+   var body=root.AddComponent<Rigidbody2D>();body.bodyType=RigidbodyType2D.Kinematic;body.gravityScale=0;
+   var visual=new GameObject("Whole box state · never split");visual.transform.SetParent(root.transform,false);
+   var image=visual.AddComponent<SpriteRenderer>();var view=visual.AddComponent<CookieBoxArtView>();
+   for(int i=0;i<=8;i++){
+    view.SetState(i);
+    Check(view.Remaining==i&&image.sprite.name=="box-"+i,"exact sprite for remaining "+i);
+    Check(image.sprite.texture.dimension==UnityEngine.Rendering.TextureDimension.Tex2D&&image.sprite.texture.width<=512,"2D texture and mobile import size at count "+i);
+    Check(root.GetComponentsInChildren<Collider2D>().Length==1,"one collider at count "+i);
+    Check(root.GetComponentsInChildren<ChainGridPiece>().Length==1&&grid.Size==2,"one 2x2 grid entity at count "+i);
+    Check(image.bounds.size.x<=data.boxBody+.001f&&image.bounds.size.y<=data.boxBody+.001f,"art stays inside footprint at count "+i);
+    Check(Mathf.Abs(image.transform.localScale.x-image.transform.localScale.y)<.00001f,"no art stretching at count "+i);
+    Check(root.transform.localScale==Vector3.one&&collider.size==CookieBoxArtView.CollisionSize,"root scale and full four-cell collider unchanged at count "+i);
+   }
+   view.SetState(8,false);Check(image.sprite.name=="box-closed","closed whole-box sprite");
+   bool rejects=false;try{view.SetState(9);}catch(ArgumentOutOfRangeException){rejects=true;}Check(rejects,"unsupported count must not silently show wrong fish count");
+   view.SetState(8);image.sprite=null;image.sharedMaterial=null; // Runtime-created art is rebuilt on enable, never serialized as temporary references.
+   PrefabUtility.SaveAsPrefabAsset(root,Art+"/CookieBox2x2.prefab");
+   var instance=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(Art+"/CookieBox2x2.prefab"));
+   try{Check(instance.GetComponentInChildren<CookieBoxArtView>().Remaining==8&&instance.GetComponentInChildren<SpriteRenderer>().sprite!=null,"prefab reconstructs its sprite on enable");}finally{UnityEngine.Object.DestroyImmediate(instance);}
+   var yarn=SecondGroupArt.Sprite("yarn-3");Check(yarn!=null,"level-three yarn registered");
+  }finally{UnityEngine.Object.DestroyImmediate(root);}
+  AssetDatabase.SaveAssets();
+  var output=Path.GetFullPath("../../Builds/SecondGroupProduction-v2");Directory.CreateDirectory(output);
+  File.WriteAllText(Path.Combine(output,"unity-validation.json"),"{\"checks\":"+checks+",\"failed\":0,\"wholeBoxFrames\":10}");
+  AssetDatabase.ExportPackage(new[]{Art,"Assets/Resources/SecondGroupSprite.shader","Assets/Scripts/World/SecondGroupArt.cs","Assets/Scripts/World/CookieBoxArtView.cs"},Path.Combine(output,"SecondGroup-ProductionArt-v2.unitypackage"),ExportPackageOptions.Recurse);
+  Debug.Log("SECOND_GROUP_PRODUCTION_ART_OK checks="+checks);
+ }
+}

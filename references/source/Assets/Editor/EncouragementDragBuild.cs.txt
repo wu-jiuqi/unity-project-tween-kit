@@ -1,0 +1,8 @@
+using System;using System.IO;using UnityEditor;using UnityEditor.Build.Reporting;using UnityEngine;
+public static class EncouragementDragBuild {
+ public static void Windows(){Build(BuildTarget.StandaloneWindows64);}
+ public static void Android(){Build(BuildTarget.Android);}
+ static void Build(BuildTarget target){BuildEntry.Configure();BuildEntry.Rules();PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+ string path=Environment.GetEnvironmentVariable("BOUNCE_ENCOURAGEMENT_DRAG_OUTPUT");if(string.IsNullOrEmpty(path))throw new Exception("BOUNCE_ENCOURAGEMENT_DRAG_OUTPUT required");Directory.CreateDirectory(Path.GetDirectoryName(path));
+ var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=target,locationPathName=path,options=BuildOptions.CompressWithLz4HC,extraScriptingDefines=new[]{"BOUNCE_TEST_TOOLS"}});Debug.Log("ENCOURAGEMENT_DRAG_V18_BUILD "+r.summary.result+" errors="+r.summary.totalErrors+" warnings="+r.summary.totalWarnings);if(r.summary.result!=BuildResult.Succeeded)throw new Exception("Encouragement build failed");}
+}

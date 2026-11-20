@@ -1,0 +1,269 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public int SnowThaws {get;private set;}public int SnowClears {get;private set;}public int SnowCocoas {get;private set;}
+ public int PicnicServed {get;private set;}public int PicnicCookieBreaks {get;private set;}
+ public FusionLevelDefinition FusionDefinition {get;private set;}
+ public bool FusionActive=>FusionDefinition!=null;
+ public FusionMetrics FusionMetrics {get;private set;}=new FusionMetrics();
+ public IReadOnlyCollection<FusionRuntimePiece> FusionPieces=>fusionPieces.Values;
+ public IReadOnlyList<FusionEventRecord> FusionEvents=>fusionEvents;
+ public int FusionGoalsTotal=>fusionGoals.Count;
+ public int FusionGoalsCredited=>fusionGoals.Values.Count(g=>g.State==FusionGoalState.Credited);
+ public int FusionCurrentVolley=>fusionAttack!=null?fusionAttack.Volley:chainBurstSerial;
+ public string FusionCurrentNetwork=>fusionAttack?.Network??"";
+ public string FusionCurrentSource=>fusionAttack?.Source??"";
+ public long FusionAttackId=>fusionAttack?.Id??0;
+ public bool FusionActionsPending=>FusionActive&&FusionPending;
+ public string FusionRuleError {get;private set;}="";
+ internal readonly Dictionary<string,FusionRuntimePiece> fusionPieces=new Dictionary<string,FusionRuntimePiece>();
+ internal readonly Dictionary<string,FusionGoalUnit> fusionGoals=new Dictionary<string,FusionGoalUnit>();
+ readonly Dictionary<int,FusionRuntimePiece> fusionBricks=new Dictionary<int,FusionRuntimePiece>();
+ readonly Dictionary<ChainTool,FusionRuntimePiece> fusionTools=new Dictionary<ChainTool,FusionRuntimePiece>();
+ readonly List<FusionEventRecord> fusionEvents=new List<FusionEventRecord>();
+ readonly List<FusionQueuedAction> fusionQueue=new List<FusionQueuedAction>();
+ readonly HashSet<string> fusionPendingRemoval=new HashSet<string>();
+ readonly Dictionary<string,List<FusionRuntimePiece>> fusionBonds=new Dictionary<string,List<FusionRuntimePiece>>();
+ readonly Dictionary<string,int> fusionHoldThrough=new Dictionary<string,int>();
+ FusionLevelDefinition pendingFusionDefinition;int pendingFusionMoves,pendingFusionSeed;string pendingFusionLabel;
+ int fusionSeed,fusionRefills,fusionSerial,fusionRewardSpent;long fusionEventSerial,fusionAttackSerial,fusionCascadeSerial,fusionQueueSerial;
+ FusionAttackContext fusionAttack;
+ sealed class FusionAttackContext {
+  public long Id,Cascade,Parent;public int Volley,Depth;public string Source,Network;
+  public readonly Dictionary<string,FusionPreState> Snapshot=new Dictionary<string,FusionPreState>();
+  public readonly HashSet<string> DirectHits=new HashSet<string>(),EffectHits=new HashSet<string>(),GateHits=new HashSet<string>(),Progress=new HashSet<string>();
+ }
+ sealed class FusionPreState {public Vector2 Position;public bool Protected,Unripe,Enabled;public int Size;}
+ sealed class FusionQueuedAction {public Action Action;public float At;public int Generation,Volley,Depth;public string Network;public long Cascade,Parent,Order;}
+
+ public void StartFusionSample(FusionLevelDefinition definition,int moves,string label,int seed){
+  if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Fusion samples require an isolated profile.");
+  var errors=FusionRules.Validate(definition,moves);if(errors.Any(e=>e.IsError))throw new ArgumentException(string.Join("\n",errors.Where(e=>e.IsError).Select(e=>e.ObjectId+": "+e.Message)));
+  pendingFusionDefinition=definition;pendingFusionMoves=moves;pendingFusionLabel=label;pendingFusionSeed=seed;
+  try{StartSession(0,false);}finally{pendingFusionDefinition=null;}
+ }
+ void ConfigureFusionLevel(FusionLevelDefinition definition,int seed){
+  FusionDefinition=definition==null?null:JsonUtility.FromJson<FusionLevelDefinition>(JsonUtility.ToJson(definition));fusionSeed=seed;
+  if(FusionDefinition==null)return;
+  foreach(var p in FusionDefinition.pieces)if(p.contents!=null)for(int i=0;i<p.contents.Length;i++)p.contents[i].id=FusionRules.ContentId(p,i);
+ }
+ void ClearFusion(){SnowThaws=SnowClears=SnowCocoas=PicnicServed=PicnicCookieBreaks=0;
+  ClearFusionPresentation();
+  ClearFusionDevices();ClearFusionPhysics();fusionPieces.Clear();fusionBricks.Clear();fusionTools.Clear();fusionGoals.Clear();fusionQueue.Clear();fusionEvents.Clear();fusionPendingRemoval.Clear();fusionBonds.Clear();fusionHoldThrough.Clear();
+  fusionAttack=null;fusionRefills=fusionSerial=fusionRewardSpent=0;fusionEventSerial=fusionAttackSerial=fusionCascadeSerial=fusionQueueSerial=0;FusionDefinition=null;FusionMetrics=new FusionMetrics();FusionRuleError="";
+ }
+ void InitializeFusionGrid(){
+  FusionMetrics=new FusionMetrics{Seed=fusionSeed,PhysicsPolicy=FusionDefinition.physicsPolicy,LevelId=CurrentLevel.label,RuleVersion=FusionDefinition.ruleVersion};
+  foreach(var definition in FusionRules.Goals(FusionDefinition))fusionGoals.Add(definition.id,new FusionGoalUnit{Definition=definition,State=definition.reserved?FusionGoalState.Reserved:FusionGoalState.Active});
+  Array.Clear(CollectionGoal,0,CollectionGoal.Length);Array.Clear(Collected,0,Collected.Length);Array.Clear(JellyGoal,0,JellyGoal.Length);Array.Clear(JellyCollected,0,JellyCollected.Length);
+  foreach(var goal in fusionGoals.Values){if(goal.Definition.kind=="fish")CollectionGoal[0]++;else if(goal.Definition.kind=="toy")CollectionGoal[1]++;else JellyGoal[1]++;}
+  FusionMetrics.GoalsTotal=fusionGoals.Count;
+  foreach(var p in FusionDefinition.pieces.OrderBy(p=>p.r).ThenBy(p=>p.c))SpawnFusionPiece(p);
+  InitializeFusionDevices();ChainMessage=CurrentLevel.label;Physics2D.SyncTransforms();
+  FusionRecord("SessionStarted","",FusionGoalsTotal,"","active");
+ }
+ FusionRuntimePiece SpawnFusionPiece(FusionPieceDefinition definition){
+  var p=new FusionRuntimePiece{Definition=definition,Charge=definition.initialCharge,Stock=definition.stock,Ice=definition.ice,Layers=definition.layers};
+  if(definition.kind=="ice")p.Ice=Mathf.Max(1,p.Ice);
+  var position=ChainGridRules.Center(definition.c,definition.r,definition.size);p.LastPosition=position;
+  if(FusionRules.IsTool(definition.kind)){
+   int kind=definition.kind=="bomb"?2:definition.kind=="link"?3:definition.kind=="soda"?4:1;
+   p.Tool=SpawnChainTool(kind,position);p.Tool.Direction=FusionRules.Direction(definition.direction);p.Tool.ReadyAt=simulationClock;
+   fusionTools[p.Tool]=p;
+  }else{
+   var role=definition.kind=="stone"?BrickKind.Stone:definition.kind=="rear"?BrickKind.RearWeak:definition.armor||definition.kind=="armor"?BrickKind.Armor:BrickKind.Normal;
+   CreateBrick(new BrickSpawn{position=position,size=Vector2.one*(CollectionLevels.Pitch*definition.size-.06f),hp=definition.hp,kind=role,colorIndex=FusionRules.GoalKind(definition)=="jelly"?1:0,referenceCol=definition.c,referenceRow=definition.r,reveal="fusion-"+definition.kind},0);
+   p.Brick=CollectionBricks.Last();var box=p.Brick.GetComponent<BoxCollider2D>();box.size=Vector2.one*(CollectionLevels.Pitch*definition.size-.06f);
+   var grid=p.Brick.GetComponent<ChainGridPiece>();grid.Col=definition.c;grid.Row=definition.r;grid.Size=definition.size;
+   fusionBricks[p.Brick.Id]=p;
+  }
+  fusionPieces.Add(definition.id,p);
+  string own=definition.id+":goal";if(fusionGoals.TryGetValue(own,out var goal)){goal.State=FusionGoalState.Active;p.GoalIds.Add(own);}
+  if(definition.kind=="basket")for(int i=0;i<definition.stock;i++)p.GoalIds.Add(definition.id+":stock:"+i);
+  if(p.Transform!=null&&!FusionRules.IsDevice(definition.kind))p.Transform.gameObject.AddComponent<FusionPieceView>().Initialize(this,p);
+  return p;
+ }
+ internal FusionRuntimePiece FusionSpawnContent(FusionContentDefinition content,int c,int r,string network=""){
+  if(content==null||string.IsNullOrWhiteSpace(content.id)||c<0||c>8||r<0||r>8||fusionPieces.ContainsKey(content.id))return null;
+  var occupant=FusionAtCell(c,r);
+  if(occupant!=null&&(occupant.Definition.kind!="normal"||occupant.GoalIds.Count>0||occupant.Ice>0||occupant.Brick?.ShellIntact==true||fusionBonds.Values.Any(g=>g.Contains(occupant))))return null;
+  if(occupant?.Transform!=null&&chainMotions.Any(m=>m.View==occupant.Transform))return null;
+  var position=ChainGridRules.Center(c,r);if(!FusionSpawnSafe(position,1))return null;
+  if(occupant!=null)FusionRemove(occupant,false,false);
+  var item=new FusionPieceDefinition{id=content.id,kind=content.kind,goal=FusionRules.ContentGoal(content),c=c,r=r,hp=content.hp};
+  var result=SpawnFusionPiece(item);result.ProducerNetworkId=network??"";
+  FusionRecord("ContentActivated",item.id,1,"Reserved","Active");ScheduleChainGravity();return result;
+ }
+ internal FusionRuntimePiece FusionAtCell(int c,int r)=>fusionPieces.Values.FirstOrDefault(p=>p.Alive&&p.Transform!=null&&p.Transform.GetComponent<ChainGridPiece>() is ChainGridPiece g&&c>=g.Col&&c<g.Col+g.Size&&r>=g.Row&&r<g.Row+g.Size);
+ internal bool FusionSpawnSafe(Vector2 p,int size){
+  float half=CollectionLevels.Pitch*size*.5f+FlightGeometry.Radius+.04f;
+  foreach(var ball in active.Values.Where(b=>b.Active)){
+   Vector2 start=ball.Body.position-p,delta=ball.Body.linearVelocity*Time.fixedDeltaTime;float enter=0,leave=1;bool intersects=true;
+   for(int axis=0;axis<2;axis++){
+    if(Mathf.Abs(delta[axis])<.00001f){if(Mathf.Abs(start[axis])>half){intersects=false;break;}continue;}
+    float a=(-half-start[axis])/delta[axis],b=(half-start[axis])/delta[axis];enter=Mathf.Max(enter,Mathf.Min(a,b));leave=Mathf.Min(leave,Mathf.Max(a,b));if(enter>leave){intersects=false;break;}
+   }
+   if(intersects)return false;
+  }return true;
+ }
+ internal bool FusionProtected(FusionRuntimePiece p)=>p.Ice>0||p.Brick!=null&&p.Brick.ShellIntact;
+ internal bool FusionUnripe(FusionRuntimePiece p)=>p.Definition.kind=="strawberry"&&p.ClearedNeighbors.Count<p.Definition.ripenNeeds;
+ internal bool FusionBlocksRay(FusionRuntimePiece p)=>!p.Enabled||FusionProtected(p)||FusionUnripe(p)||p.Definition.kind=="stone"||p.Definition.kind=="gate"||p.Definition.kind=="snowball"||p.Definition.kind=="snowdrift";
+ internal void FusionPulse(Vector2 position,string label,Color color){ChainMessage=label;ChainVisualArt.Glint(this,position,3,.3f);EmitFeedback(position,"hit",color);changed=true;}
+ internal void FusionRecord(string kind,string target,int amount=0,string before="",string after=""){
+  fusionEvents.Add(new FusionEventRecord{SessionId=Generation,VolleyId=FusionCurrentVolley,LaunchStep=chainBurstSerial,PhysicsStep=PhysicsStep,EventId=++fusionEventSerial,AttackId=FusionAttackId,CascadeId=fusionAttack?.Cascade??0,ParentEventId=fusionAttack?.Parent??0,Time=simulationClock,Kind=kind,SourceId=FusionCurrentSource,TargetId=target,Network=FusionCurrentNetwork,Amount=amount,Before=before,After=after});
+ }
+ FusionVolleyMetrics FusionVolley(int volley){var metric=FusionMetrics.Volleys.FirstOrDefault(v=>v.VolleyId==volley);if(metric==null){metric=new FusionVolleyMetrics{VolleyId=volley,StartedAt=simulationClock};FusionMetrics.Volleys.Add(metric);}return metric;}
+ void FusionProgress(FusionRuntimePiece p,string kind){
+  bool relevant=p.GoalIds.Count>0||FusionRules.IsDevice(p.Definition.kind)||p.Definition.kind=="chest"||p.Definition.kind=="basket"||p.Definition.kind=="snowball"||p.Definition.kind=="snowdrift"||p.Definition.kind=="cocoa";
+  var v=FusionVolley(FusionCurrentVolley);if(relevant){FusionMetrics.Transitions++;v.Transitions++;v.LastProgressAt=simulationClock;}
+  if(fusionAttack!=null){if(fusionAttack.Progress.Count==0)v.ProductiveAttacks++;fusionAttack.Progress.Add(p.Definition.id);}
+  if(relevant){if(FusionMetrics.FirstProgressAt<0)FusionMetrics.FirstProgressAt=simulationClock;FusionMetrics.LastProgressAt=simulationClock;}FusionRecord(kind,p.Definition.id,1);changed=true;
+ }
+ internal void FusionCredit(string id){
+  if(!fusionGoals.TryGetValue(id,out var unit)||unit.State==FusionGoalState.Credited)return;
+  unit.State=FusionGoalState.Credited;if(unit.Definition.kind=="fish")Collected[0]++;else if(unit.Definition.kind=="toy")Collected[1]++;else JellyCollected[1]++;
+  FusionMetrics.GoalsCredited++;var volley=FusionVolley(FusionCurrentVolley);volley.ObjectiveCredits++;volley.LastProgressAt=simulationClock;
+  if(FusionMetrics.FirstProgressAt<0)FusionMetrics.FirstProgressAt=simulationClock;FusionMetrics.LastProgressAt=simulationClock;
+  if(FusionMetrics.FirstEightyPercentAt<0&&FusionGoalsCredited>=Mathf.CeilToInt(FusionGoalsTotal*.8f))FusionMetrics.FirstEightyPercentAt=simulationClock;
+  FusionRecord("GoalCredited",id,1,"Active","Credited");AddScore(ScoreRules.Objective);ShowFusionGoalFlight(id,unit.Definition.kind);FusionDevicesGoalCredited(id);changed=true;
+ }
+ internal void FusionQueue(Action action,float delay=0,int volley=0,string network=""){
+  fusionQueue.Add(new FusionQueuedAction{Action=action,At=simulationClock+Mathf.Max(0,delay),Generation=Generation,Volley=volley>0?volley:FusionCurrentVolley,Network=string.IsNullOrEmpty(network)?FusionCurrentNetwork:network,Cascade=fusionAttack?.Cascade??++fusionCascadeSerial,Parent=fusionEventSerial,Depth=(fusionAttack?.Depth??0)+1,Order=++fusionQueueSerial});
+ }
+ internal void FusionRunAttack(string source,int volley,Action action,string network=""){
+  if(!FusionActive||!IsPlaying||IsPaused)return;
+  var previous=fusionAttack;var context=new FusionAttackContext{Id=++fusionAttackSerial,Cascade=previous?.Cascade??++fusionCascadeSerial,Parent=previous!=null&&previous.Id==0?previous.Parent:fusionEventSerial,Source=source??"system",Network=string.IsNullOrEmpty(network)?previous?.Network??"":network,Volley=volley,Depth=(previous?.Depth??0)+1};
+  foreach(var p in fusionPieces.Values.Where(p=>p.Alive&&p.Transform!=null&&p.Transform.GetComponent<ChainTileVisibility>()?.Hidden!=true))context.Snapshot[p.Definition.id]=new FusionPreState{Position=p.Position,Protected=FusionProtected(p),Unripe=FusionUnripe(p),Enabled=p.Enabled,Size=p.Definition.size};
+  fusionAttack=context;FusionMetrics.Attacks++;FusionVolley(volley).MaxDepth=Mathf.Max(FusionVolley(volley).MaxDepth,context.Depth);
+  try{action();}finally{fusionAttack=previous;}
+ }
+ internal void FusionHit(FusionRuntimePiece p,int damage,Vector2 incoming,Vector2 point,bool direct=false,bool clear=false){
+  if(p==null||!p.Alive||!p.Enabled||damage<1||!FusionActive||!IsPlaying||IsPaused)return;
+  if(fusionAttack==null){FusionRunAttack("external",chainBurstSerial,()=>FusionHit(p,damage,incoming,point,direct,clear));return;}
+  if(!fusionAttack.Snapshot.TryGetValue(p.Definition.id,out var pre)||!pre.Enabled)return;
+  if(p.Definition.kind=="rear"&&!ChainRearEntry(p.Brick,incoming,point)){
+   ChainBlocks++;FusionRecord("RearBlocked",p.Definition.id);return;
+  }
+  if(fusionEarliestTool.TryGetValue(p.Definition.id,out int earliest)&&FusionCurrentVolley<earliest)return;
+  var hits=direct?fusionAttack.DirectHits:fusionAttack.EffectHits;if(!hits.Add(p.Definition.id))return;
+  if(pre.Protected){
+   if(!fusionAttack.GateHits.Add(p.Definition.id))return;
+   if(p.Ice>0){p.Ice--;SnowThaws++;FusionProgress(p,"IceRemoved");SoundService.Play("ice_break");}
+   else if(p.Brick!=null&&p.Brick.ShellIntact){p.Brick.BreakShell();ChainArmorBreaks++;FusionProgress(p,"ArmorRemoved");SoundService.Play("armor_break");}
+   FusionPulse(point,"保护解除",new Color(1,.8f,.4f));return;
+  }
+  if(pre.Unripe||p.Definition.kind=="stone"){ChainBlocks++;FusionRecord("Blocked",p.Definition.id);return;}
+  if(p.Tool!=null){QueueFusionTool(p);return;}
+  bool gate=FusionRules.IsDevice(p.Definition.kind)||p.Definition.kind=="basket"||p.Definition.kind=="snowball"||p.Definition.kind=="snowdrift";
+  if(gate&&!fusionAttack.GateHits.Add(p.Definition.id))return;
+  if(FusionRules.IsDevice(p.Definition.kind)){HandleFusionDeviceHit(p,damage,incoming,point,direct);return;}
+  if(p.Definition.kind=="basket"){
+   p.Progress++;FusionProgress(p,"BasketProgress");if(p.Progress>=p.Definition.hitsPerItem){p.Progress=0;FusionServe(p,1);}return;
+  }
+  if(p.Definition.kind=="snowball"||p.Definition.kind=="snowdrift"){FusionSnowHit(p,false);return;}
+  if(p.Definition.kind=="cookie"){StartFusionCookie(p,direct);return;}
+  FusionDamageBody(p,clear?int.MaxValue:damage,direct);
+ }
+ bool FusionDamageBody(FusionRuntimePiece p,int damage,bool direct){
+  if(p.Brick==null||!p.Brick.Alive)return false;int before=rules.Health(p.Brick.Id);
+  if(!rules.DamageTarget(p.Brick.Id,damage,out bool died))return false;
+  HitCount++;noDamageTime=0;ScoreImpact(p.Brick,before-rules.Health(p.Brick.Id),died);changed=true;
+  if(!died){p.Brick.Damage(rules.Health(p.Brick.Id));EmitFeedback(p.Position,"hit",p.Brick.Tint);FusionProgress(p,"BodyDamaged");return false;}
+  FusionRemove(p,true,true,direct);return true;
+ }
+ internal void FusionRemove(FusionRuntimePiece p,bool credit=true,bool notify=true,bool direct=false){
+  if(p==null||!p.Alive)return;
+  p.LastPosition=p.Position;p.Consumed=true;
+  if(p.Tool!=null){ChainTools.Remove(p.Tool);if(p.Tool.View!=null)p.Tool.View.gameObject.SetActive(false);}
+  if(p.Brick!=null){rules.DamageTarget(p.Brick.Id,int.MaxValue,out _);p.Brick.Remove();}
+  if(p.Transform!=null)chainMotions.RemoveAll(m=>m.View==p.Transform);
+  if(credit)foreach(var id in p.GoalIds)if(fusionGoals.TryGetValue(id,out var goal)&&goal.State==FusionGoalState.Active)FusionCredit(id);
+  if(!notify){ScheduleChainGravity();return;}
+  BreakCount++;if(direct)FusionVolley(FusionCurrentVolley).DirectBreaks++;else FusionVolley(FusionCurrentVolley).CascadeBreaks++;FusionProgress(p,"PieceRemoved");
+  EmitFeedback(p.LastPosition,"break",new Color(1,.79f,.36f));SoundService.Play("break");
+  if(p.Definition.kind=="chest")ReleaseFusionChest(p);
+  if(p.Definition.kind=="lemon")QueueFusionLemon(p);
+  if(p.Definition.kind=="cocoa")QueueFusionCocoa(p);
+  FusionNotifyNeighbors(p);FusionDevicesRemoved(p);CollapseFusionBonds(p);ScheduleChainGravity();
+ }
+ void FusionServe(FusionRuntimePiece basket,int amount){
+  int served=Mathf.Min(amount,basket.Stock);for(int i=0;i<served;i++){int index=basket.Definition.stock-basket.Stock;FusionCredit(basket.Definition.id+":stock:"+index);basket.Stock--;PicnicServed++;}
+  if(served>0){FusionPulse(basket.Position,"连锁出餐 +"+served,new Color(1,.8f,.35f));SoundService.Play("basket_serve");}
+  if(basket.Stock==0)FusionRemove(basket,false);
+ }
+ void ReleaseFusionChest(FusionRuntimePiece chest){
+  var grid=chest.Transform.GetComponent<ChainGridPiece>();int c=grid.Col,r=grid.Row;
+  for(int i=0;i<chest.Definition.contents.Length;i++){
+   var item=chest.Definition.contents[i];int x=c+i%2,y=r+i/2;fusionHoldThrough[x+":"+y]=int.MaxValue;
+   FusionQueue(()=>TryReleaseFusionContent(item,x,y,chest.ProducerNetworkId,simulationClock));
+  }ChainNestSplits++;FusionPulse(chest.LastPosition,"打开箱子 · 目标展开",new Color(1,.84f,.4f));SoundService.Play("large_box_split");
+ }
+ void TryReleaseFusionContent(FusionContentDefinition item,int c,int r,string network,float started){
+  if(!IsPlaying||CollectionVictoryPending)return;
+  if(FusionSpawnContent(item,c,r,network)!=null){fusionHoldThrough.Remove(c+":"+r);return;}
+  if(simulationClock-started>3&&ActiveBalls==0&&PendingBurstBalls==0){FusionRuleError="已获得的产物没有合法出生位："+item.id;FusionRecord("RuleError",item.id);SetPaused(true);ChainMessage=FusionRuleError;return;}
+  FusionQueue(()=>TryReleaseFusionContent(item,c,r,network,started),.05f);
+ }
+ void FusionSnowHit(FusionRuntimePiece p,bool warm){
+  int old=p.Layers;if(p.Definition.kind=="snowball"&&!warm&&++p.HitsInRing<p.Definition.hitsPerRing){FusionProgress(p,"SnowHit");return;}
+  p.HitsInRing=0;p.Layers=Mathf.Max(0,p.Layers-1);SnowClears++;FusionProgress(p,"SnowLayerRemoved");
+  if(p.Layers==0){FusionRemove(p);return;}
+  if(p.Definition.kind=="snowball"){
+   var grid=p.Transform.GetComponent<ChainGridPiece>();int newSize=p.Layers;var pos=ChainGridRules.Center(grid.Col,grid.Row,newSize);
+   p.Definition.size=newSize;grid.Size=newSize;p.Brick.GetComponent<BoxCollider2D>().size=Vector2.one*(CollectionLevels.Pitch*newSize-.06f);
+   p.Brick.GetComponent<Rigidbody2D>().position=pos;p.Transform.position=pos;Physics2D.SyncTransforms();ScheduleChainGravity();
+  }
+ }
+ void FusionNotifyNeighbors(FusionRuntimePiece removed){
+  if(removed.Definition.kind=="snowdrift")return;
+  foreach(var p in fusionPieces.Values.Where(p=>p.Alive&&p!=removed).ToArray()){
+   if(!FusionAdjacent(p,removed))continue;
+   if(p.Definition.kind=="strawberry"&&FusionUnripe(p)&&p.SeenRemovals.Add(removed.Definition.id)){
+    var source=removed.Transform.GetComponent<ChainGridPiece>();var dest=p.Transform.GetComponent<ChainGridPiece>();
+    foreach(var delta in new[]{new Vector2Int(0,-1),new Vector2Int(1,0),new Vector2Int(0,1),new Vector2Int(-1,0)}){int x=dest.Col+delta.x,y=dest.Row+delta.y,key=x+y*9;if(x>=source.Col&&x<source.Col+source.Size&&y>=source.Row&&y<source.Row+source.Size&&!p.ClearedNeighbors.Contains(key)){p.ClearedNeighbors.Add(key);FusionProgress(p,"RipenProgress");break;}}
+    if(!FusionUnripe(p))FusionPulse(p.Position,"草莓成熟",Color.red);
+   }
+   if(p.Definition.kind=="snowdrift"&&fusionAttack!=null)FusionHit(p,1,Vector2.up,p.Position);
+  }
+ }
+ internal bool FusionAdjacent(FusionRuntimePiece a,FusionRuntimePiece b){
+  float pitch=CollectionLevels.Pitch;var d=a.Position-b.Position;float edge=pitch*(a.Definition.size+b.Definition.size)*.5f;
+  return Mathf.Abs(Mathf.Abs(d.x)-edge)<pitch*.18f&&Mathf.Abs(d.y)<edge-pitch*.2f||Mathf.Abs(Mathf.Abs(d.y)-edge)<pitch*.18f&&Mathf.Abs(d.x)<edge-pitch*.2f;
+ }
+ void StartFusionCookie(FusionRuntimePiece trigger,bool direct){
+  if(fusionPendingRemoval.Contains(trigger.Definition.id))return;
+  var members=fusionPieces.Values.Where(p=>p.Alive&&p.Definition.kind=="cookie"&&!FusionProtected(p)).ToArray();var todo=new Queue<Tuple<FusionRuntimePiece,int>>();var seen=new HashSet<string>();todo.Enqueue(Tuple.Create(trigger,0));
+  long chain=++fusionCascadeSerial;
+  while(todo.Count>0){var next=todo.Dequeue();var p=next.Item1;if(!seen.Add(p.Definition.id))continue;fusionPendingRemoval.Add(p.Definition.id);int distance=next.Item2;
+   Action remove=()=>{fusionPendingRemoval.Remove(p.Definition.id);if(!p.Alive)return;FusionRemove(p,true,true,direct&&p==trigger);PicnicCookieBreaks++;foreach(var basket in fusionPieces.Values.Where(b=>b.Alive&&b.Definition.kind=="basket"&&FusionAdjacent(b,p)).ToArray())if(basket.SeenRemovals.Add("cookie:"+chain))FusionServe(basket,basket.Definition.bonusServings);};
+   if(p==trigger)remove();else FusionQueue(()=>FusionRunAttack("cookie:"+chain,FusionCurrentVolley,remove),distance*.07f);
+   foreach(var candidate in members)if(!seen.Contains(candidate.Definition.id)&&FusionAdjacent(candidate,p))todo.Enqueue(Tuple.Create(candidate,distance+1));
+  }
+ }
+ void QueueFusionLemon(FusionRuntimePiece lemon){var neighbors=fusionPieces.Values.Where(p=>p.Alive&&p.Definition.kind=="normal"&&!FusionProtected(p)&&FusionAdjacent(p,lemon)).ToArray();FusionQueue(()=>FusionRunAttack(lemon.Definition.id,FusionCurrentVolley,()=>{foreach(var p in neighbors)FusionHit(p,1,(p.Position-lemon.LastPosition).normalized,p.Position);}));}
+ void QueueFusionCocoa(FusionRuntimePiece cocoa){var candidates=fusionPieces.Values.Where(p=>p.Alive&&Mathf.Abs(p.Position.x-cocoa.LastPosition.x)<CollectionLevels.Pitch*(1.5f+(p.Definition.size-1)*.5f)&&Mathf.Abs(p.Position.y-cocoa.LastPosition.y)<CollectionLevels.Pitch*(1.5f+(p.Definition.size-1)*.5f)).ToArray();FusionQueue(()=>FusionRunAttack(cocoa.Definition.id,FusionCurrentVolley,()=>{SnowCocoas++;foreach(var p in candidates){if(!p.Alive||!fusionAttack.Snapshot.TryGetValue(p.Definition.id,out var pre)||!pre.Enabled||!fusionAttack.GateHits.Add(p.Definition.id))continue;if(pre.Protected){if(p.Ice>0){p.Ice--;FusionProgress(p,"IceRemoved");}continue;}if(p.Definition.kind=="snowball"||p.Definition.kind=="snowdrift")FusionSnowHit(p,true);}}));}
+
+ void TickFusion(float dt){
+  var ready=fusionQueue.Where(q=>q.At<=simulationClock).OrderBy(q=>q.At).ThenBy(q=>q.Order).ToArray();
+  foreach(var q in ready){fusionQueue.Remove(q);if(q.Generation!=Generation||CollectionVictoryPending)continue;var previous=fusionAttack;fusionAttack=new FusionAttackContext{Cascade=q.Cascade,Parent=q.Parent,Volley=q.Volley,Network=q.Network,Source="queued",Depth=q.Depth-1};try{q.Action();}finally{fusionAttack=previous;}}
+  TickFusionDevices(dt);TickFusionPhysics();TickChainGravity(dt);TickFusionPresentation(dt);
+  FusionMetrics.NoProgressVolleys=FusionMetrics.Volleys.Count(v=>v.VolleyId>0&&!chainBursts.ContainsKey(v.VolleyId)&&v.ObjectiveCredits==0&&v.Transitions==0);
+ }
+ bool FusionPending=>fusionQueue.Count>0||FusionDevicesPending;
+ bool ResolveFusion(out bool won){
+  won=false;if(FusionGoalsTotal>0&&FusionGoalsCredited==FusionGoalsTotal)return ResolveCollectionVictory(out won);
+  if(ActiveBalls>0||PendingBurstBalls>0||queuedShot.HasValue||FusionPending)return false;
+  if(Shots>0)return false;ClearBufferedChainShot();rules.CommitOutcome(false);return true;
+ }
+ void FusionBeginVolley(){FusionMetrics.Shots++;FusionVolley(chainBurstSerial);FusionRecord("VolleyStarted","",1);}
+ bool FusionGridFixed(ChainGridPiece grid)=>grid!=null&&fusionPieces.Values.Any(p=>p.Alive&&p.Transform==grid.transform&&(FusionRules.Fixed(p.Definition.kind)||!p.Enabled));
+ bool FusionReservedCell(int c,int r,int size=1){for(int y=r;y<r+size;y++)for(int x=c;x<c+size;x++)if(fusionHoldThrough.TryGetValue(x+":"+y,out int through)&&chainBurstSerial<=through)return true;return false;}
+ bool FusionCanSupply(int planned)=>!FusionActive||fusionRefills+planned<FusionDefinition.refillBudget;
+ void SpawnFusionRefill(int c,int r){var p=SpawnFusionPiece(new FusionPieceDefinition{id="refill:"+(++fusionSerial),kind="normal",c=c,r=r,hp=FusionDefinition.refillHp});fusionRefills++;FusionMetrics.Refills++;}
+ }
+}

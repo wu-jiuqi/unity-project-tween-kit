@@ -1,0 +1,40 @@
+using UnityEngine;
+
+namespace BounceGarden {
+// The node never translates, scales or adds an angle offset. AimPivot owns rotation.
+public sealed class RearCatLauncher:MonoBehaviour {
+ GameSession owner;
+ SpriteRenderer face;
+ YarnArt.Layout layout;
+ float clockMs,afterShot=10;
+ bool aiming,firing;
+ public int FrameIndex {get;private set;}
+ public float ClockMs=>clockMs;
+ public bool ShowLoadedBall=>afterShot>=.10f;
+ public SpriteRenderer Face=>face;
+ public void Initialize(GameSession session){
+  owner=session;layout=YarnArt.Calibration;
+  face=gameObject.AddComponent<SpriteRenderer>();face.sharedMaterial=WorldArt.BoardMaterial;face.sortingOrder=48;face.color=Color.white;
+  clockMs=0;ApplyFrame();
+ }
+ public void SetAiming(bool value){if(aiming==value)return;aiming=value;if(!aiming&&!firing){clockMs=0;ApplyFrame();}}
+ public void Fire(){
+  // Called only AFTER a real ball has been spawned. Never delay or gate gameplay.
+  firing=true;afterShot=0;clockMs=layout.contact_ms;ApplyFrame();
+ }
+ void Update(){
+  if(owner==null||!owner.IsPlaying||owner.IsPaused)return;
+  float dt=Time.deltaTime;afterShot+=dt;
+  if(firing){clockMs+=dt*1000;if(clockMs>=layout.duration_ms){firing=false;clockMs=0;}}
+  else if(aiming){clockMs=Mathf.Min(layout.contact_ms-.01f,clockMs+dt*1000);}
+  else clockMs=0;
+  ApplyFrame();
+ }
+ void ApplyFrame(){
+  int frame=0;float end=layout.frame_durations_ms[0];
+  while(frame<layout.frame_durations_ms.Length-1&&clockMs>=end)end+=layout.frame_durations_ms[++frame];
+  FrameIndex=frame;face.sprite=YarnArt.CatFrame(frame);
+  
+ }
+}
+}

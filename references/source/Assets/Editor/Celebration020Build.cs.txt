@@ -1,0 +1,27 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class Celebration020Build {
+ public static void Validate(){
+  foreach(string key in new[]{"ribbon","star","confetti","halo"})if(BounceGarden.GoalCelebrationArt.Get(key)==null)throw new Exception("Celebration asset missing: "+key);
+  if(BounceGarden.FeedbackProfile.Active.hitStopBudget>.031f)throw new Exception("Old hitstop budget still active");
+  Debug.Log("CELEBRATION020_ASSETS_OK generated=4 hitStopBudget="+BounceGarden.FeedbackProfile.Active.hitStopBudget);
+ }
+ public static void Windows(){
+  Validate();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  string path=Path.GetFullPath(Environment.GetEnvironmentVariable("BOUNCE_CELEBRATION_NATIVE")??"../../Builds/Celebration-v020-r1/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+  Debug.Log("CELEBRATION020_BUILD "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings);
+  if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Celebration build failed");
+ }
+}
+public sealed class Celebration020Importer:AssetPostprocessor {
+ void OnPreprocessTexture(){
+  if(!assetPath.Contains("/Art/GoalCelebrationV1/"))return;
+  var importer=(TextureImporter)assetImporter;importer.textureType=TextureImporterType.Default;importer.alphaIsTransparency=true;importer.mipmapEnabled=false;
+  importer.npotScale=TextureImporterNPOTScale.None;importer.maxTextureSize=1024;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.filterMode=FilterMode.Bilinear;importer.wrapMode=TextureWrapMode.Clamp;
+ }
+}

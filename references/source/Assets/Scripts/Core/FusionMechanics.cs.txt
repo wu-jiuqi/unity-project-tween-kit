@@ -1,0 +1,206 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+[Serializable] public sealed class FusionLevelDefinition {
+ public int schemaVersion=1,ruleVersion=1;
+ public string physicsPolicy="no_ball_ball";
+ public bool ratingRewards=false,finiteBoosters=true;
+ public int ratingRewardBudget=2,piercePerBall=3,bombPerBall=2,superPerBall=1,superRange=9,refillHp=1,refillBudget=120;
+ public string[] requiredMechanisms=Array.Empty<string>(),introducedMechanisms=Array.Empty<string>();
+ public FusionPieceDefinition[] pieces=Array.Empty<FusionPieceDefinition>();
+ public FusionMilestoneDefinition[] milestones=Array.Empty<FusionMilestoneDefinition>();
+}
+[Serializable] public sealed class FusionPieceDefinition {
+ public string id,kind="normal",goal="",direction="up",group="",network="",activationMode="either",condition="all";
+ public int c,r,size=1,hp=1,ice=0,threshold=3,initialCharge=0,stock=2,hitsPerItem=3,bonusServings=2,ripenNeeds=2,layers=2,hitsPerRing=2,range=5,damage=2,batchSize=3;
+ public bool armor=false,autoActivate=true;
+ public string[] links=Array.Empty<string>();
+ public string[] eligibleGoals=Array.Empty<string>();
+ public Vector2Int[] spawnCells=Array.Empty<Vector2Int>(),fallbackCells=Array.Empty<Vector2Int>();
+ public string[] rewardSequence={"blast","assistant","activate"};
+ public FusionContentDefinition[] contents=Array.Empty<FusionContentDefinition>();
+}
+[Serializable] public sealed class FusionContentDefinition {
+ public string id,kind="normal",goal="";public int hp=1;
+}
+[Serializable] public sealed class FusionMilestoneDefinition {
+ public string id,kind="assistant";public int threshold,count=1;public string[] links=Array.Empty<string>();
+}
+[Serializable] public sealed class FusionValidationIssue {
+ public string ObjectId,Message;public bool IsError;
+ public FusionValidationIssue(string id,string message,bool error=true){ObjectId=id;Message=message;IsError=error;}
+}
+[Serializable] public sealed class FusionGoalDefinition {public string id,kind,ownerId;public bool reserved;}
+public enum FusionGoalState {Reserved,Active,Credited}
+public sealed class FusionGoalUnit {public FusionGoalDefinition Definition;public FusionGoalState State;}
+public sealed class FusionRuntimePiece {
+ public FusionPieceDefinition Definition;public BrickBody Brick;public ChainTool Tool;
+ public bool Consumed,Enabled=true;public int Charge,Stock,Progress,Ice,Layers,HitsInRing;
+ public string ProducerNetworkId="";public readonly HashSet<int> ClearedNeighbors=new HashSet<int>();
+ public readonly HashSet<string> SeenRemovals=new HashSet<string>();
+ public readonly List<string> GoalIds=new List<string>();
+ public Vector2 LastPosition;
+ public Vector2 Position=>Brick!=null?(Brick.GetComponent<Rigidbody2D>()!=null?Brick.GetComponent<Rigidbody2D>().position:(Vector2)Brick.transform.position):Tool!=null&&Tool.View!=null?Tool.Position:LastPosition;
+ public Transform Transform=>Brick!=null?Brick.transform:Tool!=null?Tool.View:null;
+ public bool Alive=>!Consumed&&(Brick==null||Brick.Alive);
+}
+[Serializable] public sealed class FusionEventRecord {
+ public int SessionId,VolleyId,LaunchStep,PhysicsStep;public long EventId,AttackId,CascadeId,ParentEventId;
+ public float Time;public string Kind,SourceId,TargetId,Network,Before,After;public int Amount;
+}
+[Serializable] public sealed class FusionVolleyMetrics {
+ public int VolleyId,DirectBreaks,CascadeBreaks,Transitions,ObjectiveCredits,ToolActivations,MaxDepth,ProductiveAttacks;
+ public float StartedAt,LastProgressAt;
+}
+[Serializable] public sealed class FusionMetrics {
+ public string Ruleset="fusion_v1",PhysicsPolicy,LevelId;
+ public int RuleVersion=1,Seed,Shots,GoalsTotal,GoalsCredited,Attacks,ToolActivations,Combos,Transitions,GeneratedTools,Refills,NoProgressVolleys;
+ public float FirstProgressAt=-1,LastProgressAt,FirstEightyPercentAt=-1;
+ public List<FusionVolleyMetrics> Volleys=new List<FusionVolleyMetrics>();
+}
+
+// Shared authoring/runtime rules. Unknown kinds remain editable JSON, but cannot run.
+public static class FusionRules {
+ public const string Profile="fusion_v1";
+ public static readonly string[] Kinds={
+#if BOUNCE_LEVEL_EDITOR
+ "rear",
+#endif
+ "normal","fish","toy","jelly","stone","armor","ice","chest","basket","cookie","lemon","strawberry","snowball","snowdrift","cocoa","line_h","line_v","cross","bomb","link","soda","producer","cannon","vine","battery","key","gate","assistant","reward"};
+ public static readonly string[] PhysicsPolicies={"legacy_all","no_ball_ball","entry_protected","same_volley_only"};
+ public static readonly string[] SupportedMechanisms={"CORE-01","CORE-02","CORE-03","CORE-04","CHAIN-01","CHAIN-02","CHAIN-03","CHAIN-04","CHAIN-05","GOAL-01","GOAL-02","BRK-01","BRK-02","BRK-03","BRK-05","SP-01","SP-02","SP-03","SP-04","SP-07","SP-08","SP-09","SP-10","SP-11","COM-01","COM-02","COM-03","ITEM-01","ITEM-02","ITEM-03","DEV-01","DEV-02","DEV-03","DEV-04","DEV-05","DEV-06","DEV-07","DEV-08","DEV-09","DEV-10","OBJ-01","TERR-05","TERR-06","MATCH-03","SYS-01","SYS-02","SYS-03","SYS-04","SYS-05","SYS-06"};
+ public static bool IsTool(string kind)=>kind=="line_h"||kind=="line_v"||kind=="cross"||kind=="bomb"||kind=="link"||kind=="soda";
+ public static bool IsDevice(string kind)=>kind=="producer"||kind=="cannon"||kind=="vine"||kind=="battery"||kind=="key"||kind=="gate"||kind=="assistant"||kind=="reward";
+ public static bool Fixed(string kind)=>kind=="stone"||kind=="snowball"||kind=="snowdrift"||IsDevice(kind);
+ public static string GoalKind(FusionPieceDefinition p)=>!string.IsNullOrEmpty(p.goal)?p.goal:p.kind=="fish"?"fish":p.kind=="toy"?"toy":p.kind=="jelly"||p.kind=="lemon"||p.kind=="strawberry"?"jelly":"";
+ public static string ContentGoal(FusionContentDefinition p)=>!string.IsNullOrEmpty(p.goal)?p.goal:p.kind=="fish"?"fish":p.kind=="toy"?"toy":p.kind=="jelly"?"jelly":"";
+ public static string ContentId(FusionPieceDefinition owner,int i)=>owner.contents!=null&&i>=0&&i<owner.contents.Length&&owner.contents[i]!=null&&!string.IsNullOrWhiteSpace(owner.contents[i].id)?owner.contents[i].id:owner.id+":content:"+i;
+ public static Vector2 Direction(string direction)=>direction=="left"?Vector2.left:direction=="right"?Vector2.right:direction=="down"?Vector2.down:Vector2.up;
+ public static FusionPieceDefinition DefaultPiece(string kind,int c,int r){
+  var p=new FusionPieceDefinition{id=Guid.NewGuid().ToString("N"),kind=kind,c=c,r=r};
+  if(kind=="armor"){p.armor=true;p.hp=2;}
+  if(kind=="ice"){p.ice=1;p.hp=2;}
+  if(kind=="chest"){p.size=2;p.hp=8;p.contents=Enumerable.Range(0,4).Select(i=>new FusionContentDefinition{goal=i%2==0?"fish":"toy",hp=1}).ToArray();}
+  if(kind=="basket"){p.size=2;p.stock=10;}
+  if(kind=="producer"){p.stock=2;p.threshold=2;p.contents=Enumerable.Range(0,6).Select(i=>new FusionContentDefinition{goal=i%2==0?"fish":"toy"}).ToArray();}
+  if(kind=="snowball"){p.size=2;p.layers=2;}
+  if(kind=="strawberry"||kind=="lemon")p.hp=2;
+  if(kind=="battery")p.threshold=4;
+  if(kind=="vine")p.damage=1;
+  if(kind=="cannon")p.activationMode="neighbor";
+  if(kind=="producer")p.activationMode="direct";
+  if(kind=="assistant"){p.threshold=2;p.stock=2;}
+  if(kind=="gate"||kind=="key")p.threshold=1;
+  return p;
+ }
+ public static List<FusionGoalDefinition> Goals(FusionLevelDefinition definition){
+  var result=new List<FusionGoalDefinition>();
+  if(definition?.pieces==null)return result;
+  foreach(var p in definition.pieces){
+   if(p==null)continue;string kind=GoalKind(p);
+   if(!string.IsNullOrEmpty(kind))result.Add(new FusionGoalDefinition{id=p.id+":goal",kind=kind,ownerId=p.id});
+   // Invalid imported budgets are reported by Validate; never allocate them in a draft preview.
+   if(p.kind=="basket"&&p.stock>=0&&p.stock<=30)for(int i=0;i<p.stock;i++)result.Add(new FusionGoalDefinition{id=p.id+":stock:"+i,kind="fish",ownerId=p.id,reserved=true});
+   if((p.kind=="chest"||p.kind=="producer")&&p.contents!=null)for(int i=0;i<p.contents.Length;i++){
+    var item=p.contents[i];if(item==null)continue;string goal=ContentGoal(item);if(!string.IsNullOrEmpty(goal))result.Add(new FusionGoalDefinition{id=ContentId(p,i)+":goal",kind=goal,ownerId=p.id,reserved=true});
+   }
+  }return result;
+ }
+ public static List<FusionValidationIssue> Validate(FusionLevelDefinition d,int moves,bool requireFullBoard=true){
+  var errors=new List<FusionValidationIssue>();Action<string,string> error=(id,msg)=>errors.Add(new FusionValidationIssue(id,msg));
+  if(d==null){error("","缺少 fusion 配置。");return errors;}
+  if(d.schemaVersion!=1||d.ruleVersion!=1)error("","不支持的融合机制数据或规则版本。");
+  if(moves<1||moves>999)error("","发射步数须为 1–999。");
+  if(!PhysicsPolicies.Contains(d.physicsPolicy))error("","未知球碰撞档案。");
+  foreach(var id in (d.requiredMechanisms??Array.Empty<string>()).Concat(d.introducedMechanisms??Array.Empty<string>()))if(!SupportedMechanisms.Contains(id)&&!Kinds.Contains(id)&&!(id=="BRK-04"&&Kinds.Contains("rear")))error("","尚未接入的机制声明："+id);
+  if(d.refillHp<1||d.refillHp>9||d.refillBudget<0||d.refillBudget>999)error("","补位血量须为 1–9，总预算须为 0–999。");
+  if(d.ratingRewardBudget<0||d.ratingRewardBudget>20)error("","评级工具预算须为 0–20。");
+  if(d.piercePerBall<1||d.piercePerBall>10||d.bombPerBall<1||d.bombPerBall>10||d.superPerBall<1||d.superPerBall>10)error("","强化球每球次数须为 1–10。");
+  if(d.superRange<1||d.superRange>9)error("","光球射程须为 1–9 格。");
+  var pieces=d.pieces??Array.Empty<FusionPieceDefinition>();var ids=new HashSet<string>();var map=new Dictionary<string,FusionPieceDefinition>();var cells=new string[9,9];
+  foreach(var p in pieces){
+   if(p==null){error("","空实体记录。");continue;}
+   if(string.IsNullOrWhiteSpace(p.id)||!ids.Add(p.id)){error(p.id,"实体 ID 为空或重复。");continue;}map[p.id]=p;
+   if(!Kinds.Contains(p.kind)){error(p.id,"未知或尚未接入的机制："+p.kind);continue;}
+   if(p.size<1||p.size>4||p.c<0||p.r<0||p.c>9-p.size||p.r>9-p.size){error(p.id,"对象超出 9×9 棋盘。");continue;}
+   if(p.kind!="chest"&&p.kind!="basket"&&p.kind!="snowball"&&p.size!=1)error(p.id,"该机制只支持 1×1。");
+   if((p.kind=="chest"||p.kind=="basket")&&p.size!=2)error(p.id,"箱和出货篮必须为 2×2。");
+   for(int y=p.r;y<p.r+p.size;y++)for(int x=p.c;x<p.c+p.size;x++){if(cells[x,y]!=null)error(p.id,"占格与 "+cells[x,y]+" 重叠。");else cells[x,y]=p.id;}
+   if(p.hp<1||p.hp>99)error(p.id,"本体血量须为 1–99。");
+   if(p.kind=="rear"&&(p.hp!=1||p.armor||p.ice>0))error(p.id,"背击砖为单次有效顶部命中，不叠加血量、护甲或冰。");
+   if(p.ice<0||p.ice>1||(p.armor||p.kind=="armor")&&(p.ice>0||p.kind=="ice"))error(p.id,"仅支持单层附着冰，护甲和冰不可叠加。");
+   if(p.kind=="stone"&&(p.armor||p.ice>0||!string.IsNullOrEmpty(GoalKind(p))))error(p.id,"固定石不能带保护或必需目标。");
+   if(!new[]{"","fish","toy","jelly"}.Contains(GoalKind(p)))error(p.id,"P1 只支持鱼、玩具和果冻目标。");
+   if(IsTool(p.kind)&&!string.IsNullOrEmpty(GoalKind(p)))error(p.id,"P1 工具不承载直接收集目标。");
+   if((p.kind=="gate"||p.kind=="basket")&&!string.IsNullOrEmpty(p.goal))error(p.id,"门不计收集目标，出货篮只统计库存产物。");
+   if(new[]{"cannon","producer","reward","assistant"}.Contains(p.kind)&&!string.IsNullOrEmpty(p.goal)&&p.stock<1)error(p.id,"携带目标的装置至少需要一份可兑现库存。");
+   if((IsDevice(p.kind)||p.kind=="basket")&&(p.stock<0||p.stock>30||p.threshold<1||p.threshold>20||p.initialCharge<0||p.initialCharge>=p.threshold))error(p.id,"库存须为 0–30；充能门槛须为 1–20，初始能量必须小于门槛。");
+   if(p.hitsPerItem<1||p.hitsPerItem>10||p.bonusServings<0||p.bonusServings>10)error(p.id,"出货命中门槛或加餐数量不合法。");
+   if(p.ripenNeeds<1||p.ripenNeeds>4)error(p.id,"成熟需要 1–4 个不同邻格。");
+   if(p.layers<1||p.layers>4||p.hitsPerRing<1||p.hitsPerRing>8)error(p.id,"雪层须为 1–4，圈层触点须为 1–8。");
+   if(p.kind=="snowball"&&p.layers!=p.size)error(p.id,"雪球初始层数须与占位边长相同。");
+   if(!new[]{"up","down","left","right"}.Contains(p.direction))error(p.id,"方向必须为上下左右之一。");
+   if(!new[]{"direct","neighbor","either"}.Contains(p.activationMode))error(p.id,"触发方式须为 direct、neighbor 或 either。");
+   if(p.condition!="all"&&p.condition!="any")error(p.id,"关联条件须为 all 或 any。");
+   if((p.eligibleGoals??Array.Empty<string>()).Any(g=>g!="fish"&&g!="toy"&&g!="jelly"))error(p.id,"充能目标类别只支持 fish、toy、jelly。");
+   foreach(var cell in (p.spawnCells??Array.Empty<Vector2Int>()).Concat(p.fallbackCells??Array.Empty<Vector2Int>()))if(cell.x<0||cell.x>8||cell.y<0||cell.y>8)error(p.id,"出货位置超出棋盘。");
+   if(p.range<1||p.range>9||p.damage<1||p.damage>99)error(p.id,"作用长度须为 1–9，伤害须为 1–99。");
+   if(p.kind=="chest"&&(p.contents==null||p.contents.Length!=4))error(p.id,"2×2 箱必须配置四个产物（允许普通非目标产物）。");
+   if(p.kind=="producer"&&(p.batchSize<1||p.batchSize>4||p.stock<1||p.stock>3||p.contents==null||p.contents.Length!=p.stock*p.batchSize))error(p.id,"生产器须为 1–3 批、每批 1–4 件，产物总数必须等于批数×每批件数。");
+   if(p.contents!=null)for(int i=0;i<p.contents.Length;i++){
+    var item=p.contents[i];if(item==null){error(p.id,"产物记录为空。");continue;}
+    if(!new[]{"normal","fish","toy","jelly"}.Contains(item.kind)||!new[]{"","fish","toy","jelly"}.Contains(ContentGoal(item))||item.hp<1||item.hp>9)error(p.id,"产物仅支持普通/鱼/玩具/果冻，血量 1–9。");
+   }
+   if(p.kind=="vine"&&string.IsNullOrWhiteSpace(p.group))error(p.id,"花藤必须设置共享组 ID。");
+   if(p.kind=="reward"&&(p.rewardSequence==null||p.rewardSequence.Length==0||p.rewardSequence.Any(s=>s!="blast"&&s!="assistant"&&s!="activate")))error(p.id,"奖励序列只支持 blast、assistant、activate。");
+  }
+  if(requireFullBoard&&Enumerable.Range(0,81).Any(i=>cells[i%9,i/9]==null))error("","P0/P1 样板仍须填满 9×9；空洞留给 P2 棋盘格式。");
+  foreach(var p in pieces.Where(p=>p!=null)){
+   foreach(var id in p.links??Array.Empty<string>())if(string.IsNullOrEmpty(id)||!map.ContainsKey(id))error(p.id,"关联对象不存在："+id);
+   if(p.kind=="gate"&&(p.links==null||p.links.Length==0))error(p.id,"门必须关联至少一个钥匙或节点。");
+   if(p.kind=="gate")foreach(var id in p.links??Array.Empty<string>())if(map.TryGetValue(id,out var key)&&key.kind!="key"&&key.kind!="vine")error(p.id,"门只接受钥匙或花藤端点，禁止钥匙门循环。");
+   if(p.kind=="battery"&&(p.links==null||p.links.Length==0))error(p.id,"电池必须关联预置工具。");
+   if(p.kind=="battery")foreach(var id in p.links??Array.Empty<string>())if(map.TryGetValue(id,out var t)&&!IsTool(t.kind))error(p.id,"电池关联必须为棋盘工具。");
+   if(p.kind=="producer"){
+    // Match FusionProducerCells: an explicit list replaces the default board-wide fallback.
+    // Only permanent stones and this producer are provably unavailable before its first batch.
+    var candidates=(p.spawnCells??Array.Empty<Vector2Int>()).Concat(p.fallbackCells??Array.Empty<Vector2Int>()).Distinct().ToList();
+    if(candidates.Count==0)candidates=Enumerable.Range(0,81).Select(i=>new Vector2Int(i%9,i/9)).ToList();
+    int possible=candidates.Count(cell=>cell.x>=0&&cell.x<9&&cell.y>=0&&cell.y<9
+     &&(cells[cell.x,cell.y]==null||map.TryGetValue(cells[cell.x,cell.y],out var occupant)&&occupant!=p&&occupant.kind!="stone"));
+    if(possible<p.batchSize)error(p.id,"生产器可用出货位少于每批件数；去重后须排除自身和固定石，显式位置不会自动扩展到全棋盘。");
+   }
+   if(p.kind=="strawberry"){
+    int neighbors=0;foreach(var delta in new[]{new Vector2Int(0,-1),new Vector2Int(1,0),new Vector2Int(0,1),new Vector2Int(-1,0)}){
+     int x=p.c+delta.x,y=p.r+delta.y;if(x>=0&&x<9&&y>=0&&y<9&&cells[x,y]!=null&&map.TryGetValue(cells[x,y],out var n)&&n.kind!="stone"&&n.kind!="gate")neighbors++;
+    }if(requireFullBoard&&neighbors<p.ripenNeeds)error(p.id,"草莓没有足够可清理邻格。");
+   }
+  }
+  var allIds=new HashSet<string>(ids);
+  foreach(var p in pieces.Where(p=>p!=null&&(p.kind=="chest"||p.kind=="producer")))for(int i=0;i<(p.contents?.Length??0);i++)if(!allIds.Add(ContentId(p,i)))error(p.id,"产物 ID 与实体或其他产物重复。");
+  var goals=Goals(d);if(goals.Count==0&&requireFullBoard)error("","至少需要一个必需收集目标。");
+  if(goals.GroupBy(g=>g.id).Any(g=>g.Count()>1))error("","目标单位 ID 重复。");
+  foreach(var p in pieces.Where(p=>p!=null&&p.kind=="battery")){
+   var allowed=p.eligibleGoals??Array.Empty<string>();
+   // A device's own goal is credited only after discharge and cannot fund that discharge.
+   int available=goals.Count(g=>g.ownerId!=p.id&&(allowed.Length==0||allowed.Contains(g.kind)));
+   if((long)p.threshold-p.initialCharge>available)error(p.id,"电池剩余充能门槛超过可收集的合格目标数（不计电池自身目标）。");
+  }
+  var milestoneIds=new HashSet<string>();foreach(var m in d.milestones??Array.Empty<FusionMilestoneDefinition>()){
+   if(m==null||string.IsNullOrWhiteSpace(m.id)||!milestoneIds.Add(m.id)){error("","里程碑 ID 为空或重复。");continue;}
+   if(m.threshold<1||m.threshold>=goals.Count||m.count<1||m.count>3)error(m.id,"里程碑应在完成前触发，奖励次数 1–3。");
+   if(m.kind!="assistant"&&m.kind!="activate")error(m.id,"里程碑只支持助手或预置工具唤醒。");
+   var linked=(m.links??Array.Empty<string>()).Distinct().ToArray();
+   if(m.kind=="assistant"&&linked.Length>0)error(m.id,"助手里程碑不使用关联工具，请清空 links。");
+   if(m.kind=="activate"&&(linked.Length==0||linked.Length>m.count))error(m.id,"唤醒里程碑须关联 1–count 个不同工具，避免预锁工具超过本次唤醒额度。");
+   foreach(var id in m.links??Array.Empty<string>())if(!map.TryGetValue(id,out var t)||!IsTool(t.kind))error(m.id,"里程碑关联工具不存在。");
+  }
+  if((d.milestones?.Length??0)>2)error("","P1 每关最多两项收集里程碑。");
+  foreach(var group in pieces.Where(p=>p!=null&&p.kind=="vine").GroupBy(p=>p.group))if(group.Select(p=>p.threshold).Distinct().Count()>1)error(group.First().id,"共享花藤组的充能门槛必须一致。");
+  return errors;
+ }
+}
+}

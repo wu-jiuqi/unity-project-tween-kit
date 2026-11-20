@@ -1,0 +1,44 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class MainlineArt {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ static readonly Dictionary<int,Sprite[]> palettes=new Dictionary<int,Sprite[]>();
+ public static readonly Color[] Palette={Hex("FFF0CF"),Hex("695169"),Hex("EAA0A8"),Hex("9CCEB0"),Hex("F0CC80"),Hex("BEA4D3"),Hex("A6CFDD"),Hex("BE9576"),Hex("F0AD83")};
+ static Color Hex(string s){ColorUtility.TryParseHtmlString("#"+s,out var c);return c;}
+ public static Sprite Art(int index,bool rough=false){string key="art-"+index+"-"+rough;if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/Mainline/"+(rough?"splatter":"collection"));float w=t.width/5f,h=t.height/4f;s=Sprite.Create(t,new Rect(index%5*w,(3-index/5)*h,w,h),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);cache[key]=s;return s;}
+ public static Sprite[] Frames(int color){if(palettes.TryGetValue(color,out var a))return a;var t=Resources.Load<Texture2D>("Art/Mainline/palette-"+color);a=new Sprite[16];for(int f=0;f<16;f++)a[f]=Sprite.Create(t,new Rect(f%4*256,(3-f/4)*256,256,256),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);palettes[color]=a;return a;}
+ public static Sprite Stamp(int stage,int index){string key="paint-"+stage+"-"+index;if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/Mainline/paint-"+stage);s=Sprite.Create(t,new Rect(index%12*64,(11-index/12)*64,64,64),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);cache[key]=s;return s;}
+ public static Sprite Frame(string sheet,int row,int frame){string key=sheet+row+"-"+frame;if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/Mainline/"+sheet);s=Sprite.Create(t,new Rect(frame*256,(3-row)*256,256,256),Vector2.one*.5f,256,0,SpriteMeshType.FullRect);cache[key]=s;return s;}
+}
+public sealed class MainlineCanvas:MonoBehaviour {
+ sealed class Mark {public SpriteRenderer renderer;public float age;public Vector3 scale;public bool revealed;}
+ readonly Dictionary<int,Mark> marks=new Dictionary<int,Mark>();GameSession owner;
+ public int RevealedCount {get;private set;}public int MarkCount=>marks.Count;
+ public bool MappingValid(){foreach(var b in owner.MainlineBricks){if(!marks.TryGetValue(b.Id,out var m)||Vector2.Distance(m.renderer.transform.position,b.Definition.position+b.Definition.paintOffset)>.001f)return false;}return marks.Count==owner.MainlineBricks.Count;}
+ public void Initialize(GameSession game){owner=game;var paper=new GameObject("Fox-style cream painting paper");paper.transform.SetParent(transform,false);paper.transform.localPosition=new Vector2(0,1.95f);var ps=paper.AddComponent<SpriteRenderer>();ps.sprite=PaintingArt.Image("paper");ps.color=new Color32(248,242,233,255);ps.sortingOrder=-8;ps.sharedMaterial=WorldArt.BoardMaterial;paper.transform.localScale=Vector3.one*(7.68f/ps.sprite.bounds.size.x);
+  foreach(var b in game.MainlineBricks){var d=b.Definition;var go=new GameObject("Same-position same-color paint "+b.Id);go.transform.SetParent(transform,false);go.transform.localPosition=d.position+d.paintOffset;var sr=go.AddComponent<SpriteRenderer>();sr.sprite=MainlineArt.Stamp(game.LevelIndex+1,d.paintIndex);sr.sharedMaterial=WorldArt.BoardMaterial;sr.sortingOrder=0;go.SetActive(false);marks[b.Id]=new Mark{renderer=sr,scale=Vector3.one*(.60f/.64f)};}
+ }
+ public void Reveal(BrickBody b){if(!marks.TryGetValue(b.Id,out var m)||m.revealed)return;m.revealed=true;m.age=0;RevealedCount++;m.renderer.gameObject.SetActive(true);Render(m);MainlineFrameFx.Play(owner,transform,"effects",3,b.transform.position,.65f);}
+ void Update(){if(owner==null||owner.IsPaused)return;foreach(var m in marks.Values)if(m.revealed&&m.age<.26f){m.age+=Time.deltaTime;Render(m);}}
+ static void Render(Mark m){float u=Mathf.Clamp01(m.age/.26f);float s=.4f+.6f*(1-Mathf.Pow(1-u,3))+.06f*Mathf.Sin(u*Mathf.PI);m.renderer.transform.localScale=m.scale*s;m.renderer.color=new Color(1,1,1,.60f*Mathf.Min(1,u*3));}
+}
+public sealed class MainlineBrickView:MonoBehaviour {
+ GameSession owner;BrickBody brick;SpriteRenderer feature;float age;readonly List<SpriteRenderer> links=new List<SpriteRenderer>();
+ public void Initialize(GameSession game,BrickBody target){owner=game;brick=target;var d=brick.Definition;if(d.kind==BrickKind.Guide)JellyBrickArt.Fit(brick.Face,.38f,.38f);if(d.kind==BrickKind.Normal)return;
+  var go=new GameObject("Generated jelly special device");go.transform.SetParent(brick.Face.transform.parent,false);feature=go.AddComponent<SpriteRenderer>();feature.sharedMaterial=WorldArt.BoardMaterial;feature.sortingOrder=38;go.transform.localScale=Vector3.one*.61f;
+  if(d.kind==BrickKind.Rainbow&&d.axis==1)go.transform.localRotation=Quaternion.Euler(0,0,90);if(d.kind==BrickKind.Guide){go.transform.rotation=Quaternion.identity;go.transform.localScale=Vector3.one*.63f;feature.flipX=d.angle<0;}
+  if(d.kind==BrickKind.Resonance||d.kind==BrickKind.Switch)foreach(var b in game.MainlineBricks)if(b!=brick&&d.juiceGroup==b.Definition.juiceGroup&&(d.kind==BrickKind.Resonance&&b.Definition.kind==d.kind&&b.Id>brick.Id||d.kind==BrickKind.Switch&&b.Definition.kind==BrickKind.Seal)){
+   var a=(Vector2)brick.transform.position;var z=(Vector2)b.transform.position;var line=WorldArt.Draw(owner.MainlinePainting.transform,"Visible relation "+brick.Id+" to "+b.Id,"brick",(a+z)/2,new Vector2(Vector2.Distance(a,z),.027f),d.kind==BrickKind.Switch?JuiceGardenView.Mint:JuiceGardenView.Lilac,6);line.transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(z.y-a.y,z.x-a.x)*Mathf.Rad2Deg);links.Add(line);}
+  Render();
+ }
+ void Update(){if(owner==null||owner.IsPaused||owner.JuiceFrozen||feature==null)return;age+=Time.deltaTime;Render();}
+ void Render(){if(feature==null)return;var k=brick.Definition.kind;int idle=(int)(age*4)%3;if(k==BrickKind.Armor||k==BrickKind.Frost){feature.enabled=brick.ShellIntact;feature.sprite=MainlineArt.Frame("devices",3,k==BrickKind.Frost?3:0);}else if(k==BrickKind.Resonance)feature.sprite=MainlineArt.Frame("actors",0,idle);else if(k==BrickKind.Core)feature.sprite=MainlineArt.Frame("actors",1,Mathf.Min(3,owner.CoreCharge(brick)));else if(k==BrickKind.Switch)feature.sprite=MainlineArt.Frame("actors",2,0);else if(k==BrickKind.Seal)feature.sprite=MainlineArt.Frame("actors",3,0);else feature.sprite=MainlineArt.Frame("devices",k==BrickKind.Guide?0:k==BrickKind.Bomb?1:2,idle);}
+ void OnDisable(){foreach(var line in links)if(line!=null)line.gameObject.SetActive(false);}
+}
+public sealed class MainlineFrameFx:MonoBehaviour {
+ GameSession owner;SpriteRenderer image;string sheet;int row,first,last;float age;
+ public static void Play(GameSession owner,Transform root,string sheet,int row,Vector2 p,float size,int first=0,int last=5){if(!FeedbackProfile.Active.enabledFeedback)return;var go=new GameObject("Generated mainline sequence "+sheet+" "+row);go.transform.SetParent(root,false);go.transform.position=p;var fx=go.AddComponent<MainlineFrameFx>();fx.owner=owner;fx.sheet=sheet;fx.row=row;fx.first=first;fx.last=last;fx.image=go.AddComponent<SpriteRenderer>();fx.image.sharedMaterial=WorldArt.BoardMaterial;fx.image.sortingOrder=43;go.transform.localScale=Vector3.one*size;fx.image.sprite=MainlineArt.Frame(sheet,row,first);}
+ void Update(){if(owner==null){Destroy(gameObject);return;}if(owner.IsPaused)return;age+=Time.deltaTime;int f=first+(int)(age*14);if(f>last){Destroy(gameObject);return;}image.sprite=MainlineArt.Frame(sheet,row,f);}
+}
+}

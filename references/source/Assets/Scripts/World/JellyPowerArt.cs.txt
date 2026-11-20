@@ -1,0 +1,24 @@
+using System;using System.Collections.Generic;using UnityEngine;
+namespace BounceGarden {
+// Current beam filaments load independently of effect animation sheets.
+public static class JellyPowerArt {
+ static readonly Dictionary<int,Sprite> beams=new Dictionary<int,Sprite>();
+ static readonly Dictionary<int,Material> beamMats=new Dictionary<int,Material>();
+ public static string Key(int kind)=>kind==1?"laser":kind==2?"bomb":"link";
+ public static float MarkerScale=>.86f/SevenSpecialArt.SpecialIcon(3,0).bounds.size.x;
+ public static Sprite Frame(int kind,int index)=>SevenSpecialArt.Frame(kind==1?"combo-cross":kind==2?"combo-bomb":"flower-vortex",index);
+ public static Material Material(int kind)=>WorldArt.BoardMaterial;
+ static void EnsureBeam(int kind){if(beams.ContainsKey(kind))return;string key=Key(kind);var t=Resources.Load<Texture2D>("Art/PowerJellyV62/"+key+"-beam");if(t==null)throw new InvalidOperationException("Missing current beam filament: "+key);beams[kind]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);beamMats[kind]=new Material(WorldArt.BoardMaterial){mainTexture=t};}
+ static Sprite solidLaser;
+ public static Sprite SolidLaser {get{if(solidLaser==null)solidLaser=Sprite.Create(Texture2D.whiteTexture,new Rect(0,0,Texture2D.whiteTexture.width,Texture2D.whiteTexture.height),Vector2.one*.5f,100);return solidLaser;}}
+ public static Transform Beam(Transform parent,int kind,int order=72){EnsureBeam(kind);var root=new GameObject("Jelly "+Key(kind)+" beam").transform;root.SetParent(parent,false);var image=root.gameObject.AddComponent<SpriteRenderer>();image.sprite=beams[kind];image.sharedMaterial=beamMats[kind];image.sortingOrder=order;return root;}
+ public static void BeamPose(Transform root,Vector2 from,Vector2 to,float width){var delta=to-from;var bounds=root.GetComponent<SpriteRenderer>().sprite.bounds.size;root.position=(from+to)*.5f;root.rotation=Quaternion.Euler(0,0,Mathf.Atan2(delta.y,delta.x)*Mathf.Rad2Deg);root.localScale=new Vector3(delta.magnitude/bounds.x,width/bounds.y,1);}
+ public static void ReleaseContentCache(){foreach(var s in beams.Values)if(s!=null)UnityEngine.Object.Destroy(s);foreach(var m in beamMats.Values)if(m!=null)UnityEngine.Object.Destroy(m);beams.Clear();beamMats.Clear();}
+}
+public sealed partial class GameSession {
+ int jellyPowerFxPlayed;public int JellyPowerFxPlayed=>jellyPowerFxPlayed;
+ void PlayJellyPowerFx(int kind,Vector2 point,float size=1.3f,float delay=0){if(!FeedbackProfile.Active.enabledFeedback)return;jellyPowerFxPlayed++;SevenSpecialFx.Play(this,world,kind,point,size,0);}
+ void DrawLaserLayer(Vector2 from,Vector2 to,Color tint,float width,float life,int order){var root=new GameObject("Cross laser luminous layer").transform;root.SetParent(world,false);var image=root.gameObject.AddComponent<SpriteRenderer>();image.sprite=JellyPowerArt.SolidLaser;image.sharedMaterial=WorldArt.BoardMaterial;image.color=tint;image.sortingOrder=order;JellyPowerArt.BeamPose(root,from,to,width);chainBeams.Add(new ChainBeam{View=root,Life=life,Duration=life,StartAlpha=tint.a});}
+ void DrawJellyPowerBeam(int kind,Vector2 from,Vector2 to,float width=.32f,float life=.42f){if((to-from).sqrMagnitude<.0001f)return;if(kind==1){DrawLaserLayer(from,to,new Color(.10f,.75f,1,.25f),.64f,life,71);DrawLaserLayer(from,to,Color.white,.09f,life*.85f,75);}var view=JellyPowerArt.Beam(world,kind);JellyPowerArt.BeamPose(view,from,to,width);view.GetComponent<SpriteRenderer>().color=new Color(1,1,1,1);chainBeams.Add(new ChainBeam{View=view,Life=life,Duration=life,StartAlpha=1});}
+}
+}

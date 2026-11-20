@@ -1,0 +1,40 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+// Real physics and damage callbacks under rapid repeat volleys. No saved profile changes.
+public sealed class MobileV55StressQA:MonoBehaviour {
+ [Serializable]public class Sample {public int level,volleys,peakBalls,hits,breaks,spawned,contacts,boardContacts;public double medianMs,p95Ms,maxMs,allocatedBytesPerTick;}
+ [Serializable]public class Report {public string scope="Windows scripted physics stress; not phone FPS";public bool allocationCounterSupported;public int failures,errors;public Sample[] samples;}
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--mobile-v55-stress"))new GameObject("Mobile rapid volley stress").AddComponent<MobileV55StressQA>();}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();string dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);var report=new Report();var rows=new List<Sample>();
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){report.errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};
+  long probeStart=GC.GetAllocatedBytesForCurrentThread();var probe=new byte[4096];report.allocationCounterSupported=GC.GetAllocatedBytesForCurrentThread()>probeStart;GC.KeepAlive(probe);
+  yield return new WaitForSecondsRealtime(1);FindFirstObjectByType<AppUI>().QANavigate("home");SoundService.SetMuted(true);
+  var g=new GameObject("Rapid volley fixture").AddComponent<GameSession>();g.enabled=false;g.QAIgnoreFocusLoss=true;
+  var previous=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;Time.timeScale=0;
+  foreach(int level in new[]{1,11,28}){
+   g.StartLevel(level);foreach(var b in g.CollectionBricks)b.gameObject.AddComponent<MobileV55ContactProbe>();
+   MobileV55ContactProbe.Contacts=MobileV55ContactProbe.BoardContacts=0;var row=new Sample{level=level+1};var times=new List<double>();long allocated=0;var watch=new System.Diagnostics.Stopwatch();
+   for(int step=0;step<960;step++){
+    if(step%36==0&&g.TryShoot(new Vector2(Mathf.Sin(step*.013f)*.55f,1)))row.volleys++;
+    watch.Reset();long before=GC.GetAllocatedBytesForCurrentThread();watch.Start();g.QAAdvanceOneStep();watch.Stop();allocated+=GC.GetAllocatedBytesForCurrentThread()-before;times.Add(watch.Elapsed.TotalMilliseconds);row.peakBalls=Math.Max(row.peakBalls,g.ActiveBalls);
+    if(step%60==59)yield return null;
+   }
+   times.Sort();row.medianMs=times[times.Count/2];row.p95Ms=times[(int)(times.Count*.95)];row.maxMs=times[times.Count-1];row.allocatedBytesPerTick=allocated/960.0;row.hits=g.HitCount;row.breaks=g.BreakCount;row.spawned=g.SpawnCount;row.contacts=MobileV55ContactProbe.Contacts;row.boardContacts=MobileV55ContactProbe.BoardContacts;
+   if(!report.allocationCounterSupported)row.allocatedBytesPerTick=-1;
+   if(row.volleys<5||row.peakBalls<5||row.hits==0||g.SpawnCount-g.LostCount!=g.ActiveBalls)report.failures++;
+   rows.Add(row);File.WriteAllText(dir+"/progress.json",JsonUtility.ToJson(row,true));g.StopLevel();yield return null;
+  }
+  report.samples=rows.ToArray();Time.timeScale=1;Physics2D.simulationMode=previous;File.WriteAllText(dir+"/result.json",JsonUtility.ToJson(report,true));Application.Quit(report.failures+report.errors==0?0:1);
+ }
+}
+public sealed class MobileV55ContactProbe:MonoBehaviour {
+ public static int Contacts,BoardContacts;
+ void OnCollisionEnter2D(Collision2D c){Contacts++;if(c.collider.gameObject.layer==8)BoardContacts++;}
+}
+}

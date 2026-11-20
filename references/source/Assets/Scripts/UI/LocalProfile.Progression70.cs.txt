@@ -1,0 +1,23 @@
+using System;
+using System.Linq;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ int campaignWinStreak,streakRoundLevel=-1;string lastStreakWin="",streakRoundToken="";int[] streakRoundTools=new int[4];
+ public int CampaignWinStreak=>campaignWinStreak;
+ public bool InitializeStreak70(int existingWins){if(committed.Contains("streak-v70/migrated"))return true;return LeagueTransaction(()=>{if(campaignWinStreak==0&&existingWins>0){campaignWinStreak=Math.Min(existingWins,9999);lastStreakWin="legacy-feedback70/"+AlphabetUnlocked+"/"+campaignWinStreak;}committed.Add("streak-v70/migrated");});}
+ public int CampaignStreakTier=>campaignWinStreak>=10?3:campaignWinStreak>=5?2:campaignWinStreak>=3?1:0;
+ void RecordStreakProgressWin(string result,int level){if(level<AlphabetUnlocked)return;campaignWinStreak=Math.Min(9999,campaignWinStreak+1);lastStreakWin=result;streakRoundLevel=-1;Array.Clear(streakRoundTools,0,4);}
+ void ResetCampaignStreak(){campaignWinStreak=0;lastStreakWin=streakRoundToken="";streakRoundLevel=-1;Array.Clear(streakRoundTools,0,4);}
+ public bool PrepareCampaignStreakRound(int level){if(level<0||level>=AlphabetCampaign.Count)return false;if(CampaignStreakTier==0||level!=AlphabetUnlocked||string.IsNullOrEmpty(lastStreakWin))return true;if(streakRoundLevel==level&&streakRoundToken==lastStreakWin)return true;return LeagueTransaction(()=>{streakRoundLevel=level;streakRoundToken=lastStreakWin;streakRoundTools=new int[4];for(int i=1;i<=CampaignStreakTier;i++)streakRoundTools[i]=1;});}
+ public int StreakBonusStock(StreakBooster k,int level)=>level==streakRoundLevel&&streakRoundToken==lastStreakWin&&(int)k>0&&(int)k<4?streakRoundTools[(int)k]:0;
+ bool ConsumeStreakBonus(StreakBooster k,int level)=>StreakBonusStock(k,level)>0&&LeagueTransaction(()=>streakRoundTools[(int)k]--);
+ void RestoreStreak70(int wins,string token,int round,string roundToken,int[] tools){if(wins<0||wins>9999||round< -1||round>=78||tools!=null&&(tools.Length!=4||tools.Any(n=>n<0||n>1))||(token??"").Length>120||(roundToken??"").Length>120)throw new InvalidOperationException("Invalid campaign streak");if(round>=AlphabetCampaign.Count){round=-1;roundToken="";tools=new int[4];}campaignWinStreak=wins;lastStreakWin=token??"";streakRoundLevel=round;streakRoundToken=roundToken??"";streakRoundTools=tools==null?new int[4]:(int[])tools.Clone();}
+ public bool ChapterOpened(int chapter)=>chapter<=0||chapter<3&&committed.Contains("chapter-v70/open/"+chapter);
+ public int PendingChapter{get{for(int i=1;i<3;i++)if(AlphabetUnlocked>=i*26&&!ChapterOpened(i))return i;return -1;}}
+ // Chapter-opening ledger is retained for old saves; the continuous route has no gates.
+ public int HomeLevelIndex=>Math.Min(AlphabetUnlocked,AlphabetCampaign.Count-1);
+ public bool InitializeChapterGates(){if(committed.Contains("chapter-v70/migrated"))return true;return LeagueTransaction(()=>{for(int i=1;i<3;i++)if(AlphabetUnlocked>i*26)committed.Add("chapter-v70/open/"+i);committed.Add("chapter-v70/migrated");});}
+ public bool CompleteChapterOpening(int chapter){if(chapter<1||chapter>2||AlphabetUnlocked<chapter*26||!ChapterOpened(chapter-1))return false;if(ChapterOpened(chapter))return true;return LeagueTransaction(()=>committed.Add("chapter-v70/open/"+chapter));}
+ public void QAAllowChapter(int index){if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("QA profile only");for(int i=1;i<=index/26;i++)committed.Add("chapter-v70/open/"+i);}
+}
+}

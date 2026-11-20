@@ -1,0 +1,15 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class EconomyV67Build {
+ public static void Windows(){
+  AssetDatabase.Refresh();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  Debug.Log(BounceGarden.LocalProfile.RunSelfTests());Debug.Log(BounceGarden.LeagueSelfTests.RunAll());Debug.Log(BounceGarden.LeagueActiveSelfTests.RunAll());Debug.Log(BounceGarden.EconomySelfTests.RunAll());
+  string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/Economy-v67/Windows/BounceGarden.exe"));Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+  Debug.Log("ECONOMY_V67_BUILD "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings);if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Economy build failed");
+ }
+}

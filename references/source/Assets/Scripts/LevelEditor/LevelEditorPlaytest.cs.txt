@@ -1,0 +1,175 @@
+using System;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+// A dedicated build is isolated by construction, before any scene component Awakes.
+// The command-line route is useful for development; no Resource marker enters game builds.
+public static class LevelEditorRuntime {
+ public static string Arg(string name,string fallback=null){var args=Environment.GetCommandLineArgs();int at=Array.IndexOf(args,name);return at>=0&&at+1<args.Length?args[at+1]:fallback;}
+ public static bool HasArg(string name)=>Array.IndexOf(Environment.GetCommandLineArgs(),name)>=0;
+ public static bool Enabled {get{
+#if BOUNCE_LEVEL_EDITOR
+  return true;
+#else
+  return HasArg("--level-balance")||HasArg("--level-editor")||HasArg("--level-editor-qa");
+#endif
+ }}
+}
+
+// Parsed once per launch. It belongs to one GameSession, never to Campaign's static cache.
+internal sealed class LevelEditorDraftSnapshot {
+ internal int Index,RandomSeed;
+ internal int AuthoringIndex;
+ internal string EditorLevelId,DisplayName;
+ internal AlphabetStage Alphabet,Metadata;
+ internal FusionLevelDefinition Fusion;
+ internal static LevelEditorDraftSnapshot Parse(int index,string json,int seed){
+  if(index<0||index>=78)throw new ArgumentOutOfRangeException(nameof(index));
+  if(string.IsNullOrWhiteSpace(json))throw new ArgumentException("草稿为空。");
+  var issues=LevelEditorDocument.ValidateStage(index,json);
+  var errors=issues.Where(issue=>issue.IsError).ToArray();
+  if(errors.Length>0)throw new ArgumentException(string.Join("\n",errors.Select(issue=>issue.Message)));
+  var snapshot=new LevelEditorDraftSnapshot{Index=index,AuthoringIndex=index,RandomSeed=seed};
+  var stage=EditorJson.Parse(json);
+  if(stage.Text("rulesProfile","legacy")=="fusion_v1"){
+   snapshot.Fusion=JsonUtility.FromJson<FusionLevelDefinition>(stage.Get("fusion").ToJson());
+   var goals=FusionRules.Goals(snapshot.Fusion);
+   snapshot.Metadata=new AlphabetStage{letter="",name=stage.Text("name"),lesson="融合规则",moves=stage.Int("moves",20),
+    fish=goals.Count(g=>g.kind=="fish"||g.kind=="F"),toy=goals.Count(g=>g.kind=="toy"||g.kind=="T"||g.kind=="strawberry"),
+    blueJelly=goals.Count(g=>g.kind=="jelly"||g.kind=="J"||g.kind=="lemon"),glyph=Enumerable.Repeat("00000",7).ToArray(),
+    cells=Array.Empty<AlphabetCell>(),chests=Array.Empty<AlphabetChest>()};
+   return snapshot;
+  }
+  if(index<26){snapshot.Alphabet=JsonUtility.FromJson<AlphabetStage>(json);snapshot.Metadata=snapshot.Alphabet;}
+  else throw new NotSupportedException("旧野餐／冰雪关卡已停用，请使用新版关卡编辑器或融合规则草稿。");
+  return snapshot;
+ }
+}
+
+[Serializable] public sealed class LevelEditorPlaytestResult {
+ public bool Won;
+ public int LevelIndex,ShotsUsed,RemainingShots,Score,Hits,Breaks,Activations,Explosions,Lasers,Seed;
+ public float ElapsedSeconds;
+ public string Scenario,EditorLevelId,RulesProfile;
+ public int FusionRuleVersion;
+ public int[] Goals,Collected,JellyGoals,JellyCollected;
+ public FusionMetrics Fusion;
+ public FusionEventRecord[] FusionEvents;
+}
+
+// Uses the production GameSession and Unity Physics2D. There is no AppUI result/ledger path.
+// The desktop editor owns its viewport, HUD and pointer-to-world mapping.
+public sealed class LevelEditorPlaytest:MonoBehaviour {
+ public GameSession Session {get;private set;}
+ public LocalProfile Profile {get;private set;}
+ public string LastError {get;private set;}="";
+ public LevelEditorPlaytestResult LastResult {get;private set;}
+ public string Scenario {get;private set;}="bare";
+ public float ElapsedSeconds {get;private set;}
+ public int Seed {get;set;}=20261111;
+ public bool HasDraft=>!string.IsNullOrEmpty(lastJson);
+ public event Action<LevelEditorPlaytestResult> Completed;
+ int lastIndex,lastRuntimeIndex;string lastJson,lastEditorLevelId,lastDisplayName;bool completed;
+
+ void Awake(){EnsureSession();}
+ void EnsureSession(){
+  if(Session!=null)return;
+  if(!RuntimeQA.IsIsolated){LastError="关卡编辑器试玩必须在隔离模式启动。";return;}
+  AlphabetTypography.Install();
+  var child=new GameObject("Isolated draft GameSession");child.transform.SetParent(transform,false);
+  Session=child.AddComponent<GameSession>();
+  Session.QAIgnoreFocusLoss=LevelEditorRuntime.HasArg("--level-editor-qa");
+  Session.Outcome+=OnOutcome;
+ }
+
+ // A newly authored level has its own identity and library position. The
+ // bounded runtime slot selects a rules template; it is not a campaign source.
+ public bool StartDraft(LevelEditorLevel level,string scenario="bare"){
+  try{
+   if(level==null)throw new ArgumentNullException(nameof(level));
+   var errors=level.Validate().Where(issue=>issue.IsError).ToArray();
+   if(errors.Length>0)throw new ArgumentException(string.Join("\n",errors.Select(issue=>issue.Message)));
+   var launch=EditorJson.Parse(level.SnapshotJson());
+   // The project may carry the authoring marker even when an imported stage
+   // predates per-stage metadata. Validation above still checks the original.
+   launch.Set("authoringSchema","bouncebusters-level-authoring-v2");
+   if(level.Chapter!="Alphabet")launch.Set("id",level.RuntimeIndex+1);
+   return StartDraftCore(level.RuntimeIndex,launch.ToJson(),scenario,level.Index,level.EditorLevelId,level.Name);
+  }catch(Exception e){LastError=e.Message;return false;}
+ }
+ public bool StartDraft(int index,string stageJson,string scenario="bare"){
+  return StartDraftCore(index,stageJson,scenario,index,null,null);
+ }
+ bool StartDraftCore(int index,string stageJson,string scenario,int authoringIndex,string editorLevelId,string displayName){
+  LastError="";bool replacing=false;
+  try{
+   if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("草稿试玩未处于隔离模式。");
+   scenario=string.IsNullOrEmpty(scenario)?"bare":scenario;
+   if(scenario!="bare"&&scenario!="streak3"&&scenario!="streak5"&&scenario!="streak10"&&scenario!="stocked")
+    throw new ArgumentException("未知试玩情景："+scenario);
+   // Parse/validate before stopping an existing valid playtest.
+   var draft=LevelEditorDraftSnapshot.Parse(index,stageJson,Seed);
+   draft.AuthoringIndex=authoringIndex;draft.EditorLevelId=editorLevelId;draft.DisplayName=displayName;
+   EnsureSession();if(Session==null)throw new InvalidOperationException(LastError);
+   replacing=true;
+   Stop();
+   int profileIndex=draft.Fusion!=null?Math.Max(index,LocalProfile.BoosterUnlockLevel(StreakBooster.Super)-1):index;
+   Profile=LocalProfile.CreateLevelEditorProfile(profileIndex,scenario);
+   Session.BoosterProfile=Profile;
+   lastIndex=authoringIndex;lastRuntimeIndex=index;lastJson=stageJson;lastEditorLevelId=editorLevelId;lastDisplayName=displayName;
+   Scenario=scenario;ElapsedSeconds=0;LastResult=null;completed=false;
+   Session.StartEditorDraft(draft);
+   Session.ApplyCampaignStreakBonus(); // Real grant rules; intentionally does not select an item.
+   return true;
+  }catch(Exception e){
+   LastError=e.Message;
+   if(replacing&&Session!=null){Session.StopLevel();Session.BoosterProfile=null;Profile=null;}
+   return false;
+  }
+ }
+ public bool Restart(){
+  if(!HasDraft){LastError="尚无可重试的草稿。";return false;}
+  return StartDraftCore(lastRuntimeIndex,lastJson,Scenario,lastIndex,lastEditorLevelId,lastDisplayName);
+ }
+ public void Stop(){
+  if(Session!=null){Session.SetAim(null);Session.StopLevel();Session.BoosterProfile=null;}
+  Profile=null;SoundService.CancelTransient();
+ }
+ public void SetAim(Vector2? direction){if(Session!=null)Session.SetAim(direction);}
+ public bool Shoot(Vector2 direction)=>Session!=null&&Session.TryShoot(direction);
+ public void SetPaused(bool paused){if(Session!=null)Session.SetPaused(paused);}
+ void Update(){if(Session!=null&&Session.IsPlaying&&!Session.IsPaused)ElapsedSeconds+=Time.deltaTime;}
+ void OnOutcome(bool won){
+  if(completed||Session==null)return;completed=true;
+  Session.FinalizeScore(won);
+  LastResult=new LevelEditorPlaytestResult{Won=won,LevelIndex=lastIndex,EditorLevelId=lastEditorLevelId,
+   ShotsUsed=Session.CurrentLevel.initialShots-Session.Shots,RemainingShots=Session.Shots,Score=Session.Score,
+   Hits=Session.HitCount,Breaks=Session.BreakCount,Activations=Session.ChainActivationCount,
+   Explosions=Session.StreakExplosions,Lasers=Session.StreakLasers,ElapsedSeconds=ElapsedSeconds,Scenario=Scenario,Seed=Seed,RulesProfile=EditorJson.Parse(lastJson).Text("rulesProfile","legacy"),
+   FusionRuleVersion=EditorJson.Parse(lastJson).Get("fusion")?.Int("ruleVersion",1)??0,
+   Fusion=Session.FusionActive?JsonUtility.FromJson<FusionMetrics>(JsonUtility.ToJson(Session.FusionMetrics)):null,
+   FusionEvents=Session.FusionActive?Session.FusionEvents.ToArray():null,
+   Goals=(int[])Session.CollectionGoal.Clone(),Collected=(int[])Session.Collected.Clone(),
+   JellyGoals=(int[])Session.JellyGoal.Clone(),JellyCollected=(int[])Session.JellyCollected.Clone()};
+  Completed?.Invoke(LastResult);
+ }
+ void OnDestroy(){if(Session!=null){Session.Outcome-=OnOutcome;Session.StopLevel();Session.BoosterProfile=null;}Profile=null;}
+}
+}
+
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ // Only this in-memory instance is seeded. No Load, storage adapter or persistent ledger is used.
+ internal static LocalProfile CreateLevelEditorProfile(int index,string scenario){
+  if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Editor profile requires isolation.");
+  int streak=scenario=="streak3"?3:scenario=="streak5"?5:scenario=="streak10"?10:0;
+  var profile=new LocalProfile();
+  profile.campaignRoute=AlphabetCampaign.Id;profile.alphabetUnlocked=index;
+  profile.campaignWinStreak=streak;profile.lastStreakWin=streak>0?"level-editor-seed/"+index+"/"+streak:"";
+  profile.boosters=scenario=="stocked"?new[]{0,3,3,3}:new int[4];
+  if(!profile.PrepareCampaignStreakRound(index))throw new InvalidOperationException("无法准备试玩道具情景。");
+  return profile;
+ }
+}
+}

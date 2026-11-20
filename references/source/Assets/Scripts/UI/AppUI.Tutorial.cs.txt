@@ -1,0 +1,33 @@
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ bool tutorialRun;PlayableTutorialGuide activeTutorialGuide;
+ public PlayableTutorialGuide QATutorialGuide=>activeTutorialGuide;
+ void CloseTutorialGuide(){if(activeTutorialGuide==null)return;activeTutorialGuide.Close();activeTutorialGuide=null;}
+ void NotifyTutorialPointer(bool active){if(activeTutorialGuide!=null)activeTutorialGuide.Pointer(active);}
+ void StartTutorialGuide(){
+  CloseTutorialGuide();if(Session.SevenSpecialActive&&!Session.IsTutorial)return;int kind=currentLevel==3?1:currentLevel==5?2:currentLevel==18?3:0;
+  if(!Session.IsTutorial&&(kind==0||Profile.HasPowerPractice(kind)))return;
+  var root=UICraft.Root(hudRoot,"Playable hand guide");activeTutorialGuide=root.gameObject.AddComponent<PlayableTutorialGuide>();activeTutorialGuide.Begin(this,Session,kind);
+ }
+ public void QAStartFirstBounce(){if(!RuntimeQA.IsIsolated)return;busy=false;BeginLevel(0,true,true);}
+ System.Collections.IEnumerator ShowFirstBounceIntroduction(int generation){
+  bool complete=false;var root=UICraft.Root(canvasRoot,"First Bounce demonstration");alphabetIntroduction=root.gameObject.AddComponent<AlphabetIntroductionView>();
+  alphabetIntroduction.Begin(this,OpeningIntroduction.Page(0),()=>complete=true);
+  while(!complete&&generation==viewGeneration&&alphabetIntroduction!=null)yield return null;
+  if(generation!=viewGeneration){CloseAlphabetIntroduction();yield break;}alphabetIntroduction=null;
+ }
+ public void QAStartMainlineWithOnboarding(int index){if(!RuntimeQA.IsIsolated)return;busy=false;BeginLevel(index);}
+ void FinishFirstBounce(bool win){
+  CancelAim();CloseTutorialGuide();Session.SetPaused(true);
+  if(!win){SoundService.Play("result_lose_stinger");OpenModal("再试一次",UICraft.Blue,900,740);UICraft.Label(modal,"收集全部6块黄色砖块，\n试试利用墙壁反弹吧！",0,105,770,180,38,UICraft.Ink);UICraft.Button(modal,"再试一次",0,-100,640,125,UICraft.Green,()=>{CloseModal();BeginLevel(0,true,true);},43);UICraft.Button(modal,"返回花园",0,-260,450,100,UICraft.Blue,ReturnHome,34);return;}
+  bool saved=Profile.CompleteFirstBounce();
+  OpenModal("开局真棒！",UICraft.Green,940,1050);modal.gameObject.AddComponent<ResultAudioTimeline>().Initialize(true);
+  UICraft.Label(modal,"黄色砖块全部收集完成！",0,285,800,100,47,UICraft.Ink);
+  var icon=UICraft.Box(modal,"已收集黄色砖块",0,110,160,160,Color.white);icon.sprite=SevenSpecialArt.OrdinaryIcon(1);icon.preserveAspect=true;
+  UICraft.Label(modal,"无需清空所有砖块。",0,-50,820,130,36,UICraft.Ink);
+  UICraft.Button(modal,"开始第1关",0,-230,700,145,UICraft.Green,()=>{if(!saved&&!Profile.CompleteFirstBounce()){Toast("进度保存失败，请重试。");return;}CloseModal();BeginLevel(0,false,true);},49);
+  UICraft.Button(modal,"再玩一次",0,-405,450,105,UICraft.Blue,()=>{CloseModal();BeginLevel(0,true,true);},34);
+ }
+}
+}

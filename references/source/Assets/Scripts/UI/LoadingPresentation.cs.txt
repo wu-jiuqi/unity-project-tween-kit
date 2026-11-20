@@ -1,0 +1,89 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+namespace BounceGarden {
+// Loading owns this clock; it runs independently of the paused game simulation.
+public sealed class LoadingPresentation : MonoBehaviour {
+ public const float CatCycleDuration = 3.6f;
+ public const float MinimumDuration = .6f;
+ public float Elapsed { get; private set; }
+ public string CurrentPose { get; private set; }
+ RectTransform[] letters;
+ Vector2[] letterPositions;
+ RectTransform cat;
+ Vector2 catPosition;
+ Vector3 catScale;
+ Image catImage;
+ TMP_Text label;
+ Sprite[] poses;
+ bool running, firstTick,trackContentStatus;
+ static readonly string[] PoseNames = { "cat_idle", "cat_anticipate", "cat_celebrate", "cat_settle", "cat_wave" };
+
+ public void Build() {
+  var logo = PastelLogo.Create(transform, 0, 210, 820, 410);
+  letters = new RectTransform[logo.childCount];
+  letterPositions = new Vector2[letters.Length];
+  for (int i = 0; i < letters.Length; i++) {
+   letters[i] = (RectTransform)logo.GetChild(i);
+   letterPositions[i] = letters[i].anchoredPosition;
+  }
+  label = UICraft.Label(transform, "正在准备花园…", 0, -200, 800, 100, 51);
+  cat = UICraft.Character(transform, 0, -508, 1.1f, new Color32(255, 221, 128, 255));
+  catPosition = cat.anchoredPosition;
+  catScale = cat.localScale;
+  catImage = cat.GetComponentInChildren<Image>();
+  poses = new Sprite[PoseNames.Length];
+  for (int i = 0; i < poses.Length; i++) poses[i] = PastelArt.Get(PoseNames[i]);
+  Render();
+ }
+
+ public void SetStatus(string text){if(label!=null)label.text=text;trackContentStatus=text=="正在准备本关资源…";}
+ public void Play() { Elapsed = 0; running = firstTick = true; Render(); }
+ void Update() {
+  if (!running) return;
+  if(trackContentStatus&&GameContent.Status!=null&&label.text!=GameContent.Status())label.text=GameContent.Status();
+  // Preparation stalls must not count as already-seen animation or skip a whole pose.
+  if (firstTick) { firstTick = false; return; }
+  Elapsed += Mathf.Min(Time.unscaledDeltaTime, .1f);
+  Render();
+ }
+ static float Hop(float time, float delay, float period, float duration) {
+  float age = Mathf.Repeat(time - delay, period);
+  return age < duration ? Mathf.Sin(Mathf.PI * age / duration) : 0;
+ }
+ void Render() {
+  // Preserve the original full choreography at the faster loading tempo.
+  float animationTime = Elapsed * (6.7f / CatCycleDuration);
+  for (int i = 0; i < letters.Length; i++) {
+   float h = Hop(animationTime, i * .18f, 3.7f, .60f);
+   letters[i].anchoredPosition = letterPositions[i] + Vector2.up * (30 * h);
+   letters[i].localScale = new Vector3(1 - .025f * h, 1 + .035f * h, 1);
+   letters[i].localRotation = Quaternion.Euler(0, 0, (i % 2 == 0 ? 1 : -1) * h * 1.43f);
+  }
+  label.ForceMeshUpdate();
+  var info = label.textInfo;
+  for (int i = 0; i < info.characterCount; i++) {
+   var ch = info.characterInfo[i];
+   if (!ch.isVisible) continue;
+   var vertices = info.meshInfo[ch.materialReferenceIndex].vertices;
+   Vector3 shift = Vector3.up * (16 * Hop(animationTime, i * .13f, 2.9f, .58f));
+   for (int j = 0; j < 4; j++) vertices[ch.vertexIndex + j] += shift;
+  }
+  label.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
+  float age = Mathf.Repeat(animationTime, 6.7f), stretch = 1, lift = 0, angle = 0;
+  int pose = 0;
+  if (age >= 1.8f && age < 2.35f) { pose = 1; stretch -= .025f * Mathf.Sin((age - 1.8f) / .55f * Mathf.PI); }
+  else if (age >= 2.35f && age < 3.05f) { pose = 2; lift = 30 * Mathf.Sin((age - 2.35f) / .7f * Mathf.PI); }
+  else if (age >= 3.05f && age < 4.2f) pose = 3;
+  else if (age >= 4.2f && age < 5.65f) { pose = 4; angle = Mathf.Sin((age - 4.2f) * 7) * 2; }
+  CurrentPose = PoseNames[pose];
+  if (catImage != null && poses[pose] != null) catImage.sprite = poses[pose];
+  // Stretch and tilt around the feet rather than the centre of the sprite.
+  stretch += Mathf.Sin(animationTime * 2.2f) * .008f;
+  cat.localScale = new Vector3(catScale.x, catScale.y * stretch, catScale.z);
+  cat.anchoredPosition = catPosition + Vector2.up * (lift + 150 * catScale.y * (stretch - 1));
+  cat.localRotation = Quaternion.Euler(0, 0, angle);
+ }
+}
+}

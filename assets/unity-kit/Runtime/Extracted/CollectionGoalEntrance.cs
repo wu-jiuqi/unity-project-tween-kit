@@ -1,0 +1,38 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+namespace ProjectTweenKit {
+// Move the real target cards so their icons/counts exactly match the destination.
+public sealed class CollectionGoalEntrance:MonoBehaviour {
+ public const float Duration=2.35f;
+ RectTransform root,goals,home,halo;int sibling;Vector2 homePosition;Vector3 homeScale;Quaternion homeRotation;
+ Image dim;CanvasGroup copy;TMPro.TMP_Text title;float age;bool restored,suspended,focused=true;
+ public bool Finished=>age>=Duration;public float Elapsed=>age;
+ public void Begin(RectTransform targets){
+  root=(RectTransform)transform;root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.sizeDelta=Vector2.zero;root.anchoredPosition=Vector2.zero;
+  dim=gameObject.AddComponent<Image>();dim.color=new Color(.035f,.025f,.02f,0);dim.raycastTarget=true;
+  var light=UICraft.Box(root,"Golden target glow",0,0,820,820,Color.white);light.sprite=GoalCelebrationArt.Get("halo");light.preserveAspect=true;light.raycastTarget=false;halo=light.rectTransform;
+  title=UICraft.Label(root,"本关收集目标",0,270,930,110,64,new Color(1,.96f,.80f));title.color=new Color(1,.96f,.80f);copy=title.gameObject.AddComponent<CanvasGroup>();copy.blocksRaycasts=false;
+  goals=targets;home=(RectTransform)goals.parent;sibling=goals.GetSiblingIndex();homePosition=goals.anchoredPosition;homeScale=goals.localScale;homeRotation=goals.localRotation;
+  goals.SetParent(root,true);Render();SoundService.Play("whoosh");
+ }
+ Vector2 Destination(){var world=home.TransformPoint(new Vector3(homePosition.x,homePosition.y,0));return root.InverseTransformPoint(world);}
+ Vector3 DestinationScale(){return new Vector3(home.lossyScale.x/root.lossyScale.x*homeScale.x,home.lossyScale.y/root.lossyScale.y*homeScale.y,1);}
+ void Render(){if(goals==null||home==null)return;
+  float fit=Mathf.Min(root.rect.width/1080f,root.rect.height/2340f);
+  float enter=UICraft.OutBack(Mathf.Clamp01(age/.32f)),fly=Mathf.SmoothStep(0,1,Mathf.Clamp01((age-1.45f)/.75f));
+  float enlarged=Mathf.Min(1.85f*fit,root.rect.width*.86f/Mathf.Max(1,goals.rect.width));
+  goals.anchoredPosition=Vector2.Lerp(Vector2.zero,Destination(),fly);goals.localScale=Vector3.Lerp(Vector3.one*enlarged*Mathf.LerpUnclamped(.65f,1,enter),DestinationScale(),fly);goals.localRotation=Quaternion.identity;
+  float fade=1-Mathf.SmoothStep(0,1,Mathf.Clamp01((age-1.35f)/.8f));
+  dim.color=new Color(.035f,.025f,.02f,.57f*Mathf.Clamp01(age/.18f)*fade);copy.alpha=Mathf.Clamp01(age/.18f)*fade;
+  title.rectTransform.anchoredPosition=new Vector2(0,270*fit);title.rectTransform.localScale=Vector3.one*fit;
+  halo.localScale=Vector3.one*fit*(1+.055f*Mathf.Sin(age*4));halo.localRotation=Quaternion.Euler(0,0,age*8);
+  halo.GetComponent<Image>().color=new Color(1,.94f,.63f,.85f*fade);
+ }
+ void Update(){if(suspended||(!focused&&!RuntimeQA.IsIsolated))return;if(home==null||goals==null){age=Duration;return;}age+=Mathf.Min(KitClock.Delta,.05f);Render();}
+ public void SetDestination(Vector2 value){homePosition=value;}
+ public void Restore(){if(restored)return;restored=true;if(goals==null||home==null)return;goals.SetParent(home,false);goals.SetSiblingIndex(sibling);goals.anchoredPosition=homePosition;goals.localScale=homeScale;goals.localRotation=homeRotation;}
+ void OnApplicationPause(bool value){suspended=value;}void OnApplicationFocus(bool value){focused=value;}
+ void OnDisable(){Restore();}void OnDestroy(){Restore();}
+}
+}

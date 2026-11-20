@@ -1,0 +1,19 @@
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public static class FirstBounceTutorial {
+ public static bool Yellow(int col,int row)=>col>=3&&col<=5&&(row==6||row==7);
+ public static LevelData Level()=>new LevelData{alphabetCampaign=true,tutorial=true,label="初次弹跳",note="收集全部6块黄色砖块。",initialShots=20,volleyCount=5};
+}
+public sealed partial class GameSession {
+ public bool IsTutorial=>CurrentLevel!=null&&CurrentLevel.tutorial;
+ void InitializeTutorialGrid(){
+  CollectionGoal[0]=CollectionGoal[1]=0;
+  for(int r=0;r<9;r++)for(int c=0;c<9;c++){
+   SpawnChainCell(c,r,0,1,BrickKind.Normal,true);
+   if(FirstBounceTutorial.Yellow(c,r))RegisterJellyTarget(CollectionBricks.Last(),4);
+  }
+  ChainMessage="收集全部黄色砖块，无需清空棋盘。";PlanChainRow();
+ }
+}
+}

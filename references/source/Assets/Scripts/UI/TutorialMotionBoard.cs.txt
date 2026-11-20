@@ -1,0 +1,58 @@
+using System.Collections.Generic;
+using DG.Tweening;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+// Independent illustration actors. Never references the live session or its RuleState.
+public sealed partial class TutorialMotionBoard:MonoBehaviour {
+ readonly List<Image> tiles=new List<Image>();readonly List<TMP_Text> numbers=new List<TMP_Text>();readonly List<Image> dots=new List<Image>();readonly List<Image> links=new List<Image>();
+ Image hand,ring,spark,loot,hbeam,vbeam,specialEmblem;TMP_Text nice,task;Tween timeline;float clock;int mode,cycle;bool focus=true;
+ public int Mode=>mode;public float Clock=>clock;
+ public bool HandVisible=>hand!=null&&hand.color.a>.1f;
+ public void Build(){
+  UICraft.Box(transform,"Cream demonstration board",0,20,820,1310,new Color(.98f,.93f,.82f,.97f));
+  for(int i=0;i<25;i++){var p=Cell(i);var img=UICraft.Box(transform,"Demonstration cell "+i,p.x,p.y,117,117,Color.white);img.sprite=JellyCollectionArt.Sprite(0);img.preserveAspect=true;tiles.Add(img);numbers.Add(UICraft.Label(img.transform,"1",0,0,80,80,43,UICraft.Ink));}
+  for(int i=0;i<8;i++){var d=UICraft.Box(transform,"Independent aiming dot "+i,0,0,15,15,new Color(.68f,.89f,.66f),true);d.raycastTarget=false;dots.Add(d);}
+  for(int i=0;i<4;i++)links.Add(UICraft.Box(transform,"Independent link connector "+i,0,0,1,7,new Color(.68f,.43f,.94f)));
+  hbeam=UICraft.Box(transform,"Row beam",0,48,665,17,new Color(.73f,1,.66f));vbeam=UICraft.Box(transform,"Column beam",0,48,17,665,new Color(.73f,1,.66f));
+  specialEmblem=UICraft.Box(transform,"Five-color flower or special emblem",0,0,90,90,Color.white);specialEmblem.preserveAspect=true;specialEmblem.raycastTarget=false;
+  ring=TutorialArt.Picture(transform,"Touch rings","touch-rings",Vector2.zero,Vector2.one*155);
+  hand=TutorialArt.Picture(transform,"Animated tutorial glove","hand-drag",Vector2.zero,Vector2.one*270);
+  loot=UICraft.Box(transform,"Independent flying yellow brick",0,0,110,110,Color.white);loot.sprite=SevenSpecialArt.OrdinaryIcon(1);
+  spark=TutorialArt.Picture(transform,"Independent reward sparkles","reward-sparkles",Vector2.zero,Vector2.one*220);
+  nice=UICraft.Label(transform,"真不错！",0,-315,700,100,68,new Color(.78f,.50f,.12f));
+  task=UICraft.Label(transform,"",0,555,700,100,45,UICraft.Ink);
+ }
+ static Vector2 Cell(int i)=>new Vector2((i%5-2)*126,300-(i/5)*126);
+ public void Configure(int next){mode=next;clock=0;cycle=0;timeline?.Kill();timeline=DOTween.To(()=>clock,t=>clock=t,Duration,Duration).SetEase(Ease.Linear).SetLoops(-1,LoopType.Restart).SetUpdate(true).OnStepComplete(()=>cycle++);Render();}
+ float Duration=>mode==2||mode>=6?5.4f:4.4f;
+ public void Sample(float t){timeline?.Pause();clock=t;Render();}
+ static void Alpha(Graphic image,float a){var c=image.color;c.a=a;image.color=c;}
+ void Render(){
+  if(hand==null)return;float t=clock;bool hit=t>2.4f&&t<3.6f;
+  for(int i=0;i<25;i++){tiles[i].sprite=JellyCollectionArt.Sprite(0);tiles[i].color=Color.white;tiles[i].rectTransform.localScale=Vector3.one;numbers[i].text="1";numbers[i].color=UICraft.Ink;}
+  task.text=mode<2?"黄色砖块 · "+(mode==1&&t>=1.6f?"5":"6"):mode==2?"一组连发 · "+Mathf.Clamp(Mathf.CeilToInt((t-.4f)/.3f),0,4)+" / 4 BREAKS":"";
+  foreach(var link in links)Alpha(link,0);
+  Alpha(specialEmblem,0);Alpha(hbeam,0);Alpha(vbeam,0);Alpha(loot,0);Alpha(spark,0);Alpha(nice,0);
+  float u=Mathf.SmoothStep(0,1,Mathf.Clamp01((t-.6f)/1.3f));Vector2 tip=Vector2.Lerp(new Vector2(100,-470),new Vector2(0,-355),u);
+  hand.rectTransform.anchoredPosition=tip+new Vector2(88,-80);hand.sprite=TutorialArt.Get(t<.6f?"hand-press":t>2.2f?"hand-release":"hand-drag");ring.rectTransform.anchoredPosition=tip;ring.rectTransform.localScale=Vector3.one*(.9f+.1f*Mathf.Sin(t*8));
+  float gesture=t>.2f&&t<2.5f?1:0;Alpha(hand,gesture);Alpha(ring,gesture*.8f);
+  for(int i=0;i<dots.Count;i++){dots[i].rectTransform.anchoredPosition=Vector2.Lerp(new Vector2(0,-485),new Vector2(0,-240),i/7f);Alpha(dots[i],gesture);}
+  if(mode==5){
+   foreach(int i in new[]{5,9,17,21,23}){tiles[i].sprite=SevenSpecialArt.OrdinaryIcon(0);tiles[i].color=Color.white;if(hit){Alpha(tiles[i],0);Alpha(numbers[i],0);}}
+   Tool(12,3);hand.rectTransform.anchoredPosition=Cell(12)+new Vector2(88,-80);ring.rectTransform.anchoredPosition=Cell(12);foreach(var d in dots)Alpha(d,0);if(hit){Alpha(tiles[12],0);Alpha(specialEmblem,0);spark.rectTransform.anchoredPosition=Cell(12);Alpha(spark,1);}return;
+  }
+  if(mode<2){foreach(int i in new[]{11,12,13,16,17,18}){tiles[i].sprite=SevenSpecialArt.OrdinaryIcon(1);numbers[i].color=Color.white;}
+   if(mode==1){Alpha(hand,0);Alpha(ring,0);foreach(var d in dots)Alpha(d,0);if(t>.7f){Alpha(tiles[17],0);Alpha(numbers[17],0);}float f=Mathf.SmoothStep(0,1,Mathf.Clamp01((t-.7f)/.9f));loot.rectTransform.anchoredPosition=Vector2.Lerp(Cell(17),new Vector2(0,555),f)+Vector2.right*(Mathf.Sin(f*Mathf.PI)*120);loot.rectTransform.localScale=Vector3.one*(1-.5f*f);Alpha(loot,t>.7f&&t<1.6f?1:0);task.rectTransform.localScale=Vector3.one*(1+(t>=1.6f&&t<1.95f?Mathf.Sin((t-1.6f)/.35f*Mathf.PI)*.1f:0));}
+  }else if(mode==2){Alpha(hand,0);Alpha(ring,0);foreach(var d in dots)Alpha(d,0);int broken=0;foreach(int i in new[]{20,21,23,24}){if(t>.4f+broken*.3f){Alpha(tiles[i],0);Alpha(numbers[i],0);}broken++;}Alpha(nice,t>1.6f&&t<4?1:0);if(t>2.2f&&t<3.1f)for(int i=0;i<5;i++){float v=Mathf.Clamp01((t-2.2f)/.9f);dots[i].rectTransform.anchoredPosition=Vector2.Lerp(new Vector2((i-2)*90,-220),new Vector2(0,-500),v);Alpha(dots[i],1);}if(t>3.1f){int target=new[]{6,8,12,16}[cycle%4];Tool(target,1);spark.rectTransform.anchoredPosition=Cell(target);Alpha(spark,t<3.9f?1:0);}}
+  else{int kind=mode-2;Tool(12,kind);if(mode==3&&hit){Alpha(hbeam,1);Alpha(vbeam,1);}if(mode==4&&hit){foreach(int i in new[]{6,7,8,11,12,13,16,17,18}){tiles[i].color=new Color(1,.82f,.35f);tiles[i].rectTransform.localScale=Vector3.one*1.04f;}}if(mode==5){int[] members={5,9,17,21,23};if(t>1.1f){Alpha(tiles[12],0);foreach(int i in members){tiles[i].color=new Color(.8f,.65f,1);tiles[i].rectTransform.localScale=Vector3.one*(hit?.78f:1);if(hit){Alpha(tiles[i],.25f);Alpha(numbers[i],.25f);}}}if(hit){spark.rectTransform.anchoredPosition=Cell(17);Alpha(spark,1);}}}
+ }
+ void Tool(int index,int kind){tiles[index].sprite=SevenSpecialArt.SpecialIcon(kind,kind==3?0:kind==2?1:4);tiles[index].color=Color.white;Alpha(specialEmblem,0);numbers[index].text="";}
+
+ void Update(){if(focus)Render();}
+ void OnApplicationFocus(bool value){focus=value||RuntimeQA.IsIsolated;if(focus)timeline?.Play();else timeline?.Pause();}
+ void OnDestroy(){timeline?.Kill();}
+}
+}
+

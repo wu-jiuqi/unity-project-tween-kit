@@ -1,0 +1,47 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using DG.Tweening;
+using UnityEngine.EventSystems;
+
+namespace BounceGarden {
+public static class UICraft {
+ public static readonly Color Ink = new Color32(108,76,74,255);
+ public static readonly Color Green = new Color32(160,226,195,255);
+ public static readonly Color Blue = new Color32(193,169,235,255);
+ public static readonly Color Gold = new Color32(255,199,42,255);
+ static Sprite rounded, circle; static Font font;
+ public static Font Font { get { if(font==null)font=Resources.Load<Font>("Fonts/MaokenZhuyuanTi");return font;} }
+ public static RectTransform Root(Transform parent,string name,float x=0,float y=0,float w=1080,float h=2340){var go=new GameObject(name,typeof(RectTransform));var rt=go.GetComponent<RectTransform>();rt.SetParent(parent,false);rt.sizeDelta=new Vector2(w,h);rt.anchoredPosition=new Vector2(x,y);return rt;}
+ public static Sprite Shape(bool disk=false){if(disk&&circle!=null)return circle;if(!disk&&rounded!=null)return rounded;const int n=64;var t=new Texture2D(n,n,TextureFormat.RGBA32,false);t.filterMode=FilterMode.Bilinear;t.wrapMode=TextureWrapMode.Clamp;var p=new Color[n*n];for(int y=0;y<n;y++)for(int x=0;x<n;x++){float dx=Mathf.Abs(x-31.5f),dy=Mathf.Abs(y-31.5f);float d=disk?Mathf.Sqrt(dx*dx+dy*dy)-30f:Mathf.Sqrt(Mathf.Pow(Mathf.Max(dx-18,0),2)+Mathf.Pow(Mathf.Max(dy-18,0),2))-13f;p[y*n+x]=new Color(1,1,1,Mathf.Clamp01(1-d));}t.SetPixels(p);t.Apply();var s=Sprite.Create(t,new Rect(0,0,n,n),new Vector2(.5f,.5f),100,0,SpriteMeshType.FullRect,disk?Vector4.zero:new Vector4(18,18,18,18));if(disk)circle=s;else rounded=s;return s;}
+ public static Image Box(Transform p,string n,float x,float y,float w,float h,Color color,bool disk=false,bool raycast=false){var rt=Root(p,n,x,y,w,h);var i=rt.gameObject.AddComponent<Image>();i.sprite=Shape(disk);i.type=disk?Image.Type.Simple:Image.Type.Sliced;i.color=color;i.raycastTarget=raycast;return i;}
+ public static Image Art(Transform p,string resource,float x,float y,float w,float h){var s=ProductionArt.Get(resource)??Resources.Load<Sprite>("Art/"+resource);if(s==null)return null;var i=Box(p,resource,x,y,w,h,Color.white);i.sprite=s;i.type=Image.Type.Simple;i.preserveAspect=true;if(s.border.x>0&&s.name!="modal_panel")i.pixelsPerUnitMultiplier=Mathf.Clamp(s.rect.height/h,.1f,8);return i;}
+ public static TMP_Text Label(Transform p,string value,float x,float y,float w,float h,int size,Color? color=null,TextAnchor align=TextAnchor.MiddleCenter,bool outline=false){
+ var rt=Root(p,"Text "+value,x,y,w,h);var t=rt.gameObject.AddComponent<TextMeshProUGUI>();t.text=System.Text.RegularExpressions.Regex.Replace(value??"",@"\bLevel\s*(\d+)","第$1关");t.font=size>=48?GameTypography.HeadingFont:GameTypography.Font;t.fontSize=size;t.color=color.HasValue&&color.Value.maxColorComponent<.5f?color.Value:Ink;t.raycastTarget=false;t.overflowMode=TextOverflowModes.Overflow;
+ t.alignment=align==TextAnchor.MiddleLeft?TextAlignmentOptions.MidlineLeft:align==TextAnchor.MiddleRight?TextAlignmentOptions.MidlineRight:TextAlignmentOptions.Midline;
+ t.enableAutoSizing=true;t.fontSizeMin=Mathf.Min(size,22);t.fontSizeMax=size;return t;
+ }
+ public static Button Button(Transform p,string value,float x,float y,float w,float h,Color color,Action action,int size=44){
+ var rt=Root(p,"Button "+value,x,y,w,h);var hit=rt.gameObject.AddComponent<Image>();hit.color=Color.clear;hit.raycastTarget=true;
+ var content=Root(rt,"ButtonVisual",0,0,w,h);var key=w/h<1.4f?"round_button_blank":ProductionArt.ButtonKey(color);var sprite=ProductionArt.Get(key);
+ float faceW=w,faceH=h;
+ var face=Box(content,"Face",0,0,faceW,faceH,Color.white);if(sprite!=null){face.sprite=sprite;face.type=w/h<1.4f?Image.Type.Simple:Image.Type.Sliced;face.preserveAspect=w/h<1.4f;if(w/h>=1.4f)face.pixelsPerUnitMultiplier=Mathf.Clamp(sprite.rect.height/h,.1f,8);}
+ var label=Label(content,value,0,0,faceW*.86f,faceH*.70f,size,Ink,TextAnchor.MiddleCenter,false);
+ var b=rt.gameObject.AddComponent<Button>();b.targetGraphic=hit;b.transition=Selectable.Transition.None;b.onClick.AddListener(()=>{SoundService.Play("click");action?.Invoke();});var feel=rt.gameObject.AddComponent<UIBounce>();feel.Target=content;return b;
+ }
+ public static void HomeIcon(Transform p,float x,float y,float size){Art(p,"round4/home_simple",x,y,size,size);}
+ public static void Skin(Image image,string key){var sprite=ProductionArt.Get("round4/"+key);if(sprite==null)return;image.sprite=sprite;image.color=Color.white;image.type=Image.Type.Sliced;image.preserveAspect=false;image.pixelsPerUnitMultiplier=Mathf.Clamp(sprite.rect.height/image.rectTransform.rect.height,.1f,8);}
+ public static void ButtonIcon(Button button,string key,float size){var visual=button.transform.Find("ButtonVisual");foreach(var label in visual.GetComponentsInChildren<TMP_Text>())label.gameObject.SetActive(false);Art(visual,key.StartsWith("round6/")||key.StartsWith("pastel/")?key:"round4/"+key,0,0,size*.65f,size*.65f);}
+ public static Button Tab(Button button,string key){var face=button.transform.Find("ButtonVisual/Face").GetComponent<Image>();face.rectTransform.sizeDelta=button.GetComponent<RectTransform>().sizeDelta;Skin(face,key);return button;}
+ public static RectTransform Coin(Transform p,float x,float y,float size){var rt=Root(p,"Coin",x,y,size,size);if(Art(rt,"coin",0,0,size,size)!=null)return rt;Box(rt,"Depth",0,-size*.05f,size,size,new Color32(186,108,7,255),true);Box(rt,"Gold",0,0,size,size,Gold,true);Box(rt,"Inset",0,0,size*.73f,size*.73f,new Color32(245,156,18,255),true);Box(rt,"Center",0,size*.03f,size*.59f,size*.59f,new Color32(255,213,71,255),true);Label(rt,"$",0,size*.02f,size,size,Mathf.RoundToInt(size*.62f),new Color32(197,123,15,255));return rt;}
+ public static RectTransform Badge(Transform p,float x,float y,float size){var rt=Root(p,"VIP badge",x,y,size,size);if(Art(rt,"badge",0,0,size,size)!=null)return rt;Box(rt,"Ribbon left",-size*.19f,-size*.36f,size*.24f,size*.5f,new Color32(217,58,71,255)).rectTransform.localRotation=Quaternion.Euler(0,0,-12);Box(rt,"Ribbon right",size*.19f,-size*.36f,size*.24f,size*.5f,new Color32(217,58,71,255)).rectTransform.localRotation=Quaternion.Euler(0,0,12);Box(rt,"Gold medallion",0,0,size*.85f,size*.85f,Gold,true);Box(rt,"Inset",0,0,size*.61f,size*.61f,new Color32(255,232,127,255),true);Label(rt,"*",0,-size*.04f,size,size,Mathf.RoundToInt(size*.72f),new Color32(208,137,17,255));return rt;}
+ public static RectTransform Character(Transform p,float x,float y,float scale,Color color,bool ears=true){var rt=Root(p,"Garden friend",x,y,240,300);rt.localScale=Vector3.one*scale;if(Art(rt,"pastel/cat_idle",0,0,300,300)!=null)return rt;Box(rt,"Ground shadow",0,-133,205,42,new Color(0,.18f,.1f,.18f),true);Box(rt,"FootL",-55,-112,75,48,Color.Lerp(color,Color.black,.17f),true);Box(rt,"FootR",55,-112,75,48,Color.Lerp(color,Color.black,.17f),true);Box(rt,"Body",0,-50,180,170,color,true);if(ears){Box(rt,"EarL",-67,94,62,110,color,true).rectTransform.localRotation=Quaternion.Euler(0,0,22);Box(rt,"EarR",67,94,62,110,color,true).rectTransform.localRotation=Quaternion.Euler(0,0,-22);Box(rt,"Ear innerL",-67,95,25,65,new Color32(255,159,170,255),true);Box(rt,"Ear innerR",67,95,25,65,new Color32(255,159,170,255),true);}Box(rt,"Head",0,32,230,205,color,true);Box(rt,"Muzzle",0,-7,132,72,new Color32(255,241,211,255),true);Box(rt,"EyeL",-45,47,28,39,Ink,true);Box(rt,"EyeR",45,47,28,39,Ink,true);Box(rt,"SparkL",-40,55,9,11,Color.white,true);Box(rt,"SparkR",50,55,9,11,Color.white,true);Box(rt,"CheekL",-79,7,35,19,new Color32(255,139,156,255),true);Box(rt,"CheekR",79,7,35,19,new Color32(255,139,156,255),true);Box(rt,"Nose",0,12,24,17,new Color32(151,84,70,255),true);Label(rt,"w",0,-14,60,38,30,new Color32(118,75,62,255));Box(rt,"ArmL",-101,-52,52,92,color,true).rectTransform.localRotation=Quaternion.Euler(0,0,-25);Box(rt,"ArmR",101,-52,52,92,color,true).rectTransform.localRotation=Quaternion.Euler(0,0,25);return rt;}
+ public static RectTransform Flower(Transform p,float x,float y,float s,Color c){var rt=Root(p,"Flower",x,y,s,s);Box(rt,"Stem",0,-s*.38f,s*.1f,s*.5f,new Color32(50,129,65,255));for(int a=0;a<5;a++){float f=a*Mathf.PI*2/5;Box(rt,"Petal",Mathf.Cos(f)*s*.24f,Mathf.Sin(f)*s*.24f,s*.38f,s*.38f,c,true);}Box(rt,"Pollen",0,0,s*.32f,s*.32f,Gold,true);return rt;}
+ public static float OutBack(float t){t-=1;return 1+2.70158f*t*t*t+1.70158f*t*t;}
+}
+public sealed class UILightSurface:MonoBehaviour {}
+public class UIFloat:MonoBehaviour {public float amplitude=12,speed=1.4f,phase;Vector3 initial;void Start(){initial=transform.localPosition;}void Update(){transform.localPosition=initial+Vector3.up*Mathf.Sin(Time.unscaledTime*speed+phase)*amplitude;}}
+}

@@ -1,0 +1,5 @@
+using UnityEngine;
+namespace BounceGarden {public static class MainlineCatalog {
+ public static LevelData[] All=>System.Array.Empty<LevelData>();
+ public static int ArtIndex(string id)=>-1;public static Sprite Artwork(string id)=>null;
+}}

@@ -1,0 +1,15 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class VictoryRoundPreparation:MonoBehaviour {
+ GameSession game;BattleHUDSummary summary;BattleScoreMeter meter;Action done;int phase,diagnostics;float stable,shown,waitAge;
+ public int Phase=>phase;
+ public void Begin(GameSession g,BattleHUDSummary counter,BattleScoreMeter stars,Action complete){game=g;summary=counter;meter=stars;done=complete;shown=g.Score;var blocker=gameObject.AddComponent<Image>();blocker.color=Color.clear;blocker.raycastTarget=true;g.BeginVictoryRound();gameObject.AddComponent<VictoryPlaybackControl>().Initialize(g);}
+ void Update(){float dt=game.PresentationDelta(Mathf.Min(Time.unscaledDeltaTime,.05f));game.TickVictoryBoard(dt);shown=Mathf.MoveTowards(shown,game.Score,Mathf.Max(3000,(game.Score-shown)*10)*dt);summary?.ShowVictoryScore(Mathf.RoundToInt(shown));meter?.CountVictoryScore(Mathf.RoundToInt(shown));
+  {waitAge+=Time.unscaledDeltaTime;if(diagnostics<3&&waitAge>=(diagnostics+1)*5){diagnostics++;Debug.LogWarning("BOUNCE_VICTORY_WAIT phase="+phase+" shown="+shown+" score="+game.Score+" "+game.VictorySettlementStatus);}}
+  if(phase==0){stable=game.VictoryRoundReady?stable+dt:0;if(stable>=.12f){phase=1;stable=0;diagnostics=0;waitAge=0;game.TriggerVictorySpecials();}}
+  else {stable=game.VictoryEffectsReady&&Mathf.Abs(shown-game.Score)<.5f?stable+dt:0;if(stable>=.12f){game.RefillVictoryEmptyBoard();game.LockVictoryDamage();summary?.ShowVictoryScore(game.Score,true);meter?.CountVictoryScore(game.Score);var next=done;done=null;enabled=false;next?.Invoke();}}
+ }
+}
+}

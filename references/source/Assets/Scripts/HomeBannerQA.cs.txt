@@ -1,0 +1,84 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+namespace BounceGarden {
+public sealed class HomeBannerQA:MonoBehaviour {
+ int checks,failures,errors,width=540,height=1170;string dir;AppUI app;RenderTexture target;Canvas canvas;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--home-banner-qa"))new GameObject("Home banner QA").AddComponent<HomeBannerQA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ Button FindButton(string name)=>FindObjectsByType<Button>(FindObjectsSortMode.None).FirstOrDefault(b=>b.gameObject.activeInHierarchy&&b.name==name);
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();Canvas.ForceUpdateCanvases();var backdrop=GameObject.Find("Full screen cream clear");if(backdrop!=null)backdrop.GetComponent<Camera>().Render();Camera.main.Render();var old=RenderTexture.active;RenderTexture.active=target;var tex=new Texture2D(width,height,TextureFormat.RGB24,false);tex.ReadPixels(new Rect(0,0,width,height),0,0);tex.Apply();File.WriteAllBytes(dir+"/"+name+".png",tex.EncodeToPNG());RenderTexture.active=old;Destroy(tex);}
+ bool ClearsCapsule(Button button){Rect blocked;if(!WeChatLayoutMetrics.TryGetBlockedRect(new Vector2Int(width,height),out blocked))return true;var c=new Vector3[4];button.GetComponent<RectTransform>().GetWorldCorners(c);var lo=Camera.main.WorldToScreenPoint(c[0]);var hi=Camera.main.WorldToScreenPoint(c[2]);return !Rect.MinMaxRect(lo.x,lo.y,hi.x,hi.y).Overlaps(blocked);}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");int n=Array.IndexOf(args,"--qa-size");if(n>=0){var size=args[n+1].Split('x');width=int.Parse(size[0]);height=int.Parse(size[1]);}
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(1);app=FindFirstObjectByType<AppUI>();target=new RenderTexture(width,height,24);target.Create();Camera.main.targetTexture=target;canvas=FindFirstObjectByType<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=Camera.main;canvas.planeDistance=1;
+  app.QASetViewport(new Vector2Int(width,height));WeChatLayoutMetrics.Set(390,844,new Rect(0,44,390,766),new Rect(295,52,87,32));app.QAStaticNavigation("home");yield return new WaitForSecondsRealtime(.7f);
+  Check(FindObjectsByType<Round6Nav>(FindObjectsSortMode.None).Length==0,"no bottom navigation created");
+  var settings=FindButton("Settings medallion");var corners=new Vector3[4];settings.GetComponent<RectTransform>().GetWorldCorners(corners);float high=Camera.main.WorldToScreenPoint(corners[2]).y;
+  Check(ClearsCapsule(settings),"home settings hit region avoids only the capsule");
+  var homeTop=GameObject.Find("Home top content").GetComponent<RectTransform>();var header=GameObject.Find("Fixed top bar").GetComponent<RectTransform>();var portrait=GameObject.Find("Portrait layout").GetComponent<RectTransform>();
+  Check(Mathf.Abs(homeTop.anchoredPosition.y-header.anchoredPosition.y)<.01f&&homeTop.anchoredPosition.y<(portrait.rect.height-2340)*.5f&&homeTop.localScale==Vector3.one&&settings.GetComponent<RectTransform>().anchoredPosition==new Vector2(446,1010),"avatar wordmark settings and banners move together without rescaling or moving settings independently");
+  var play=FindButton("Play current level");play.GetComponent<RectTransform>().GetWorldCorners(corners);Check(Camera.main.WorldToScreenPoint(corners[0]).y>=0,"start button stays on screen");
+  var carousel=FindFirstObjectByType<ActivityCarousel>();Check(carousel.transform.Find("Activity cards/Style Shop/Jelly visual/Shop portrait layers")!=null,"shop card uses independent original portrait layers");
+  var first=carousel.transform.Find("Activity cards/Garden League").GetComponent<RectTransform>();first.GetWorldCorners(corners);Check(Camera.main.WorldToScreenPoint(corners[0]).x<width*.10f,"banner retains full authored width on short safe-area screens");
+  var feedback=GameObject.Find("Home achievement feedback").transform;Check(feedback.localScale.x>=.65f,"short-screen welcome text remains readable");
+  yield return Capture("01-home-wechat");
+  carousel.QADrag(new Vector2(-400,5));yield return new WaitForSecondsRealtime(.4f);Check(carousel.SelectedPage==1,"horizontal swipe selects next carousel page");carousel.QADrag(new Vector2(400,5));yield return new WaitForSecondsRealtime(.4f);Check(carousel.SelectedPage==0,"carousel returns to first page");
+  // Click through the actual pointer event handler, not a separate navigation implementation.
+  var card=carousel.transform.Find("Activity cards/Garden League");var e=new PointerEventData(EventSystem.current){button=PointerEventData.InputButton.Left,position=Camera.main.WorldToScreenPoint(card.position),pointerCurrentRaycast=new RaycastResult{module=canvas.GetComponent<GraphicRaycaster>()}};carousel.OnPointerDown(e);carousel.OnPointerUp(e);carousel.OnPointerClick(e);yield return new WaitForSecondsRealtime(.5f);
+  Check(app.CurrentPage=="ranking"&&FindFirstObjectByType<LeagueRankingView>()!=null,"leaderboard banner opens actual league");
+  var view=FindFirstObjectByType<LeagueRankingView>();var podium=FindFirstObjectByType<LeaguePodiumView>();Check(podium!=null&&GameObject.Find("League ribbon navigation")!=null,"reference ribbon navigation and podium exist");
+  Check(FindButton("Settings medallion")==null,"ranking uses back/title/info without old settings chrome");
+  var expected=new[]{2,1,3}.Select(rank=>view.Snapshot.entries.First(entry=>entry.rank==rank).id).ToArray();Check(podium.DisplayedIds.SequenceEqual(expected),"podium displays actual second, first, third entries");
+  Check(view.ListContent.anchoredPosition.y<1,"ranking opens with leaders visible");
+  var clock=GameObject.Find("League countdown").GetComponent<TMPro.TMP_Text>();string clockBefore=clock.text;yield return new WaitForSecondsRealtime(1.3f);Check(clock.text!=clockBefore,"countdown ticks each second");
+  var back=FindButton("Return home").GetComponent<RectTransform>();back.GetWorldCorners(corners);Check(ClearsCapsule(FindButton("League rewards preview")),"ranking info avoids capsule without moving left header");
+  Rect systemZone;WeChatLayoutMetrics.TryGetBlockedRect(new Vector2Int(width,height),out systemZone);var ribbon=GameObject.Find("League ribbon navigation").transform.Find("Title ribbon").GetComponent<RectTransform>();ribbon.GetWorldCorners(corners);Check(Camera.main.WorldToScreenPoint(corners[2]).y<systemZone.yMin,"entire ranking title and back navigation sit below reserved system strip");
+  int coinsBefore=app.Profile.Coins;FindButton("League rewards preview").onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);Check(GameObject.Find("Modal")!=null&&app.Profile.Coins==coinsBefore,"info button opens existing reward rules without modifying balance");yield return Capture("02b-ranking-info");
+  app.QAStaticNavigation("ranking");yield return new WaitForSecondsRealtime(.4f);FindButton("League locate player").onClick.Invoke();yield return null;var own=view.ListContent.Find("League row you");Check(Mathf.Abs(view.Viewport.InverseTransformPoint(own.position).y)<view.Viewport.rect.height/2,"footer locates player in full roster");
+  view.Viewport.GetComponent<ScrollRect>().verticalNormalizedPosition=1;yield return new WaitForSecondsRealtime(.3f);yield return Capture("02-ranking");
+  FindButton("Return home").onClick.Invoke();yield return new WaitForSecondsRealtime(.5f);Check(app.CurrentPage=="home","ranking has top return home");
+  carousel.ActivateCard(1);yield return new WaitForSecondsRealtime(.5f);Check(app.CurrentPage=="shop"&&FindButton("Button Frames")!=null,"shop banner opens purchase page");
+  Check(GameObject.Find("Shop ribbon navigation")!=null&&FindButton("Shop information")!=null,"shop shares back/ribbon/info navigation with ranking");
+  Check(FindButton("Button Settings")==null,"shop removes old settings from navigation");
+  var shopBack=FindButton("Button Home").GetComponent<RectTransform>();shopBack.GetWorldCorners(corners);Check(ClearsCapsule(FindButton("Shop information")),"shop info avoids capsule without shrinking shop");
+  var shopRibbon=GameObject.Find("Shop ribbon navigation").transform.Find("Title ribbon").GetComponent<RectTransform>();shopRibbon.GetWorldCorners(corners);Check(Camera.main.WorldToScreenPoint(corners[2]).y<systemZone.yMin,"entire shop navigation sits below reserved system strip");
+  GameObject.Find("Shop wallet capsule").GetComponent<RectTransform>().GetWorldCorners(corners);float walletBottom=Camera.main.WorldToScreenPoint(corners[0]).y;FindButton("Button Avatars").GetComponent<RectTransform>().GetWorldCorners(corners);Check(walletBottom>Camera.main.WorldToScreenPoint(corners[2]).y,"wallet toolbar does not overlap category tabs");
+  float tabsBottom=Camera.main.WorldToScreenPoint(corners[0]).y;GameObject.Find("Reference grid viewport").GetComponent<RectTransform>().GetWorldCorners(corners);Check(Camera.main.WorldToScreenPoint(corners[2]).y<tabsBottom,"product scroll viewport starts below category tabs");
+  int shopGuideBalance=app.Profile.Coins;FindButton("Shop information").onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);Check(FindButton("Button Continue shopping")!=null&&app.Profile.Coins==shopGuideBalance,"shop info opens guide without purchasing");yield return Capture("03b-shop-guide");FindButton("Button Continue shopping").onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);
+  Check(!FindObjectsByType<Button>(FindObjectsSortMode.None).Any(b=>b.gameObject.activeInHierarchy&&b.name=="Button Rank"),"shop has no bottom nav controls");yield return Capture("03-shop");
+  FindButton("Button Frames").onClick.Invoke();yield return new WaitForSecondsRealtime(.4f);Check(GameObject.Find("Reference grid").transform.childCount==10,"all ten purchasable frames shown");yield return Capture("04-frame-shop");
+  int balance=app.Profile.Coins;var item=CatCosmeticCatalog.Items[1];app.OpenCosmeticOffer(item.id,true);yield return new WaitForSecondsRealtime(.4f);FindButton("Button Buy with coins").onClick.Invoke();yield return new WaitForSecondsRealtime(.4f);
+  Check(app.Profile.OwnsShopCosmetic(item.id,true)&&app.Profile.Coins==balance-LocalProfile.CosmeticPrice(item.id,true),"banner path purchases frame with exact coin debit");
+  FindButton("Button Customize").onClick.Invoke();yield return new WaitForSecondsRealtime(.4f);Check(FindButton("Button Save style")!=null,"purchase opens existing dressing modal");
+  FindButton("Button 选择 头像框 "+item.id).onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);
+  WeChatLayoutMetrics.Set(390,844,new Rect(0,59,390,751),new Rect(295,66,87,32));yield return new WaitForSecondsRealtime(.4f);
+  var modal=GameObject.Find("Modal").GetComponent<RectTransform>();modal.GetWorldCorners(corners);var safe=WeChatLayoutMetrics.Fit(new Rect(0,0,width,height),new Vector2Int(width,height));Check(Camera.main.WorldToScreenPoint(corners[2]).y<=safe.yMax+1&&Camera.main.WorldToScreenPoint(corners[0]).y>=safe.yMin-1,"open dressing retains native safe bounds after capsule moves");yield return Capture("05-dressing-safe");
+  FindButton("Button Save style").onClick.Invoke();yield return new WaitForSecondsRealtime(.3f);var shopEquipped=GameObject.Find("Shop equipped style").GetComponentInChildren<CatCosmeticPortrait>();Check(app.Profile.EquippedFrameId==item.id&&shopEquipped.FrameId==item.id,"saving purchased frame refreshes equipped shop toolbar immediately");yield return Capture("05b-shop-equipped");FindButton("Button Home").onClick.Invoke();yield return new WaitForSecondsRealtime(.5f);Check(app.CurrentPage=="home","shop has top return home");
+  WeChatLayoutMetrics.Set(390,844,new Rect(0,44,390,766),Rect.zero);yield return new WaitForSecondsRealtime(.3f);Check(FindButton("Settings medallion")!=null,"invalid capsule retains usable fallback layout");
+  WeChatLayoutMetrics.Reset();yield return new WaitForSecondsRealtime(.3f);yield return Capture("06-home-native");
+  Check(FindButton("Play current level").GetComponent<UIBounce>()!=null,"play retains existing bounce component");
+  WeChatLayoutMetrics.Set(390,844,new Rect(0,44,390,766),new Rect(295,52,87,32));yield return null;FindButton("Play current level").onClick.Invoke();yield return app.QAWaitForLevel();Check(app.CurrentPage=="battle"&&app.Session.IsPlaying,"start button enters actual gameplay");
+  var cameraRect=Camera.main.rect;var design=GameObject.Find("Portrait layout").transform;var designScale=design.localScale;
+  WeChatLayoutMetrics.Reset();yield return new WaitForSecondsRealtime(.2f);
+  Check(Camera.main.rect==cameraRect&&design.localScale==designScale,"capsule does not shrink battle camera or HUD scale");
+  var before=FindButton("Battle settings").GetComponent<RectTransform>().anchoredPosition;
+  // Force a capsule over the authored settings hit region, proving local displacement.
+  var button=FindButton("Battle settings");button.GetComponent<RectTransform>().GetWorldCorners(corners);var p0=Camera.main.WorldToScreenPoint(corners[0]);var p2=Camera.main.WorldToScreenPoint(corners[2]);
+  WeChatLayoutMetrics.Set(width,height,new Rect(0,0,width,height),Rect.MinMaxRect(p0.x,height-p2.y,p2.x,height-p0.y));yield return new WaitForSecondsRealtime(.2f);
+  Check(ClearsCapsule(button)&&button.GetComponent<RectTransform>().anchoredPosition.y<before.y,"only overlapping battle settings moves below capsule");
+  Check(Camera.main.rect==cameraRect&&design.localScale==designScale,"moving settings preserves battle dimensions");
+  WeChatLayoutMetrics.Set(390,844,new Rect(0,44,390,766),new Rect(295,52,87,32));yield return new WaitForSecondsRealtime(.2f);yield return Capture("07-battle-wechat");
+
+  app.Session.SetAim(Vector2.up);int changes=app.Session.AimVisibilityChanges;for(int j=0;j<120;j++)app.Session.SetAim(Vector2.up);Check(app.Session.AimVisibilityChanges==changes,"stable aim reuses all visible points without 120 frames of disable-enable churn");app.Session.SetAim(null);
+  int spawned=app.Session.SpawnCount;bool accepted=app.Session.TryShoot(Vector2.up);yield return new WaitForFixedUpdate();yield return new WaitForFixedUpdate();Check(accepted&&app.Session.SpawnCount>spawned,"accepted shot begins spawning within two physics ticks without animation delay");
+  app.QASetSafeArea(new Rect(0,24,width,height-48));yield return new WaitForSecondsRealtime(.2f);var fill=GameObject.Find("Full screen original garden fill");var fillCamera=GameObject.Find("Full screen cream clear").GetComponent<Camera>();Check(fill!=null&&fill.activeSelf&&fillCamera.rect==new Rect(0,0,1,1)&&fillCamera.cullingMask==(1<<30),"original garden background independently fills top and bottom outside safe gameplay viewport");yield return Capture("08-fullscreen-garden");
+  File.AppendAllText(dir+"/checks.txt",$"RESULT checks={checks} failed={failures} errors={errors}\n");Camera.main.targetTexture=null;target.Release();Application.Quit(failures+errors==0?0:1);
+ }
+}
+}

@@ -1,0 +1,24 @@
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;
+namespace BounceGarden {
+public sealed class ImmediateSpecialIntro020QA:MonoBehaviour {
+ string dir;int checks,failures,errors;AppUI app;bool resultReady;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--immediate-special-intro-qa"))new GameObject("Immediate special introduction QA").AddComponent<ImmediateSpecialIntro020QA>();}
+ void Check(bool ok,string message){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+message+"\n");}
+ IEnumerator Load(int level){app.QAStartLevel(level);yield return app.QAWaitForLevel();app.Session.QAIgnoreFocusLoss=true;for(int n=0;n<120;n++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.02f);if(n>10&&!app.AlphabetIntroActive&&!app.Session.IsPaused)break;}app.Session.SetPaused(false);}
+ IEnumerator DelayResult(string page){if(page=="result-win"){yield return new WaitForSecondsRealtime(.4f);resultReady=true;}}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.targetFrameRate=60;QualitySettings.vSyncCount=0;Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();yield return Load(0);var g=app.Session;
+  g.QASevenClear();for(int r=2;r<7;r++)for(int c=1;c<8;c++)g.QAThirdNormal(c,r,c%5);
+  Check(g.TryShoot(Vector2.up),"live volley accepted before first special");yield return new WaitForSecondsRealtime(.035f);
+  int spawned=g.SpawnCount,shots=g.Shots;
+  foreach(int kind in SevenSpecialRules.Kinds){var tool=g.QASevenTool(kind,kind,8,kind%5);tool.Waiting=true;}
+  yield return new WaitForSecondsRealtime(.35f);
+  Check(!app.AlphabetIntroActive&&!g.IsPaused,"all five first appearances leave the current volley running");
+  Check(g.SpawnCount>spawned&&g.Shots==shots,"first appearances neither gate spawning nor charge extra steps");
+  yield return Load(4);g=app.Session;GameContent.Ready=page=>page!="result-win"||resultReady;GameContent.Page=DelayResult;g.QAFinaleGoal(7,1800);yield return new WaitForSecondsRealtime(.15f);
+  Check(!g.IsPlaying&&app.QAGoalCelebration!=null&&app.QAVictoryPreparation==null,"cold result resources do not postpone goal celebration");
+  float deadline=Time.realtimeSinceStartup+20;while(app.QAVictoryPage==null&&Time.realtimeSinceStartup<deadline)yield return null;Check(app.QAVictoryPage!=null&&g.ScoreFinalized&&g.Shots==0,"deferred result resources resume full victory and rewards");
+  GameContent.Ready=null;GameContent.Page=null;
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

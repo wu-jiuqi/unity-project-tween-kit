@@ -1,0 +1,60 @@
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class ChainCollectionHUD:MonoBehaviour {
+ GameSession game;readonly List<ChainTaskCard> cards=new List<ChainTaskCard>();TMP_Text steps;RectTransform stepsRoot;int seenSteps;float stepAge=2,age;int generation;
+ public IReadOnlyList<ChainTaskCard> Cards=>cards;public RectTransform StepsRect=>stepsRoot;public RectTransform GoalsRect {get;private set;}
+ public void ShowVictorySteps(int remaining){steps.text=remaining.ToString();foreach(var card in cards)card.ShowCompleted();}
+ public void Initialize(GameSession session){
+  game=session;generation=game.Generation;gameObject.AddComponent<ChainRatingView>().Initialize(game);
+  var hint=UICraft.Root(transform,"Quiet launch instruction",0,game.LauncherPosition.y*100-114,480,60);hint.gameObject.AddComponent<BattleAimHint>().Initialize(game);hint.gameObject.SetActive(!game.IsStreakTrial&&!game.UsesShopBoosters&&!game.IsOpening);
+  GoalsRect=UICraft.Root(transform,"Grouped collection goals",-15,1000,480,180);
+
+  int columns=game.IsOpening?game.OpeningTargets.Length:game.ActiveJellyColors.Count()+game.CollectionGoal.Count(n=>n>0);float gap=16,width=480f/Mathf.Max(1,columns)-gap;int column=0;
+  if(game.IsOpening){for(int i=0;i<game.OpeningTargets.Length;i++)AddCard(-1,-1,column++,columns,width,gap,i);}else{foreach(int color in game.ActiveJellyColors)AddCard(-1,color,column++,columns,width,gap);
+  for(int food=0;food<2;food++)if(game.CollectionGoal[food]>0)AddCard(food,-1,column++,columns,width,gap);}
+  var header=transform.parent.Find("Safe battle header") as RectTransform;var slot=UICraft.Root(header!=null?header:transform,"Moves safe slot",405,1010,170,128);slot.gameObject.AddComponent<BattleMovesPlacement>().Initialize(game);stepsRoot=UICraft.Root(slot,"Independent remaining steps",0,0,170,128);
+  var stepsPlate=BattleJellyArt.Image(stepsRoot,"moves-badge",0,0,170,128);steps=UICraft.Label(stepsRoot,"",0,-13,150,76,64,UICraft.Ink);steps.enableAutoSizing=false;BattleRoundTypography.Style(steps,true);var stepsCaption=UICraft.Label(stepsRoot,"剩余步数",0,35,160,34,26,UICraft.Ink);slot.GetComponent<BattleMovesPlacement>().Bind(stepsRoot,stepsPlate,steps,stepsCaption);
+  game.OpeningLootDestination=i=>Target(cards.FirstOrDefault(c=>c.OpeningIndex==i));game.ChainLootDestination=FoodTarget;game.JellyLootDestination=JellyTarget;seenSteps=game.Shots;game.StateChanged+=Refresh;Refresh();
+ }
+ static float Center(int column,int columns,float width,float gap)=>(column-(columns-1)*.5f)*(width+gap);
+ void AddCard(int food,int jelly,int column,int columns,float width,float gap,int openingIndex=-1){float x=Center(column,columns,width,gap);var root=UICraft.Root(GoalsRect,jelly>=0?JellyCollectionArt.Name(jelly)+" jelly task":food==0?"Fish task card":"Toy task card",x,-14,width,92);var card=root.gameObject.AddComponent<ChainTaskCard>();card.Initialize(game,food,jelly,width,38,openingIndex);cards.Add(card);}
+ Vector2 FoodTarget(int kind)=>Target(cards.FirstOrDefault(c=>c.FoodIndex==kind-1));
+ Vector2 JellyTarget(int color)=>Target(cards.FirstOrDefault(c=>c.JellyColor==color));
+ Vector2 Target(ChainTaskCard card){if(card==null)return new Vector2(0,7.95f);var canvas=GetComponentInParent<Canvas>();Camera uiCamera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;Vector2 screen=RectTransformUtility.WorldToScreenPoint(uiCamera,card.Icon.position);var camera=Camera.main;return camera.ScreenToWorldPoint(new Vector3(screen.x,screen.y,camera.WorldToScreenPoint(Vector3.zero).z));}
+ void Refresh(){if(game==null||game.Generation!=generation||!game.IsPlaying)return;if(game.Shots!=seenSteps){seenSteps=game.Shots;stepAge=0;if(seenSteps==3)SoundService.Play("low_moves");}steps.text=game.Shots.ToString();foreach(var card in cards)card.Refresh();}
+ void Update(){if(game==null||game.Generation!=generation||game.IsPaused)return;age+=Time.deltaTime;stepAge+=Time.deltaTime;float intro=Mathf.Min(1.025f,Mathf.LerpUnclamped(.9f,1,UICraft.OutBack(Mathf.Clamp01(age/.5f))));float kick=Mathf.Sin(Mathf.Clamp01(stepAge/.3f)*Mathf.PI)*.025f;stepsRoot.localScale=new Vector3(intro*(1+kick),intro*(1-kick),1);}
+ void OnDestroy(){if(game!=null){game.StateChanged-=Refresh;if(game.Generation==generation){game.OpeningLootDestination=null;game.ChainLootDestination=null;game.JellyLootDestination=null;}}}
+}
+public sealed class ChainTaskCard:MonoBehaviour {
+ GameSession game;int target,generation;float pulseAge=2,age,width;RectTransform root,content;Image icon,stamp;RectTransform jellyVisual;TMP_Text count;
+ public int FoodIndex {get;private set;}=-1;public int JellyColor {get;private set;}=-1;
+ public RectTransform Icon=>icon.rectTransform;public RectTransform Rect=>root;public RectTransform ContentRect=>content;public RectTransform NumberRect=>count.rectTransform;
+ public int OpeningIndex {get;private set;}=-1;
+ public void ShowCompleted(){count.enabled=false;stamp.gameObject.SetActive(true);stamp.rectTransform.localScale=Vector3.one;}
+ int Current=>OpeningIndex>=0?game.OpeningCollected[OpeningIndex]:JellyColor>=0?game.JellyCollected[JellyColor]:game.Collected[FoodIndex];
+ int Goal=>OpeningIndex>=0?game.OpeningTargets[OpeningIndex].count:JellyColor>=0?game.JellyGoal[JellyColor]:game.CollectionGoal[FoodIndex];
+ public void Initialize(GameSession owner,int food,int jelly,float cardWidth,int numberSize,int openingIndex=-1){
+  game=owner;generation=game.Generation;OpeningIndex=openingIndex;FoodIndex=food;JellyColor=jelly;width=cardWidth;root=(RectTransform)transform;
+  content=UICraft.Root(root,"Contained task face",0,0,width,92);
+  // One-goal tutorial still uses the full tray; keep its icon/count compact.
+  float faceWidth=Mathf.Min(width,196),iconX=0;jellyVisual=BattleJellyArt.Image(content,BattleJellyArt.GoalPad(game,OpeningIndex,jelly,food),0,0,faceWidth+8,164).rectTransform;
+  // Resolve the actual campaign icon directly; do not load an obsolete HUD
+  // atlas merely to replace its sprite on the same construction frame.
+  icon=UICraft.Box(content,"Task icon",iconX,21,96,86,Color.white);icon.type=Image.Type.Simple;icon.preserveAspect=true;icon.raycastTarget=false;
+  if(OpeningIndex>=0)icon.sprite=game.OpeningTargetSprite(OpeningIndex);else if(game.IsOpening)icon.sprite=game.OpeningGoalSprite(jelly,food);else if(jelly>=0)icon.sprite=game.IsTutorial?SevenSpecialArt.OrdinaryIcon(1):JellyCollectionArt.Sprite(jelly);else icon.sprite=ChainHudArt.Frame(food==1?5:4);
+  count=UICraft.Label(content,"",0,-35,faceWidth*.9f,52,46,UICraft.Ink);count.enableAutoSizing=false;BattleRoundTypography.Style(count,true);
+  stamp=BattleJellyArt.Image(content,"goal-complete",0,-35,42,42);stamp.gameObject.SetActive(false);target=Current;Refresh();
+ }
+ public void Refresh(){if(game==null||game.Generation!=generation||!game.IsPlaying)return;int next=Current;if(next!=target){target=next;pulseAge=0;}count.text=Mathf.Max(0,Goal-target).ToString();count.enabled=target<Goal;}
+ void Update(){if(game==null||game.Generation!=generation||!game.IsPlaying||game.IsPaused)return;float dt=Time.deltaTime;age+=dt;pulseAge+=dt;float intro=Mathf.Min(1.025f,Mathf.LerpUnclamped(.9f,1,UICraft.OutBack(Mathf.Clamp01(age/.48f)))),pulse=Mathf.Sin(Mathf.Clamp01(pulseAge/.38f)*Mathf.PI);root.localScale=new Vector3(intro*(1+pulse*.025f),intro*(1-pulse*.025f),1);
+  icon.rectTransform.localScale=new Vector3(1+pulse*.1f,1-pulse*.08f,1);icon.rectTransform.localRotation=Quaternion.identity;count.transform.localScale=Vector3.one*(1+pulse*.04f);
+  bool complete=target>=Goal;stamp.gameObject.SetActive(complete);if(complete)stamp.rectTransform.localScale=Vector3.one*Mathf.LerpUnclamped(.4f,1,UICraft.OutBack(Mathf.Clamp01(pulseAge/.4f)));
+  float wobble=Mathf.Sin(pulseAge*27)*Mathf.Exp(-pulseAge*8)*.11f;jellyVisual.localScale=new Vector3(1+wobble,1-wobble,1);
+ }
+}
+}
+

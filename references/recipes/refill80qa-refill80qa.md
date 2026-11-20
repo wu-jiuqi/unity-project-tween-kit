@@ -1,0 +1,154 @@
+# Refill80QA · Refill80QA
+
+状态：`test-fixture`；交付：`source-evidence-only`。
+
+源文件：`Assets/Scripts/Refill80QA.cs`
+文件 SHA-256：`66553f9219608b5d5fb7ec21792d1d0a7a46c071c221894e5ca17bf4a405228e`
+[原始源码快照](../source/Assets/Scripts/Refill80QA.cs.txt)
+
+此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+
+## 源方法、参数与曲线
+
+### Settle · L24
+
+方法 SHA-256：`fe4eafcb0e6c5f40cb0d74a029cdce1f770a56ab203fe8154ef7f9eea60f0408`
+时间来源：本方法未直接取时；查调用者/字段
+曲线证据：查原式或下级调用
+解析符号：`BounceGarden.Refill80QA.Settle()`
+
+Roslyn 已解析的实际源码调用位置：
+
+- `Assets/Scripts/Refill80QA.cs:41` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:44` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:44` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:51` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:53` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:56` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:58` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:64` · `Refill80QA.Start` → `Settle()`
+- `Assets/Scripts/Refill80QA.cs:66` · `Refill80QA.Start` → `Settle()`
+
+```csharp
+IEnumerator Settle(){int steps=0;while((!g.ChainGridReady||g.ChainEffectsPending)&&steps++<1400){Tick();if(steps%15==0)yield return null;}Check(steps<1400&&g.ChainGridValid(false),"bounded settlement and valid occupancy");}
+```
+
+### Capture · L25
+
+方法 SHA-256：`8984e384f2a90bf2f7fc197baff6ccf05e897434f6ec8585fd71dcd6bff5e0fe`
+时间来源：本方法未直接取时；查调用者/字段
+曲线证据：查原式或下级调用
+解析符号：`BounceGarden.Refill80QA.Capture(string)`
+
+Roslyn 已解析的实际源码调用位置：
+
+- `Assets/Scripts/Refill80QA.cs:41` · `Refill80QA.Start` → `Capture("01-protected-arrival")`
+- `Assets/Scripts/Refill80QA.cs:76` · `Refill80QA.Start` → `Capture("04-anchored-release-grid")`
+- `Assets/Scripts/Refill80QA.cs:81` · `Refill80QA.Start` → `Capture("03-conversion-local-emphasis")`
+- `Assets/Scripts/Refill80QA.cs:84` · `Refill80QA.Start` → `Capture("02-mainline")`
+
+```csharp
+IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var im=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,im);File.WriteAllBytes(dir+"/"+name+".png",im.EncodeToPNG());Destroy(im);rt.Release();Destroy(rt);}
+```
+
+### Start · L26
+
+方法 SHA-256：`a16fb084f0e96ba27088cdd6cebc4cde1d2a7785f47da42ca0c45bd53b1ccbe3`
+时间来源：Time.realtimeSinceStartup, Time.timeScale, WaitForSecondsRealtime
+曲线证据：查原式或下级调用
+解析符号：`BounceGarden.Refill80QA.Start()`
+
+Unity 引擎回调；是否创建并启用组件，见 constructionSites 与场景入口。
+
+```csharp
+IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();int at=Array.IndexOf(args,"--qa-out");dir=at>=0?args[at+1]:Application.persistentDataPath+"/Refill80";Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  int fpsAt=Array.IndexOf(args,"--qa-fps");Application.targetFrameRate=fpsAt>=0?int.Parse(args[fpsAt+1]):60;QualitySettings.vSyncCount=0;
+  Application.logMessageReceived+=(text,stack,type)=>{if(type==LogType.Error||type==LogType.Exception||type==LogType.Assert){errors++;File.AppendAllText(dir+"/errors.txt",text+"\n"+stack+"\n");}};
+  yield return new WaitForSecondsRealtime(8);app=FindFirstObjectByType<AppUI>();g=app.Session;app.QAStartLevel(4);yield return app.QAWaitForLevel();
+  for(int i=0;i<100;i++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.04f);}g=app.Session;g.QAIgnoreFocusLoss=true;g.SetPaused(false);g.enabled=false;
+  var mode=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;
+  // Half of current gaps, including vacancies left over from earlier cycles.
+  Reset();for(int r=0;r<9;r++)for(int c=0;c<9;c++)g.QASevenBrick(c,r,100);var removed=g.CollectionBricks.Where(b=>b.GetComponent<ChainGridPiece>().Row==8&&b.GetComponent<ChainGridPiece>().Col<8).ToArray();foreach(var b in removed)g.QARefillRemove(b);
+  g.QARefillQuiet(60);Check(g.RefillGenerated==0&&g.ChainOccupiedCells()==73,"elimination does not immediately refill");
+  for(int i=0;i<2;i++)g.QARefillVolley();Check(g.RefillPending==0&&g.RefillCleared==8,"first two volleys do not open supply");
+  g.QARefillVolley();Check(g.RefillShots==3&&g.RefillPending==4&&g.RefillGapSnapshot==8&&g.RefillRemainder==0,"third volley snapshots eight current gaps into four arrivals");
+  Tick();var falling=g.CollectionBricks.FirstOrDefault(b=>b.Alive&&g.QARefillIsProtected(b));Check(falling!=null&&g.RefillGenerated==1,"one emission per planner step");
+  if(falling!=null){int hp=falling.CurrentHealth;Check(!falling.GetComponent<BoxCollider2D>().enabled&&falling.Face.color.a<.6f,"falling arrival is translucent and non-colliding");g.SevenHit(falling,99);g.ApplyChainImpact(falling,99,Vector2.up,falling.transform.position,true);Check(falling.Alive&&falling.CurrentHealth==hp,"direct and special damage cannot hit protected arrival");}
+  Check(g.ChainCanLaunch,"ordinary supply allows continuing volleys");Tick(8);
+  yield return Capture("01-protected-arrival");yield return Settle();Check(g.RefillGenerated==4&&g.ChainOccupiedCells()==77,"eight gaps receive exactly four new bricks");
+  Check(g.CollectionBricks.Where(b=>b.Alive&&b.CurrentHealth==1).All(b=>!g.QARefillIsProtected(b)&&b.GetComponent<BoxCollider2D>().enabled&&b.Face.color.a>.99f&&!g.IsJellyTarget(b)),"landed arrivals restore opacity/collision and never become goals");
+  var late=g.CollectionBricks.First(b=>b.Alive&&b.GetComponent<ChainGridPiece>().Col==8&&b.GetComponent<ChainGridPiece>().Row==8);g.QARefillRemove(late);Check(g.RefillCleared==1&&g.RefillPending==0,"post-cutoff elimination does not expand the previous batch");g.QARefillVolley();g.QARefillVolley();Check(g.RefillShots==5&&g.RefillGapSnapshot==5&&g.RefillPending==2&&g.RefillRemainder==0,"fifth volley includes four old gaps plus one new gap and floors half of five to two");
+  yield return Settle();g.QARefillVolley();g.QARefillVolley();Check(g.RefillGapSnapshot==3&&g.RefillPending==1,"seventh volley fills half of old gaps even with no new eliminations");yield return Settle();
+  Reset();for(int r=0;r<9;r++)for(int c=0;c<9;c++)g.QASevenBrick(c,r,100);foreach(var b in g.CollectionBricks.Take(20).ToArray())g.QARefillRemove(b);g.QARefillVolley();g.QARefillVolley();g.QARefillVolley();Check(g.RefillPending==10&&g.RefillGapSnapshot==20,"twenty current gaps plan ten arrivals");g.QARefillVolley();g.QARefillVolley();Check(g.RefillPending==15&&g.RefillGapSnapshot==10,"overlapping batches exclude ten pending reservations from the same twenty gaps");
+  Reset();for(int r=0;r<9;r++)for(int c=0;c<9;c++)if(c<2||c>3||r<6||r>7)g.QASevenBrick(c,r,100);var wide=g.QASevenBrick(2,6,1,0,2);g.QARefillRemove(wide);g.QARefillVolley();g.QARefillVolley();g.QARefillVolley();Check(g.RefillCleared==0&&g.RefillGapSnapshot==4&&g.RefillPending==2,"one removed two-by-two entity creates four gap cells and two new arrivals");
+  // Replacements are identities, not eliminations.
+  Reset();g.QASevenBrick(4,8,1);g.QASevenCompleteReward(4);Check(g.RefillCleared==0&&g.ChainTools.Count==1,"reward replacement does not earn refill credit");
+  Reset();var big=g.QASevenBrick(2,6,1,0,2);var armor=g.QASevenBrick(6,8,50,0,1,3);g.SevenHit(armor);Check(g.RefillCleared==0,"armor loss is not elimination");g.QARefillRemove(big);Check(g.RefillCleared==1,"two-by-two removal counts one entity");
+  // Full supply does not reset the fixed input cadence.
+  Reset();g.QASevenBrick(4,8,100);g.QARefillVolley();g.QARefillVolley();g.QARefillFull();Check(g.RefillShots==2&&g.RefillCleared==0,"full refill preserves volley count");yield return Settle();Check(g.ChainOccupiedCells()==81&&g.RefillGenerated==80,"full refill fills reachable cells sequentially");g.QARefillVolley();g.QARefillVolley();g.QARefillVolley();Check(g.RefillOrdinaryBatches==1&&g.RefillPending==0,"fifth volley closes zero-gap cycle after full refill covered the third-volley boundary");
+  // Only column zero is available; terrain splits it, leaving unreachable holes.
+  Reset();for(int c=1;c<9;c++)for(int r=0;r<9;r++)g.QASevenBrick(c,r,1,0,1,0,true);g.QASevenBrick(0,4,1,0,1,0,true);g.QARefillFull();yield return Settle();Check(g.RefillGenerated==4&&g.RefillPending==0&&g.ChainOccupiedCells()==77,"full columns skipped, capacity above terrain filled, sealed lower holes retained without debt");
+  g.QARefillQuiet(100);Check(g.RefillFullBatches==1,"terrain-only or no-capacity states never loop full refill");
+  // A real clear edge requests full supply once; an initial empty board does not.
+  Reset();g.QARefillQuiet(20);Check(g.RefillFullBatches==0,"initial empty fixture does not trigger full supply");var last=g.QASevenBrick(4,8,1);g.QARefillRemove(last);Tick();Check(g.RefillFullBatches==1,"last actual elimination triggers full supply");yield return Settle();Check(g.ChainOccupiedCells()==81&&g.RefillFullBatches==1,"clear-board full supply completes once");
+  // Natural vertical gravity leaves the lateral corridor open.
+  Reset();g.QASevenBrick(4,4,1,0,1,0,true);var side=g.QASevenBrick(3,8,100);var cut=g.QASevenBrick(4,8,1);g.QARefillRemove(cut);yield return Settle();Check(side.GetComponent<ChainGridPiece>().Col==3&&g.FlowSideSlides==0&&g.RefillGenerated==0,"no automatic lateral filling of cleared corridor");
+  // New behavior: global bound-color specials, independent of ordinary-color targets.
+  foreach(int kind in new[]{5,6,1,2}){Reset();var flower=g.QASevenTool(3,0,8,2);var same=g.QASevenTool(kind,7,1,2);var other=g.QASevenTool(2,8,6,3);g.QASevenBrick(4,4,100);g.ActivateChainTool(flower,Vector2.up);Check(same.Consumed&&!other.Consumed&&g.SevenEmptyCasts==0,"bound green flower remotely activates same-color special "+kind+" without false empty cast");yield return null;}
+  // Full rainbow supply and waiting anchors survive the new queue.
+  Reset();var a=g.QASevenTool(3,4,8,0);g.QASevenTool(3,5,8,1);var waiting=g.QASevenTool(3,0,4,2);var terrain=g.QASevenBrick(8,8,1,0,1,0,true);g.ActivateChainTool(a,Vector2.up);Vector2 anchor=waiting.Position;Check(waiting.Waiting&&g.RefillFreezeBalls&&!g.TryShoot(Vector2.up)&&!g.ChainLaunchQueued,"double flowers gate input without buffering");
+  int ticks=0;bool early=false;while(!waiting.Consumed&&ticks++<1600){Tick();if(waiting.Waiting&&Vector2.Distance(waiting.Position,anchor)>.001f)early=true;if(ticks%10==0)yield return null;}
+  File.AppendAllText(dir+"/diagnostics.txt",g.QARefillStatus()+"\n");Check(!early&&waiting.Consumed&&g.RefillFullBatches>=1&&terrain.Alive,"waiting flower stays anchored through full batch then resumes");yield return Settle();yield return new WaitForSecondsRealtime(.85f);Tick(50);Check(!g.RefillFreezeBalls,"freeze released after final waiting flower effects");
+  // Pool, pause and restart lifecycle.
+  Reset();g.QASevenBrick(8,8,100);g.QARefillFull();Tick();var protectedBrick=g.CollectionBricks.First(b=>b.Alive&&g.QARefillIsProtected(b));var pos=protectedBrick.GetComponent<Rigidbody2D>().position;g.SetPaused(true);g.QAAdvanceOneStep();Check(Vector2.Distance(pos,protectedBrick.GetComponent<Rigidbody2D>().position)<.001f&&g.QARefillIsProtected(protectedBrick),"pause preserves arrival position and protection");g.SetPaused(false);yield return Settle();
+  Reset();Check(g.RefillGenerated==0&&g.RefillPending==0&&g.RefillShots==0&&!g.RefillFreezeBalls,"restart clears counters queues and freeze");
+  // Actual shot path and frozen ball lifecycle, rather than only counter hooks.
+  g.QASevenBrick(4,8,100);Check(g.TryShoot(Vector2.up),"real launch accepted");g.QAAdvanceOneStep();var held=g.QARefillFirstBall();Check(g.RefillShots==1&&g.Shots==19&&g.PendingBurstBalls==4,"actual five-ball burst counts one refill volley");
+  var oldPosition=held.Body.position;var oldVelocity=held.Body.linearVelocity;g.QARefillHold(true);Check(!held.Body.simulated&&!g.TryShoot(Vector2.up)&&!g.ChainLaunchQueued,"special freeze suspends physics and rejects buffered input");g.QAAdvanceOneStep();Check(g.PendingBurstBalls==4&&Vector2.Distance(oldPosition,held.Body.position)<.001f,"freeze does not spawn reserved balls or move existing ball");g.QARefillHold(false);Check(held.Body.simulated&&Vector2.Distance(held.Body.linearVelocity,oldVelocity)<.001f,"freeze restores original velocity without charging another shot");
+  Reset();for(int r=0;r<9;r++)for(int c=0;c<9;c++)g.QASevenBrick(c,r,100);for(int i=0;i<2;i++)g.QARefillVolley();g.CollectionGoal[0]=0;Check(!g.QASevenOutcome(),"victory cannot skip the final due refill boundary");Tick();Check(g.RefillOrdinaryBatches==1&&g.RefillPending==0,"zero-allowance final cycle closes exactly once");
+  for(int level=0;level<78;level++){g.StartLevel(level);g.enabled=false;g.QAIgnoreFocusLoss=true;Check(g.ChainGridValid(false)&&g.RefillGenerated==0,"level "+(level+1)+" retains authored starting occupancy and goals");if(level%6==0)yield return null;}
+  // Inspect actual release renderers, not only the pre-release actor anchors.
+  Physics2D.simulationMode=mode;Reset();yield return null;for(int i=0;i<5;i++)for(int c=0;c<5;c++)SevenSpecialFx.Play(g,g.transform.Find("WorldRoot"),new[]{5,6,1,2,3}[i],ChainGridRules.Center(c*2,i*2),g.Board.CellWidth,c);
+  var anchoredFx=FindObjectsByType<SevenSpecialFx>(FindObjectsSortMode.None).Where(f=>f.gameObject.activeInHierarchy).ToArray();Check(anchoredFx.Length==25&&anchoredFx.All(f=>Vector2.Distance(f.transform.position,f.Origin)<.001f&&f.Artwork.transform.parent==f.transform),"all 25 actual release renderers preserve source position after sizing");
+  yield return new WaitForSecondsRealtime(.18f);Check(anchoredFx.All(f=>f!=null&&Vector2.Distance(f.transform.position,f.Origin)<.001f&&!f.HasIdlePortrait),"animated release frames never reset to screen center or repeat an enlarged idle brick");yield return Capture("04-anchored-release-grid");
+  // Real-time grouped conversion: replacement portraits stay at original cells.
+  Physics2D.simulationMode=mode;Reset();var converted=new[]{g.QASevenBrick(1,1,1,0),g.QASevenBrick(7,2,1,0),g.QASevenBrick(2,5,1,0)};var positions=converted.Select(b=>(Vector2)b.transform.position).ToArray();var bystander=g.QASevenBrick(8,1,25,1);var source=g.QASevenTool(3,4,8,0);g.QASevenTool(6,5,8,0);g.ActivateChainTool(source,Vector2.up);
+  float deadline=Time.realtimeSinceStartup+3;SevenWindup conversion=null;while(conversion==null&&Time.realtimeSinceStartup<deadline){conversion=FindObjectsByType<SevenWindup>(FindObjectsSortMode.None).FirstOrDefault(w=>w.IsConversion);yield return null;}
+  Check(conversion!=null&&conversion.ActorCount==3&&converted.All(b=>!b.Alive)&&g.SevenConversions==0&&bystander.CurrentHealth==25,"all three matching bricks replaced before any copied laser fires");
+  yield return new WaitForSecondsRealtime(.16f);yield return new WaitForEndOfFrame();Check(conversion!=null&&conversion.ActorsEmphasized&&conversion.transform.Cast<Transform>().All(t=>t.localScale.x>1.6f&&t.localScale.y>1.6f)&&conversion.ActorPositions.All(p=>positions.Any(q=>Vector2.Distance(p,q)<.001f))&&Time.timeScale<.3f,"replacement lasers visibly grow above 1.6x at original positions during slow motion or hitstop");yield return Capture("03-conversion-local-emphasis");
+  Check(g.CombatFeel.HitStops>0,"local emphasis requests a real short hitstop before release");yield return new WaitForSecondsRealtime(.5f);Check(g.SevenConversions==3&&bystander.CurrentHealth==15&&SevenSuctionFx.Alive(g)==0,"converted lasers release together after emphasis without inward target suction");
+  // Visible campaign screenshot using normal UI, memory-only progress.
+  Physics2D.simulationMode=mode;app.QAStartLevel(0);yield return app.QAWaitForLevel();g=app.Session;g.QAIgnoreFocusLoss=true;for(int i=0;i<40;i++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.04f);}yield return Capture("02-mainline");
+  File.WriteAllText(dir+"/report.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+",\"version\":\""+GameVersion.Name+"\"}");Debug.Log("REFILL80_QA checks="+checks+" failures="+failures+" errors="+errors);Application.Quit(failures==0&&errors==0?0:3);
+ }
+```
+
+## 对象层级和素材入口
+
+- L74：`g.transform.Find("WorldRoot")`
+
+素材完整路径、原始 GUID 与包内映射见 [resource-map.json](../resource-map.json)。未解析的动态路径仍留在 source-map.json 的 resourceEvidence；不能猜测为已打包。
+
+## 生命周期证据
+
+```csharp
+void Reset(int level=0){g.StartLevel(level);g.enabled=false;g.QAIgnoreFocusLoss=true;g.QASevenClear();}
+```
+
+## 源字段与依赖
+
+```csharp
+string dir;
+```
+```csharp
+int checks,failures,errors;
+```
+```csharp
+GameSession g;
+```
+```csharp
+AppUI app;
+```
+
+业务/组件依赖保留在上述字段、泛型 Get/AddComponent 和源方法参数中。语义解析不覆盖运行时委托结果；`nameMatchedCallSites` 仅供补充检索。

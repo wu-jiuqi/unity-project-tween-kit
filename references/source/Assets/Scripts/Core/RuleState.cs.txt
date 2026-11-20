@@ -1,0 +1,137 @@
+using System;
+using System.Collections.Generic;
+
+namespace BounceGarden
+{
+    // Rules contain no Unity types, clocks, rendering or audio dependencies.
+    public sealed class RuleState
+    {
+        readonly Dictionary<int, int> targets = new Dictionary<int, int>();
+        readonly HashSet<int> balls = new HashSet<int>();
+        int primaryObjective;
+        // Optional encounter goal: other registered targets remain ordinary damageable bricks.
+        public void SetPrimaryObjective(int id)
+        {
+            if (!targets.ContainsKey(id)) throw new ArgumentException("Primary objective must be registered");
+            primaryObjective = id;
+        }
+        public bool UnlimitedShots {get;set;}
+        public void CommitOutcome(bool won){Won=won;OutcomeCommitted=true;PendingBurstBalls=0;}
+        public int Shots { get; private set; }
+        public void SpendVictorySteps(int amount){if(OutcomeCommitted&&Won)Shots=Math.Max(0,Shots-Math.Max(0,amount));}
+        public void ClearVictoryTargets(){if(!OutcomeCommitted||!Won)return;targets.Clear();balls.Clear();PendingTargetStages=PendingDamageChains=PendingBurstBalls=0;}
+        public int PendingBurstBalls { get; private set; }
+        public int ActiveBalls => balls.Count;
+        public int RemainingTargets => targets.Count;
+        public int PendingTargetStages { get; private set; }
+        public int PendingDamageChains { get; private set; }
+        public bool OutcomeCommitted { get; private set; }
+        public bool Won { get; private set; }
+        public bool VictoryDamageEnabled {get;set;}
+        public void ClearVictoryBalls(){if(!OutcomeCommitted||!Won)return;balls.Clear();PendingBurstBalls=0;}
+        public bool CanShoot => !OutcomeCommitted && Shots > 0 && PendingBurstBalls == 0;
+        public bool ContinueUsed { get; private set; }
+        public bool CanContinue => OutcomeCommitted && !Won && targets.Count > 0 && !ContinueUsed;
+
+        public bool TryContinue(int shots)
+        {
+            if (!CanContinue || shots < 1) return false;
+            Shots = shots; OutcomeCommitted = false; ContinueUsed = true; return true;
+        }
+
+        public void Reset(int shots)
+        {
+            targets.Clear(); balls.Clear(); Shots = Math.Max(0, shots);
+            primaryObjective = 0;UnlimitedShots=false;
+            PendingBurstBalls = PendingTargetStages = PendingDamageChains = 0;
+            OutcomeCommitted = Won = VictoryDamageEnabled = false;
+            ContinueUsed = false;
+        }
+
+        public void RegisterTarget(int id, int hp)
+        {
+            if (hp < 1) throw new ArgumentOutOfRangeException(nameof(hp));
+            targets.Add(id, hp);
+        }
+        public int Health(int id) => targets.TryGetValue(id, out int hp) ? hp : 0;
+        public bool DamageTarget(int id, int amount, out bool destroyed)
+        {
+            destroyed = false;
+            if (OutcomeCommitted&&!VictoryDamageEnabled || amount < 1 || !targets.TryGetValue(id, out int hp)) return false;
+            hp -= amount;
+            if (hp <= 0) { targets.Remove(id); destroyed = true; }
+            else targets[id] = hp;
+            return true;
+        }
+
+        // Caller reserves and initializes the first physical ball before accepting the burst.
+        public bool BeginBurst(int count, int firstBallId)
+        {
+            if (!CanShoot || count < 1 || balls.Contains(firstBallId)) return false;
+            if(!UnlimitedShots)Shots--; PendingBurstBalls = count - 1; balls.Add(firstBallId); return true;
+        }
+        public bool SpawnPendingBall(int id)
+        {
+            if (OutcomeCommitted || PendingBurstBalls < 1 || balls.Contains(id)) return false;
+            PendingBurstBalls--; balls.Add(id); return true;
+        }
+        public bool LoseBall(int id) => balls.Remove(id);
+        public bool AddSplitBall(int id) => !OutcomeCommitted && balls.Add(id);
+        public void BeginTargetStage() { PendingTargetStages++; }
+        public void CompleteTargetStage() { PendingTargetStages = Math.Max(0, PendingTargetStages - 1); }
+        public void BeginDamageChain() { PendingDamageChains++; }
+        public void CompleteDamageChain() { PendingDamageChains = Math.Max(0, PendingDamageChains - 1); }
+
+        // Called after physics callbacks. Win takes priority when last target and ball leave together.
+        public bool Resolve(out bool won)
+        {
+            won = Won;
+            if (OutcomeCommitted || PendingTargetStages != 0 || PendingDamageChains != 0) return false;
+            if (primaryObjective != 0 ? !targets.ContainsKey(primaryObjective) : targets.Count == 0) { won = true; }
+            else if (Shots == 0 && PendingBurstBalls == 0 && balls.Count == 0) { won = false; }
+            else return false;
+            Won = won; OutcomeCommitted = true; PendingBurstBalls = 0; return true;
+        }
+    }
+
+    public static class RuleSelfTests
+    {
+        static void Check(bool condition, string message) { if (!condition) throw new InvalidOperationException("RULE TEST FAILED: " + message); }
+        public static string RunAll()
+        {
+            int count = 0;
+            var r = new RuleState(); r.Reset(2); r.RegisterTarget(1, 2);
+            Check(r.BeginBurst(5, 100) && r.Shots == 1 && r.PendingBurstBalls == 4 && r.ActiveBalls == 1, "burst charges once"); count++;
+            Check(!r.BeginBurst(5, 200) && r.Shots == 1, "pending burst rejects another request"); count++;
+            for (int id = 101; id <= 104; id++) Check(r.SpawnPendingBall(id), "pending ball spawn");
+            Check(r.Shots == 1 && r.PendingBurstBalls == 0 && r.ActiveBalls == 5, "sub balls do not consume shots"); count++;
+            Check(r.BeginBurst(5, 200) && r.Shots == 0 && r.ActiveBalls == 6, "old balls do not block next shot"); count++;
+            Check(!r.Resolve(out _), "last volley not prematurely lost"); count++;
+            for (int id = 100; id <= 104; id++) r.LoseBall(id);
+            r.LoseBall(200);
+            Check(!r.Resolve(out _) && r.PendingBurstBalls == 4, "pending balls keep session alive"); count++;
+            for (int id = 201; id <= 204; id++) r.SpawnPendingBall(id);
+            Check(r.DamageTarget(1, 1, out bool firstDestroyed) && !firstDestroyed && r.Health(1) == 1, "first distinct hit damages"); count++;
+            Check(r.DamageTarget(1, 1, out bool destroyed) && destroyed && !r.DamageTarget(1, 1, out _), "target destruction idempotent"); count++;
+            for (int id = 201; id <= 204; id++) r.LoseBall(id);
+            Check(r.Resolve(out bool won) && won, "last target plus last loss resolves win"); count++;
+            Check(!r.Resolve(out _) && !r.BeginBurst(5, 300), "outcome commits once and blocks shooting"); count++;
+            r.Reset(1); r.RegisterTarget(1, 10); r.BeginBurst(1, 1);
+            Check(r.LoseBall(1) && !r.LoseBall(1) && r.ActiveBalls == 0, "water and crossing lose ball only once"); count++;
+            Check(r.Resolve(out won) && !won, "exhausted active and pending resources lose"); count++;
+            Check(!r.TryContinue(0) && r.TryContinue(5) && r.Shots == 5 && r.Health(1) == 10 && r.CanShoot, "continue retains target health and restores five shots only after loss"); count++;
+            Check(!r.TryContinue(5), "duplicate completion cannot grant more shots"); count++;
+            for(int i=0;i<5;i++){r.BeginBurst(1,400+i);r.LoseBall(400+i);}
+            Check(r.Resolve(out won) && !won && !r.CanContinue && !r.TryContinue(5), "second loss cannot reuse rewarded continue"); count++;
+            r.Reset(0);r.Resolve(out won);Check(won&&!r.TryContinue(5),"victory cannot be continued");count++;
+            r.Reset(0); r.BeginTargetStage();
+            Check(!r.Resolve(out _), "hidden target stage blocks early win"); count++;
+            r.RegisterTarget(5, 1); r.CompleteTargetStage(); r.BeginDamageChain();
+            r.DamageTarget(5, 1, out _); Check(!r.Resolve(out _), "damage chain delays outcome"); count++;
+            r.CompleteDamageChain(); Check(r.Resolve(out won) && won, "completed reveal chain wins"); count++;
+            for (int i = 0; i < 100; i++) { r.Reset(20); r.RegisterTarget(i, 1); r.BeginBurst(5, i); }
+            Check(r.Shots == 19 && r.ActiveBalls == 1 && r.PendingBurstBalls == 4 && r.RemainingTargets == 1, "100 restarts leave no model state"); count++;
+            return "PASS " + count + " rule checks: burst accounting, overlap, final shot, duplicate destruction/loss, same-step win, stages, outcome and 100 resets.";
+        }
+    }
+}

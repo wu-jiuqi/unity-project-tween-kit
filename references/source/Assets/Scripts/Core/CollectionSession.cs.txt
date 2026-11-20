@@ -1,0 +1,124 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public static class CollectionLevels {
+ public const int First=50, Columns=9;
+ public const float Pitch=.82f, Top=5.45f, Danger=-4.55f, Basket=-5.65f;
+ public static Vector2 Cell(int col,int row)=>new Vector2((col-4)*Pitch,Top-row*Pitch);
+ public static LevelData Get(int n)=>throw new System.InvalidOperationException("Legacy collection routes are archived in v37");
+}
+public sealed class CollectionTreat {
+ public int Kind,Column; public Transform View; public float Speed;
+}
+public sealed partial class GameSession {
+ public bool IsCollection=>IsChainCollection;
+ public readonly List<BrickBody> CollectionBricks=new List<BrickBody>();
+ public readonly List<CollectionTreat> CollectionTreats=new List<CollectionTreat>();
+ public readonly int[] Collected=new int[2],CollectionGoal=new int[2];
+ public int CollectionEnergy {get;private set;}
+ public int CollectionRound {get;private set;}
+ public int CollectionTool {get;private set;}
+ public bool CollectionBusy=>collectionPhase!=0||collectionRoundPending||IsChainCollection&&!ChainGridReady;
+ public bool CollectionReady=>IsChainCollection?ChainCanLaunch:IsCollection&&IsPlaying&&!IsPaused&&!CollectionBusy&&ActiveBalls==0&&PendingBurstBalls==0&&!queuedShot.HasValue;
+ public bool CollectionWon=>IsOpening?OpeningGoalsComplete:Collected[0]>=CollectionGoal[0]&&Collected[1]>=CollectionGoal[1]&&JellyCollectionComplete;
+ public const float CollectionVictoryDelay=1f;
+ public bool CollectionVictoryPending {get;private set;}
+ float collectionVictoryAt;
+ public float CollectionVictoryRemaining=>CollectionVictoryPending?Mathf.Max(0,collectionVictoryAt-simulationClock):0;
+ public int[] NextCollectionRow {get;private set;}=new int[9];
+ int collectionPhase;float collectionClock;bool collectionFailed,collectionRoundPending;
+ SpriteRenderer collectionDanger;
+ TMPro.TMP_Text harvestText;int harvestCount;float harvestLife;
+ readonly List<Transform> collectionPreview=new List<Transform>();
+ void ClearCollection(){CollectionVictoryPending=false;collectionVictoryAt=0;ClearJellyCollection();ClearChainCollection();CollectionBricks.Clear();CollectionTreats.Clear();collectionPreview.Clear();collectionPhase=0;collectionFailed=false;collectionRoundPending=false;CollectionTool=0;CollectionEnergy=0;CollectionRound=1;CollectionGoal[0]=CollectionGoal[1]=0;Collected[0]=Collected[1]=0;harvestText=null;harvestCount=0;harvestLife=0;}
+ void StartCollection(){if(IsChainCollection)StartChainCollection();}
+ int ChooseCollectionKind(int seed){
+  if(Collected[0]>=CollectionGoal[0])return 2;
+  if(Collected[1]>=CollectionGoal[1])return 1;
+  return seed%2+1;
+ }
+ int[] MakeCollectionRow(int seed,bool opening=false){
+  // Authored staggered gaps; deterministic supply makes the preview trustworthy.
+  string[] patterns={"xx.xx.x.x","x.xx.xx.x","xx.x.xx.x","x.xx.x.xx"};
+  var p=patterns[seed%patterns.Length];var row=new int[9];
+  for(int c=0;c<9;c++)row[c]=p[c]=='x'?-1:0;
+  if(opening?seed<3:seed%3==0){int col=(seed*2+2)%9;row[col]=ChooseCollectionKind(seed);if(!opening)row[(col+4)%9]=ChooseCollectionKind(seed+1);}
+  // Any missing final kind is guaranteed in the very next supply, not just random chance.
+  for(int kind=1;kind<=2;kind++)if(CollectionGoal[kind-1]-Collected[kind-1]==1&&!CollectionTreats.Any(t=>t.Kind==kind)&&!CollectionBricks.Any(b=>b.Alive&&b.Definition.juiceGroup==kind))row[kind==1?2:6]=kind;
+  return row;
+ }
+ void SpawnCollectionRow(int[] plan,int row){for(int col=0;col<9;col++)if(plan[col]!=0){var d=new BrickSpawn{position=CollectionLevels.Cell(col,row),size=Vector2.one*.76f,hp=CollectionRound>4&&plan[col]<0&&(col+CollectionRound)%5==0?2:1,colorIndex=col%5,referenceCol=col,juiceGroup=Mathf.Max(0,plan[col])};CreateBrick(d,0);}}
+ void AttachCollectionBrick(BrickBody b){CollectionBricks.Add(b);if(IsChainCollection){ChainCollectionArt.Container(b);ChainCollectionArt.Special(b);RegisterChainGrid(b.transform,OpeningCookieBrick(b)||ChainPowerRules.IsNest(b.Definition)?2:1);return;}if(b.Definition.juiceGroup>0)CollectionArt.Icon(b.transform,b.Definition.juiceGroup,Vector2.zero,.52f,55);}
+ void PlanCollectionRow(){NextCollectionRow=MakeCollectionRow(CollectionRound);foreach(var t in collectionPreview)if(t!=null)Destroy(t.gameObject);collectionPreview.Clear();for(int c=0;c<9;c++){
+  var p=new Vector2(CollectionLevels.Cell(c,0).x,6.45f);var marker=WorldArt.Draw(world,"Next row slot","brick",p,new Vector2(.55f,.40f),NextCollectionRow[c]==0?new Color(1,1,1,.15f):new Color(.7f,.86f,.91f,.8f),45);collectionPreview.Add(marker.transform);if(NextCollectionRow[c]>0)CollectionArt.Icon(marker.transform,NextCollectionRow[c],Vector2.zero,.7f,56);
+ }}
+ void CollectionBrickBroken(BrickBody brick,bool energy){
+  if(!IsCollection)return;if(energy)CollectionEnergy=Mathf.Min(40,CollectionEnergy+1);
+  if(brick.Definition.juiceGroup>0){var icon=CollectionArt.Icon(world,brick.Definition.juiceGroup,brick.transform.position,.58f,60);CollectionTreats.Add(new CollectionTreat{Kind=brick.Definition.juiceGroup,Column=brick.Definition.referenceCol,View=icon});}
+ }
+ public bool SelectCollectionTool(int tool){if(IsChainCollection||!CollectionReady)return false;CollectionTool=CollectionTool==tool?0:tool;SetAim(null);changed=true;return true;}
+ public bool UseCollectionTool(Vector2 point){
+  if(!CollectionReady||CollectionTool==0)return false;
+  if(CollectionTool==1){var item=CollectionTreats.OrderBy(t=>Vector2.Distance(t.View.position,point)).FirstOrDefault();if(CollectionEnergy<12||item==null||Vector2.Distance(item.View.position,point)>.4f)return false;CollectionEnergy-=12;SoundService.Play("paw_pick");CollectTreat(item);}
+  else {int col=Mathf.RoundToInt(point.x/CollectionLevels.Pitch)+4;if(col<0||col>8||CollectionEnergy<20)return false;var bricks=CollectionBricks.Where(b=>b.Alive&&b.Definition.referenceCol==col&&b.Definition.juiceGroup==0).OrderBy(b=>b.transform.position.y).Take(3).ToArray();if(bricks.Length==0)return false;CollectionEnergy-=20;SoundService.Play("clear_yarn");foreach(var b in bricks){rules.DamageTarget(b.Id,int.MaxValue,out var removed);if(removed){BreakCount++;fx.PlayJelly(b);EmitFeedback(b.transform.position,"break",b.Tint);b.Remove();}}}
+  CollectionTool=0;collectionPhase=1;collectionRoundPending=false;changed=true;return true;
+ }
+ void CollectTreat(CollectionTreat item){Collected[item.Kind-1]=Mathf.Min(CollectionGoal[item.Kind-1],Collected[item.Kind-1]+1);harvestCount=harvestLife>0?harvestCount+1:1;harvestLife=1.3f;if(harvestText!=null)harvestText.text=harvestCount>1?"HARVEST × "+harvestCount:"+1 COLLECTED";EmitFeedback(new Vector2(item.View.position.x,CollectionLevels.Basket),"break",item.Kind==1?new Color(1,.8f,.3f):new Color(1,.4f,.55f));Destroy(item.View.gameObject);CollectionTreats.Remove(item);changed=true;}
+ bool FallCollectionTreats(float dt){bool moving=false;foreach(var item in CollectionTreats.OrderBy(t=>t.View.position.y).ToArray()){
+  float y=item.View.position.y,target=CollectionLevels.Basket;
+  foreach(var b in CollectionBricks)if(b.Alive&&b.Definition.referenceCol==item.Column&&b.transform.position.y<y-.05f)target=Mathf.Max(target,b.transform.position.y+.65f);
+  foreach(var lower in CollectionTreats)if(lower!=item&&lower.Column==item.Column&&lower.View.position.y<y-.05f)target=Mathf.Max(target,lower.View.position.y+.50f);
+  target=Mathf.Min(y,target);item.Speed+=dt*20;float next=Mathf.MoveTowards(y,target,item.Speed*dt);item.View.position=new Vector3(CollectionLevels.Cell(item.Column,0).x,next,0);
+  if(next<=CollectionLevels.Basket+.001f){CollectTreat(item);continue;}if(next>target+.001f)moving=true;else item.Speed=0;
+ }return moving;}
+ void TickCollection(float dt){
+  if(!IsCollection)return;if(IsChainCollection){TickChainCollection(dt);return;}
+  harvestLife=Mathf.Max(0,harvestLife-dt);if(harvestText!=null){harvestText.alpha=Mathf.Clamp01(harvestLife*3);harvestText.transform.localPosition=new Vector3(0,CollectionLevels.Basket+.75f+(1.3f-harvestLife)*.3f,-.1f);harvestText.transform.localScale=Vector3.one*(1+Mathf.Sin(Mathf.Clamp01((1.3f-harvestLife)*4)*Mathf.PI)*.16f);}
+  bool danger=CollectionBricks.Any(b=>b.Alive&&b.transform.position.y<CollectionLevels.Danger+2);
+  if(collectionDanger!=null)collectionDanger.color=new Color(1,.27f,.31f,danger?.55f+.4f*Mathf.Sin(simulationClock*8):.25f);
+  if(collectionPhase==0&&collectionRoundPending&&ActiveBalls==0&&PendingBurstBalls==0&&rules.PendingDamageChains==0){collectionPhase=1;changed=true;}
+  if(collectionPhase==1){if(FallCollectionTreats(dt)||CollectionWon)return;if(!collectionRoundPending){collectionPhase=0;PlanCollectionRow();changed=true;return;}collectionPhase=2;collectionClock=0;}
+  if(collectionPhase==2){float step=Mathf.Min(dt,.32f-collectionClock);collectionClock+=step;foreach(var b in CollectionBricks)if(b.Alive)b.transform.position+=Vector3.down*(CollectionLevels.Pitch*step/.32f);Physics2D.SyncTransforms();if(collectionClock<.32f)return;
+   collectionFailed=CollectionBricks.Any(b=>b.Alive&&b.transform.position.y-.38f<=CollectionLevels.Danger);
+   if(collectionFailed)return;foreach(var b in CollectionBricks.Where(b=>!b.Alive).ToArray()){CollectionBricks.Remove(b);Destroy(b.gameObject);}SpawnCollectionRow(NextCollectionRow,0);CollectionRound++;PlanCollectionRow();collectionRoundPending=false;collectionPhase=3;collectionClock=0;changed=true;
+  }
+  if(collectionPhase==3){bool moving=FallCollectionTreats(dt);collectionClock+=dt;if(!moving&&collectionClock>.30f){collectionPhase=0;changed=true;}}
+ }
+ bool ResolveCollection(out bool won){
+  if(FusionActive)return ResolveFusion(out won);
+  won=false;
+  if(IsChainCollection){
+   FinishEarnedCollectionSupply();
+   if(CollectionWon&&!IsTutorial&&!IsStreakTrial){CollectionVictoryPending=true;collectionVictoryAt=simulationClock;collectionRoundPending=false;queuedShot=null;ClearBufferedChainShot();SetAim(null);won=true;rules.CommitOutcome(true);return true;}
+   // Finish work already in flight, never wait for a new refill or an impossible
+   // rating replacement after all collection goals have been earned.
+   if(CollectionVictoryPending||CollectionWon||EarnedChainGoal()){if(SevenSpecialActive&&(SevenSettlementPending||!ChainGridReady||ChainEffectsPending||ActiveBalls>0||PendingBurstBalls>0||chainReplacementRewards.Count>0))return false;return ResolveCollectionVictory(out won);}
+   // Failure still waits for all real and reserved balls, including split balls.
+   if(ActiveBalls>0||PendingBurstBalls>0||ChainMinis.Count>0||queuedShot.HasValue||SevenSpecialActive&&(SevenSettlementPending||!ChainGridReady||ChainEffectsPending))return false;
+   if(Shots>0&&!collectionFailed&&!CollectionWon&&!EarnedChainGoal())return false;
+   CompleteEarnedChainLoot();won=CollectionWon;
+   if(won)return ResolveCollectionVictory(out won);
+   if(!won&&Shots>0&&!collectionFailed)return false;
+   collectionRoundPending=false;ClearBufferedChainShot();rules.CommitOutcome(won);return true;
+  }
+  won=CollectionWon;if(!won&&!collectionFailed)return false;rules.CommitOutcome(won);return true;
+ }
+ bool ResolveCollectionVictory(out bool won){
+  won=false;
+  if(!CollectionVictoryPending){CollectionVictoryPending=true;collectionVictoryAt=simulationClock+CollectionVictoryDelay;queuedShot=null;ClearBufferedChainShot();SetAim(null);changed=true;}
+  if(simulationClock+.00001f<collectionVictoryAt)return false;
+  CompleteEarnedChainLoot();collectionRoundPending=false;won=true;rules.CommitOutcome(true);return true;
+ }
+}
+public static class CollectionArt {
+ // Small vector-like compositions reuse the game's existing soft shape sprites.
+ public static Transform Icon(Transform parent,int kind,Vector2 position,float size,int order){var root=new GameObject(kind==1?"Fish biscuit":"Strawberry").transform;root.SetParent(parent,false);root.localPosition=position;root.localScale=Vector3.one*size;
+  if(kind==1){WorldArt.Draw(root,"Biscuit body","circle",new Vector2(.06f,0),new Vector2(.82f,.52f),new Color(1,.72f,.29f),order);var tail=WorldArt.Draw(root,"Tail","brick",new Vector2(-.38f,0),new Vector2(.33f,.33f),new Color(1,.72f,.29f),order);tail.transform.localRotation=Quaternion.Euler(0,0,45);WorldArt.Draw(root,"Eye","circle",new Vector2(.25f,.05f),Vector2.one*.08f,new Color(.36f,.24f,.22f),order+1);}
+  else{WorldArt.Draw(root,"Berry","circle",new Vector2(0,-.04f),new Vector2(.70f,.77f),new Color(1,.31f,.45f),order);for(int i=0;i<3;i++){var leaf=WorldArt.Draw(root,"Leaf","circle",new Vector2((i-1)*.16f,.31f),new Vector2(.30f,.17f),new Color(.36f,.72f,.40f),order+1);leaf.transform.localRotation=Quaternion.Euler(0,0,(i-1)*30);}for(int i=0;i<5;i++)WorldArt.Draw(root,"Seed","circle",new Vector2((i%2==0?-.14f:.14f),.12f-i*.085f),new Vector2(.04f,.065f),new Color(1,.94f,.65f),order+1);}
+  return root;
+ }
+}
+}
+

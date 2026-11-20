@@ -1,0 +1,10 @@
+using UnityEngine;
+namespace BounceGarden {
+public sealed class BlockInfo {public readonly string Key;public readonly float FootprintPixels,YCorrection;public BlockInfo(string key,float width,float y){Key=key;FootprintPixels=width;YCorrection=y;}}
+public static class Round5Blocks {
+public static readonly BlockInfo[] All={new BlockInfo("blue_star",632f,1.10f),new BlockInfo("orange_star",630f,1.10f),new BlockInfo("yellow_blank",574f,1f),new BlockInfo("ivory_star",570f,1f),new BlockInfo("black_blank",573f,1f)};
+public static bool Enabled=true;
+public static BlockInfo Info(string key){foreach(var b in All)if(key=="round5/"+b.Key)return b;return null;}
+public static string Key(string old){if(!Enabled)return old;switch(old){case "round3/brick_ivory_star":return "round5/ivory_star";case "round3/brick_orange_star":return "round5/orange_star";case "round3/brick_yellow_blank":return "round5/yellow_blank";case "round3/brick_black_blank":return "round5/black_blank";}return old;}
+}
+}

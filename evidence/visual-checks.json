@@ -1,0 +1,37 @@
+{
+  "method": "computer-use sky native bounded-window capture, after source and runtime validation",
+  "testedPlayerRunSha256": "bd8b63168d5c9b724cc9663175cefbf5fd7f6c4f7559ab4e75b8885a8f0db9b8",
+  "images": [
+    {
+      "path": "evidence/visual/logo.png",
+      "sha256": "7f0ba690b889b514f2995c2aa1c2efc9f5e015f640f527281781e8507bcaaae1"
+    },
+    {
+      "path": "evidence/visual/modal-closed.png",
+      "sha256": "643c916c7e24fbcf1edf87e1aef1057de240c171bc02a9ad1022ae21e97ea529"
+    },
+    {
+      "path": "evidence/visual/modal-open.png",
+      "sha256": "867d74073ce57fd692e18a50fdf7bc9aa88aaa1322cfafa4952e146b463fad77"
+    },
+    {
+      "path": "evidence/visual/press-click.png",
+      "sha256": "5ce9b0664d3c2670f534fb50f2c99362b6d77998d670f99998d3010d2a035fa2"
+    },
+    {
+      "path": "evidence/visual/press.png",
+      "sha256": "fa05f71dda15b2307627094826023029f2786178f9a4c4ac110537bd109209e4"
+    }
+  ],
+  "observed": [
+    "Original C-style button and Chinese font render in visible Windows gallery.",
+    "Actual pointer drag returned without click callback; normal click displayed the local-only callback.",
+    "Source/type filters and parameter panel labels are readable.",
+    "Modal open and done-close work through real UI; open button and footer do not overlap.",
+    "Original four-glyph logo and typewriter quote are visible."
+  ],
+  "limits": [
+    "Native interaction checks sample representative entries, not all 19 workflows or all original game call sites.",
+    "Hidden-window black screenshots are excluded."
+  ]
+}

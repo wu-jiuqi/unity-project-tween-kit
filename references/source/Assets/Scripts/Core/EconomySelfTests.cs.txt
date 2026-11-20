@@ -1,0 +1,58 @@
+using System;
+using UnityEngine;
+namespace BounceGarden {
+public static class EconomySelfTests {
+ public static string RunAll(){
+  int checks=0;Action<bool,string> check=(ok,label)=>{checks++;if(!ok)throw new Exception("Economy: "+label);};
+  var store=new LeagueSelfTests.Store();var p=LocalProfile.Load(store);
+  check(p.Coins==400&&p.BoosterStock(StreakBooster.Pierce)==1&&p.BoosterStock(StreakBooster.Bomb)==1&&p.BoosterStock(StreakBooster.Super)==1,"new starter kit");
+  check(ScoreRules.WinCoins(-1)==40&&ScoreRules.WinCoins(9999)==40&&ScoreRules.WinCoins(10000)==45&&ScoreRules.WinCoins(60000)==70&&ScoreRules.WinCoins(int.MaxValue)==70,"bounded score bonus");
+  int before=p.Coins;check(p.CampaignWinCoins(0,0)==60&&p.CommitAlphabetWin("first",0,0)&&p.Coins==before+60,"first clear even with zero score");
+  before=p.Coins;check(p.CommitAlphabetWin("first",0,60000)&&p.Coins==before&&p.BestScore(0)==0,"duplicate result cannot change wallet or record");
+  check(p.CampaignWinCoins(0,0)==40&&p.CommitAlphabetWin("replay",0,0)&&p.Coins==before+40,"zero score replay does not repeat first clear");
+  foreach(int level in new[]{2,5,9}){before=p.Coins;check(p.CampaignWinCoins(level,60000)==190&&p.CommitAlphabetWin("milestone-"+level,level,60000)&&p.Coins==before+190,"first clear and new player milestone "+level);before=p.Coins;check(p.CommitAlphabetWin("milestone-replay-"+level,level,60000)&&p.Coins==before+70,"milestone cannot repeat "+level);}
+  p=LocalProfile.Load(store);check(p.StorageHealthy&&p.NewPlayerMilestone(2)==0,"milestones persist");
+  // Legacy profiles retain their exact wallet and inventory and do not receive the new-player schedule.
+  var old=LocalProfile.ImportForQA("{\"schema\":1,\"coins\":1580,\"badges\":2,\"unlockedLevel\":4,\"soundEnabled\":true,\"committedKeys\":[]}");
+  check(old.Coins==1580&&old.BoosterStock(StreakBooster.Pierce)==0&&old.NewPlayerMilestone(2)==0,"old wallet and empty stock preserved");
+  old=LocalProfile.ImportForQA(old.ExportForQA());check(old.Coins==1580&&old.NewPlayerMilestone(2)==0,"migration is stable after reload");
+  for(int n=0;n<3;n++)check(p.RecordCampaignLoss("loss-"+n,12),"record actual loss "+n);
+  check(p.HasRescue(12)&&!p.HasRescue(11)&&p.RescueFailures(12)==0,"third loss grants only current level rescue");
+  check(p.RecordCampaignLoss("loss-2",12)&&p.HasRescue(12)&&p.RescueFailures(12)==0,"duplicate loss is idempotent");
+  for(int n=3;n<8;n++)p.RecordCampaignLoss("loss-"+n,12);
+  check(p.HasRescue(12)&&p.RescueFailures(12)==0,"unused rescue cannot accumulate");
+  p=LocalProfile.Load(store);check(p.HasRescue(12),"rescue persists across exit");
+  int stock=p.BoosterStock(StreakBooster.Pierce);before=p.Coins;
+  check(p.ConsumeCampaignBooster(StreakBooster.Pierce,12)&&!p.HasRescue(12)&&p.BoosterStock(StreakBooster.Pierce)==stock&&p.Coins==before,"free rescue consumed before paid stock");
+  for(int n=8;n<11;n++)p.RecordCampaignLoss("loss-"+n,12);
+  check(p.HasRescue(12),"three further failures replenish one rescue");
+  check(p.CommitAlphabetWin("rescue-win",12,30000)&&!p.HasRescue(12)&&p.RescueFailures(12)==0,"win clears rescue and failure streak");
+  check(!p.RecordCampaignLoss("",12)&&!p.RecordCampaignLoss("bad",AlphabetCampaign.Count),"invalid losses rejected");
+  var failedStore=new LeagueSelfTests.Store();var failed=LocalProfile.Load(failedStore);failed.RecordCampaignLoss("f0",4);failed.RecordCampaignLoss("f1",4);failed.RecordCampaignLoss("f2",4);
+  string saved=failedStore.Json;failedStore.Fail=true;bool logging=Debug.unityLogger.logEnabled;
+  try{Debug.unityLogger.logEnabled=false;check(!failed.ConsumeCampaignBooster(StreakBooster.Pierce,4)&&failed.HasRescue(4)&&failedStore.Json==saved,"failed rescue write rolls back");}finally{Debug.unityLogger.logEnabled=logging;}
+  failedStore.Fail=false;failed=LocalProfile.Load(failedStore);check(failed.ConsumeCampaignBooster(StreakBooster.Pierce,4)&&!failed.HasRescue(4),"rescue retry after reload");
+  var milestoneStore=new LeagueSelfTests.Store();var milestone=LocalProfile.Load(milestoneStore);milestone.Save();before=milestone.Coins;milestoneStore.Fail=true;
+  try{Debug.unityLogger.logEnabled=false;check(!milestone.CommitAlphabetWin("failed-win",2,60000)&&milestone.Coins==before&&milestone.NewPlayerMilestone(2)==100&&milestone.AlphabetUnlocked==0,"win transaction rolls back wallet progress and milestone");}finally{Debug.unityLogger.logEnabled=logging;}
+  milestoneStore.Fail=false;milestone=LocalProfile.Load(milestoneStore);check(milestone.CommitAlphabetWin("failed-win",2,60000)&&milestone.Coins==before+190,"failed win can retry exactly once");
+  var provider=new LeagueSelfTests.ConfigProvider();var clock=new LeagueSelfTests.Clock();var league=new LocalProfile();league.ConfigureLeague(provider,clock);league.GrantMedals("leader",100);
+  clock.Now+=8*86400;var reward=league.ReadLeague(true).reward;before=league.Coins;
+  check(reward!=null&&league.LeagueDuplicateCoins(reward)==0&&league.ClaimLeagueReward(reward.periodId)&&league.Coins==before+reward.coins,"first league appearance has no duplicate compensation");
+  league.GrantMedals("leader-again",100);clock.Now+=8*86400;reward=league.ReadLeague(true).reward;before=league.Coins;
+  check(league.LeagueDuplicateCoins(reward)==100&&league.ClaimLeagueReward(reward.periodId)&&league.Coins==before+reward.coins+100,"duplicate avatar and frame each grant 50");
+  before=league.Coins;check(!league.ClaimLeagueReward(reward.periodId)&&league.Coins==before,"duplicate compensation cannot be reclaimed");
+  league.GrantMedals("leader-third",100);clock.Now+=8*86400;reward=league.ReadLeague(true).reward;
+  var duplicateStore=new LeagueSelfTests.Store{Json=league.ExportForQA()};var duplicate=LocalProfile.Load(duplicateStore);before=duplicate.Coins;saved=duplicateStore.Json;duplicateStore.Fail=true;
+  try{Debug.unityLogger.logEnabled=false;check(!duplicate.ClaimLeagueReward(reward.periodId)&&duplicate.Coins==before&&duplicateStore.Json==saved&&duplicate.LeagueDuplicateCoins(reward)==100,"duplicate compensation rolls back with failed reward save");}finally{Debug.unityLogger.logEnabled=logging;}
+  duplicateStore.Fail=false;duplicate=LocalProfile.Load(duplicateStore);check(duplicate.ClaimLeagueReward(reward.periodId)&&duplicate.Coins==before+reward.coins+100,"duplicate compensation retries once after reload");
+  var legacyInventory=LocalProfile.ImportForQA(p.ExportForQA().Replace("\"economyVersion\":1,",""));
+  check(legacyInventory.Coins==p.Coins&&legacyInventory.BestScoreTotal==p.BestScoreTotal&&legacyInventory.BoosterStock(StreakBooster.Bomb)==p.BoosterStock(StreakBooster.Bomb),"v2 old wallet scores and stocked inventory preserved");
+  var purchased=new LocalProfile();purchased.ConfigureLeague(provider,clock);var item=CatCosmeticCatalog.FindAvatar(provider.Value.cosmetic.avatarResource);
+  check(LocalProfile.CosmeticPrice(item.id,false)==250&&LocalProfile.CosmeticPrice(item.id,true)==300,"entry cosmetics priced at 250 and 300");
+  purchased.GrantPurchase("fixture",1000);check(purchased.PurchaseCosmetic(item.id,false),"purchase shop alias of league avatar");purchased.GrantMedals("leader",100);clock.Now+=8*86400;reward=purchased.ReadLeague(true).reward;
+  check(purchased.LeagueDuplicateCoins(reward)==50,"shop ownership recognized despite league ID alias");
+  check(new LeagueConfig().rewardTiers[0].coins==300&&new LeagueConfig().rewardTiers[3].coins==80,"fallback league values match new economy");
+  return "PASS: "+checks+" economy v67 wallet migration rescue milestones and duplicate rewards checks";
+ }
+}
+}

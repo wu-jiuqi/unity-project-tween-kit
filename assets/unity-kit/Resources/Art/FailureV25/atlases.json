@@ -1,0 +1,1048 @@
+{
+  "version": 25,
+  "characterAssets": 0,
+  "backgroundFrames": 96,
+  "backgroundFps": 24,
+  "sprites": [
+    {
+      "name": "background_000",
+      "texture": "background",
+      "rect": [
+        0,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_001",
+      "texture": "background",
+      "rect": [
+        320,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_002",
+      "texture": "background",
+      "rect": [
+        640,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_003",
+      "texture": "background",
+      "rect": [
+        960,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_004",
+      "texture": "background",
+      "rect": [
+        1280,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_005",
+      "texture": "background",
+      "rect": [
+        1600,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_006",
+      "texture": "background",
+      "rect": [
+        1920,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_007",
+      "texture": "background",
+      "rect": [
+        2240,
+        0,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_008",
+      "texture": "background",
+      "rect": [
+        0,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_009",
+      "texture": "background",
+      "rect": [
+        320,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_010",
+      "texture": "background",
+      "rect": [
+        640,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_011",
+      "texture": "background",
+      "rect": [
+        960,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_012",
+      "texture": "background",
+      "rect": [
+        1280,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_013",
+      "texture": "background",
+      "rect": [
+        1600,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_014",
+      "texture": "background",
+      "rect": [
+        1920,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_015",
+      "texture": "background",
+      "rect": [
+        2240,
+        320,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_016",
+      "texture": "background",
+      "rect": [
+        0,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_017",
+      "texture": "background",
+      "rect": [
+        320,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_018",
+      "texture": "background",
+      "rect": [
+        640,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_019",
+      "texture": "background",
+      "rect": [
+        960,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_020",
+      "texture": "background",
+      "rect": [
+        1280,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_021",
+      "texture": "background",
+      "rect": [
+        1600,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_022",
+      "texture": "background",
+      "rect": [
+        1920,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_023",
+      "texture": "background",
+      "rect": [
+        2240,
+        640,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_024",
+      "texture": "background",
+      "rect": [
+        0,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_025",
+      "texture": "background",
+      "rect": [
+        320,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_026",
+      "texture": "background",
+      "rect": [
+        640,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_027",
+      "texture": "background",
+      "rect": [
+        960,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_028",
+      "texture": "background",
+      "rect": [
+        1280,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_029",
+      "texture": "background",
+      "rect": [
+        1600,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_030",
+      "texture": "background",
+      "rect": [
+        1920,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_031",
+      "texture": "background",
+      "rect": [
+        2240,
+        960,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_032",
+      "texture": "background",
+      "rect": [
+        0,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_033",
+      "texture": "background",
+      "rect": [
+        320,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_034",
+      "texture": "background",
+      "rect": [
+        640,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_035",
+      "texture": "background",
+      "rect": [
+        960,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_036",
+      "texture": "background",
+      "rect": [
+        1280,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_037",
+      "texture": "background",
+      "rect": [
+        1600,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_038",
+      "texture": "background",
+      "rect": [
+        1920,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_039",
+      "texture": "background",
+      "rect": [
+        2240,
+        1280,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_040",
+      "texture": "background",
+      "rect": [
+        0,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_041",
+      "texture": "background",
+      "rect": [
+        320,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_042",
+      "texture": "background",
+      "rect": [
+        640,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_043",
+      "texture": "background",
+      "rect": [
+        960,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_044",
+      "texture": "background",
+      "rect": [
+        1280,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_045",
+      "texture": "background",
+      "rect": [
+        1600,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_046",
+      "texture": "background",
+      "rect": [
+        1920,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_047",
+      "texture": "background",
+      "rect": [
+        2240,
+        1600,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_048",
+      "texture": "background",
+      "rect": [
+        0,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_049",
+      "texture": "background",
+      "rect": [
+        320,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_050",
+      "texture": "background",
+      "rect": [
+        640,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_051",
+      "texture": "background",
+      "rect": [
+        960,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_052",
+      "texture": "background",
+      "rect": [
+        1280,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_053",
+      "texture": "background",
+      "rect": [
+        1600,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_054",
+      "texture": "background",
+      "rect": [
+        1920,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_055",
+      "texture": "background",
+      "rect": [
+        2240,
+        1920,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_056",
+      "texture": "background",
+      "rect": [
+        0,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_057",
+      "texture": "background",
+      "rect": [
+        320,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_058",
+      "texture": "background",
+      "rect": [
+        640,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_059",
+      "texture": "background",
+      "rect": [
+        960,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_060",
+      "texture": "background",
+      "rect": [
+        1280,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_061",
+      "texture": "background",
+      "rect": [
+        1600,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_062",
+      "texture": "background",
+      "rect": [
+        1920,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_063",
+      "texture": "background",
+      "rect": [
+        2240,
+        2240,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_064",
+      "texture": "background",
+      "rect": [
+        0,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_065",
+      "texture": "background",
+      "rect": [
+        320,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_066",
+      "texture": "background",
+      "rect": [
+        640,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_067",
+      "texture": "background",
+      "rect": [
+        960,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_068",
+      "texture": "background",
+      "rect": [
+        1280,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_069",
+      "texture": "background",
+      "rect": [
+        1600,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_070",
+      "texture": "background",
+      "rect": [
+        1920,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_071",
+      "texture": "background",
+      "rect": [
+        2240,
+        2560,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_072",
+      "texture": "background",
+      "rect": [
+        0,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_073",
+      "texture": "background",
+      "rect": [
+        320,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_074",
+      "texture": "background",
+      "rect": [
+        640,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_075",
+      "texture": "background",
+      "rect": [
+        960,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_076",
+      "texture": "background",
+      "rect": [
+        1280,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_077",
+      "texture": "background",
+      "rect": [
+        1600,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_078",
+      "texture": "background",
+      "rect": [
+        1920,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_079",
+      "texture": "background",
+      "rect": [
+        2240,
+        2880,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_080",
+      "texture": "background",
+      "rect": [
+        0,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_081",
+      "texture": "background",
+      "rect": [
+        320,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_082",
+      "texture": "background",
+      "rect": [
+        640,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_083",
+      "texture": "background",
+      "rect": [
+        960,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_084",
+      "texture": "background",
+      "rect": [
+        1280,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_085",
+      "texture": "background",
+      "rect": [
+        1600,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_086",
+      "texture": "background",
+      "rect": [
+        1920,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_087",
+      "texture": "background",
+      "rect": [
+        2240,
+        3200,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_088",
+      "texture": "background",
+      "rect": [
+        0,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_089",
+      "texture": "background",
+      "rect": [
+        320,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_090",
+      "texture": "background",
+      "rect": [
+        640,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_091",
+      "texture": "background",
+      "rect": [
+        960,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_092",
+      "texture": "background",
+      "rect": [
+        1280,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_093",
+      "texture": "background",
+      "rect": [
+        1600,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_094",
+      "texture": "background",
+      "rect": [
+        1920,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "background_095",
+      "texture": "background",
+      "rect": [
+        2240,
+        3520,
+        320,
+        320
+      ]
+    },
+    {
+      "name": "glyph_S-purple",
+      "texture": "glyphs",
+      "rect": [
+        36,
+        8,
+        184,
+        240
+      ]
+    },
+    {
+      "name": "glyph_O-purple",
+      "texture": "glyphs",
+      "rect": [
+        272,
+        8,
+        224,
+        240
+      ]
+    },
+    {
+      "name": "glyph_C",
+      "texture": "glyphs",
+      "rect": [
+        535,
+        8,
+        210,
+        240
+      ]
+    },
+    {
+      "name": "glyph_L",
+      "texture": "glyphs",
+      "rect": [
+        810,
+        8,
+        172,
+        240
+      ]
+    },
+    {
+      "name": "glyph_O",
+      "texture": "glyphs",
+      "rect": [
+        1040,
+        8,
+        223,
+        240
+      ]
+    },
+    {
+      "name": "glyph_S",
+      "texture": "glyphs",
+      "rect": [
+        1314,
+        8,
+        187,
+        240
+      ]
+    },
+    {
+      "name": "glyph_E",
+      "texture": "glyphs",
+      "rect": [
+        1575,
+        8,
+        177,
+        240
+      ]
+    },
+    {
+      "name": "glyph_exclamation",
+      "texture": "glyphs",
+      "rect": [
+        1874,
+        8,
+        92,
+        240
+      ]
+    }
+  ]
+}

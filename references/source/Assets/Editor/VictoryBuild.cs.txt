@@ -1,0 +1,50 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+
+public sealed class VictoryTextureImporter : AssetPostprocessor {
+    void OnPreprocessTexture() {
+        if (!assetPath.StartsWith("Assets/Resources/Art/VictoryV23/", StringComparison.Ordinal)
+            && !assetPath.StartsWith("Assets/Resources/Art/VictoryCatV23/", StringComparison.Ordinal)) return;
+        var texture = (TextureImporter)assetImporter;
+        texture.textureType = TextureImporterType.Default;
+        texture.alphaSource = TextureImporterAlphaSource.FromInput;
+        texture.alphaIsTransparency = true;
+        texture.mipmapEnabled = false; texture.isReadable = false;
+        texture.sRGBTexture = true; texture.npotScale = TextureImporterNPOTScale.None;
+        texture.wrapMode = TextureWrapMode.Clamp; texture.filterMode = FilterMode.Bilinear;
+        texture.maxTextureSize = 4096;
+        texture.textureCompression = TextureImporterCompression.Uncompressed;
+        texture.SetPlatformTextureSettings(new TextureImporterPlatformSettings {
+            name = "Android", overridden = true, maxTextureSize = 4096,
+            format = TextureImporterFormat.ETC2_RGBA8, compressionQuality = 100
+        });
+    }
+}
+
+public static class VictoryBuild {
+    public static void Windows() { Build(BuildTarget.StandaloneWindows64); }
+    public static void Android() { Build(BuildTarget.Android); }
+    static void Build(BuildTarget target) {
+        foreach (var path in Directory.GetFiles("Assets/Resources/Art/VictoryV23", "*.png"))
+            AssetDatabase.ImportAsset(path.Replace('\\', '/'), ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+        BuildEntry.Configure(); BuildEntry.Rules();
+        Debug.Log("PROFILE_TESTS " + BounceGarden.LocalProfile.RunSelfTests());
+        PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;
+        PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+        PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
+        string output = Environment.GetEnvironmentVariable("BOUNCE_VICTORY_OUTPUT");
+        if (string.IsNullOrEmpty(output)) throw new Exception("BOUNCE_VICTORY_OUTPUT required");
+        Directory.CreateDirectory(Path.GetDirectoryName(output));
+        var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
+            scenes = new[] { "Assets/Scenes/Main.unity" }, target = target,
+            locationPathName = output, options = BuildOptions.CompressWithLz4HC,
+            extraScriptingDefines = new[] { "BOUNCE_TEST_TOOLS" }
+        });
+        string result = "VICTORY_V23_BUILD " + report.summary.result + " errors=" + report.summary.totalErrors + " warnings=" + report.summary.totalWarnings;
+        File.WriteAllText(output + ".build.txt", result); Debug.Log(result);
+        if (report.summary.result != BuildResult.Succeeded) throw new Exception(result);
+    }
+}

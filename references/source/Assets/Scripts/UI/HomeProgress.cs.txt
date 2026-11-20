@@ -1,0 +1,17 @@
+using System;using UnityEngine;using UnityEngine.UI;using TMPro;
+namespace BounceGarden {
+public static class HomeProgress {
+ // One shared palette drives node faces and the play button for each authored difficulty.
+ static readonly int[] MainlineTiers={0,1,2,3,1};
+ static readonly int[] Tiers={0,1,2,1,2,3};
+ static readonly Color32[] Palette={new Color32(151,217,182,255),new Color32(244,209,112,255),new Color32(185,147,229,255),new Color32(239,153,161,255)};
+ static readonly string[] Buttons={"button_mint","button_yellow","button_lavender","button_blush"};
+ static int Tier(int level){float p=AlphabetCampaign.Stage(level).pressure;return p<1.5f?0:p<2.7f?1:p<4?2:3;}
+ public static Color DifficultyColor(int level)=>Palette[Tier(level)];
+ public static string ButtonKey(int level)=>Buttons[Tier(level)];
+ // Restore the original independently rendered, deformable play component.
+ public static Button PlayButton(Transform parent,int level,Action play){var button=UICraft.Button(parent,(level==0?"开始第1关":"继续第"+(Mathf.Min(level,77)+1)+"关"),0,-755,860,230,UICraft.Green,play,76);button.name="Play current level";button.GetComponent<UIBounce>().IdleInterval=30f;
+  var face=button.transform.Find("ButtonVisual/Face").GetComponent<Image>();face.sprite=PastelArt.Get("button_mint");face.type=Image.Type.Sliced;face.preserveAspect=false;var info=PastelArt.Info("button_mint");var label=button.GetComponentInChildren<TMP_Text>();label.alignment=TextAlignmentOptions.Center;label.rectTransform.anchoredPosition=new Vector2(0,(.5f-(info.visible[1]+info.visible[3]*.5f)/info.size[1])*230);return button;
+ }
+}
+}

@@ -1,0 +1,32 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Reflection;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class MobileV58OutcomeQA:MonoBehaviour {
+ string dir;int checks,failures,errors,outcomes;bool won;GameSession g;
+ static readonly FieldInfo Rules=typeof(GameSession).GetField("rules",BindingFlags.NonPublic|BindingFlags.Instance);
+ static readonly FieldInfo Shots=typeof(RuleState).GetField("<Shots>k__BackingField",BindingFlags.NonPublic|BindingFlags.Instance);
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--mobile-v58-outcome"))new GameObject("Last-ball result audit").AddComponent<MobileV58OutcomeQA>();}
+ void Check(bool ok,string name){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+name+"\n");}
+ void Reset(int level,int shots=1){g.StartLevel(level);Shots.SetValue(Rules.GetValue(g),shots);outcomes=0;won=false;}
+ void Step(int count=1){for(int i=0;i<count;i++)g.QAAdvanceOneStep();}
+ void ReturnBalls(){foreach(var ball in g.GetComponentsInChildren<BallBody>(true))if(ball.Active)g.LoseBall(ball,ball.Body.position);}
+ void Fire(){Check(g.TryShoot(Vector2.up),"last volley accepted");Step(30);Check(g.PendingBurstBalls==0&&g.ActiveBalls>0,"five-ball volley completes spawning");}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};
+  yield return new WaitForSecondsRealtime(1);FindFirstObjectByType<AppUI>().QANavigate("home");g=new GameObject("Last-ball fixture").AddComponent<GameSession>();g.enabled=false;g.QAIgnoreFocusLoss=true;g.Outcome+=value=>{outcomes++;won=value;};var previous=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;Time.timeScale=0;
+  foreach(int level in new[]{0,11,28}){
+   Reset(level);Fire();var victim=g.CollectionBricks.First(b=>b.Alive&&b.Definition.kind==BrickKind.Normal&&!g.IsJellyTarget(b)&&(string.IsNullOrEmpty(b.Definition.reveal)||b.Definition.reveal=="picnic-N"));g.ApplyChainImpact(victim,999999,Vector2.up,victim.transform.position,true);if(level<26){Step();Check(g.ChainFalling,"fixture really has moving refill bricks stage "+(level+1));}else Check(!g.ChainGridReady,"fixture really has pending refill planning stage "+(level+1));ReturnBalls();Step();Check(!g.IsPlaying&&outcomes==1&&!won,"loss commits on first no-ball step despite falling board");Step(5);Check(outcomes==1,"loss emits exactly once");yield return null;
+  }
+  Reset(0);Check(g.TryShoot(Vector2.up),"pending fixture accepts volley");Step();ReturnBalls();Step();Check(g.IsPlaying&&g.PendingBurstBalls>0&&outcomes==0,"pending sub-balls prevent premature loss");
+  Reset(0);Fire();Array.Copy(g.CollectionGoal,g.Collected,g.Collected.Length);Array.Copy(g.JellyGoal,g.JellyCollected,g.JellyCollected.Length);Step();Check(g.IsPlaying&&outcomes==0,"reached goal waits for remaining physical balls");ReturnBalls();Step();Check(!g.IsPlaying&&won&&outcomes==1,"victory commits immediately after last ball returns");
+  Reset(0);Fire();Array.Copy(g.CollectionGoal,g.Collected,g.Collected.Length);Array.Copy(g.JellyGoal,g.JellyCollected,g.JellyCollected.Length);var target=g.CollectionBricks.First(b=>b.Alive&&g.IsJellyTarget(b));int color=Enumerable.Range(0,g.JellyGoal.Length).First(c=>g.JellyGoal[c]>0);g.JellyCollected[color]--;g.ApplyChainImpact(target,999999,Vector2.up,target.transform.position,true);Check(!g.CollectionWon,"last earned reward is still flying to HUD");ReturnBalls();Step();Check(!g.IsPlaying&&won&&g.CollectionWon,"flying earned reward credited before immediate verdict");int collected=g.JellyCollected.Sum();Step(5);Check(g.JellyCollected.Sum()==collected&&outcomes==1,"flushed loot cannot be counted twice");
+  Reset(0,2);Fire();ReturnBalls();Step();Check(g.IsPlaying&&outcomes==0,"empty field with shots remaining keeps playing");
+  Reset(0);Fire();ReturnBalls();var miniView=new GameObject("Active split ball fixture").transform;g.ChainMinis.Add(new ChainMini{View=miniView,Position=Vector2.zero,Direction=Vector2.up,Life=10});Step();Check(g.IsPlaying&&outcomes==0,"visible split balls also keep the field active");g.ChainMinis.Clear();Destroy(miniView.gameObject);Step();Check(!g.IsPlaying&&outcomes==1,"last split ball exit allows immediate verdict");
+  Reset(0);Fire();ReturnBalls();g.SetPaused(true);Step();Check(g.IsPlaying&&outcomes==0,"pause suppresses result processing");g.SetPaused(false);Step();Check(!g.IsPlaying&&outcomes==1,"resume resolves exhausted no-ball field without waiting for refill");
+  Physics2D.simulationMode=previous;Time.timeScale=1;File.WriteAllText(dir+"/result.json",$"{{\"checks\":{checks},\"failures\":{failures},\"errors\":{errors}}}");Application.Quit(failures+errors==0?0:1);
+ }
+}
+}

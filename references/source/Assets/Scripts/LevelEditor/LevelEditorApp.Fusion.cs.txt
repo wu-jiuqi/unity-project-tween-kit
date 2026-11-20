@@ -1,0 +1,519 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    public sealed partial class LevelEditorApp
+    {
+        bool showFusionSamples, fusionShowOptions, fusionShowContents = true, fusionShowGoals, fusionShowMilestones, fusionShowAdvanced;
+        int fusionPaletteGroup;
+        string fusionLoadedLevel, fusionLoadedObject, fusionPreviewJson;
+        FusionLevelDefinition fusionPreview, fusionOptions;
+        FusionPieceDefinition fusionEdit;
+        readonly Dictionary<string, string> fusionOptionText = new Dictionary<string, string>();
+        readonly Dictionary<string, string> fusionPieceText = new Dictionary<string, string>();
+        readonly List<FusionContentRow> fusionContentRows = new List<FusionContentRow>();
+        readonly List<FusionMilestoneRow> fusionMilestoneRows = new List<FusionMilestoneRow>();
+        Vector2 fusionSampleScroll, fusionPlayScroll;
+        FusionSampleDefinition[] fusionSamples;
+        GUIStyle fusionTileLabel, fusionTileBadge;
+        sealed class FusionContentRow { internal string id, kind, goal, hp; }
+        sealed class FusionMilestoneRow { internal string id, kind, threshold, count, links; }
+        static readonly string[,] FusionOptionNumbers = {
+            {"ratingRewardBudget", "评级工具总预算"}, {"piercePerBall", "穿透次数 / 每球"}, {"bombPerBall", "爆炸次数 / 每球"},
+            {"superPerBall", "光球次数 / 每球"}, {"superRange", "光球射程 / 格"}, {"refillHp", "补位砖生命"}, {"refillBudget", "补位砖总预算"}
+        };
+        static readonly string[,] FusionPieceNumbers = {
+            {"threshold", "充能门槛"}, {"initialCharge", "初始充能"}, {"stock", "库存 / 生产批数"}, {"batchSize", "每批产物数"},
+            {"hitsPerItem", "每份命中次数"}, {"bonusServings", "连锁加餐份数"}, {"ripenNeeds", "成熟所需邻格"},
+            {"layers", "雪层数"}, {"hitsPerRing", "每圈有效触点"}, {"range", "作用长度（格）"}, {"damage", "装置作用伤害"}
+        };
+        static readonly string[] FusionGoalsKinds = { "", "fish", "toy", "jelly" };
+        static readonly string[] FusionContentKinds = { "normal", "fish", "toy", "jelly" };
+
+        public bool CreateFusionLevel()
+        {
+            if (Workspace == null || IsPlaytesting) return false;
+            FinishBoardGesture();
+            try
+            {
+                var level = Workspace.CreateFusionLevel(Chapters[selectedChapter], "融合新关 " + (Workspace.Levels.Count + 1));
+                search = ""; SelectLevel(level.Index); toolMode = 1; levelScroll = new Vector2(0, float.MaxValue);
+                SetStatus("已新建融合空关 · 放置目标与装置，补满空格后可真实试玩"); return true;
+            }
+            catch (Exception ex) { SetStatus("新建融合关失败：" + ex.Message, true); return false; }
+        }
+        public bool ImportFusionSample(string sampleId)
+        {
+            if (Workspace == null || IsPlaytesting) return false;
+            FinishBoardGesture();
+            try
+            {
+                var sample = FusionSamples.CreateDefinitions().FirstOrDefault(s => s.id == sampleId);
+                if (sample == null) throw new ArgumentException("找不到该样板。");
+                var level = Workspace.CreateFusionLevel(Chapters[selectedChapter], sample.name, sample.definition, sample.moves);
+                var guidance = level.TrySetFusionGuidance(sample.name, sample.focus, sample.id);
+                if (!guidance.Success) throw new InvalidOperationException(guidance.Message);
+                search = ""; SelectLevel(level.Index); showFusionSamples = false; levelScroll = new Vector2(0, float.MaxValue);
+                SetStatus("已添加独立样板：" + sample.name + " · " + sample.focus); return true;
+            }
+            catch (Exception ex) { SetStatus("样板导入失败：" + ex.Message, true); return false; }
+        }
+        string[] FusionPaletteKinds()
+        {
+            return FusionRules.Kinds.Where(k => fusionPaletteGroup == 0 || fusionPaletteGroup == 1 && !FusionRules.IsTool(k) && !FusionRules.IsDevice(k)
+                || fusionPaletteGroup == 2 && FusionRules.IsTool(k) || fusionPaletteGroup == 3 && FusionRules.IsDevice(k)).ToArray();
+        }
+        static string FusionBoosterRule(GameSession session)
+        {
+            var config = session.FusionDefinition;
+            if (session.SelectedStreakBooster == StreakBooster.None) return "普通球 · 每组5球。\n打砖、触发工具并推进收集目标。";
+            int budget = session.SelectedStreakBooster == StreakBooster.Pierce ? config.piercePerBall : session.SelectedStreakBooster == StreakBooster.Bomb ? config.bombPerBall : config.superPerBall;
+            string range = session.SelectedStreakBooster == StreakBooster.Super ? " · 十字每向" + (config.finiteBoosters ? config.superRange : 9) + "格" : "";
+            return StreakTrials.Name(session.SelectedStreakBooster) + " · 下一组5球\n" + (config.finiteBoosters ? "每球最多" + budget + "次" : "不限触发次数") + range
+                + "\n" + (config.finiteBoosters ? "用完恢复普通球；保护分次推进。" : "保护与机关按每次攻击结算。");
+        }
+        void DrawFusionPlaytestProgress(GameSession game, float x, float w)
+        {
+            var text = new GUIStyle(body) { wordWrap = true };
+            string lesson = CurrentLevel.FusionLesson, focus = CurrentLevel.FusionFocus;
+            string guidance = string.IsNullOrWhiteSpace(focus) ? lesson : string.IsNullOrWhiteSpace(lesson) || lesson == CurrentLevel.Name ? focus : lesson + "\n" + focus;
+            if (string.IsNullOrWhiteSpace(guidance)) guidance = "触发棋盘机制，收集全部目标；无需清空普通砖。";
+            int reserved = game.fusionGoals.Values.Count(g => g.State == FusionGoalState.Reserved);
+            int active = game.fusionGoals.Values.Count(g => g.State == FusionGoalState.Active);
+            var goals = new List<string>();
+            if (game.CollectionGoal[0] > 0) goals.Add("鱼 " + game.Collected[0] + "/" + game.CollectionGoal[0]);
+            if (game.CollectionGoal[1] > 0) goals.Add("玩具 " + game.Collected[1] + "/" + game.CollectionGoal[1]);
+            for (int i = 0; i < game.JellyGoal.Length; i++) if (game.JellyGoal[i] > 0) goals.Add("果冻 " + game.JellyCollected[i] + "/" + game.JellyGoal[i]);
+            var lines = RecentFusionProgress(game);
+            if (lines.Count == 0) lines.Add("尚未触发；先观察入口和目标位置。");
+            string next = FusionNextAction(game), goalText = string.Join(" · ", goals);
+            float contentWidth = w - 18, y = 0;
+            float guidanceHeight = Mathf.Max(54, text.CalcHeight(new GUIContent(guidance), contentWidth));
+            float nextHeight = Mathf.Max(54, text.CalcHeight(new GUIContent(next), contentWidth));
+            float goalsHeight = Mathf.Max(28, text.CalcHeight(new GUIContent(goalText), contentWidth));
+            var lineHeights = lines.Select(line => Mathf.Max(42, text.CalcHeight(new GUIContent(line), contentWidth))).ToArray();
+            float contentHeight = guidanceHeight + nextHeight + goalsHeight + lineHeights.Sum() + 310;
+            fusionPlayScroll = GUI.BeginScrollView(new Rect(x, 199, w, height - 260), fusionPlayScroll, new Rect(0, 0, contentWidth, contentHeight));
+            GUI.Label(new Rect(0, y, contentWidth, guidanceHeight), guidance, text); y += guidanceHeight + 16;
+            GUI.Label(new Rect(0, y, contentWidth, 28), "收集 " + game.FusionGoalsCredited + " / " + game.FusionGoalsTotal, heading); y += 36;
+            GUI.Label(new Rect(0, y, contentWidth, 48), "在场待收 " + active + " · 待展开 " + reserved + "\n待展开目标已包含在总数内。", text); y += 56;
+            GUI.Label(new Rect(0, y, contentWidth, goalsHeight), goalText, text); y += goalsHeight + 16;
+            GUI.Label(new Rect(0, y, contentWidth, 28), "最近机制进展", heading); y += 36;
+            for (int i = 0; i < lines.Count; i++) { GUI.Label(new Rect(0, y, contentWidth, lineHeights[i]), lines[i], text); y += lineHeights[i] + 7; }
+            y += 12; GUI.Label(new Rect(0, y, contentWidth, nextHeight), next, text); y += nextHeight + 16;
+            GUI.Label(new Rect(0, y, contentWidth, 25), "剩余 " + game.Shots + " 步 · 场上 " + game.ActiveBalls + " 球", body); y += 35;
+            GUI.Label(new Rect(0, y, contentWidth, 55), "破坏 " + game.BreakCount + " · 工具触发 " + game.ChainActivationCount + "\n阶段推进 " + game.FusionMetrics.Transitions + " · 无进展球组 " + game.FusionMetrics.NoProgressVolleys, small);
+            GUI.EndScrollView();
+        }
+        internal static List<string> RecentFusionProgress(GameSession game)
+        {
+            var lines = new List<string>(); var categories = new HashSet<string>();
+            for (int i = game.FusionEvents.Count - 1; i >= 0 && lines.Count < 3; i--)
+            {
+                var record = game.FusionEvents[i]; string category = record.Kind, label = null;
+                game.fusionPieces.TryGetValue(record.TargetId ?? "", out var target);
+                switch (record.Kind)
+                {
+                    case "ArmorRemoved": case "IceRemoved": category = "protection"; label = "保护已解除，后续命中可推进本体。"; break;
+                    case "PieceRemoved": if (target?.Definition.kind == "chest") label = "箱子已打开，继续收集展开的目标。"; break;
+                    case "ContentActivated": category = "output"; label = "产物已上场，仍需击中收集。"; break;
+                    case "ProducerBatchReleased": category = "output"; label = "一批补给已展开，查看剩余目标。"; break;
+                    case "GateOpened": label = "关联门已打开，可尝试新的入口。"; break;
+                    case "CannonFired": label = "机关炮已发射，剩余弹药见炮身。"; break;
+                    case "AssistantJarOpened": case "AssistantResolved": category = "assistant"; label = record.Kind == "AssistantJarOpened" ? "助手已出发，等待它推进目标。" : "助手已命中，查看剩余目标。"; break;
+                    case "MilestoneClaimed": label = "收集里程碑已兑现一次助力。"; break;
+                    case "BatteryDischarged": case "ToolEnabled": category = "wake"; label = "预置工具已唤醒，可继续触发接力。"; break;
+                    case "GoalCredited": category = "goal"; label = record.TargetId != null && record.TargetId.Contains(":stock:") ? "出货已计入收集，无需重复击中。" : "目标已收集，完成数已更新。"; break;
+                }
+                // Group rapid identical credits so they do not bury the mechanism that produced them.
+                if (label != null && categories.Add(category)) lines.Add("第" + Math.Max(1, record.VolleyId) + "组 · " + label);
+            }
+            return lines;
+        }
+        static string FusionNextAction(GameSession game)
+        {
+            if (!string.IsNullOrEmpty(game.FusionRuleError)) return "配置问题：" + game.FusionRuleError;
+            if (game.FusionGoalsCredited == game.FusionGoalsTotal) return "全部目标已完成。";
+            var chest = game.FusionPieces.FirstOrDefault(p => p.Alive && p.Definition.kind == "chest");
+            if (chest != null) return "目标箱还在场：先解除保护或击中箱体，打开后再收集产物。";
+            var cannon = game.FusionPieces.FirstOrDefault(p => p.Alive && p.Definition.kind == "cannon" && p.Stock > 0);
+            if (cannon != null) return "机关炮 " + cannon.Charge + "/" + cannon.Definition.threshold + " · 余弹 " + cannon.Stock + "。" + (cannon.Definition.activationMode == "neighbor" ? "清除炮旁砖可充能。" : cannon.Definition.activationMode == "direct" ? "命中炮身可充能。" : "命中炮身或清除旁砖可充能。");
+            if (game.FusionPieces.Any(p => p.Alive && (p.Ice > 0 || p.Brick != null && p.Brick.ShellIntact))) return "甲/冰会先挡住一次攻击；解除后，让后续球或独立工具继续推进。";
+            if (game.fusionGoals.Values.Any(g => g.State == FusionGoalState.Reserved)) return "还有目标待展开；继续推进对应容器或生产器。";
+            return "观察剩余目标与可触发工具，再选择下一次发射入口。";
+        }
+        FusionLevelDefinition FusionPreview()
+        {
+            string text = CurrentLevel.SnapshotJson();
+            if (text != fusionPreviewJson) { fusionPreviewJson = text; try { fusionPreview = CurrentLevel.FusionDefinition; } catch { fusionPreview = null; } }
+            return fusionPreview;
+        }
+        void LoadFusionInspector()
+        {
+            if (CurrentLevel == null || !CurrentLevel.IsFusion) return;
+            fusionLoadedLevel = CurrentLevel.EditorLevelId; fusionLoadedObject = selectedPiece;
+            fusionOptions = null; fusionEdit = null; fusionOptionText.Clear(); fusionPieceText.Clear(); fusionContentRows.Clear(); fusionMilestoneRows.Clear();
+            try
+            {
+                fusionOptions = CurrentLevel.FusionDefinition;
+                LoadNumbers(fusionOptions, FusionOptionNumbers, fusionOptionText);
+                fusionOptionText["requiredMechanisms"] = Join(fusionOptions.requiredMechanisms);
+                fusionOptionText["introducedMechanisms"] = Join(fusionOptions.introducedMechanisms);
+                foreach (var m in fusionOptions.milestones ?? Array.Empty<FusionMilestoneDefinition>()) if (m != null)
+                    fusionMilestoneRows.Add(new FusionMilestoneRow { id = m.id, kind = m.kind, threshold = m.threshold.ToString(), count = m.count.ToString(), links = Join(m.links) });
+                if (selectedPiece == null || !CurrentLevel.Pieces.Any(p => p.Id == selectedPiece)) return;
+                fusionEdit = CurrentLevel.GetFusionPiece(selectedPiece);
+                foreach (string key in new[] { "c", "r", "size", "hp", "ice" }) fusionPieceText[key] = ((int)typeof(FusionPieceDefinition).GetField(key).GetValue(fusionEdit) + (key == "c" || key == "r" ? 1 : 0)).ToString();
+                LoadNumbers(fusionEdit, FusionPieceNumbers, fusionPieceText);
+                fusionPieceText["group"] = fusionEdit.group ?? ""; fusionPieceText["network"] = fusionEdit.network ?? "";
+                fusionPieceText["links"] = Join(fusionEdit.links); fusionPieceText["eligibleGoals"] = Join(fusionEdit.eligibleGoals);
+                fusionPieceText["rewards"] = Join(fusionEdit.rewardSequence);
+                fusionPieceText["spawn"] = CellText(fusionEdit.spawnCells); fusionPieceText["fallback"] = CellText(fusionEdit.fallbackCells);
+                foreach (var c in fusionEdit.contents ?? Array.Empty<FusionContentDefinition>()) if (c != null)
+                    fusionContentRows.Add(new FusionContentRow { id = c.id, kind = c.kind, goal = c.goal, hp = c.hp.ToString() });
+            }
+            catch (Exception ex) { SetStatus("融合草稿配置有误，可先查看检查结果：" + ex.Message, true); }
+        }
+        static void LoadNumbers(object value, string[,] fields, Dictionary<string, string> output)
+        {
+            for (int i = 0; i < fields.GetLength(0); i++) output[fields[i, 0]] = Convert.ToString(value.GetType().GetField(fields[i, 0]).GetValue(value), CultureInfo.InvariantCulture);
+        }
+        static void ApplyNumbers(object value, string[,] fields, Dictionary<string, string> input)
+        {
+            for (int i = 0; i < fields.GetLength(0); i++) value.GetType().GetField(fields[i, 0]).SetValue(value, Number(input[fields[i, 0]], fields[i, 1]));
+        }
+        static int Number(string text, string label)
+        {
+            if (!int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int result)) throw new ArgumentException(label + "必须填写整数。");
+            return result;
+        }
+        static string Join(IEnumerable<string> items) => string.Join(",", items ?? Array.Empty<string>());
+        static string[] SequenceTokens(string value) => (value ?? "").Split(new[] { ',', '，', ';', '；', ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToArray();
+        static string[] Tokens(string value) => SequenceTokens(value).Distinct().ToArray();
+        static string CellText(Vector2Int[] cells) => string.Join("; ", (cells ?? Array.Empty<Vector2Int>()).Select(c => (c.x + 1) + "," + (c.y + 1)));
+        static Vector2Int[] ParseCells(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return Array.Empty<Vector2Int>();
+            return value.Split(new[] { ';', '；', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(t =>
+            {
+                var xy = t.Trim().Split(new[] { ',', '，' }, StringSplitOptions.RemoveEmptyEntries);
+                if (xy.Length != 2) throw new ArgumentException("出生位置按 列,行;列,行 填写，范围1–9。");
+                int x = Number(xy[0], "列"), y = Number(xy[1], "行");
+                if (x < 1 || x > 9 || y < 1 || y > 9) throw new ArgumentException("出生位置范围为1–9。");
+                return new Vector2Int(x - 1, y - 1);
+            }).ToArray();
+        }
+        bool FusionFold(string label, bool open, ref float y)
+        {
+            if (Btn(new Rect(0, y, 280, 30), (open ? "▾  " : "▸  ") + label)) open = !open;
+            y += 39; return open;
+        }
+        bool FusionToggle(string label, bool value, ref float y)
+        {
+            if (Tab(new Rect(0, y, 280, 30), (value ? "☑  " : "□  ") + label, value)) value = !value;
+            y += 38; return value;
+        }
+        string FusionChoice(string label, string value, string[] options, string[] labels, ref float y)
+        {
+            GUI.Label(new Rect(0, y, 280, 24), label, small); y += 26;
+            float w = 280f / options.Length;
+            for (int i = 0; i < options.Length; i++) if (Tab(new Rect(i * w, y, w - 4, 29), labels[i], value == options[i])) value = options[i];
+            y += 39; return value;
+        }
+        void FusionText(string key, string label, Dictionary<string, string> values, ref float y) { values[key] = TextField(label, values.TryGetValue(key, out string text) ? text : "", ref y); }
+        void DrawFusionInspector()
+        {
+            if (fusionLoadedLevel != CurrentLevel.EditorLevelId || fusionLoadedObject != selectedPiece) LoadFusionInspector();
+            float x = width - InspectorWidth - 14;
+            Fill(new Rect(x, 98, InspectorWidth, height - 148), Panel);
+            GUI.Label(new Rect(x + 16, 110, 280, 30), "融合关卡 / 装置属性", heading);
+            inspectorScroll = GUI.BeginScrollView(new Rect(x + 12, 150, InspectorWidth - 24, height - 221), inspectorScroll, new Rect(0, 0, InspectorWidth - 44, inspectorContentHeight));
+            float y = 0;
+            editName = TextField("关卡名称", editName, ref y);
+            if (Btn(new Rect(0, y, 280, 30), "应用名称")) ApplyResult(CurrentLevel.TryRename(editName)); y += 39;
+            movesText = TextField("可用步数（1–999）", movesText, ref y);
+            if (Btn(new Rect(0, y, 280, 30), "应用步数")) { if (int.TryParse(movesText, out int n)) ApplyResult(CurrentLevel.TrySetMoves(n)); else SetStatus("步数必须为整数。", true); } y += 39;
+            GUI.Label(new Rect(0, y, 280, 24), "融合规则 v1 · 每组5球 · 9×9满盘", small); y += 32;
+            DrawFusionGoalPreview(ref y);
+            DrawMechanismCatalog(ref y);
+            fusionShowOptions = FusionFold("规则、道具与补位预算", fusionShowOptions, ref y);
+            if (fusionShowOptions && fusionOptions != null)
+            {
+                fusionOptions.physicsPolicy = FusionChoice("球间碰撞档案", fusionOptions.physicsPolicy, FusionRules.PhysicsPolicies, new[] { "旧规则", "互不碰", "入口保护", "同组碰" }, ref y);
+                fusionOptions.ratingRewards = FusionToggle("评级发工具", fusionOptions.ratingRewards, ref y);
+                fusionOptions.finiteBoosters = FusionToggle("强化球使用可见有限次数", fusionOptions.finiteBoosters, ref y);
+                for (int i = 0; i < FusionOptionNumbers.GetLength(0); i++) FusionText(FusionOptionNumbers[i, 0], FusionOptionNumbers[i, 1], fusionOptionText, ref y);
+                FusionText("requiredMechanisms", "需要的机制（逗号分隔）", fusionOptionText, ref y);
+                FusionText("introducedMechanisms", "本关教学机制", fusionOptionText, ref y);
+                if (Btn(new Rect(0, y, 280, 33), "应用规则与预算", true)) ApplyFusionOptions(); y += 43;
+            }
+            fusionShowMilestones = FusionFold("收集里程碑（" + fusionMilestoneRows.Count + "）", fusionShowMilestones, ref y);
+            if (fusionShowMilestones && fusionOptions != null) DrawFusionMilestones(ref y);
+            Fill(new Rect(0, y, 278, 1), Line); y += 14;
+            if (fusionEdit == null) { GUI.Label(new Rect(0, y, 280, 56), "点击对象配置目标、保护与装置。\n关联模式可在棋盘上点击连线。", small); y += 65; }
+            else DrawFusionObjectInspector(ref y);
+            GUI.Label(new Rect(0, y, 280, 27), "真实试玩开局", heading); y += 37;
+            for (int i = 0; i < ScenarioNames.Length; i++) if (Tab(new Rect(i % 2 * 143, y + i / 2 * 39, 135, 33), ScenarioNames[i], scenario == i)) scenario = i;
+            y += 124;
+            GUI.Label(new Rect(0, y, 280, 55), "固定种子 " + Playtest.Seed + " · 独立测试库存\n发射后使用真实会话与物理。", small); y += 64;
+            inspectorContentHeight = y + 20; GUI.EndScrollView();
+        }
+        void DrawFusionGoalPreview(ref float y)
+        {
+            try
+            {
+                if (issues.Any(issue => issue.IsError))
+                {
+                    GUI.Label(new Rect(0, y, 280, 44), "配置有误，目标预览仅供编辑。\n修复硬错误后才能试玩或导出。", small); y += 51;
+                }
+                var goals = CurrentLevel.FusionGoals;
+                GUI.Label(new Rect(0, y, 280, 26), "目标 " + goals.Count + "  · 在场 " + goals.Count(g => !g.reserved) + " / 预留 " + goals.Count(g => g.reserved), body); y += 32;
+                fusionShowGoals = FusionFold("查看目标来源", fusionShowGoals, ref y);
+                if (fusionShowGoals) foreach (var group in goals.GroupBy(g => new { g.ownerId, g.kind, g.reserved }))
+                {
+                    var piece = CurrentLevel.Pieces.FirstOrDefault(p => p.LegacyId == group.Key.ownerId);
+                    string label = (piece == null ? group.Key.ownerId : KindName(piece.Kind) + " " + (piece.Col + 1) + "," + (piece.Row + 1)) + " → " + GoalLabel(group.Key.kind) + " ×" + group.Count() + (group.Key.reserved ? "（预留）" : "");
+                    GUI.Label(new Rect(0, y, 280, 25), label, small); y += 29;
+                }
+            }
+            catch { GUI.Label(new Rect(0, y, 280, 28), "目标配置有误，请查看检查结果。", small); y += 35; }
+        }
+        static string GoalLabel(string kind) => kind == "fish" ? "小鱼" : kind == "toy" ? "玩具" : kind == "jelly" ? "果冻" : "按类型";
+        void DrawFusionObjectInspector(ref float y)
+        {
+            GUI.Label(new Rect(0, y, 280, 28), KindName(fusionEdit.kind), heading); y += 35;
+            if (Btn(new Rect(0, y, 280, 26), "复制对象标识：" + fusionEdit.id)) GUIUtility.systemCopyBuffer = fusionEdit.id; y += 34;
+            FusionText("c", "列（1–9）", fusionPieceText, ref y); FusionText("r", "行（1–9）", fusionPieceText, ref y);
+            if (new[] { "chest", "basket", "snowball" }.Contains(fusionEdit.kind)) FusionText("size", "占格边长", fusionPieceText, ref y);
+            FusionText("hp", "本体生命", fusionPieceText, ref y);
+            fusionEdit.goal = FusionChoice("收集目标", fusionEdit.goal ?? "", FusionGoalsKinds, new[] { "按类型", "小鱼", "玩具", "果冻" }, ref y);
+            fusionEdit.armor = FusionToggle("外层护甲", fusionEdit.armor, ref y);
+            FusionText("ice", "附着冰（0或1）", fusionPieceText, ref y);
+            bool directional = fusionEdit.kind == "soda" || fusionEdit.kind == "cannon";
+            bool chargeable = new[] { "producer", "cannon", "vine", "assistant", "reward" }.Contains(fusionEdit.kind);
+            if (directional) fusionEdit.direction = FusionChoice("作用方向", fusionEdit.direction, new[] { "up", "right", "down", "left" }, new[] { "↑", "→", "↓", "←" }, ref y);
+            if (chargeable) fusionEdit.activationMode = FusionChoice("充能触发", fusionEdit.activationMode, new[] { "direct", "neighbor", "either" }, new[] { "直击", "旁消", "两者" }, ref y);
+            if (fusionEdit.kind == "battery")
+            {
+                GUI.Label(new Rect(0, y, 280, 43), "电池由真实目标收集充能。\n直击与普通旁消不为电池充能。", small); y += 50;
+                fusionEdit.autoActivate = FusionToggle("充满后立即触发关联工具", fusionEdit.autoActivate, ref y);
+            }
+            if (FusionRules.IsDevice(fusionEdit.kind) || fusionEdit.kind == "basket" || fusionEdit.kind == "snowball" || fusionEdit.kind == "snowdrift" || fusionEdit.kind == "strawberry")
+                for (int i = 0; i < FusionPieceNumbers.GetLength(0); i++) if (FusionNumberRelevant(fusionEdit.kind, FusionPieceNumbers[i, 0])) FusionText(FusionPieceNumbers[i, 0], FusionPieceNumbers[i, 1], fusionPieceText, ref y);
+            FusionText("group", "共享组（花藤 / 连锁）", fusionPieceText, ref y);
+            FusionText("network", "来源网络（防自产循环）", fusionPieceText, ref y);
+            FusionText("links", "关联对象标识（逗号分隔）", fusionPieceText, ref y);
+            if (Btn(new Rect(0, y, 280, 29), "在棋盘上添加 / 取消关联")) { FinishBoardGesture(); toolMode = 3; SetStatus("保持当前源对象，点击目标添加或取消关联。"); } y += 39;
+            if (fusionEdit.kind == "gate") fusionEdit.condition = FusionChoice("关联完成条件", fusionEdit.condition, new[] { "all", "any" }, new[] { "全部", "任一" }, ref y);
+            if (fusionEdit.kind == "battery") FusionText("eligibleGoals", "充能目标 fish / toy / jelly（空为全部）", fusionPieceText, ref y);
+            if (fusionEdit.kind == "reward") FusionText("rewards", "奖励顺序 blast / assistant / activate", fusionPieceText, ref y);
+            if (fusionEdit.kind == "chest" || fusionEdit.kind == "producer")
+            {
+                FusionText("spawn", "出生格：列,行;列,行（1–9）", fusionPieceText, ref y);
+                FusionText("fallback", "备用出生格（同格式）", fusionPieceText, ref y);
+                fusionShowContents = FusionFold("产物清单（" + fusionContentRows.Count + "）", fusionShowContents, ref y);
+                if (fusionShowContents) DrawFusionContents(ref y);
+            }
+            fusionShowAdvanced = FusionFold("全部机制参数", fusionShowAdvanced, ref y);
+            if (fusionShowAdvanced)
+            {
+                GUI.Label(new Rect(0, y, 280, 43), "共享模板完整字段；只有对应机制\n使用这些参数，不改变对象类型。", small); y += 50;
+                if (!directional) fusionEdit.direction = FusionChoice("模板方向", fusionEdit.direction, new[] { "up", "right", "down", "left" }, new[] { "↑", "→", "↓", "←" }, ref y);
+                if (!chargeable) fusionEdit.activationMode = FusionChoice("模板触发方式", fusionEdit.activationMode, new[] { "direct", "neighbor", "either" }, new[] { "直击", "旁消", "两者" }, ref y);
+                if (fusionEdit.kind != "battery") fusionEdit.autoActivate = FusionToggle("模板自动激活", fusionEdit.autoActivate, ref y);
+                if (fusionEdit.kind != "gate") fusionEdit.condition = FusionChoice("模板关联条件", fusionEdit.condition, new[] { "all", "any" }, new[] { "全部", "任一" }, ref y);
+                for (int i = 0; i < FusionPieceNumbers.GetLength(0); i++) FusionText(FusionPieceNumbers[i, 0], FusionPieceNumbers[i, 1], fusionPieceText, ref y);
+                if (fusionEdit.kind != "battery") FusionText("eligibleGoals", "可充能目标类别", fusionPieceText, ref y);
+                if (fusionEdit.kind != "reward") FusionText("rewards", "奖励序列", fusionPieceText, ref y);
+                if (fusionEdit.kind != "chest" && fusionEdit.kind != "producer") { FusionText("spawn", "出生格（1–9）", fusionPieceText, ref y); FusionText("fallback", "备用格（1–9）", fusionPieceText, ref y); }
+            }
+            if (Btn(new Rect(0, y, 280, 36), "应用对象属性", true)) ApplyFusionObject(); y += 45;
+            if (Btn(new Rect(0, y, 134, 30), "复制为画笔")) CopySelection();
+            if (Btn(new Rect(144, y, 134, 30), "移除对象")) { ApplyResult(CurrentLevel.TryDelete(selectedPiece)); selectedPiece = null; } y += 44;
+        }
+        static bool FusionNumberRelevant(string kind, string field)
+        {
+            if (field == "layers" || field == "hitsPerRing") return kind == "snowball" || kind == "snowdrift";
+            if (field == "ripenNeeds") return kind == "strawberry";
+            if (field == "hitsPerItem" || field == "bonusServings") return kind == "basket";
+            if (field == "batchSize") return kind == "producer";
+            if (field == "range" || field == "damage") return kind == "cannon" || kind == "vine" || kind == "assistant" || kind == "reward";
+            if (field == "stock") return new[] { "producer", "cannon", "assistant", "reward", "basket" }.Contains(kind);
+            return new[] { "producer", "cannon", "vine", "battery", "assistant", "reward" }.Contains(kind);
+        }
+        void DrawFusionContents(ref float y)
+        {
+            GUI.Label(new Rect(0, y, 280, 24), "依次：产物类型 / 收集目标 / 生命", small); y += 30;
+            for (int i = 0; i < fusionContentRows.Count; i++)
+            {
+                var row = fusionContentRows[i];
+                if (Btn(new Rect(0, y, 91, 28), KindName(row.kind))) row.kind = Next(row.kind, FusionContentKinds);
+                if (Btn(new Rect(96, y, 84, 28), GoalLabel(row.goal))) row.goal = Next(row.goal ?? "", FusionGoalsKinds);
+                row.hp = GUI.TextField(new Rect(185, y, 45, 28), row.hp, input);
+                if (Btn(new Rect(236, y, 43, 28), "×")) { fusionContentRows.RemoveAt(i); i--; } y += 35;
+            }
+            if (Btn(new Rect(0, y, 280, 28), "＋ 添加产物")) fusionContentRows.Add(new FusionContentRow { id = "u_" + Guid.NewGuid().ToString("N"), kind = "normal", goal = "", hp = "1" }); y += 39;
+        }
+        static string Next(string value, string[] choices) { int i = Array.IndexOf(choices, value); return choices[(i + 1) % choices.Length]; }
+        void DrawFusionMilestones(ref float y)
+        {
+            for (int i = 0; i < fusionMilestoneRows.Count; i++)
+            {
+                var row = fusionMilestoneRows[i];
+                GUI.Label(new Rect(0, y, 228, 25), "里程碑 " + (i + 1), body);
+                if (Btn(new Rect(238, y, 40, 26), "×")) { fusionMilestoneRows.RemoveAt(i); i--; y += 34; continue; } y += 35;
+                row.threshold = TextField("已收集目标数量", row.threshold, ref y);
+                row.kind = FusionChoice("奖励", row.kind, new[] { "assistant", "activate" }, new[] { "猫爪助手", "激活关联工具" }, ref y);
+                row.count = TextField(row.kind == "activate" ? "最大唤醒数（须覆盖全部链接）" : "助手数量", row.count, ref y);
+                row.links = TextField(row.kind == "activate" ? "关联工具标识（逗号分隔）" : "关联工具（助手请留空）", row.links, ref y);
+            }
+            if (Btn(new Rect(0, y, 280, 28), "＋ 添加收集里程碑")) fusionMilestoneRows.Add(new FusionMilestoneRow { id = "m_" + Guid.NewGuid().ToString("N"), kind = "assistant", threshold = "5", count = "1", links = "" }); y += 38;
+            if (Btn(new Rect(0, y, 280, 31), "应用里程碑", true)) ApplyFusionOptions(); y += 42;
+        }
+        void ApplyFusionOptions()
+        {
+            try
+            {
+                ApplyNumbers(fusionOptions, FusionOptionNumbers, fusionOptionText);
+                fusionOptions.requiredMechanisms = Tokens(fusionOptionText["requiredMechanisms"]); fusionOptions.introducedMechanisms = Tokens(fusionOptionText["introducedMechanisms"]);
+                fusionOptions.milestones = fusionMilestoneRows.Select(m => new FusionMilestoneDefinition { id = m.id, kind = m.kind, threshold = Number(m.threshold, "里程碑门槛"), count = Number(m.count, "奖励数"), links = Tokens(m.links) }).ToArray();
+                ApplyResult(CurrentLevel.TrySetFusionOptions(fusionOptions));
+            }
+            catch (Exception ex) { SetStatus(ex.Message, true); }
+        }
+        void ApplyFusionObject()
+        {
+            try
+            {
+                var next = JsonUtility.FromJson<FusionPieceDefinition>(JsonUtility.ToJson(fusionEdit));
+                next.c = Number(fusionPieceText["c"], "列") - 1; next.r = Number(fusionPieceText["r"], "行") - 1;
+                next.size = Number(fusionPieceText["size"], "边长"); next.hp = Number(fusionPieceText["hp"], "生命"); next.ice = Number(fusionPieceText["ice"], "冰层");
+                ApplyNumbers(next, FusionPieceNumbers, fusionPieceText);
+                next.group = fusionPieceText["group"].Trim(); next.network = fusionPieceText["network"].Trim(); next.links = Tokens(fusionPieceText["links"]);
+                next.eligibleGoals = Tokens(fusionPieceText["eligibleGoals"]); next.rewardSequence = SequenceTokens(fusionPieceText["rewards"]);
+                next.spawnCells = ParseCells(fusionPieceText["spawn"]); next.fallbackCells = ParseCells(fusionPieceText["fallback"]);
+                next.contents = fusionContentRows.Select(c => new FusionContentDefinition { id = c.id, kind = c.kind, goal = c.goal, hp = Number(c.hp, "产物生命") }).ToArray();
+                ApplyResult(CurrentLevel.TryUpdateFusionPiece(selectedPiece, next));
+            }
+            catch (Exception ex) { SetStatus(ex.Message, true); }
+        }
+        void ToggleFusionLink(int c, int r)
+        {
+            var target = CurrentLevel.PieceAt(c, r);
+            if (target == null) return;
+            if (selectedPiece == null || Selected() == null) { selectedPiece = target.Id; LoadInspector(); SetStatus("已选关联源；再点击目标。"); return; }
+            if (target.Id == selectedPiece) { SetStatus("已保留当前源对象；点击其他对象添加或取消关联。"); return; }
+            var source = CurrentLevel.GetFusionPiece(selectedPiece); var links = (source.links ?? Array.Empty<string>()).ToList();
+            if (!links.Remove(target.LegacyId)) links.Add(target.LegacyId);
+            ApplyResult(CurrentLevel.TrySetFusionLinks(selectedPiece, links));
+        }
+        void DrawFusionPiece(LevelEditorPiece piece, Rect rect)
+        {
+            if (fusionTileLabel == null)
+            {
+                fusionTileLabel = new GUIStyle(cellLabel) { fontSize = 14, wordWrap = false };
+                fusionTileBadge = new GUIStyle(center) { fontSize = 12, wordWrap = false }; fusionTileBadge.normal.textColor = Hex(0x263C46);
+            }
+            Color color = piece.Kind == "stone" ? Hex(0x697585) : FusionRules.IsDevice(piece.Kind) ? Hex(0xE6B583) : FusionRules.IsTool(piece.Kind) ? Hex(0xAAA4E0) : piece.IsTarget ? Hex(0x80CDDC) : Hex(0xDDE4D5);
+            Fill(new Rect(rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4), color);
+            GUI.Label(new Rect(rect.x + 2, rect.y + 13, rect.width - 4, rect.height - 32), FusionTileName(piece.Kind), fusionTileLabel);
+            var p = FusionPreview()?.pieces?.FirstOrDefault(v => v != null && v.id == piece.LegacyId);
+            string tag = piece.Armor ? "甲" : piece.Ice > 0 ? "冰" : piece.IsTarget ? "●" : "";
+            if (!string.IsNullOrEmpty(tag)) GUI.Label(new Rect(rect.x + 3, rect.y, rect.width - 6, 20), tag, cellLabel);
+            string badge = p != null && (FusionRules.IsDevice(p.kind) || p.kind == "basket") ? p.initialCharge + "/" + p.threshold + " ·" + p.stock : FusionRules.IsTool(piece.Kind) ? "工具" : piece.Kind == "stone" ? "固定" : piece.Hp.ToString();
+            GUI.Label(new Rect(rect.x + 2, rect.yMax - 19, rect.width - 4, 18), badge, fusionTileBadge);
+        }
+        static string FusionTileName(string kind)
+        {
+            switch (kind)
+            {
+                case "line_h": return "横激光"; case "line_v": return "纵激光"; case "cross": return "十字光";
+                case "producer": return "生产器"; case "battery": return "电池"; case "reward": return "奖励器";
+                case "vine": return "花藤"; case "link": return "链接";
+                default: return LevelEditorRuleCatalog.FusionKindName(kind);
+            }
+        }
+        void DrawFusionOverlays()
+        {
+            var definition = FusionPreview(); if (definition?.pieces == null) return;
+            var pieces = definition.pieces.Where(p => p != null && p.size >= 1 && p.size <= 9 && p.c >= 0 && p.r >= 0 && p.c <= 9 - p.size && p.r <= 9 - p.size).ToArray();
+            foreach (var source in pieces)
+            {
+                foreach (var id in source.links ?? Array.Empty<string>())
+                {
+                    var target = pieces.FirstOrDefault(p => p.id == id); if (target == null) continue;
+                    DrawFusionLine(CellRect(source.c, source.r, source.size).center, CellRect(target.c, target.r, target.size).center, source.id == selectedPiece ? Accent : new Color(.2f, .55f, .7f, .65f), source.id == selectedPiece ? 3 : 1.5f);
+                }
+            }
+            foreach (var group in pieces.Where(p => !string.IsNullOrWhiteSpace(p.group)).GroupBy(p => p.group))
+            {
+                var nodes = group.OrderBy(p => p.r).ThenBy(p => p.c).ToArray();
+                for (int i = 1; i < nodes.Length; i++) DrawFusionLine(CellRect(nodes[i - 1].c, nodes[i - 1].r, nodes[i - 1].size).center, CellRect(nodes[i].c, nodes[i].r, nodes[i].size).center, new Color(.3f, .8f, .35f, .7f), 2);
+            }
+            var selected = pieces.FirstOrDefault(p => p.id == selectedPiece); if (selected == null) return;
+            foreach (var cell in selected.spawnCells ?? Array.Empty<Vector2Int>()) if (cell.x >= 0 && cell.x < 9 && cell.y >= 0 && cell.y < 9) Border(CellRect(cell.x, cell.y, 1), Accent, 3);
+            foreach (var cell in selected.fallbackCells ?? Array.Empty<Vector2Int>()) if (cell.x >= 0 && cell.x < 9 && cell.y >= 0 && cell.y < 9) Border(CellRect(cell.x, cell.y, 1), Amber, 2);
+            if (selected.kind == "cannon" || selected.kind == "soda" || selected.kind == "line_h" || selected.kind == "line_v" || selected.kind == "cross" || selected.kind == "bomb")
+            {
+                foreach (var cell in FusionEffectCells(selected, pieces, definition)) Border(CellRect(cell.x, cell.y, 1), new Color(1f, .7f, .1f, .9f), 2);
+            }
+        }
+        static IEnumerable<Vector2Int> FusionEffectCells(FusionPieceDefinition source, FusionPieceDefinition[] pieces, FusionLevelDefinition definition)
+        {
+            if (source.kind == "bomb")
+            {
+                for (int y = source.r - 1; y <= source.r + 1; y++) for (int x = source.c - 1; x <= source.c + 1; x++) if (x >= 0 && x < 9 && y >= 0 && y < 9) yield return new Vector2Int(x, y);
+                yield break;
+            }
+            Vector2Int[] directions = source.kind == "line_h" ? new[] { Vector2Int.left, Vector2Int.right } : source.kind == "line_v" ? new[] { Vector2Int.up, Vector2Int.down } : source.kind == "cross" ? new[] { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down } : new[] { source.direction == "left" ? Vector2Int.left : source.direction == "right" ? Vector2Int.right : source.direction == "up" ? Vector2Int.down : Vector2Int.up };
+            foreach (var direction in directions) for (int distance = 1; distance <= (source.kind == "cannon" ? source.range : 9); distance++)
+            {
+                var cell = new Vector2Int(source.c, source.r) + direction * distance;
+                if (cell.x < 0 || cell.x >= 9 || cell.y < 0 || cell.y >= 9) break;
+                yield return cell;
+                var blocker = pieces.FirstOrDefault(p => cell.x >= p.c && cell.x < p.c + p.size && cell.y >= p.r && cell.y < p.r + p.size);
+                if (blocker != null)
+                {
+                    bool waitingTool = pieces.Any(p => (p.kind == "battery" || p.kind == "reward") && (p.links ?? Array.Empty<string>()).Contains(blocker.id))
+                        || (definition.milestones ?? Array.Empty<FusionMilestoneDefinition>()).Any(m => m != null && m.kind == "activate" && (m.links ?? Array.Empty<string>()).Contains(blocker.id));
+                    bool barrier = waitingTool || blocker.armor || blocker.ice > 0 || new[] { "stone", "gate", "armor", "ice", "snowball", "snowdrift", "strawberry" }.Contains(blocker.kind)
+                        || source.kind == "cannon" && (blocker.kind == "chest" || blocker.kind == "basket");
+                    barrier |= blocker.kind == "rear" && direction != Vector2Int.up;
+                    if (barrier) break;
+                }
+            }
+        }
+        static void DrawFusionLine(Vector2 from, Vector2 to, Color color, float thickness)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            var matrix = GUI.matrix; var old = GUI.color; Vector2 delta = to - from;
+            GUIUtility.RotateAroundPivot(Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg, from); GUI.color = color;
+            GUI.DrawTexture(new Rect(from.x, from.y - thickness * .5f, delta.magnitude, thickness), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(from.x + delta.magnitude - 7, from.y - 4, 7, 8), Texture2D.whiteTexture);
+            GUI.matrix = matrix; GUI.color = old;
+        }
+        void DrawFusionSamples()
+        {
+            Fill(new Rect(0, 0, width, height), new Color(0, 0, 0, .65f));
+            var box = new Rect((width - 800) / 2, (height - 620) / 2, 800, 620); Fill(box, Panel); Border(box, Line, 1);
+            GUI.Label(new Rect(box.x + 24, box.y + 18, 620, 34), "融合样板 · 添加为独立新关", heading);
+            if (Btn(new Rect(box.xMax - 104, box.y + 18, 80, 30), "关闭")) showFusionSamples = false;
+            if (fusionSamples == null) fusionSamples = FusionSamples.CreateDefinitions();
+            var samples = fusionSamples;
+            fusionSampleScroll = GUI.BeginScrollView(new Rect(box.x + 20, box.y + 65, 760, 525), fusionSampleScroll, new Rect(0, 0, 735, samples.Length * 105));
+            for (int i = 0; i < samples.Length; i++)
+            {
+                var sample = samples[i]; float y = i * 105;
+                GUI.Label(new Rect(4, y + 3, 575, 28), sample.name + "  ·  " + sample.moves + "步", body);
+                GUI.Label(new Rect(4, y + 37, 575, 50), sample.focus, small);
+                if (Btn(new Rect(603, y + 17, 120, 38), "添加样板", true)) ImportFusionSample(sample.id);
+                Fill(new Rect(4, y + 95, 720, 1), Line);
+            }
+            GUI.EndScrollView();
+        }
+    }
+}

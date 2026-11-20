@@ -1,0 +1,15 @@
+using System;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ string campaignRoute="";int alphabetUnlocked;uint alphabetIntroductions;int legacyRouteUnlocked;
+ public int AlphabetUnlocked=>Math.Min(AlphabetCampaign.Count,Math.Max(0,alphabetUnlocked));
+ public bool AlphabetCompleted=>AlphabetUnlocked>=AlphabetCampaign.Count;
+ public bool HasAlphabetIntro(int id)=>id>=1&&id<=12&&(alphabetIntroductions&(1u<<(id-1)))!=0;
+ public bool EnsureAlphabetRoute(){if(campaignRoute==AlphabetCampaign.Id)return true;if(!storageHealthy)return false;string old=Serialize();legacyRouteUnlocked=UnlockedLevel;campaignRoute=AlphabetCampaign.Id;alphabetUnlocked=0;alphabetIntroductions=0;try{SaveInternal();return true;}catch(Exception ex){Restore(old);storageHealthy=false;UnityEngine.Debug.LogWarning("Campaign migration could not be saved: "+ex.Message);return false;}}
+ public bool MarkAlphabetIntro(int id){if(id<1||id>12||!storageHealthy)return false;if(HasAlphabetIntro(id))return true;string previous=Serialize();alphabetIntroductions|=1u<<(id-1);try{SaveInternal();return true;}catch(Exception ex){Restore(previous);storageHealthy=false;UnityEngine.Debug.LogWarning("Introduction could not be saved: "+ex.Message);return false;}}
+ public bool CommitAlphabetWin(string resultKey,int level,int score=0){if(level<0||level>=AlphabetCampaign.Count||!ValidKey(resultKey))return false;string key=resultKey+"/base";if(committed.Contains(key))return true;if(!storageHealthy)return false;
+  score=Math.Max(0,Math.Min(ScoreRules.Cap,score));bool firstClear=!committed.Contains("economy-v67/first/"+level)&&bestScores[level]<=0;int reward=CampaignWinCoins(level,score);string previous=Serialize();int oldBadges=Badges;if(Coins>int.MaxValue-reward||Badges==int.MaxValue)return false;Coins+=reward;RecordStreakProgressWin(resultKey,level);ApplyEconomyWin(level);bestScores[level]=Math.Max(bestScores[level],score);Badges++;alphabetUnlocked=Math.Max(alphabetUnlocked,Math.Min(level+1,AlphabetCampaign.Count));committed.Add(key);
+  try{CommitCampaignLeague(level,firstClear,oldBadges);SaveInternal();NotifyChanged();return true;}catch(Exception ex){Restore(previous);storageHealthy=false;UnityEngine.Debug.LogWarning("Alphabet reward could not be saved: "+ex.Message);return false;}
+ }
+}
+}

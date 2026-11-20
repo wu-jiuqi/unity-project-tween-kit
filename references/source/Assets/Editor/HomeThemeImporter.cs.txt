@@ -1,0 +1,4 @@
+using UnityEditor;using UnityEngine;
+public sealed class HomeThemeImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/HomeV7/"))return;var texture=(TextureImporter)assetImporter;texture.textureType=TextureImporterType.Sprite;texture.spriteImportMode=SpriteImportMode.Single;texture.alphaIsTransparency=true;texture.mipmapEnabled=false;texture.textureCompression=TextureImporterCompression.Uncompressed;texture.maxTextureSize=512;texture.filterMode=FilterMode.Bilinear;var settings=new TextureImporterSettings();texture.ReadTextureSettings(settings);settings.spriteMeshType=SpriteMeshType.FullRect;settings.spriteAlignment=9;settings.spritePivot=new Vector2(.5f,.5f);texture.SetTextureSettings(settings);}
+}

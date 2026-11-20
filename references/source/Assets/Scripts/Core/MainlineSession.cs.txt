@@ -1,0 +1,69 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public bool IsMainline=>CurrentLevel!=null&&CurrentLevel.mainline;
+ public MainlineCanvas MainlinePainting {get;private set;}
+ public readonly List<BrickBody> MainlineBricks=new List<BrickBody>();
+ readonly Queue<BrickBody> mainlineQueue=new Queue<BrickBody>();
+ readonly HashSet<int> mainlineActivated=new HashSet<int>();
+ readonly Dictionary<int,int> coreHits=new Dictionary<int,int>();
+ public int MainlineActivations {get;private set;}
+ public int DirectHits {get;private set;}
+ public int CoreCharge(BrickBody b)=>coreHits.TryGetValue(b.Id,out int n)?n:0;
+ void ClearMainline(){MainlineBricks.Clear();mainlineQueue.Clear();mainlineActivated.Clear();coreHits.Clear();MainlinePainting=null;MainlineActivations=DirectHits=0;}
+ void StartMainline(){if(!IsMainline)return;var go=new GameObject("Persistent mapped artwork");go.transform.SetParent(world,false);MainlinePainting=go.AddComponent<MainlineCanvas>();MainlinePainting.Initialize(this);foreach(var b in MainlineBricks)b.gameObject.AddComponent<MainlineBrickView>().Initialize(this,b);}
+ void HitMainline(BrickBody brick,BallBody ball,Vector2 point){
+  long key=((long)brick.Id<<32)|(uint)ball.Id;
+  if(juiceContacts.TryGetValue(key,out float t)&&simulationClock-t<MainlineRules.Current.contactCooldown)return;
+  juiceContacts[key]=simulationClock;
+  if(brick.Definition.kind==BrickKind.Stone)return;
+  // Every accepted contact changes health, shell, or a core's finite charge state.
+  ball.HeatHits++;DirectHits++;JuicePeak=Mathf.Max(JuicePeak,ball.HeatHits);
+  int tier=ball.HeatHits>=MainlineRules.Current.heatBlazingHits?2:ball.HeatHits>=MainlineRules.Current.heatWarmHits?1:0;
+  if(ball.HeatHits==MainlineRules.Current.heatWarmHits||ball.HeatHits==MainlineRules.Current.heatBlazingHits){JuiceTriggers++;JuiceView.Callout(point,tier==2?"BLAZING!":"WARM!",JuiceGardenView.Gold);}
+  rules.BeginDamageChain();
+  try {
+   if(brick.Definition.kind==BrickKind.Core){
+    SoundService.Play("core_charge");int charge=CoreCharge(brick)+1;coreHits[brick.Id]=charge;brick.Damage(Mathf.Max(1,MainlineRules.Current.coreDirectHits-charge));HitCount++;noDamageTime=0;
+    JuiceView.Burst(point,1,.8f);if(charge>=MainlineRules.Current.coreDirectHits){DamageMainline(brick,99,false);}
+   }else {
+    DamageMainline(brick,1+tier,true);
+    if(brick.Definition.kind==BrickKind.Resonance){SoundService.Play("resonance");MainlineFrameFx.Play(this,MainlinePainting.transform,"effects",0,point,1.2f);foreach(var b in MainlineBricks)if(b!=brick&&b.Alive&&b.Definition.kind==BrickKind.Resonance&&b.Definition.juiceGroup==brick.Definition.juiceGroup){JuiceView.Tether(brick.transform.position,b.transform.position,JuiceGardenView.Lilac);DamageMainline(b,MainlineRules.Current.resonanceDamage,false);}}
+   }
+   DrainMainline();
+  }finally{rules.CompleteDamageChain();}
+  changed=true;
+ }
+ public bool DamageMainline(BrickBody b,int amount,bool direct){
+  if(!IsMainline||!IsPlaying||IsPaused||b==null||!b.Alive||amount<1||b.Definition.kind==BrickKind.Stone)return false;
+  if(b.Definition.kind==BrickKind.Core&&CoreCharge(b)<MainlineRules.Current.coreDirectHits)return false; // indirect energy cannot charge or detonate a core
+  if(b.ShellIntact){SoundService.Play(b.Definition.kind==BrickKind.Frost?"ice_break":"armor_break");b.BreakShell();MainlineFrameFx.Play(this,MainlinePainting.transform,"devices",3,b.transform.position,.9f,b.Definition.kind==BrickKind.Frost?4:1,b.Definition.kind==BrickKind.Frost?5:2);HitCount++;noDamageTime=0;CombatFeel?.Power(b.transform.position,.04f);JuiceView?.Impact(b.transform.position,0,1.15f,.04f);EmitFeedback(b.transform.position,"hit",b.Tint);return true;}
+  if(!rules.DamageTarget(b.Id,amount,out bool dead))return false;
+  HitCount++;noDamageTime=0;changed=true;
+  if(!dead){b.Damage(rules.Health(b.Id));EmitFeedback(b.transform.position,"hit",b.Tint);return true;}
+  BreakCount++;var p=b.transform.position;b.Remove(); // collider first, then paint, then propagation
+  if(b.Definition.kind==BrickKind.Guide)MainlineFrameFx.Play(this,MainlinePainting.transform,"devices",0,p,.9f,3);
+  if(b.Definition.kind==BrickKind.Seal)MainlineFrameFx.Play(this,MainlinePainting.transform,"actors",3,p,.9f,1);
+  MainlinePainting?.Reveal(b);fx.PlayJelly(b);EmitFeedback(p,"break",b.Tint);
+  var kind=b.Definition.kind;
+  if(kind==BrickKind.Bomb||kind==BrickKind.Rainbow||kind==BrickKind.Switch||kind==BrickKind.Core)mainlineQueue.Enqueue(b);
+  return true;
+ }
+ void DrainMainline(){
+  while(mainlineQueue.Count>0){var source=mainlineQueue.Dequeue();
+   if(!mainlineActivated.Add(source.Id))throw new System.InvalidOperationException("Duplicate mainline death activation");
+   MainlineActivations++;var d=source.Definition;SoundService.Play(d.kind==BrickKind.Core?"core_burst":d.kind==BrickKind.Switch?"key_unlock":d.kind==BrickKind.Rainbow?"rainbow_sweep":"bomb");MainlineFrameFx.Play(this,MainlinePainting.transform,d.kind==BrickKind.Bomb||d.kind==BrickKind.Rainbow?"devices":"effects",d.kind==BrickKind.Core?1:d.kind==BrickKind.Switch?2:d.kind==BrickKind.Bomb?1:2,source.transform.position,d.kind==BrickKind.Core?2.4f:1.3f,d.kind==BrickKind.Bomb||d.kind==BrickKind.Rainbow?3:0);var p=(Vector2)source.transform.position;
+   CombatFeel?.Power(p,MainlineRules.Current.hitStop);JuiceView.Impact(p,d.kind==BrickKind.Core?1:2,d.kind==BrickKind.Core?2.3f:1.45f,MainlineRules.Current.hitStop);
+   foreach(var target in MainlineBricks){if(!target.Alive)continue;var q=target.Definition;int dr=Mathf.Abs(q.referenceRow-d.referenceRow),dc=Mathf.Abs(q.referenceCol-d.referenceCol);
+    if(d.kind==BrickKind.Switch){if(q.juiceGroup==d.juiceGroup&&q.kind==BrickKind.Seal){JuiceView.Tether(p,target.transform.position,JuiceGardenView.Mint);DamageMainline(target,99,false);}continue;}
+    if(d.kind==BrickKind.Rainbow){if(d.axis==0?dr==0:dc==0){JuiceView.Tether(p,target.transform.position,JuiceGardenView.Gold);DamageMainline(target,MainlineRules.Current.chainDamage,false);}continue;}
+    int radius=d.kind==BrickKind.Core?MainlineRules.Current.coreRadius:MainlineRules.Current.bombRadius;
+    if(dr<=radius&&dc<=radius){JuiceView.Tether(p,target.transform.position,JuiceGardenView.Coral);DamageMainline(target,MainlineRules.Current.chainDamage,false);}
+   }
+   // Neighboring ice shells thaw predictably, even if outside the blast footprint.
+   foreach(var target in MainlineBricks)if(target.Alive&&target.ShellIntact&&target.Definition.kind==BrickKind.Frost&&Vector2.Distance(target.transform.position,p)<=MainlineRules.Current.thawDistance){target.BreakShell();JuiceView.Tether(p,target.transform.position,JuiceGardenView.Mint);}
+  }
+ }
+}
+}

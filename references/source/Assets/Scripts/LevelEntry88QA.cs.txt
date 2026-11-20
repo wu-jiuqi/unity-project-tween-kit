@@ -1,0 +1,45 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using BounceGarden;
+using UnityEngine;
+// Exercise the visible loading handoff, including cancellation and a stopped visual clock.
+public sealed class LevelEntry88QA:MonoBehaviour {
+ [Serializable]class Result{public int levels,failures,errors;public float maxEntrySeconds,maxFrameMs;public List<string> messages=new List<string>();}
+ Result result=new Result();string dir;bool entering;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(RuntimeQA.IsIsolated&&Environment.GetCommandLineArgs().Contains("--level-entry-qa"))new GameObject("Level entry regression").AddComponent<LevelEntry88QA>();}
+ void Update(){if(entering)result.maxFrameMs=Mathf.Max(result.maxFrameMs,Time.unscaledDeltaTime*1000);}
+ void Check(bool ok,string message){if(!ok){result.failures++;result.messages.Add(message);}File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+message+"\n");}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Exception||t==LogType.Error){result.errors++;result.messages.Add(m);}};
+  Application.targetFrameRate=60;QualitySettings.vSyncCount=0;yield return new WaitForSecondsRealtime(3);
+  app=FindFirstObjectByType<AppUI>();
+  // Returning during a partially constructed board must dispose that generation.
+  app.QAStartLevel(0);float cancelDeadline=Time.realtimeSinceStartup+5;
+  while(!app.Session.IsPlaying&&Time.realtimeSinceStartup<cancelDeadline)yield return null;
+  Check(app.Session.IsPlaying&&app.GetComponentInChildren<LoadingPresentation>()!=null,"cancellation fixture reaches partial board construction");
+  app.QANavigate("home");yield return null;yield return null;
+  Check(app.CurrentPage=="home"&&!app.Session.IsPlaying&&app.GetComponentInChildren<LoadingPresentation>()==null,"cancel entry returns home without a live partial board");
+  for(int index=0;index<OpeningCampaign.Count;index++){
+   app.QAStartLevel(index);float start=Time.realtimeSinceStartup,deadline=start+12;entering=true;int frames=0;
+   while(Time.realtimeSinceStartup<deadline){
+    var loading=app.GetComponentInChildren<LoadingPresentation>();
+    // A disabled presentation used to make the reveal wait depend on an Update that never ran.
+    if(index==0&&loading!=null)loading.enabled=false;
+    if(loading==null&&app.CurrentPage=="battle"&&app.Session.LevelIndex==index)break;
+    frames++;yield return null;
+   }
+   entering=false;float duration=Time.realtimeSinceStartup-start;result.maxEntrySeconds=Mathf.Max(result.maxEntrySeconds,duration);
+   Check(app.CurrentPage=="battle"&&app.Session.LevelIndex==index&&app.GetComponentInChildren<LoadingPresentation>()==null,"level "+(index+1)+" loading handoff "+duration.ToString("F2")+"s frames="+frames);
+   Check(app.Session.ChainOccupiedCells()>0,"level "+(index+1)+" board exists");
+   for(int n=0;n<90;n++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();if(n>8&&!app.AlphabetIntroActive&&!app.Session.IsPaused)break;yield return null;}
+   app.Session.QAIgnoreFocusLoss=true;Check(!app.Session.IsPaused,"level "+(index+1)+" accepts gameplay after introductions");result.levels++;
+   app.QANavigate("home");yield return null;
+   if(result.failures>0)break;
+  }
+  File.WriteAllText(dir+"/result.json",JsonUtility.ToJson(result,true));Application.Quit(result.failures+result.errors==0?0:3);
+ }
+}

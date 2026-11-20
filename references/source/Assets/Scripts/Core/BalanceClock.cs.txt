@@ -1,0 +1,4 @@
+namespace BounceGarden {
+// Enabled only by the isolated batch runner. Production updates remain unchanged.
+public static class BalanceClock {public static bool Active {get;internal set;}}
+}

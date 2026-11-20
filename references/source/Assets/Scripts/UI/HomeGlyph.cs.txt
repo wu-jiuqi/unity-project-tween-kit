@@ -1,0 +1,13 @@
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+// A small native UI icon, independent of any reference-image crop.
+public sealed class HomeGlyph:MaskableGraphic {
+ protected override void OnPopulateMesh(VertexHelper mesh){mesh.Clear();var size=rectTransform.rect.size;float unit=Mathf.Min(size.x,size.y);Color ink=new Color32(60,43,28,255),cream=new Color32(255,250,226,255);
+  Triangle(mesh,new Vector2(-.59f,.02f)*unit,new Vector2(0,.57f)*unit,new Vector2(.59f,.02f)*unit,ink);
+  Quad(mesh,-.39f,-.45f,.39f,.12f,unit,ink);Triangle(mesh,new Vector2(-.48f,.04f)*unit,new Vector2(0,.48f)*unit,new Vector2(.48f,.04f)*unit,cream);Quad(mesh,-.31f,-.37f,.31f,.13f,unit,cream);Quad(mesh,-.105f,-.37f,.105f,-.07f,unit,new Color32(13,131,229,255));
+ }
+ static void Triangle(VertexHelper m,Vector2 a,Vector2 b,Vector2 c,Color color){int n=m.currentVertCount;m.AddVert(a,color,Vector2.zero);m.AddVert(b,color,Vector2.zero);m.AddVert(c,color,Vector2.zero);m.AddTriangle(n,n+1,n+2);}
+ static void Quad(VertexHelper m,float l,float b,float r,float t,float unit,Color color){int n=m.currentVertCount;m.AddVert(new Vector3(l,b)*unit,color,Vector2.zero);m.AddVert(new Vector3(l,t)*unit,color,Vector2.zero);m.AddVert(new Vector3(r,t)*unit,color,Vector2.zero);m.AddVert(new Vector3(r,b)*unit,color,Vector2.zero);m.AddTriangle(n,n+1,n+2);m.AddTriangle(n,n+2,n+3);}
+}
+}

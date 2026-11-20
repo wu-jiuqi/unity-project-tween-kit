@@ -1,0 +1,5 @@
+using UnityEditor;
+using UnityEngine;
+public sealed class PaintingImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/PaintingTrial/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.alphaSource=TextureImporterAlphaSource.FromInput;t.alphaIsTransparency=true;t.isReadable=false;t.mipmapEnabled=false;t.npotScale=TextureImporterNPOTScale.None;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=assetPath.EndsWith("fox_pixel.png")?FilterMode.Point:FilterMode.Bilinear;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.Uncompressed;}
+}

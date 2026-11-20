@@ -1,0 +1,124 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public bool RefillActive=>SevenSpecialActive;
+ public int RefillSettledGroups=>refillSettledGroups.Count;
+ public int RefillLastSettledGroup {get;private set;}
+ public int RefillGapSnapshot {get;private set;}
+ public int RefillShots {get;private set;}
+ public int RefillCleared {get;private set;}
+ public int RefillRemainder {get;private set;}
+ public int RefillGenerated {get;private set;}
+ public int RefillOrdinaryBatches {get;private set;}
+ public int RefillFullBatches {get;private set;}
+ public int RefillLowBoardBatches {get;private set;}
+ public int RefillDirectLowBatches {get;private set;}
+ // Copper is directly breakable even though SevenTerrain excludes it from
+ // special-brick replacement. Count objects, never HP or occupied cells.
+ public int RefillDirectBreakables=>CollectionBricks.Count(b=>b.Alive&&!RefillProtected(b)&&(!SevenTerrain(b)||OpeningCopperBrick(b))&&b.GetComponent<ChainTileVisibility>()?.Hidden!=true)+ChainTools.Count(t=>!t.Consumed&&!t.Waiting&&t.View!=null&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true);
+ int refillPreviousDirect=-1;bool refillDirectArmed=true,refillDirectRequested;
+ public int RefillPending=>refillRemaining;
+ public bool RefillPendingSettlement=>RefillActive&&(refillRemaining>0||CollectionBricks.Any(b=>b.Alive&&RefillProtected(b)));
+ public bool RefillFreezeBalls=>RefillActive&&refillFreeze;
+ int refillRemaining;
+ readonly HashSet<int> refillSettledGroups=new HashSet<int>();
+ bool refillFull,refillEmptyEdge,refillFreeze;bool refillLowBoardArmed=true;
+ float refillNext;
+ System.Random refillRandom;
+ readonly Dictionary<BallBody,Vector2> refillHeldBalls=new Dictionary<BallBody,Vector2>();
+ internal static bool RefillProtected(BrickBody b)=>b!=null&&b.GetComponent<ChainGridPiece>()?.RefillProtected==true;
+ void ClearRefill80(){refillRemaining=0;refillSettledGroups.Clear();RefillLastSettledGroup=0;refillFull=refillEmptyEdge=refillFreeze=false;refillLowBoardArmed=true;refillNext=0;refillRandom=null;refillHeldBalls.Clear();refillPreviousDirect=-1;refillDirectArmed=true;refillDirectRequested=false;RefillDirectLowBatches=0;RefillGapSnapshot=RefillShots=RefillCleared=RefillRemainder=RefillGenerated=RefillOrdinaryBatches=RefillFullBatches=RefillLowBoardBatches=0;}
+ internal void RecordRefillRemoval(BrickBody b){if(RefillActive&&!SevenTerrain(b)){RefillCleared++;refillEmptyEdge=true;}}
+ void RecordRefillToolRemoval(){if(RefillActive){RefillCleared++;refillEmptyEdge=true;}}
+ void RefillBeforeVolley(){
+  if(!RefillActive)return;
+  if(CollectionGoalEarned){FinishEarnedCollectionSupply();return;}
+  RefillShots++;
+ }
+ void RefillAfterVolley(int groupId){
+  if(!RefillActive||!refillSettledGroups.Add(groupId))return;
+  RefillLastSettledGroup=groupId;
+  // Ratings have just been delivered/queued for this exact group. Other live
+  // groups keep flying; no global all-balls-idle gate is imposed here.
+  BeginOrdinaryRefill();
+ }
+ void BeginOrdinaryRefill(){
+  if(CollectionGoalEarned){FinishEarnedCollectionSupply();return;}
+  RefillOrdinaryBatches++;
+  // Count all current vacant cells, including gaps from earlier cycles. Pending
+  // arrivals already reserve capacity, so overlapping batches cannot double-book it.
+  RefillGapSnapshot=Mathf.Max(0,81-ChainOccupiedCells()-refillRemaining);
+  int allowance=RefillGapSnapshot*2/3;RefillCleared=0;RefillRemainder=0;
+  // Existing batches keep their frozen allowance even during overlapping volleys.
+  refillRemaining+=allowance;refillNext=Mathf.Min(refillNext,simulationClock);
+  if(refillRemaining>0)ScheduleChainGravity();changed=true;
+ }
+ void BeginFullRefill(){
+  if(!RefillActive)return;
+  if(CollectionGoalEarned){FinishEarnedCollectionSupply();return;}
+  RefillFullBatches++;refillFull=true;refillEmptyEdge=false;
+  RefillCleared=RefillRemainder=0;
+  // A bounded snapshot; supply can pass fixed ceilings to fill any free cell.
+  refillRemaining=Mathf.Max(0,81-ChainOccupiedCells());refillNext=simulationClock;
+  ScheduleChainGravity();changed=true;
+ }
+ bool RefillSupplyReady=>RefillActive&&!CollectionGoalEarned&&refillRemaining>0&&simulationClock+.00001f>=refillNext&&!SevenFreezeBoard;
+ void RefillSupplyCommitted(ChainGridPiece piece){
+  refillRemaining=Mathf.Max(0,refillRemaining-1);RefillGenerated++;
+  refillNext=simulationClock+(refillFull?.035f:.06f);
+  piece.RefillProtected=true;
+  var view=piece.GetComponent<RefillArrival80>();if(view==null)view=piece.gameObject.AddComponent<RefillArrival80>();view.Initialize(piece);
+ }
+ void RefillSupplyBlocked(){refillRemaining=0;refillFull=false;changed=true;}
+ void TickRefill80(float dt){
+  if(!RefillActive)return;
+  FinishEarnedCollectionSupply();
+  int direct=RefillDirectBreakables;
+  if(direct>5){refillDirectArmed=true;refillDirectRequested=false;}
+  // Dense fixed mechanisms can cap the total below six. A later real removal
+  // must still trigger again after the prior batch, without retriggering at rest.
+  if(direct<refillPreviousDirect&&!RefillPendingSettlement)refillDirectArmed=true;
+  if(direct<=5&&(refillPreviousDirect>=0||CollectionBricks.Any(b=>b.Alive)||ChainTools.Any(t=>!t.Consumed)))refillDirectRequested=true;
+  refillPreviousDirect=direct;
+  if(CollectionGoalEarned)refillDirectRequested=false;
+  // Reserve the normal allowance immediately, even during a cast. Existing
+  // supply already covers this emergency; do not duplicate its reservation.
+  if(!CollectionGoalEarned&&refillDirectArmed&&refillDirectRequested&&direct<=5){
+   refillDirectArmed=false;refillDirectRequested=false;
+   if(!RefillPendingSettlement){RefillDirectLowBatches++;BeginOrdinaryRefill();}
+  }
+  if(ChainOccupiedCells()>=ChainGridRules.Columns*ChainGridRules.Rows/3)refillLowBoardArmed=true;
+  bool freeze=sevenRefillBarrier||sevenWaiting.Count>0||refillFreeze&&(SevenSettlementPending||SevenAnimationsPending);
+  SetRefillBallFreeze(freeze);
+  if(freeze){foreach(var b in active.Values)b.ChainBornAt+=dt;nextSpawnTime+=dt;}
+  if(refillRemaining>0&&RefillSupplyReady)ScheduleChainGravity();
+  if(refillRemaining==0)refillFull=false;
+  if(!CollectionGoalEarned&&refillEmptyEdge&&!RefillPendingSettlement&&!SevenSettlementPending&&!SevenAnimationsPending&&!SevenFreezeBoard){
+   refillEmptyEdge=false;if(refillLowBoardArmed&&ChainOccupiedCells()<ChainGridRules.Columns*ChainGridRules.Rows/3){refillLowBoardArmed=false;RefillLowBoardBatches++;BeginOrdinaryRefill();}
+  }
+  // Every group closes in ReturnChainBall, including recall, expiry and the
+  // last available move. Neither another input nor global idle is required.
+ }
+ void SetRefillBallFreeze(bool freeze){
+  if(freeze&&!refillFreeze){queuedShot=null;ClearBufferedChainShot();SetAim(null);}
+  refillFreeze=freeze;
+  foreach(var ball in active.Values){
+   if(freeze){if(!refillHeldBalls.ContainsKey(ball))refillHeldBalls.Add(ball,ball.Body.linearVelocity);ball.Body.simulated=false;ball.PauseTrail(true);}
+   else if(refillHeldBalls.TryGetValue(ball,out var velocity)){ball.Body.simulated=!IsPaused;ball.Body.linearVelocity=velocity;ball.PauseTrail(IsPaused);}
+  }
+  if(!freeze)refillHeldBalls.Clear();
+ }
+}
+
+// Apply opacity after ordinary/chapter face updates; logical protection is owned by the grid.
+[DefaultExecutionOrder(10000)]
+public sealed class RefillArrival80:MonoBehaviour {
+ ChainGridPiece piece;SpriteRenderer[] sprites;Color[] colors;bool applied;
+ public void Initialize(ChainGridPiece p){piece=p;sprites=GetComponentsInChildren<SpriteRenderer>(true);colors=sprites.Select(s=>s.color).ToArray();applied=false;Refresh();}
+ public void Refresh(){if(piece==null||sprites==null)return;bool protect=piece.RefillProtected;for(int i=0;i<sprites.Length;i++)if(sprites[i]!=null){var c=sprites[i].color;c.a=protect?colors[i].a*.42f:colors[i].a;sprites[i].color=c;}applied=protect;GetComponent<ChainTileVisibility>()?.Refresh();}
+ void LateUpdate(){if(piece!=null&&(piece.RefillProtected||applied))Refresh();}
+}
+}

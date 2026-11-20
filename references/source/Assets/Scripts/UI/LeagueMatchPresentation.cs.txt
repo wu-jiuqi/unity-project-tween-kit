@@ -1,0 +1,42 @@
+using System;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+// An independent overlay: acknowledgement is saved only after dismissing its summary.
+public sealed class LeagueMatchPresentation:MonoBehaviour {
+ LocalProfile profile;LeagueSnapshot snapshot;Action done;RectTransform content,emblem;RectTransform[] portraits;
+ TMP_Text detail,status,buttonText;float age;bool summary,focused=true,suspended;
+ public static void Show(RectTransform parent,LocalProfile p,LeagueSnapshot s,Action completed=null){
+  if(parent.GetComponentInChildren<LeagueMatchPresentation>()!=null)return;
+  UICraft.Root(parent,"League placement match").gameObject.AddComponent<LeagueMatchPresentation>().Build(p,s,completed);
+ }
+ void Build(LocalProfile p,LeagueSnapshot s,Action completed){
+  profile=p;snapshot=s;done=completed;var rt=(RectTransform)transform;rt.anchorMin=Vector2.zero;rt.anchorMax=Vector2.one;rt.sizeDelta=Vector2.zero;
+  var curtain=gameObject.AddComponent<Image>();curtain.color=new Color32(248,244,235,255);curtain.raycastTarget=true;
+  content=UICraft.Root(transform,"League entry composition");Fit();
+  UICraft.Label(content,p.AlphabetUnlocked==10&&s.player.medals==1?"花园联赛已开启":"新一期花园联赛",0,635,980,115,62,UICraft.Ink);
+  emblem=LeagueMotionArt.Image(content,"season",0,430,270).rectTransform;
+  detail=UICraft.Label(content,"本期对手集结",0,240,940,70,38,UICraft.Ink);
+  LeaguePortrait.Create(content,p,"",0,-30,200,true);
+  var rivals=s.entries.Where(e=>!e.player).OrderBy(e=>Math.Abs(e.rank-s.player.rank)).Take(6).ToArray();portraits=new RectTransform[rivals.Length];
+  for(int i=0;i<rivals.Length;i++){float a=i*Mathf.PI*2/rivals.Length;var v=LeaguePortrait.Create(content,p,rivals[i].portrait,Mathf.Cos(a)*330,Mathf.Sin(a)*170-30,120,false,rivals[i].frame);UICraft.Label(v,rivals[i].name,0,-85,220,50,25,UICraft.Ink);portraits[i]=v;v.localScale=Vector3.zero;}
+  status=UICraft.Label(content,"虚拟对手正在入场",0,-340,940,85,37,UICraft.Ink);
+  var start=DateTimeOffset.FromUnixTimeSeconds(s.config.calendarSeasons?LeagueEngine.CalendarStart(p.LeagueClock.UtcSeconds):p.LeagueClock.UtcSeconds).ToOffset(TimeSpan.FromHours(8));
+  var end=DateTimeOffset.FromUnixTimeSeconds(p.LeagueClock.UtcSeconds+s.remaining).ToOffset(TimeSpan.FromHours(8));
+  UICraft.Label(content,start.ToString("M月d日")+" — "+end.AddSeconds(-1).ToString("M月d日")+" · 剩余"+Math.Max(1,(int)Math.Ceiling(s.remaining/86400d))+"天",0,-440,960,65,29,UICraft.Ink);
+  var button=UICraft.Button(content,"跳过动画",0,-575,740,130,UICraft.Green,Continue,43);button.name="League entry continue";buttonText=button.GetComponentInChildren<TMP_Text>();
+  UICraft.Label(content,"主线首通+1奖章 · 每日重玩最多3枚\n虚拟对手联赛 · 离线对手不增长",0,-725,1000,105,27,UICraft.Ink);SoundService.Play("whoosh");
+ }
+ void Fit(){var r=(RectTransform)transform;content.localScale=Vector3.one*Mathf.Min(1,Mathf.Max(.1f,(r.rect.height-140)/1650f));}
+ void Update(){if(!focused||suspended)return;Fit();age+=Mathf.Min(Time.unscaledDeltaTime,.05f);bool motion=FeedbackProfile.Active.enabledFeedback;
+  emblem.localScale=Vector3.one*(motion?1+.035f*Mathf.Sin(age*3):1);
+  for(int i=0;i<portraits.Length;i++){float t=Mathf.Clamp01((age-.15f-i*.23f)/.32f);portraits[i].localScale=Vector3.one*(motion?UICraft.OutBack(t):(t>0?1:0));}
+  if(age>=2.1f&&!summary)Summary();
+ }
+ void Summary(){summary=true;foreach(var p in portraits)p.localScale=Vector3.one;detail.text="20位花园伙伴已就位";status.text="本期第"+snapshot.player.rank+"名 · "+snapshot.player.medals+"枚奖章";buttonText.text="继续闯关";SoundService.Play("medal_arrive");}
+ public void Continue(){if(!summary){Summary();age=Mathf.Max(age,2.1f);return;}if(!profile.CompleteLeagueMatch(snapshot.periodId)){detail.text="保存失败，请重启后重试";return;}var next=done;done=null;gameObject.SetActive(false);Destroy(gameObject);next?.Invoke();}
+ void OnApplicationFocus(bool f){focused=f;}void OnApplicationPause(bool p){suspended=p;}
+}
+}

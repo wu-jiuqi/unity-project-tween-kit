@@ -1,0 +1,43 @@
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+// A non-interactive ghost. Only actual player input launches balls or advances goals.
+public sealed class PlayableTutorialGuide:MonoBehaviour {
+ AppUI app;GameSession game;int kind,generation,breaks,initialActivations,seenCollected;float clock,lastInput=-10,noticeUntil;bool pointer,ownsAim,closed;Image hand,ring,outline;TMP_Text text;CanvasGroup visual;RectTransform root;string notice;
+ public bool PointerActive=>pointer;
+ public float GuideClock=>clock;
+ public bool HandVisible=>hand!=null&&hand.gameObject.activeSelf&&visual.alpha>.1f;
+ public string Caption=>text==null?"":text.text;
+ public void Begin(AppUI owner,GameSession session,int powerKind){
+  app=owner;game=session;kind=powerKind;generation=game.Generation;root=(RectTransform)transform;
+  var plaque=UICraft.Box(root,"Contained tutorial caption",0,-860,850,158,new Color(1,.97f,.89f,.96f));plaque.raycastTarget=false;
+  text=UICraft.Label(root,"",0,-860,780,134,34,UICraft.Ink);text.textWrappingMode=TextWrappingModes.Normal;text.enableAutoSizing=true;text.fontSizeMin=25;text.fontSizeMax=34;
+  var actors=UICraft.Root(root,"Independent gesture actors");visual=actors.gameObject.AddComponent<CanvasGroup>();visual.blocksRaycasts=false;visual.interactable=false;
+  outline=TutorialArt.Picture(actors,"Target outline","target-outline",Vector2.zero,new Vector2(120,120));ring=TutorialArt.Picture(actors,"Touch ripple","touch-rings",Vector2.zero,new Vector2(120,120));hand=TutorialArt.Picture(actors,"Drag glove","hand-drag",Vector2.zero,new Vector2(210,210));
+  initialActivations=kind>0?game.ChainKindActivations[kind-1]:0;
+ }
+ Vector2 Local(Vector2 point){var screen=Camera.main.WorldToScreenPoint(BoardDisplay.Forward(point));var canvas=GetComponentInParent<Canvas>();RectTransformUtility.ScreenPointToLocalPointInRectangle(root,screen,canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera,out var local);return local;}
+ public void Pointer(bool active){pointer=active;lastInput=clock;ReleaseAim();if(hand!=null)hand.gameObject.SetActive(false);}
+ void ReleaseAim(){if(ownsAim&&game!=null){game.SetAim(null);ownsAim=false;}}
+ void Update(){
+  if(closed||game==null||game.Generation!=generation||!game.IsPlaying){if(visual!=null)visual.alpha=0;return;}
+  if(game.IsPaused){visual.alpha=0;ReleaseAim();return;}clock+=Time.deltaTime;
+  if(kind>0&&game.ChainKindActivations[kind-1]>initialActivations){app.Profile.MarkPowerPractice(kind);Close();return;}
+  Vector2 target=Vector2.zero;bool hasTarget=false;
+  if(kind==0){var b=game.CollectionBricks.Where(b=>b.Alive&&game.IsJellyTarget(b)).OrderBy(b=>b.transform.position.y).ThenBy(b=>Mathf.Abs(b.transform.position.x)).FirstOrDefault();if(b!=null){target=b.transform.position;hasTarget=true;}}
+  else{var tool=game.ChainTools.FirstOrDefault(t=>t.Kind==kind);if(tool!=null){target=tool.Position;hasTarget=true;}}
+  if(kind==0){if(game.JellyCollected[4]>seenCollected){seenCollected=game.JellyCollected[4];notice="黄色砖块飞进目标卡啦！";noticeUntil=clock+3;}else if(game.BreakCount>breaks&&clock>noticeUntil){notice=game.Shots==19?"每步连发五颗球。\n弹跳期间也能再次发射！":"砖块在2秒后下落。\n利用空隙，弹向更高处！";noticeUntil=clock+3;}breaks=game.BreakCount;text.text=clock<noticeUntil?notice:game.Shots==20?"拖动瞄准，松手发射。\n收集全部6块黄色砖块。":clock%12<6?"击碎剩余黄色砖块。\n补入的白砖不会增加收集目标。":"利用墙壁反弹，命中更多果冻。\n无需清空所有砖块。";}
+  else text.text=kind==1?"命中十字激光即可激活。\n一组连发直接击碎4块砖，可获得更多！":kind==2?"命中炸弹，爆破周围3×3区域。\n击碎越多，奖励越丰富！":"命中五色花，按绑定色发动效果。\n附近有特殊砖时优先组合！";
+  bool show=hasTarget&&!pointer&&clock-lastInput>5&&game.ActiveBalls==0&&game.PendingBurstBalls==0;visual.alpha=show?1:0;hand.gameObject.SetActive(show);
+  if(!show){ReleaseAim();return;}
+  float t=(clock-lastInput)%4.4f;Vector2 direction=GameSession.NormalizeAimDirection(target-game.LauncherPosition);Vector2 origin=Local(game.LauncherPosition),end=Local(game.LauncherPosition+direction*2.1f);float u=Mathf.SmoothStep(0,1,Mathf.Clamp01((t-.6f)/1.3f));Vector2 tip=Vector2.Lerp(origin,end,u);
+  hand.sprite=OnboardingArt.Get(2,t<.6f?1:t>2.2f?3:2);ring.sprite=OnboardingArt.Get(2,5);hand.rectTransform.anchoredPosition=tip+new Vector2(68,-62);ring.rectTransform.anchoredPosition=tip;ring.rectTransform.localScale=Vector3.one*(.85f+.12f*Mathf.Sin(t*8));outline.rectTransform.anchoredPosition=Local(target);outline.rectTransform.localScale=Vector3.one*(1+.05f*Mathf.Sin(clock*4));
+  hand.color=new Color(1,1,1,t>3?Mathf.Clamp01(4-t):1);ring.color=hand.color;
+  if(t>.6f&&t<2.4f){game.SetAim(direction);ownsAim=true;}else ReleaseAim();
+ }
+ public void Close(){if(closed)return;closed=true;ReleaseAim();gameObject.SetActive(false);Destroy(gameObject);}
+ void OnDestroy(){ReleaseAim();}
+}
+}

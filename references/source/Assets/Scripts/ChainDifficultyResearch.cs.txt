@@ -1,0 +1,100 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+// Read-only experiments on C04's production rules. No difficulty rules are modified.
+public sealed class ChainDifficultyResearch:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Array.IndexOf(Environment.GetCommandLineArgs(),"--chain-research")>=0)new GameObject("Chain difficulty research").AddComponent<ChainDifficultyResearch>();}
+ [Serializable]public sealed class Turn {
+  public int round,bricksBefore,bricksAfter,healthBefore,healthAfter,broken,spawned,generated,activated,generatedSurvived,sameVolleyActivated,goalProgress;
+  public float clearanceRows;
+ }
+ [Serializable]public sealed class Run {
+  public string policy;public int variant,turns,fish,toys,generated,activated,riskyTurns,blockedHits,weakHits,armorBroken;public bool won,ended;
+  public float minimumClearanceRows=100;public List<Turn> trace=new List<Turn>();
+ }
+ [Serializable]public sealed class Report {public string rules="ContainerChain-v4 rating rewards, stone, armor and rear guards";public int errors;public List<Run> runs=new List<Run>();}
+ string dir;GameSession game;Report report=new Report();
+ float Clearance(){return game.CollectionBricks.Where(b=>b.Alive&&b.Definition.kind!=BrickKind.Stone).Select(b=>(b.transform.position.y-.38f-CollectionLevels.Danger)/CollectionLevels.Pitch).DefaultIfEmpty(12).Min();}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){report.errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),m+"\n"+s);}};
+  yield return new WaitForSecondsRealtime(1);FindFirstObjectByType<AppUI>().QANavigate("home");
+  game=new GameObject("Research session").AddComponent<GameSession>();game.QAIgnoreFocusLoss=true;
+  var originalMode=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;
+  string[] names={"vertical","fixed_angle","random","bottom_direct","tools_and_banks","objective_first","rear_aware"};
+  for(int policy=0;policy<names.Length;policy++)for(int variant=0;variant<3;variant++){
+   game.StartLevel(53);yield return new WaitForSecondsRealtime(.4f);
+   var run=new Run{policy=names[policy],variant=variant};var random=new System.Random(913+variant*101);
+   while(game.IsPlaying&&run.turns<25){
+    var turn=new Turn{round=game.CollectionRound,bricksBefore=game.CollectionBricks.Count(b=>b.Alive),healthBefore=game.CollectionBricks.Where(b=>b.Alive).Sum(b=>b.CurrentHealth)};
+    var ids=new HashSet<int>(game.CollectionBricks.Where(b=>b.Alive).Select(b=>b.Id));var oldTools=new HashSet<ChainTool>(game.ChainTools);
+    int breaks=game.BreakCount,generated=game.ChainGeneratedCount,activated=game.ChainActivationCount,progress=game.Collected.Sum();
+    Vector2 direction=Vector2.up;
+    var target=game.CollectionBricks.Where(b=>b.Alive).OrderBy(b=>b.transform.position.y).ThenBy(b=>Mathf.Abs(b.transform.position.x)).FirstOrDefault();
+    if(policy==1||policy==2){float a=(policy==1?new[]{30f,90f,150f}[variant]:12+(float)random.NextDouble()*156)*Mathf.Deg2Rad;direction=new Vector2(Mathf.Cos(a),Mathf.Sin(a));}
+    else if(policy>=3){
+     var tool=game.ChainTools.OrderBy(t=>t.Position.y).FirstOrDefault();
+     if(policy==5&&target!=null&&target.transform.position.y>-2)target=game.CollectionBricks.Where(b=>b.Alive).OrderByDescending(b=>b.Definition.juiceGroup>0).ThenBy(b=>b.transform.position.y).FirstOrDefault();
+     if(policy>=4&&run.turns==0){float a=new[]{160f,60f,120f}[variant]*Mathf.Deg2Rad;direction=new Vector2(Mathf.Cos(a),Mathf.Sin(a));}
+     else if(policy>=4&&tool!=null)direction=tool.Position-game.LauncherPosition;
+     else if(target!=null){Vector2 p=target.transform.position;bool bank=policy>=4&&run.turns%3==0;direction=(bank?new Vector2((p.x<0?-8.2f:8.2f)-p.x,p.y):p)-game.LauncherPosition;}
+    }
+    if(policy==6)direction=PickGuardShot(variant);
+    if(!game.TryShoot(direction)){report.errors++;break;}
+    int steps=0;float low=Clearance();do{game.QAAdvanceOneStep();steps++;low=Mathf.Min(low,Clearance());if(game.RecallAvailable)game.RecallBalls();}while(game.IsPlaying&&(!game.CollectionReady||steps<2)&&steps<3000);
+    if(steps>=3000){report.errors++;break;}
+    turn.bricksAfter=game.CollectionBricks.Count(b=>b.Alive);turn.healthAfter=game.CollectionBricks.Where(b=>b.Alive).Sum(b=>b.CurrentHealth);
+    turn.broken=game.BreakCount-breaks;turn.spawned=game.CollectionBricks.Count(b=>b.Alive&&!ids.Contains(b.Id));turn.generated=game.ChainGeneratedCount-generated;turn.activated=game.ChainActivationCount-activated;
+    turn.generatedSurvived=game.ChainTools.Count(t=>!oldTools.Contains(t));turn.sameVolleyActivated=turn.generated-turn.generatedSurvived;
+    turn.clearanceRows=low;turn.goalProgress=game.Collected.Sum()-progress;run.minimumClearanceRows=Mathf.Min(run.minimumClearanceRows,low);if(low<=2)run.riskyTurns++;
+    run.trace.Add(turn);run.turns++;yield return new WaitForSecondsRealtime(.3f);
+   }
+   run.ended=!game.IsPlaying;run.fish=game.Collected[0];run.toys=game.Collected[1];run.won=game.CollectionWon;run.generated=game.ChainGeneratedCount;run.activated=game.ChainActivationCount;run.blockedHits=game.ChainBlocks;run.weakHits=game.ChainRearHits;run.armorBroken=game.ChainArmorBreaks;report.runs.Add(run);
+   File.WriteAllText(Path.Combine(dir,"research.json"),JsonUtility.ToJson(report,true));
+   File.AppendAllText(Path.Combine(dir,"summary.txt"),$"{run.policy}/{variant} turns={run.turns} won={run.won} minimumClearanceRows={run.minimumClearanceRows:F2} riskyTurns={run.riskyTurns} tools={run.generated}/{run.activated} blocked={run.blockedHits} rear={run.weakHits} armor={run.armorBroken}\n");
+  }
+  game.StopLevel();Destroy(game.gameObject);Physics2D.simulationMode=originalMode;File.WriteAllText(Path.Combine(dir,"research.json"),JsonUtility.ToJson(report,true));Application.Quit(report.errors==0?0:1);
+ }
+ Vector2 PickGuardShot(int variant){
+  float best=float.NegativeInfinity;Vector2 choice=Vector2.up;
+  // An analysis-only geometric planner. It predicts one ball, then fires five real balls.
+  // No game state is rolled back or edited and no damage is issued by this function.
+  for(int angle=12+variant;angle<=168;angle+=3){
+   float a=angle*Mathf.Deg2Rad;Vector2 direction=new Vector2(Mathf.Cos(a),Mathf.Sin(a)),d=direction,p=game.SpawnPosition(d);
+   float score=0,budget=90;var hp=new System.Collections.Generic.Dictionary<int,int>();var opened=new System.Collections.Generic.HashSet<int>();Collider2D previous=null;
+   for(int bounce=0;bounce<70&&budget>.01f;bounce++){
+    var hits=Physics2D.CircleCastAll(p,FlightGeometry.Radius,d,budget,1<<8);
+    RaycastHit2D hit=default;bool found=false;
+    foreach(var candidate in hits.OrderBy(h=>h.distance)){
+     if(candidate.collider==null||candidate.collider.isTrigger||candidate.distance<.005f&&candidate.collider==previous)continue;
+     var cb=candidate.collider.GetComponentInParent<BrickBody>();if(cb!=null&&(!cb.Alive||hp.TryGetValue(cb.Id,out int gone)&&gone<=0))continue;
+     hit=candidate;found=true;break;
+    }
+    if(!found)break;
+    if(d.y<0&&hit.centroid.y<-6.1f)break;
+    budget-=Mathf.Max(.02f,hit.distance);var b=hit.collider.GetComponentInParent<BrickBody>();
+    if(b!=null){
+     if(!hp.TryGetValue(b.Id,out int health))health=b.CurrentHealth;
+     float urgency=Mathf.Max(0,7-(b.transform.position.y-.38f-CollectionLevels.Danger)/CollectionLevels.Pitch);
+     if(b.Definition.kind==BrickKind.Stone)score-=.1f;
+     else if(b.Definition.kind==BrickKind.RearWeak&&!game.ChainRearEntry(b,d,hit.point))score-=.2f;
+     else if(b.ShellIntact&&!opened.Contains(b.Id)){opened.Add(b.Id);score+=1+urgency;}
+     else {
+      int damage=b.Definition.kind==BrickKind.RearWeak?3:1;
+      score+=(b.Definition.kind==BrickKind.RearWeak?4+urgency:b.Definition.kind==BrickKind.Armor?1+urgency:0)+Mathf.Min(damage,health)*.3f;
+      health-=damage;hp[b.Id]=health;
+      if(health<=0)score+=b.Definition.juiceGroup>0?7:b.Definition.kind!=BrickKind.Normal?5+urgency*2:1.5f;
+     }
+    }
+    previous=hit.collider;d=Vector2.Reflect(d,hit.normal).normalized;p=hit.centroid+hit.normal*.02f;
+   }
+   if(score>best){best=score;choice=direction;}
+  }
+  return choice;
+ }
+}
+}

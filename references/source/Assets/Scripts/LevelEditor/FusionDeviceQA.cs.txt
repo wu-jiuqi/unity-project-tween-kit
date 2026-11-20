@@ -1,0 +1,302 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    /// <summary>
+    /// Opt-in, injected rule fixtures on the production GameSession. These assertions are deliberately
+    /// separate from natural playthroughs: they do not establish completion rates or difficulty.
+    /// </summary>
+    public static class FusionDeviceQA
+    {
+        public static IEnumerator Run(GameSession session, Action<string, bool, string> check)
+        {
+            var fixtures = new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>[]
+            {
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("cannon", Cannon),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("cannon goal retirement", CannonGoalRetirement),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("producer", Producer),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("vine", Vine),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("battery", Battery),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("gate", Gate),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("assistant protection", AssistantProtection),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("assistant retarget", AssistantRetarget),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("assistant locked region", AssistantLockedRegion),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("reward ticket", Reward),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("milestones", Milestones),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("snow shrink snapshot", SnowShrinkSnapshot),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("snow removed snapshot", SnowRemovedSnapshot),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("frozen snow neighbor", FrozenSnowNeighbor),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("cocoa one stage", CocoaOneStage)
+            };
+            foreach (var fixture in fixtures)
+            {
+                try { fixture.Value(session, check); }
+                catch (Exception error) { check("device_rule_fixture " + fixture.Key + " executes", false, error.ToString()); }
+                session.StopLevel();
+                yield return null; // Complete actual Unity object destruction before reusing the session.
+            }
+        }
+
+        static FusionLevelDefinition Board(bool holdGoal = true)
+        {
+            // Start from a shipped sample clone; fixtures never modify the sample or campaign.
+            var definition = JsonUtility.FromJson<FusionLevelDefinition>(JsonUtility.ToJson(FusionSamples.CreateDefinitions()[0].definition));
+            definition.pieces = definition.pieces.Select(p => new FusionPieceDefinition
+                { id = "fixture_" + p.c + "_" + p.r, kind = "normal", c = p.c, r = p.r }).ToArray();
+            definition.milestones = Array.Empty<FusionMilestoneDefinition>();
+            definition.refillBudget = 0;
+            if (holdGoal) Put(definition, "hold", "fish", 0, 0, 30).goal = "fish";
+            return definition;
+        }
+
+        static FusionPieceDefinition Put(FusionLevelDefinition board, string id, string kind, int c, int r, int hp = 1, int size = 1)
+        {
+            var piece = FusionRules.DefaultPiece(kind, c, r);
+            piece.id = "device_qa_" + id; piece.hp = hp; piece.size = size;
+            board.pieces = board.pieces.Where(p => !(p.c < c + size && p.c + p.size > c && p.r < r + size && p.r + p.size > r)).Concat(new[] { piece }).ToArray();
+            return piece;
+        }
+
+        static void Start(GameSession game, FusionLevelDefinition board, string fixture)
+        {
+            game.StartFusionSample(board, 12, "QA device_rule_fixture " + fixture, 9107);
+            game.enabled = false;
+        }
+
+        static FusionRuntimePiece Piece(GameSession game, FusionPieceDefinition definition) => game.FusionPieces.Single(p => p.Definition.id == definition.id);
+        static FusionRuntimePiece Cell(GameSession game, int c, int r) => game.FusionPieces.First(p => p.Alive && p.Definition.c == c && p.Definition.r == r);
+        static void Hit(GameSession game, FusionRuntimePiece p, string source = "qa:device_hit", string network = "") =>
+            game.FusionRunAttack(source, 1, () => game.FusionHit(p, 1, Vector2.up, p.Position, true), network);
+        static void Remove(GameSession game, FusionRuntimePiece p, string source = "qa:device_remove", string network = "") =>
+            game.FusionRunAttack(source, 1, () => game.FusionRemove(p), network);
+        static void Step(GameSession game, int count) { for (int i = 0; i < count && game.IsPlaying && !game.CollectionVictoryPending; i++) game.QAAdvanceOneStep(); }
+        static int Events(GameSession game, string kind) => game.FusionEvents.Count(e => e.Kind == kind);
+        static void Assert(Action<string, bool, string> check, string name, bool value, string detail = "") => check("device_rule_fixture " + name, value, detail);
+
+        static void Cannon(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board();
+            var cannon = Put(board, "cannon", "cannon", 4, 6); cannon.threshold = 3; cannon.stock = 2; cannon.direction = "up"; cannon.activationMode = "neighbor";
+            var chest = Put(board, "wide_neighbor", "chest", 2, 5, 8, 2);
+            for (int i = 0; i < chest.contents.Length; i++) { chest.contents[i].id = "device_qa_wide_" + i; chest.contents[i].goal = ""; chest.contents[i].kind = "normal"; }
+            Start(game, board, "cannon"); var p = Piece(game, cannon);
+            Hit(game, p);
+            Assert(check, "cannon direct hit does not charge neighbor mode", p.Charge == 0 && p.Stock == 2);
+            var wide = Piece(game, chest); Remove(game, wide); Remove(game, wide);
+            Assert(check, "one removed 2x2 object charges cannon once", p.Charge == 1 && p.Stock == 2);
+            Remove(game, Cell(game, 5, 6)); Remove(game, Cell(game, 4, 7));
+            Step(game, 12);
+            Assert(check, "cannon spends one finite ammo and fires", p.Stock == 1 && Events(game, "CannonFired") == 1);
+            Assert(check, "cannon ray removals do not recharge its network", p.Charge == 0, "charge=" + p.Charge);
+        }
+
+        static void Producer(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var producer = Put(board, "producer", "producer", 4, 6);
+            producer.stock = 2; producer.batchSize = 3; producer.threshold = 2; producer.activationMode = "either";
+            producer.goal = "toy";
+            producer.spawnCells = new[] { new Vector2Int(5, 6), new Vector2Int(6, 6), new Vector2Int(7, 6) };
+            producer.contents = Enumerable.Range(0, 6).Select(i => new FusionContentDefinition { id = "device_qa_stock_" + i, kind = "fish", goal = "fish", hp = 1 }).ToArray();
+            Start(game, board, "producer"); var p = Piece(game, producer); int total = game.FusionGoalsTotal;
+            Hit(game, p); Hit(game, p); Step(game, 1);
+            var first = game.FusionPieces.Where(x => x.Definition.id.StartsWith("device_qa_stock_", StringComparison.Ordinal)).ToArray();
+            Assert(check, "producer activates a complete preregistered batch", first.Length == 3 && p.Stock == 1 && p.Progress == 3 && game.FusionGoalsTotal == total && game.FusionGoalsCredited == 0);
+            Assert(check, "producer stock has a physically adjacent output", first.Any(x => game.FusionAdjacent(p, x)));
+            foreach (var output in first) Remove(game, output);
+            Assert(check, "producer own outputs cannot recharge it even under later ball attack", p.Charge == 0);
+            Hit(game, p); Hit(game, p); Step(game, 80);
+            Assert(check, "producer final batch uses exactly six stable identities", p.Stock == 0 && p.Progress == 6
+                && game.FusionPieces.Count(x => x.Definition.id.StartsWith("device_qa_stock_", StringComparison.Ordinal)) == 6 && game.FusionGoalsTotal == total,
+                "stock=" + p.Stock + " progress=" + p.Progress);
+            Assert(check, "producer explicit goal retires only after final batch", p.Consumed && game.fusionGoals[producer.id + ":goal"].State == FusionGoalState.Credited);
+            Hit(game, p); Hit(game, p); Step(game, 3);
+            Assert(check, "producer cannot create a third batch", Events(game, "ProducerBatchReleased") == 2 && p.Stock == 0);
+        }
+
+        static void CannonGoalRetirement(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var cannon = Put(board, "last_cannon", "cannon", 4, 6);
+            cannon.stock = 1; cannon.threshold = 1; cannon.activationMode = "direct"; cannon.goal = "toy";
+            Start(game, board, "cannon goal retirement"); var p = Piece(game, cannon);
+            Hit(game, p);
+            Assert(check, "last cannon target stays alive until earned shot fires", p.Alive && game.fusionGoals[cannon.id + ":goal"].State == FusionGoalState.Active);
+            Step(game, 12);
+            Assert(check, "last cannon shot fires before explicit goal retires", Events(game, "CannonFired") == 1 && p.Consumed
+                && game.fusionGoals[cannon.id + ":goal"].State == FusionGoalState.Credited);
+        }
+
+        static void Vine(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board();
+            var a = Put(board, "vine_a", "vine", 3, 6); var b = Put(board, "vine_b", "vine", 5, 6); var c = Put(board, "vine_c", "vine", 4, 5);
+            foreach (var node in new[] { a, b, c }) { node.group = "fixture_vine"; node.threshold = 2; node.damage = 1; node.activationMode = "either"; }
+            Start(game, board, "vine");
+            Remove(game, Cell(game, 4, 6));
+            Assert(check, "one neighbor removal contributes once to shared vine group", new[] { a, b, c }.All(d => Piece(game, d).Charge == 1));
+            Hit(game, Piece(game, a)); Step(game, 20);
+            Assert(check, "shared vine group releases all surviving nodes once", new[] { a, b, c }.All(d => Piece(game, d).Consumed)
+                && Events(game, "VineGroupReleased") == 1 && Events(game, "VineCharge") == 2);
+        }
+
+        static void Battery(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var battery = Put(board, "battery", "battery", 4, 6); var tool = Put(board, "battery_tool", "line_h", 4, 3);
+            battery.threshold = 2; battery.network = "fixture_battery"; battery.links = new[] { tool.id }; battery.autoActivate = false;
+            battery.goal = "toy";
+            var goals = new[] { Put(board, "battery_goal_a", "fish", 1, 1), Put(board, "battery_goal_b", "fish", 2, 1), Put(board, "battery_goal_c", "fish", 3, 1) };
+            Start(game, board, "battery"); var p = Piece(game, battery); var t = Piece(game, tool);
+            Hit(game, t); Step(game, 2);
+            Assert(check, "battery linked tool is dormant before discharge", !t.Enabled && t.Alive);
+            game.FusionRunAttack("qa:credit", 1, () => { game.FusionCredit(goals[0].id + ":goal"); game.FusionCredit(goals[0].id + ":goal"); });
+            Assert(check, "battery charges a unique goal identity once", p.Charge == 1);
+            game.FusionRunAttack(tool.id, 1, () => game.FusionCredit(goals[1].id + ":goal"), battery.network);
+            Assert(check, "battery network goal counts but does not recharge battery", game.FusionGoalsCredited == 2 && p.Charge == 1);
+            game.FusionRunAttack("qa:credit", 1, () => game.FusionCredit(goals[2].id + ":goal"));
+            Assert(check, "battery enables preplaced tool exactly once", t.Enabled && t.Alive && Events(game, "BatteryDischarged") == 1);
+            Assert(check, "battery explicit goal retires after discharge", p.Consumed && game.fusionGoals[battery.id + ":goal"].State == FusionGoalState.Credited);
+            Hit(game, t); Step(game, 20);
+            Assert(check, "enabled battery tool activates and is never recreated", t.Consumed && game.FusionPieces.Count(x => x.Definition.id == tool.id) == 1);
+        }
+
+        static void Gate(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var a = Put(board, "key_a", "key", 2, 7); var b = Put(board, "key_b", "key", 6, 7);
+            var gate = Put(board, "gate", "gate", 4, 5); gate.links = new[] { a.id, b.id }; gate.condition = "all";
+            var cannon = Put(board, "gate_neighbor_cannon", "cannon", 3, 5); cannon.activationMode = "neighbor";
+            Start(game, board, "gate"); var p = Piece(game, gate);
+            game.FusionRunAttack("qa:gate_damage", 1, () => game.FusionHit(p, 999, Vector2.up, p.Position));
+            Assert(check, "locked gate ignores direct damage", p.Alive);
+            Hit(game, Piece(game, a)); Step(game, 2); Assert(check, "all-keys gate remains closed after first key", p.Alive);
+            Hit(game, Piece(game, b)); Step(game, 3);
+            Assert(check, "gate opens after exact linked key set", p.Consumed && Events(game, "GateOpened") == 1);
+            Assert(check, "opening gate does not fabricate adjacent removal charge", Piece(game, cannon).Charge == 0);
+            Hit(game, Piece(game, b)); Step(game, 2); Assert(check, "repeat key collection cannot open gate twice", Events(game, "GateOpened") == 1);
+        }
+
+        static void AssistantProtection(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(false); var jar = Put(board, "helper_jar", "assistant", 4, 7); jar.threshold = 1; jar.stock = 1;
+            var goal = Put(board, "helper_protected_goal", "fish", 4, 1, 6); goal.armor = true;
+            Start(game, board, "assistant protection"); var target = Piece(game, goal);
+            Hit(game, Piece(game, jar)); Step(game, 150);
+            Assert(check, "assistant advances only one protection stage", target.Alive && !target.Brick.ShellIntact && target.Brick.CurrentHealth == 6 && game.FusionGoalsCredited == 0);
+            Assert(check, "assistant reaches a finite terminal state", Events(game, "AssistantResolved") == 1);
+        }
+
+        static void AssistantRetarget(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(false); var jar = Put(board, "retarget_jar", "assistant", 4, 7); jar.threshold = 1; jar.stock = 1;
+            Put(board, "retarget_a", "fish", 1, 1, 5); Put(board, "retarget_b", "fish", 7, 1, 5);
+            Start(game, board, "assistant retarget"); Hit(game, Piece(game, jar)); Step(game, 1);
+            var reservation = game.FusionEvents.LastOrDefault(e => e.Kind == "AssistantTargetReserved");
+            Assert(check, "assistant visibly reserves a real target", reservation != null);
+            if (reservation == null) return;
+            var original = game.FusionPieces.Single(p => p.Definition.id == reservation.TargetId); Remove(game, original);
+            Step(game, 150);
+            var hit = game.FusionEvents.LastOrDefault(e => e.Kind == "AssistantResolved");
+            Assert(check, "assistant retargets when ball claims reserved target", hit != null && hit.TargetId != original.Definition.id);
+            var target = hit == null ? null : game.FusionPieces.Single(p => p.Definition.id == hit.TargetId);
+            Assert(check, "assistant applies two body damage instead of clearing high HP goal", target != null && target.Alive && target.Brick.CurrentHealth == 3);
+        }
+
+        static void AssistantLockedRegion(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(false); var jar = Put(board, "locked_jar", "assistant", 4, 7); jar.threshold = 1; jar.stock = 1;
+            var goal = Put(board, "locked_goal", "fish", 4, 1, 7); var key = Put(board, "locked_key", "key", 2, 7);
+            for (int c = 0; c < 9; c++) Put(board, "wall_" + c, "stone", c, 5);
+            var gate = Put(board, "locked_gate", "gate", 4, 5); gate.links = new[] { key.id };
+            Start(game, board, "assistant locked region"); Hit(game, Piece(game, jar)); Step(game, 150);
+            // A useful exposed key is allowed; the sealed goal itself is not an initial target.
+            var first = game.FusionEvents.FirstOrDefault(e => e.Kind == "AssistantTargetReserved");
+            Assert(check, "assistant excludes closed gate-region goals", first == null || first.TargetId != goal.id);
+            Assert(check, "assistant does not bypass gate directly to damage goal", Piece(game, goal).Brick.CurrentHealth == 7);
+        }
+
+        static void Reward(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(false); var reward = Put(board, "reward", "reward", 4, 7);
+            reward.threshold = 1; reward.stock = 1; reward.rewardSequence = new[] { "assistant", "blast" };
+            reward.goal = "toy";
+            var goal = Put(board, "reward_goal", "fish", 4, 1, 9);
+            Start(game, board, "reward ticket"); var p = Piece(game, reward);
+            Hit(game, p); Hit(game, p); // Last ticket must survive another overlapping ball before it resolves.
+            Step(game, 150);
+            var tickets = game.FusionEvents.Where(e => e.Kind == "RewardTicketCommitted").ToArray();
+            Assert(check, "reward commits its visible type once", tickets.Length == 1 && tickets[0].After == "assistant" && p.Stock == 0);
+            Assert(check, "last committed reward survives overlapping hit", Events(game, "RewardTicketResolved") == 1 && Events(game, "AssistantResolved") == 1);
+            Assert(check, "reward explicit goal retires after last ticket delivery", p.Consumed && game.fusionGoals[reward.id + ":goal"].State == FusionGoalState.Credited);
+            Assert(check, "reward helper is finite and respects body damage", Piece(game, goal).Brick.CurrentHealth == 7);
+        }
+
+        static void Milestones(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var a = Put(board, "milestone_a", "fish", 2, 1); var b = Put(board, "milestone_b", "fish", 6, 1);
+            board.milestones = new[] { new FusionMilestoneDefinition { id = "fixture_milestone_1", threshold = 1, kind = "assistant", count = 1 },
+                new FusionMilestoneDefinition { id = "fixture_milestone_2", threshold = 2, kind = "assistant", count = 1 } };
+            Start(game, board, "milestones"); int total = game.FusionGoalsTotal;
+            game.FusionRunAttack("qa:cross_two_milestones", 1, () => { game.FusionCredit(a.id + ":goal"); game.FusionCredit(b.id + ":goal"); game.FusionCredit(a.id + ":goal"); });
+            Step(game, 150);
+            Assert(check, "one cascade can claim two finite milestones once each", Events(game, "MilestoneClaimed") == 2
+                && game.FusionEvents.Where(e => e.Kind == "MilestoneClaimed").Select(e => e.TargetId).Distinct().Count() == 2);
+            Assert(check, "milestone rewards keep starting denominator and finish", game.FusionGoalsTotal == total && Events(game, "AssistantResolved") == 2);
+        }
+
+        static void SnowShrinkSnapshot(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(false); var snow = Put(board, "shrinking_snow", "snowball", 4, 4, 1, 2);
+            snow.layers = 2; snow.hitsPerRing = 1;
+            var goal = Put(board, "behind_old_snow_footprint", "fish", 6, 5, 5);
+            Start(game, board, "snow shrink snapshot"); var p = Piece(game, snow); var target = Piece(game, goal);
+            game.FusionRunAttack("qa:two_rays_same_attack", 1, () =>
+            {
+                game.FusionRay(ChainGridRules.Center(3, 4), Vector2.right, 9, 2);
+                game.FusionRay(ChainGridRules.Center(3, 5), Vector2.right, 9, 2);
+            });
+            Assert(check, "same AttackId shrinks snow only one stage", p.Layers == 1 && p.Definition.size == 1);
+            Assert(check, "later ray still respects attack-start snow footprint", target.Alive && target.Brick.CurrentHealth == 5);
+        }
+
+        static void SnowRemovedSnapshot(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(false); var snow = Put(board, "removed_snow", "snowball", 4, 4, 1, 1);
+            snow.layers = 1; snow.hitsPerRing = 1;
+            var goal = Put(board, "behind_removed_snow", "fish", 6, 4, 5);
+            Start(game, board, "snow removed snapshot"); var p = Piece(game, snow); var target = Piece(game, goal);
+            game.FusionRunAttack("qa:repeat_ray_same_attack", 1, () =>
+            {
+                game.FusionRay(ChainGridRules.Center(3, 4), Vector2.right, 9, 2);
+                game.FusionRay(ChainGridRules.Center(3, 4), Vector2.right, 9, 2);
+            });
+            Assert(check, "consumed snow retains its blocker in originating attack snapshot", p.Consumed && target.Alive && target.Brick.CurrentHealth == 5);
+            game.FusionRunAttack("qa:new_ray_after_snow", 1, () => game.FusionRay(ChainGridRules.Center(3, 4), Vector2.right, 9, 2));
+            Assert(check, "independent later attack can enter cleared snow route", target.Brick.CurrentHealth == 3);
+        }
+
+        static void FrozenSnowNeighbor(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var snow = Put(board, "frozen_drift", "snowdrift", 4, 5);
+            snow.layers = 2; snow.ice = 1;
+            Start(game, board, "frozen snow neighbor"); var p = Piece(game, snow);
+            game.FusionRunAttack("qa:two_neighbors_one_attack", 1, () => { game.FusionRemove(Cell(game, 3, 5)); game.FusionRemove(Cell(game, 4, 6)); });
+            Assert(check, "frozen snow neighbor event removes attached ice first", p.Ice == 0 && p.Layers == 2 && p.Alive);
+            Assert(check, "multiple neighbor removals cannot warm through same-attack ice", Events(game, "IceRemoved") == 1 && !game.FusionEvents.Any(e => e.Kind == "SnowLayerRemoved" && e.TargetId == snow.id));
+        }
+
+        static void CocoaOneStage(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var cocoa = Put(board, "cocoa", "cocoa", 4, 6);
+            var melting = Put(board, "cocoa_first_snow", "snowball", 3, 5, 1, 1); melting.layers = 1; melting.hitsPerRing = 1;
+            var drift = Put(board, "cocoa_neighbor_drift", "snowdrift", 4, 5); drift.layers = 4;
+            Start(game, board, "cocoa one stage"); var p = Piece(game, drift);
+            Remove(game, Piece(game, cocoa)); int beforeIndependentCocoa = p.Layers;
+            Step(game, 2);
+            Assert(check, "cocoa melt plus its neighbor notification advances drift once", Piece(game, melting).Consumed
+                && p.Alive && p.Layers == beforeIndependentCocoa - 1,
+                "before cocoa=" + beforeIndependentCocoa + " after=" + p.Layers);
+        }
+    }
+}

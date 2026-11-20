@@ -1,0 +1,37 @@
+using System;
+using System.Linq;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ int economyVersion=1,rescueLevel=-1,rescueFailures;bool rescueReady;
+ public bool HasRescue(int level)=>rescueReady&&rescueLevel==level;
+ public int RescueFailures(int level)=>rescueLevel==level?rescueFailures:0;
+ public int NewPlayerMilestone(int level)=>economyVersion==1&&(level==2||level==5||level==9)&&!committed.Contains("economy-v67/milestone/"+level)?100:0;
+ public int CampaignWinCoins(int level,int score)=>ScoreRules.WinCoins(score)+(bestScores[level]==0&&!committed.Contains("economy-v67/first/"+level)?20:0)+NewPlayerMilestone(level);
+ void ApplyEconomyWin(int level){
+  committed.Add("economy-v67/first/"+level);
+  if(NewPlayerMilestone(level)>0)committed.Add("economy-v67/milestone/"+level);
+  if(rescueLevel==level){rescueLevel=-1;rescueFailures=0;rescueReady=false;}
+ }
+ public bool RecordCampaignLoss(string resultKey,int level){
+  if(!ValidKey(resultKey)||level<0||level>=AlphabetCampaign.Count)return false;
+  string key=resultKey+"/loss";if(committed.Contains(key))return true;
+  return LeagueTransaction(()=>{if(level>=AlphabetUnlocked)ResetCampaignStreak();if(rescueLevel!=level){rescueLevel=level;rescueFailures=0;rescueReady=false;}if(!rescueReady&&++rescueFailures>=3){rescueFailures=0;rescueReady=true;}committed.Add(key);});
+ }
+ public bool ConsumeCampaignBooster(StreakBooster kind,int level){
+  if(StreakBonusStock(kind,level)>0)return ConsumeStreakBonus(kind,level);
+  if(kind==StreakBooster.Pierce&&HasRescue(level))return LeagueTransaction(()=>rescueReady=false);
+  return ConsumeBooster(kind);
+ }
+ void RestoreEconomy(int version,int level,int failures,bool ready){
+  if(version<0||version>1||level< -1||level>=78||failures<0||failures>2||ready&&level<0)throw new InvalidOperationException("Invalid economy state");
+  if(level>=AlphabetCampaign.Count){level=-1;failures=0;ready=false;}
+  economyVersion=version;rescueLevel=level;rescueFailures=failures;rescueReady=ready;
+ }
+ bool RewardCosmeticOwned(LeagueReward reward,bool frame){
+  string id=frame?reward.frameId:reward.avatarId;if(string.IsNullOrEmpty(id))return false;
+  var item=frame?CatCosmeticCatalog.FindFrame(reward.frameResource):CatCosmeticCatalog.FindAvatar(reward.avatarResource);
+  return (frame?OwnsFrame(id):OwnsAvatar(id))||item!=null&&OwnsShopCosmetic(item.id,frame);
+ }
+ public int LeagueDuplicateCoins(LeagueReward reward)=>reward==null?0:(RewardCosmeticOwned(reward,false)?50:0)+(RewardCosmeticOwned(reward,true)?50:0);
+}
+}

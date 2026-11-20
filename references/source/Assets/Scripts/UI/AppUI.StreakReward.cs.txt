@@ -1,0 +1,75 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public partial class AppUI {
+ readonly HashSet<int> rewardTiersSeen=new HashSet<int>();
+ public bool StreakRewardActive=>GetComponentInChildren<StreakRewardPresentation>()!=null;
+ IEnumerator ShowCampaignStreakReward(int generation){
+  var hud=GetComponentInChildren<StreakTrialHUD>();if(hud==null)yield break;
+  var targets=new List<RectTransform>();var kinds=new List<StreakBooster>();
+  for(int i=1;i<=3;i++){var k=(StreakBooster)i;if(Profile.StreakBonusStock(k,currentLevel)>0&&Session.BoosterAvailable(k)){var slot=hud.transform.Find("Skill slot "+k) as RectTransform;if(slot!=null){targets.Add(slot);kinds.Add(k);}}}
+  if(kinds.Count==0)yield break;
+  CancelAim();var root=UICraft.Root(overlayRoot,"连胜道具赠送动画");
+  var presentation=root.gameObject.AddComponent<StreakRewardPresentation>();
+  int tier=kinds.Count;bool repeated=RuntimeQA.IsIsolated?rewardTiersSeen.Contains(tier):PlayerPrefs.GetInt("BounceGarden.RewardSeen.v76."+tier,0)!=0;
+  yield return presentation.Play(Profile.CampaignWinStreak,kinds,targets,repeated);
+  if(presentation.Phase=="complete"){rewardTiersSeen.Add(tier);if(!RuntimeQA.IsIsolated){PlayerPrefs.SetInt("BounceGarden.RewardSeen.v76."+tier,1);PlayerPrefs.Save();}}
+  if(root!=null)Destroy(root.gameObject);
+ }
+}
+public sealed class StreakRewardPresentation:MonoBehaviour,UnityEngine.EventSystems.IPointerClickHandler {
+ readonly List<CanvasGroup> hidden=new List<CanvasGroup>();
+ public string Phase{get;private set;}="dim";
+ bool canAccelerate,accelerated;public bool Accelerated=>accelerated;
+ public void OnPointerClick(UnityEngine.EventSystems.PointerEventData data){if(canAccelerate)accelerated=true;}
+ public IEnumerator Play(int wins,List<StreakBooster> kinds,List<RectTransform> targets,bool repeated=false){
+  canAccelerate=repeated;
+  var root=(RectTransform)transform;
+  var shade=UICraft.Box(root,"全屏压暗",0,0,10000,10000,Color.clear,false,true);shade.sprite=null;
+  var title=UICraft.Label(root,wins+"连胜奖励",0,440,950,100,62);title.color=new Color(1,.94f,.7f,0);
+  var note=UICraft.Label(root,"赠送本关道具 · 点击选择后再发射",0,-260,1000,70,32);note.color=new Color(1,1,1,0);
+  if(repeated){var hint=UICraft.Label(root,"点击加速",0,-360,600,70,34);hint.color=Color.white;}
+  var cards=new RectTransform[kinds.Count];var halos=new RectTransform[kinds.Count];var labels=new CanvasGroup[kinds.Count];var starts=new Vector2[kinds.Count];var ends=new Vector2[kinds.Count];
+  for(int i=0;i<kinds.Count;i++){
+   var group=targets[i].gameObject.AddComponent<CanvasGroup>();group.alpha=0;hidden.Add(group);
+   starts[i]=new Vector2((i-(kinds.Count-1)*.5f)*310,70);
+   // Resolve the real HUD position through the hierarchy, including safe-area transforms.
+   ends[i]=root.InverseTransformPoint(targets[i].position);
+   cards[i]=UICraft.Root(root,"赠送 "+kinds[i],starts[i].x,starts[i].y,300,300);
+   halos[i]=UICraft.Root(cards[i],"旋转闪光",0,0,440,440);
+   var glow=halos[i].gameObject.AddComponent<StreakRewardGlow>();glow.raycastTarget=false;glow.color=new Color(1,.86f,.4f,.8f);
+   var icon=UICraft.Box(cards[i],"奖励道具",0,0,250,250,Color.white);GardenArt70.Orb(icon,kinds[i],240,0,8);
+   var label=UICraft.Label(cards[i],StreakTrials.Name(kinds[i])+" ×1",0,-175,310,74,30);label.color=Color.white;labels[i]=label.gameObject.AddComponent<CanvasGroup>();
+   cards[i].localScale=Vector3.zero;
+  }
+  SoundService.Play("streak_reward");
+  const float duration=2.35f;float elapsed=0;
+  while(elapsed<duration){
+   if(this==null||root==null)yield break;
+   elapsed+=Time.unscaledDeltaTime*(accelerated?4:1);float reveal=Mathf.Clamp01((elapsed-.18f)/.42f),fly=Mathf.Clamp01((elapsed-1.22f)/.72f),fade=Mathf.Clamp01((elapsed-2.05f)/.30f);
+   Phase=elapsed<.18f?"dim":elapsed<1.22f?"reveal":elapsed<1.94f?"fly":"restore";
+   shade.color=new Color(.035f,.025f,.09f,.76f*Mathf.Clamp01(elapsed/.18f)*(1-fade));
+   title.color=new Color(1,.94f,.7f,reveal*(1-Mathf.Clamp01(fly*2)));note.color=new Color(1,1,1,reveal*(1-Mathf.Clamp01(fly*2)));
+   for(int i=0;i<cards.Length;i++){
+    float ease=fly*fly*(3-2*fly);cards[i].anchoredPosition=Vector2.Lerp(starts[i],ends[i],ease)+Vector2.up*(Mathf.Sin(fly*Mathf.PI)*120);
+    cards[i].localScale=Vector3.one*Mathf.Lerp(UICraft.OutBack(reveal),112f/240f,ease);
+    halos[i].localRotation=Quaternion.Euler(0,0,elapsed*38);halos[i].localScale=Vector3.one*(1+.07f*Mathf.Sin(elapsed*9));
+    var glow=halos[i].GetComponent<Graphic>();glow.color=new Color(1,.88f,.5f,(.6f+.25f*Mathf.Exp(-Mathf.Pow((elapsed-.35f)*8,2)))*(1-fly));labels[i].alpha=1-fly;
+    if(fly>=1){hidden[i].alpha=1;cards[i].gameObject.SetActive(false);}
+   }
+   yield return null;
+  }
+  Phase="complete";
+ }
+ void OnDestroy(){foreach(var group in hidden)if(group!=null){group.alpha=1;Destroy(group);}}
+}
+// Soft radial light and tapered rays, rendered without an extra texture or material.
+public sealed class StreakRewardGlow:MaskableGraphic {
+ protected override void OnPopulateMesh(VertexHelper vh){vh.Clear();const int segments=64;float radius=rectTransform.rect.width*.5f;
+  for(int i=0;i<segments;i++){float a=i*Mathf.PI*2/segments,b=(i+1)*Mathf.PI*2/segments;int n=vh.currentVertCount;var edge=color;edge.a=0;vh.AddVert(Vector3.zero,color,Vector2.zero);vh.AddVert(new Vector3(Mathf.Cos(a),Mathf.Sin(a))*radius,edge,Vector2.zero);vh.AddVert(new Vector3(Mathf.Cos(b),Mathf.Sin(b))*radius,edge,Vector2.zero);vh.AddTriangle(n,n+1,n+2);}
+  for(int i=0;i<12;i++){float a=i*Mathf.PI/6;int n=vh.currentVertCount;var edge=color;edge.a=0;vh.AddVert(new Vector3(Mathf.Cos(a-.08f),Mathf.Sin(a-.08f))*radius*.25f,color,Vector2.zero);vh.AddVert(new Vector3(Mathf.Cos(a),Mathf.Sin(a))*radius,edge,Vector2.zero);vh.AddVert(new Vector3(Mathf.Cos(a+.08f),Mathf.Sin(a+.08f))*radius*.25f,color,Vector2.zero);vh.AddTriangle(n,n+1,n+2);}
+ }
+}
+}

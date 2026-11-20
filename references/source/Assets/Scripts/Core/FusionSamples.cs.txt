@@ -1,0 +1,124 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+    [Serializable]
+    public sealed class FusionSampleDefinition {
+        public string id, name, focus;
+        public int moves;
+        public FusionLevelDefinition definition;
+    }
+
+    /// <summary>Independent authoring examples. Never replaces bundled campaign assets.</summary>
+    public static class FusionSamples {
+        public static FusionSampleDefinition[] CreateDefinitions() {
+            return new[] { Relay(), Armor(), Chest(), Cannon(), Gate(), Producer(), Assistant() };
+        }
+
+        sealed class Board {
+            readonly string prefix;
+            readonly List<FusionPieceDefinition> pieces = new List<FusionPieceDefinition>();
+            public Board(string id) {
+                prefix = id;
+                for (int r = 0; r < 9; r++) for (int c = 0; c < 9; c++)
+                    pieces.Add(new FusionPieceDefinition { id = id + "_n_" + c + "_" + r, kind = "normal", c = c, r = r, hp = 1 });
+            }
+            public FusionPieceDefinition Put(string id, string kind, int c, int r, int hp = 1, int size = 1, string goal = "") {
+                pieces.RemoveAll(p => p.c < c + size && p.c + p.size > c && p.r < r + size && p.r + p.size > r);
+                var piece = new FusionPieceDefinition { id = prefix + "_" + id, kind = kind, c = c, r = r, hp = hp, size = size, goal = goal };
+                pieces.Add(piece); return piece;
+            }
+            public void Goal(string id, int c, int r, string kind = "fish", int hp = 1) { Put(id, kind, c, r, hp, 1, kind); }
+            public FusionLevelDefinition Finish() {
+                return new FusionLevelDefinition { pieces = pieces.OrderBy(p => p.r).ThenBy(p => p.c).ToArray(),
+                    refillHp = 1, refillBudget = 80, ratingRewards = false, finiteBoosters = true, physicsPolicy = "no_ball_ball" };
+            }
+        }
+
+        static FusionSampleDefinition Sample(string id, string name, int moves, string focus, Board board) {
+            return new FusionSampleDefinition { id = id, name = name, moves = moves, focus = focus, definition = board.Finish() };
+        }
+        static FusionContentDefinition Content(string id, string goal) {
+            return new FusionContentDefinition { id = id, kind = goal, goal = goal, hp = 1 };
+        }
+
+        static FusionSampleDefinition Relay() {
+            var b = new Board("p01");
+            b.Put("entry", "line_v", 4, 8);
+            b.Put("relay", "line_h", 4, 6);
+            b.Put("burst", "bomb", 6, 6);
+            foreach (var cell in new[] { new[] {2,6}, new[] {3,6}, new[] {5,6}, new[] {7,6}, new[] {6,5}, new[] {7,5}, new[] {5,7}, new[] {7,7} })
+                b.Goal("g_" + cell[0] + "_" + cell[1], cell[0], cell[1]);
+            return Sample("P-01", "工具接力", 8, "选择底部入口，观察独立工具接力与任务进展。", b);
+        }
+        static FusionSampleDefinition Armor() {
+            var b = new Board("p02");
+            b.Put("entry", "line_v", 4, 8);
+            b.Put("sweep", "line_h", 4, 6);
+            b.Put("burst", "bomb", 5, 6);
+            foreach (int c in new[] {2,3,6,7}) {
+                var p = b.Put("armored_" + c, "fish", c, 6, 1, 1, "fish"); p.armor = true;
+                b.Goal("g_" + c, c, 5, "toy");
+            }
+            return Sample("P-02", "破壳再接力", 9, "同次攻击只去护壳，后续独立效果继续推进。", b);
+        }
+        static FusionSampleDefinition Chest() {
+            var b = new Board("p03");
+            var box = b.Put("box", "chest", 3, 5, 2, 2);
+            box.contents = new[] { Content("p03_inside_1", "fish"), Content("p03_inside_2", "toy"), Content("p03_inside_3", "fish"), Content("p03_inside_4", "toy") };
+            b.Put("cross", "cross", 4, 8);
+            b.Put("side", "line_v", 6, 8);
+            b.Goal("g1", 2, 6); b.Goal("g2", 6, 6); b.Goal("g3", 2, 4, "toy"); b.Goal("g4", 6, 4, "toy");
+            return Sample("P-03", "箱子里的礼物", 10, "先打开箱子，再收集已经计入总量的内部目标。", b);
+        }
+        static FusionSampleDefinition Cannon() {
+            var b = new Board("p04");
+            var cannon = b.Put("cannon", "cannon", 4, 6); cannon.direction = "up"; cannon.threshold = 2; cannon.range = 6; cannon.damage = 2; cannon.stock = 2; cannon.activationMode = "neighbor";
+            b.Put("entry", "bomb", 4, 8);
+            for (int r = 1; r <= 5; r++) b.Goal("lane_" + r, 4, r, r % 2 == 0 ? "toy" : "fish");
+            var line = b.Put("bonus_line", "line_h", 6, 3);
+            var battery = b.Put("battery", "battery", 6, 6); battery.threshold = 2; battery.links = new[] { line.id }; battery.network = "p04_bonus";
+            b.Goal("side1", 5, 3); b.Goal("side2", 7, 3, "toy");
+            return Sample("P-04", "邻消机关炮", 10, "清炮旁边的普通砖获得固定方向收益，旁边电池提供一次额外接力。", b);
+        }
+        static FusionSampleDefinition Gate() {
+            var b = new Board("p05");
+            var keyA = b.Put("key_left", "key", 2, 7);
+            var keyB = b.Put("key_right", "key", 6, 7);
+            keyA.threshold = 1; keyB.threshold = 1;
+            for (int c = 0; c < 9; c++) if (c != 3 && c != 4) b.Put("wall_" + c, "stone", c, 5);
+            var gate = b.Put("gate_left", "gate", 3, 5); gate.links = new[] { keyA.id, keyB.id }; gate.threshold = 2;
+            var gateRight = b.Put("gate_right", "gate", 4, 5); gateRight.links = new[] { keyA.id, keyB.id }; gateRight.threshold = 2;
+            var vineA = b.Put("vine_left", "vine", 2, 6); vineA.group = "p05_vine"; vineA.threshold = 2;
+            var vineB = b.Put("vine_right", "vine", 6, 6); vineB.group = "p05_vine"; vineB.threshold = 2;
+            b.Put("entry_left", "line_v", 2, 8); b.Put("entry_right", "line_v", 6, 8);
+            b.Put("behind_gate", "cross", 4, 3);
+            for (int c = 2; c <= 6; c++) b.Goal("back_" + c, c, c == 4 ? 2 : 3, c % 2 == 0 ? "fish" : "toy");
+            b.Goal("side1", 1, 6); b.Goal("side2", 7, 6);
+            return Sample("P-05", "双节点开门", 10, "两侧钥匙打开中央两格直达捷径，也可选择绕边进入上区。", b);
+        }
+        static FusionSampleDefinition Producer() {
+            var b = new Board("p06");
+            var source = b.Put("producer", "producer", 4, 8); source.stock = 3; source.batchSize = 1; source.threshold = 2; source.hitsPerItem = 1; source.activationMode = "direct";
+            source.contents = new[] { Content("p06_stock_1", "fish"), Content("p06_stock_2", "toy"), Content("p06_stock_3", "fish") };
+            source.spawnCells = new[] { new Vector2Int(3, 8), new Vector2Int(5, 8), new Vector2Int(4, 7) };
+            b.Put("entry", "bomb", 3, 7);
+            b.Put("side", "line_h", 2, 6);
+            b.Goal("outside1", 2, 5); b.Goal("outside2", 6, 5, "toy"); b.Goal("outside3", 2, 7); b.Goal("outside4", 6, 7, "toy");
+            return Sample("P-06", "有限出货", 11, "先正面充能，再转向两侧收货；看清剩余库存，耗尽后关闭。", b);
+        }
+        static FusionSampleDefinition Assistant() {
+            var b = new Board("p07");
+            var helper = b.Put("assistant", "assistant", 4, 6); helper.threshold = 3; helper.stock = 2;
+            b.Put("entry", "bomb", 4, 8);
+            b.Put("relay", "line_h", 4, 4);
+            foreach (var cell in new[] { new[] {1,1}, new[] {7,1}, new[] {2,4}, new[] {3,4}, new[] {5,4}, new[] {6,4}, new[] {3,5}, new[] {5,5} })
+                b.Goal("g_" + cell[0] + "_" + cell[1], cell[0], cell[1], cell[0] % 2 == 0 ? "toy" : "fish");
+            var sample = Sample("P-07", "助手帮忙收尾", 10, "充能助手优先帮助剩余任务，里程碑奖励提供最后一次可见助力。", b);
+            sample.definition.milestones = new[] { new FusionMilestoneDefinition { id = "p07_progress", threshold = 4, kind = "assistant", count = 1 } };
+            return sample;
+        }
+    }
+}

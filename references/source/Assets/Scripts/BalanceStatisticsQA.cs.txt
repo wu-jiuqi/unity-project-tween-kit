@@ -1,0 +1,99 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace BounceGarden {
+// Explicit opt-in, isolated QA only. No production state or timing changes.
+public sealed class BalanceStatisticsQA:MonoBehaviour {
+ AppUI app;GameSession game;BalanceStatistics stats;string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(RuntimeQA.IsIsolated&&Environment.GetCommandLineArgs().Contains("--balance-qa"))new GameObject("Balance statistics QA").AddComponent<BalanceStatisticsQA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(Path.Combine(dir,"checks.txt"),(ok?"PASS ":"FAIL ")+label+"\n");}
+ void Call(string method,params object[] args)=>typeof(GameSession).GetMethod(method,BindingFlags.NonPublic|BindingFlags.Instance).Invoke(game,args);
+ void StatsEvent(string method,bool value)=>typeof(BalanceStatistics).GetMethod(method,BindingFlags.NonPublic|BindingFlags.Instance).Invoke(stats,new object[]{value});
+ void Click(string name){var b=app.GetComponentsInChildren<Button>().FirstOrDefault(x=>x.isActiveAndEnabled&&x.name==name);Check(b!=null,"button "+name);if(b!=null)b.onClick.Invoke();}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var texture=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,texture);File.WriteAllBytes(Path.Combine(dir,name+".png"),texture.EncodeToPNG());Destroy(texture);rt.Release();Destroy(rt);}
+ IEnumerator Battle(int level){
+  app.QAStartLevel(level);yield return app.QAWaitForLevel();float deadline=Time.realtimeSinceStartup+15;
+  while(Time.realtimeSinceStartup<deadline){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();if(!app.AlphabetIntroActive&&!app.Session.IsPaused&&stats.History.active!=null)break;yield return null;}
+  game.QAIgnoreFocusLoss=true;StatsEvent("OnApplicationFocus",true);Check(stats.History.active!=null,"round starts after onboarding");
+ }
+ void ModelChecks(){
+  var a=new BalanceRound{id="a",level=1,configHash="config-a",outcome="win",usedShots=5,score=100};
+  var b=new BalanceRound{id="b",level=1,configHash="config-a",outcome="loss"};
+  var c=new BalanceRound{id="c",level=1,configHash="config-b",outcome="win",usedShots=20};
+  var d=new BalanceRound{id="d",level=1,configHash="config-a",outcome="win",boostedVolleys=1};
+  Check(new[]{a,b,c,d}.GroupBy(BalanceReport.Group).Count()==3,"configuration and assistance split cohorts");
+  Check(BalanceReport.Median(new double[]{9,1,4,2})=="3","even median uses middle pair");
+  Check(BalanceReport.Median(Array.Empty<double>())=="","empty median not fabricated");
+  Check(BalanceReport.Csv("x,\"y\"\n")=="\"x,\"\"y\"\"\n\"","CSV escapes quotes comma and newline");
+  Check(BalanceReport.Json(new BalanceHistory()).Contains("playScore + victoryClearScore + completionBonus = score"),"export metadata explains independent phase score partition");
+  string summary=BalanceReport.SummaryCsv(new[]{a,b,c,d});Check(summary.Split('\n').Count(x=>x.Trim().Length>0)==4,"three summary rows");Check(summary.Contains("0.500"),"win rate denominator includes wins and losses");
+  string saved=JsonUtility.ToJson(new BalanceHistory{rounds=new System.Collections.Generic.List<BalanceRound>{a},active=b});
+  var restored=new GameObject("Recovery fixture").AddComponent<BalanceStatistics>();restored.Restore(saved);
+  Check(restored.History.rounds.Count==2&&restored.History.active==null&&restored.History.rounds.Last().outcome=="interrupted","crash checkpoint becomes interrupted history");
+  var large=new BalanceHistory();for(int i=0;i<520;i++)large.rounds.Add(new BalanceRound{id=i.ToString()});restored.Restore(JsonUtility.ToJson(large));
+  Check(restored.History.rounds.Count==512&&restored.History.droppedRounds==8,"bounded history reports dropped rows");
+  string before=JsonUtility.ToJson(restored.History);try{restored.Restore("{\"schema\":99}");}catch{}Check(before==JsonUtility.ToJson(restored.History),"invalid history leaves existing data intact");Destroy(restored.gameObject);
+ }
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();int at=Array.IndexOf(args,"--qa-out");dir=at>=0?args[at+1]:Path.Combine(Application.temporaryCachePath,"BalanceQA");Directory.CreateDirectory(dir);File.WriteAllText(Path.Combine(dir,"checks.txt"),"");
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Exception||t==LogType.Error){errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();Check(app!=null,"AppUI exists");game=app.Session;stats=app.Metrics.Balance;app.QANavigate("home");ModelChecks();
+  yield return Battle(4);game.SetPaused(false);var round=stats.History.active;
+  Check(round.level==5&&round.initialShots==OpeningCampaign.Stage(4).moves,"authored initial shots captured");
+  Check(round.goals.Length==game.OpeningTargets.Length&&round.configHash.Length==64,"goals and SHA256 config captured");
+  Check(round.generatedSpecials==0,"initial special pieces not counted as newly generated");
+  string config=BalanceStatistics.Configuration(game);var randomBefore=UnityEngine.Random.state;string same=BalanceStatistics.Configuration(game);Check(config==same&&randomBefore.Equals(UnityEngine.Random.state),"config read stable and does not consume random");
+  int moves=game.Shots,score=game.Score,stock=app.Profile.BoosterStock(StreakBooster.Pierce);stats.ExportJson();Check(game.Shots==moves&&game.Score==score&&app.Profile.BoosterStock(StreakBooster.Pierce)==stock,"reading statistics does not alter game or inventory");
+  int oldMoves=game.CurrentLevel.initialShots;game.CurrentLevel.initialShots++;Check(config!=BalanceStatistics.Configuration(game),"moves change configuration fingerprint");game.CurrentLevel.initialShots=oldMoves;
+  string originalColor=game.OpeningTargets[0].color;game.OpeningTargets[0].color="qa-test";Check(config!=BalanceStatistics.Configuration(game),"goal change configuration fingerprint");game.OpeningTargets[0].color=originalColor;
+  game.OpeningCollected[0]++;Check(config==BalanceStatistics.Configuration(game),"collected progress does not change fingerprint");game.OpeningCollected[0]--;
+  float seconds=round.activeSeconds;game.SetPaused(true);yield return new WaitForSecondsRealtime(.2f);Check(Mathf.Abs(round.activeSeconds-seconds)<.04f,"pause excluded from active seconds");game.SetPaused(false);StatsEvent("OnApplicationFocus",true);yield return new WaitForSecondsRealtime(.15f);Check(round.activeSeconds>seconds+.05f,"active time advances while playing");
+  seconds=round.activeSeconds;StatsEvent("OnApplicationPause",true);yield return new WaitForSecondsRealtime(.15f);Check(Mathf.Abs(round.activeSeconds-seconds)<.04f,"background excluded from active time");StatsEvent("OnApplicationPause",false);
+  // Score old-formula equivalence including pause, finalization, and cap saturation.
+  var brick=game.CollectionBricks.First(b=>b.Alive);int damageSum=game.DamageScore;
+  foreach(int hp in new[]{0,1,3,10001}){int prior=game.Score;Call("ScoreImpact",brick,hp,false);Check(game.Score-prior==Mathf.Clamp(hp,0,10000)*100,"damage score legacy equivalence "+hp);}
+  game.SetPaused(true);score=game.Score;Call("ScoreImpact",brick,2,true);Check(game.Score==score,"paused scoring still rejected");game.SetPaused(false);
+  Check(game.DamageScore>damageSum,"damage breakdown tracks credited points");
+  Call("ResetScore");Call("AddScore",ScoreRules.Cap-50);Call("ScoreImpact",brick,1,true);Check(game.Score==ScoreRules.Cap&&game.DamageScore==50&&game.BreakScore==0,"score cap breakdown only credits available points");game.FinalizeScore(true);Check(game.CreditedCompletionBonus==0,"capped completion records actual credited bonus");stats.ExportJson();Check(round.otherScore>=0&&round.damageScore+round.breakScore+round.objectiveScore+round.otherScore+round.completionBonus==round.score,"score components reconcile at cap");Call("ResetScore");
+  PlayerStrategyChecks.Run(game,Check,dir);
+  moves=game.Shots;Check(game.TryShoot(Vector2.up),"real launch accepted");yield return new WaitForSecondsRealtime(.25f);Check(round.usedShots==1&&game.Shots==moves-1&&round.launches.Count==1,"one accepted volley records one move");
+  stats.ExportJson();Check(round.launches[0].number==1,"launch detail included");
+  // Restart and return use the real AppUI lifecycle (no synthetic outcome shortcut).
+  yield return Battle(4);Check(stats.History.rounds.Any(r=>r.id==round.id&&r.outcome=="restarted"),"restart preserves previous attempt");
+  Check(stats.History.active.configAttempt==2,"same config attempt increments");round=stats.History.active;
+  app.QANavigate("home");yield return null;Check(stats.History.active==null&&round.outcome=="abandoned","return home records exit");
+  // Force only fixture readiness; run actual LateUpdate outcome and AppUI finalization.
+  yield return Battle(4);round=stats.History.active;game.enabled=false;game.SetPaused(false);
+  for(int i=0;i<game.OpeningTargets.Length;i++)game.OpeningCollected[i]=game.OpeningTargets[i].count;
+  Physics2D.simulationMode=SimulationMode2D.Script;
+  for(int i=0;i<180&&game.IsPlaying;i++)game.QAAdvanceOneStep();
+  float waitUntil=Time.realtimeSinceStartup+15;while(stats.History.active!=null&&Time.realtimeSinceStartup<waitUntil)yield return null;
+  Check(round.hasSettlementBreakdown&&round.playScore+round.victoryClearScore+round.completionBonus==round.score,"phase score split reconciles without double counting");Check(BalanceReport.RoundsCsv(new[]{round}).Contains("通关清场奖励"),"phase scores exported to CSV");
+  Check(!game.IsPlaying&&round.outcome=="win"&&stats.History.active==null,"actual goal outcome finalizes winning record");
+  Check(round.completionBonus==game.CreditedCompletionBonus&&round.score==game.Score,"win recorded after completion bonus");
+  int count=stats.History.rounds.Count;app.Metrics.Finish("win");Check(stats.History.rounds.Count==count,"duplicate finish is idempotent");
+  app.QANavigate("home");game.enabled=true;yield return Battle(4);round=stats.History.active;game.enabled=false;game.SetPaused(false);
+  typeof(GameSession).GetField("rules",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game).GetType().GetMethod("Reset").Invoke(typeof(GameSession).GetField("rules",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(game),new object[]{0});
+  for(int i=0;i<180&&game.IsPlaying;i++)game.QAAdvanceOneStep();Check(!game.IsPlaying&&round.outcome=="loss","actual exhausted-shot outcome records failure");Check(round.goals.Any(g=>g.collected<g.required)&&round.completionBonus==0,"failure retains missing goals without win bonus");
+  app.QANavigate("home");yield return null;
+  // Deliberate collector failure must not propagate or touch gameplay state.
+  score=game.Score;moves=game.Shots;int writes=0;stats.SetWriterForTest(_=>{writes++;throw new IOException("QA injected storage failure");});stats.Save();Check(game.Score==score&&game.Shots==moves&&stats.LastError.Contains("QA injected"),"storage failure contained");
+  stats.Save();stats.Save();Check(writes==1,"storage failures are throttled instead of retrying every frame");
+  string retried=null;stats.SetWriterForTest(json=>{retried=json;File.WriteAllText(Path.Combine(dir,"persisted-history.json"),json);});stats.Save();Check(!string.IsNullOrEmpty(retried),"failed storage write can be retried");
+  var diskRestore=new GameObject("Disk recovery fixture").AddComponent<BalanceStatistics>();diskRestore.Restore(File.ReadAllText(Path.Combine(dir,"persisted-history.json")));Check(diskRestore.History.active==null&&diskRestore.History.rounds.Count==stats.History.rounds.Count,"disk round trip does not invent an active record");Destroy(diskRestore.gameObject);
+  File.WriteAllText(Path.Combine(dir,"sample-rounds.json"),stats.ExportJson());File.WriteAllText(Path.Combine(dir,"sample-levels.csv"),BalanceReport.SummaryCsv(stats.History.rounds));
+  typeof(AppUI).GetMethod("Settings",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(app,null);yield return new WaitForSecondsRealtime(.25f);
+  Check(app.GetComponentsInChildren<Button>().Any(b=>b.isActiveAndEnabled&&b.name=="试玩统计")==PlayerStrategyTestBuild.Enabled,"statistics entry follows the Windows playtest build flag");typeof(AppUI).GetMethod("OpenBalanceStatistics",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(app,null);yield return new WaitForSecondsRealtime(.3f);yield return Capture("statistics-540");
+  Click("Button 查看关卡汇总");yield return new WaitForSecondsRealtime(.3f);yield return Capture("summary-540");
+  Click("Button 查看逐局");yield return new WaitForSecondsRealtime(.2f);var recordButton=app.GetComponentsInChildren<Button>().FirstOrDefault(b=>b.name.StartsWith("Balance round "));Check(recordButton!=null,"round details entry");recordButton?.onClick.Invoke();yield return new WaitForSecondsRealtime(.25f);yield return Capture("detail-540");
+  Click("Button 返回统计");yield return new WaitForSecondsRealtime(.2f);Click("Button 导出试玩数据");yield return new WaitForSecondsRealtime(.25f);Check(!string.IsNullOrEmpty(stats.LastExportDirectory)&&File.Exists(Path.Combine(stats.LastExportDirectory,"rounds.json"))&&File.Exists(Path.Combine(stats.LastExportDirectory,"rounds.csv"))&&File.Exists(Path.Combine(stats.LastExportDirectory,"levels.csv")),"export creates JSON and two CSV files");yield return Capture("export-540");
+  File.WriteAllText(Path.Combine(dir,"result.json"),$"{{\"checks\":{checks},\"failures\":{failures},\"errors\":{errors}}}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

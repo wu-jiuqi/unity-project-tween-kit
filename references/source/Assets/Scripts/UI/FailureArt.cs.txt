@@ -1,0 +1,38 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden {
+// Shared immutable textures and sprite rectangles. No character assets are loaded.
+public static class FailureArt {
+    [Serializable] sealed class Entry { public string name, texture; public int[] rect; }
+    [Serializable] sealed class Layout { public Entry[] sprites; }
+    static readonly Dictionary<string, Sprite> sprites = new Dictionary<string, Sprite>();
+    static readonly Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
+    static bool loaded;
+    public static Sprite Get(string name) {
+        if (!loaded) Load();
+        if (sprites.TryGetValue(name, out var sprite)) return sprite;
+        throw new InvalidOperationException("Missing failure sprite: " + name);
+    }
+    static void Load() {
+        var text = Resources.Load<TextAsset>("Art/FailureV25/atlases");
+        if (text == null) throw new InvalidOperationException("FailureV25 atlas manifest is missing.");
+        var layout = JsonUtility.FromJson<Layout>(text.text);
+        foreach (var entry in layout.sprites) {
+            if (!textures.TryGetValue(entry.texture, out var texture)) {
+                texture = Resources.Load<Texture2D>("Art/FailureV25/" + entry.texture);
+                if (texture == null) throw new InvalidOperationException("Missing failure atlas: " + entry.texture);
+                textures.Add(entry.texture, texture);
+            }
+            var r = entry.rect;
+            float sx=texture.width/(entry.texture=="background"?2560f:2048f),sy=texture.height/(entry.texture=="background"?3840f:256f);
+            var sprite = Sprite.Create(texture, new Rect(r[0]*sx, texture.height-(r[1]+r[3])*sy, r[2]*sx, r[3]*sy),
+                new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect);
+            sprite.name = entry.name;
+            sprites.Add(entry.name, sprite);
+        }
+        loaded = true;
+    }
+}
+}

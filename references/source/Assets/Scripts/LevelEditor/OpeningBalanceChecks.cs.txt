@@ -1,0 +1,62 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden.LevelEditing {
+public static class OpeningBalanceChecks {
+ public static int Run(string directory){
+  Directory.CreateDirectory(directory);var checks=new List<string>();int failures=0;
+  Action<bool,string> check=(ok,name)=>{checks.Add((ok?"PASS ":"FAIL ")+name);if(!ok)failures++;};
+  var root=new GameObject("Balance regression checks");var game=root.AddComponent<GameSession>();game.enabled=false;game.QAIgnoreFocusLoss=true;
+  Physics2D.simulationMode=SimulationMode2D.Script;Time.fixedDeltaTime=1f/60;Time.timeScale=0;
+  try{
+   var data=JsonUtility.FromJson<OpeningData>(JsonUtility.ToJson(OpeningCampaign.Data));var s=data.levels[0];s.health=new OpeningHealth{ordinaryHp=3,refillHp=5};s.hpOverrides=new[]{new OpeningHpOverride{c=4,r=4,hp=7}};
+   OpeningCampaign.LoadBalanceData(JsonUtility.ToJson(data));game.StartLevel(0);game.SetPaused(false);
+   check(game.CollectionBricks.Where(b=>b.Definition.referenceCol==4&&b.Definition.referenceRow==4).Single().CurrentHealth==7,"local HP reaches physical brick");
+   check(game.CollectionBricks.Where(b=>b.Definition.referenceCol!=4||b.Definition.referenceRow!=4).All(b=>b.CurrentHealth==3),"ordinary HP reaches every other physical brick");
+   check(game.BalanceCheckRefillHp()==5,"refill HP reaches actual spawned body");
+   game.StartLevel(37);game.SetPaused(false);game.BalanceCheckPendingArrival(check);game.BalanceCheckWaitingRoute(check);
+   data.levels[0].health=null;data.levels[0].hpOverrides=null;OpeningCampaign.LoadBalanceData(JsonUtility.ToJson(data));game.StartLevel(0);
+   check(game.CollectionBricks.All(b=>b.CurrentHealth==1),"old levels keep one-hit default");
+   game.BalanceCheckSeeds(check);
+   var weights=new BalanceWeights();var timing=new BalanceTimingState{CanLaunch=true,Groups=1,SinceShot=2};
+   check(BalanceFirePolicy.ShouldFire("rapid",timing,weights,out _),"rapid mode permits overlapping groups");
+   check(!BalanceFirePolicy.ShouldFire("settled",timing,weights,out _),"settled mode rejects an unfinished previous group");
+   timing.Groups=0;timing.Settled=true;check(BalanceFirePolicy.ShouldFire("settled",timing,weights,out _),"settled mode fires after complete settlement");
+   timing.Groups=1;timing.Settled=false;check(BalanceFirePolicy.ShouldFire("hybrid",timing,weights,out _),"hybrid can overlap on an open board");
+   timing.SpecialOpportunity=1;timing.Effects=true;timing.Moving=true;check(!BalanceFirePolicy.ShouldFire("hybrid",timing,weights,out _),"hybrid waits for a valuable special/settlement opportunity");
+   timing.Groups=weights.hybridMaxGroups;check(!BalanceFirePolicy.ShouldFire("hybrid",timing,weights,out _),"hybrid respects its live-group cap");
+   check(BalanceFirePolicy.RayBox(Vector2.zero,Vector2.up,new Vector2(.7f,3),Vector2.one*.82f,out float distance)&&Mathf.Abs(distance-2.18f)<.001f,"aiming respects the whole 2x2 box footprint");
+  }catch(Exception e){check(false,e.ToString());}
+  finally{game.StopLevel();UnityEngine.Object.Destroy(root);}
+  File.WriteAllLines(Path.Combine(directory,"checks.txt"),checks);File.WriteAllText(Path.Combine(directory,"summary.json"),"{\"checks\":"+checks.Count+",\"failures\":"+failures+"}");
+  Debug.Log("OPENING_BALANCE_CHECKS "+checks.Count+" failures="+failures);return failures;
+ }
+}
+}
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public void BalanceCheckSeeds(Action<bool,string> check){
+  Func<int[]> sample=()=>new[]{chainRewardRandom.Next(),openingCatRandom.Next(),sevenRandom.Next(),refillRandom.Next()};
+  BalanceSeed(101);var first=sample();BalanceSeed(101);check(first.SequenceEqual(sample()),"all four gameplay random sources repeat for an identical seed");
+  BalanceSeed(202);check(first.Zip(sample(),(a,b)=>a!=b).All(v=>v),"all four gameplay random sources vary for independent seed sets");
+ }
+ public void BalanceCheckPendingArrival(Action<bool,string> check){
+  QASevenClear();var brick=QASevenBrick(7,8,1);var grid=brick.GetComponent<ChainGridPiece>();var body=brick.GetComponent<Rigidbody2D>();var target=ChainGridRules.Center(7,8);var start=target+Vector2.up*.14f;body.position=start;
+  var route=new GridMotion{View=brick.transform,From=start,To=target,Path=new List<Vector2>{target},PathStarts=new List<float>{simulationClock-.1f},PathEnds=new List<float>{simulationClock-.01f},Version=grid.MotionVersion};chainMotions.Add(route);grid.FallAt=simulationClock-.1f;
+  TickChainGravity(.02f);check(chainMotions.Contains(route),"MovePosition request does not prematurely release physical route");
+  chainReplacementRewards.Enqueue(SevenSpecialRules.Horizontal);TryChainReplacementRewards();var replacement=ChainTools.Last();check(route.View==replacement.View,"reward created during pending arrival inherits exact route");
+  TickChainGravity(.02f);check(Vector2.Distance(replacement.Position,target)<.001f,"replacement completes pending final movement");
+ }
+ public int BalanceCheckRefillHp(){QASevenClear();SpawnChainCell(0,0,0,0,BrickKind.Normal);return CollectionBricks.Last().CurrentHealth;}
+ public void BalanceCheckWaitingRoute(Action<bool,string> check){
+  QASevenClear();var flower=SpawnChainTool(SevenSpecialRules.Rainbow,ChainGridRules.Center(7,3)+Vector2.up*.14f,1);var grid=flower.View.GetComponent<ChainGridPiece>();grid.Col=7;grid.Row=3;grid.FallAt=simulationClock;
+  var route=new GridMotion{View=flower.View,From=ChainGridRules.Center(7,1),To=ChainGridRules.Center(7,3),Path=new List<Vector2>{ChainGridRules.Center(7,3)},PathStarts=new List<float>{simulationClock},PathEnds=new List<float>{simulationClock+.2f},Version=grid.MotionVersion};chainMotions.Add(route);
+  SevenWait(flower);check(chainMotions.Contains(route),"waiting flower keeps reserved moving route");check(FixedChainPiece(grid),"waiting flower keeps logical footprint reserved");
+  sevenRefillBarrier=true;sevenAwaitRefill=false;float before=route.PathEnds[0];TickChainGravity(.02f);check(Mathf.Abs(route.PathEnds[0]-before-.02f)<.00001f,"freeze shifts all route deadlines without time jump");
+  sevenRefillBarrier=false;sevenAwaitRefill=false;sevenWaiting.Remove(flower);flower.Waiting=false;simulationClock=route.PathEnds[0]+.01f;
+  var destination=AdvanceBoardFlow(route,flower.Position,.02f,new List<ChainGridPiece>());check(Vector2.Distance(destination,route.To)<.00001f,"resumed reserved path reaches its intended cell");
+ }
+}
+}

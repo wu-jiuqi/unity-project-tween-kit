@@ -1,0 +1,47 @@
+using System;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+namespace BounceGarden {
+[Serializable]public sealed class CopperFrame {public float x,y,w,h;}
+[Serializable]public sealed class CopperClip {public string key;public int sourceWidth,sourceHeight;public CopperFrame[] frames;}
+[Serializable]public sealed class CopperLayout {public CopperClip[] clips;}
+public static class OpeningCopperArt {
+ public const int MaxHealth=25,HealthPerState=5;
+ public static readonly Color NumberColor=new Color32(73,37,13,255);
+ public static void StyleNumber(TMP_Text text){text.color=NumberColor;text.fontStyle=FontStyles.Bold;text.outlineColor=new Color32(255,245,214,255);text.outlineWidth=.14f;}
+ static CopperLayout data;static readonly Dictionary<string,Sprite[]> cache=new Dictionary<string,Sprite[]>();
+ static CopperClip Clip(string key){if(data==null)data=JsonUtility.FromJson<CopperLayout>(Resources.Load<TextAsset>("Art/FourthGroup/layout").text);foreach(var c in data.clips)if(c.key==key)return c;throw new InvalidOperationException("Missing copper clip "+key);}
+ public static Sprite Frame(string key,int index){var c=Clip(key);if(!cache.TryGetValue(key,out var frames)){var tex=Resources.Load<Texture2D>("Art/FourthGroup/"+key);if(tex==null)throw new InvalidOperationException("Missing copper texture "+key);float sx=(float)tex.width/c.sourceWidth,sy=(float)tex.height/c.sourceHeight;frames=new Sprite[c.frames.Length];for(int i=0;i<frames.Length;i++){var f=c.frames[i];frames[i]=Sprite.Create(tex,new Rect(f.x*sx,(c.sourceHeight-f.y-f.h)*sy,f.w*sx,f.h*sy),Vector2.one*.5f,100*sx,0,SpriteMeshType.FullRect);frames[i].name="copper-"+key+"-"+i;}cache[key]=frames;}return frames[Mathf.Clamp(index,0,frames.Length-1)];}
+ public static int StateIndex(int hp)=>Mathf.Clamp((MaxHealth-Mathf.Clamp(hp,1,MaxHealth))/HealthPerState,0,4);
+ public static Sprite State(int hp)=>Frame("states",StateIndex(hp));
+ public static void Fit(SpriteRenderer image,Sprite sprite,float size){image.sprite=sprite;image.sharedMaterial=OpeningYarnArt.Material;image.transform.localScale=new Vector3(size/sprite.bounds.size.x,size/sprite.bounds.size.y,1);}
+ public static SpriteRenderer Image(Transform parent,string name,int order){var sr=new GameObject(name).AddComponent<SpriteRenderer>();sr.transform.SetParent(parent,false);sr.sortingOrder=order;sr.sharedMaterial=OpeningYarnArt.Material;return sr;}
+}
+[DefaultExecutionOrder(650)]public sealed class OpeningCopperView:MonoBehaviour {
+ GameSession game;public BrickBody Brick {get;private set;}public SpriteRenderer Image {get;private set;}
+ SpriteRenderer previous;Transform visual;TMP_Text number;Vector2 impactDirection=Vector2.up;public Vector2 ImpactStretch=>JellyMotion.HitStretch(age,impactDirection);public bool ImpactAnimating=>age<JellyMotion.HitDuration;float age=1;int oldHp;readonly HashSet<long> attacks=new HashSet<long>();
+ public void Initialize(GameSession g,BrickBody b){game=g;Brick=b;foreach(var text in GetComponentsInChildren<TMP_Text>())text.gameObject.SetActive(false);visual=new GameObject("Fixed footprint copper jelly artwork").transform;visual.SetParent(transform,false);previous=OpeningCopperArt.Image(visual,"Outgoing HP state",67);Image=OpeningCopperArt.Image(visual,"Current HP state",68);number=WorldArt.Text(visual,"Remaining copper HP",b.CurrentHealth.ToString(),Vector2.zero,.07f,Color.white,71);number.fontSize=4.8f;OpeningCopperArt.StyleNumber(number);number.transform.localPosition=new Vector3(0,0,-.12f);Render();}
+ public bool RegisterAttack(long key)=>attacks.Add(key);
+ public void Hit(int from,Vector2 incoming){oldHp=from;impactDirection=incoming.sqrMagnitude>.001f?incoming.normalized:Vector2.up;age=0;game.OpeningCopperHitFx(transform.position);Render();}
+ public void Tick(float dt){age+=dt;Render();}
+ void Render(){
+  if(Brick==null||!Brick.Alive)return;Brick.Face.enabled=false;
+  // Both state sprites use exactly the same .76 square; no per-state shrink or position drift.
+  OpeningCopperArt.Fit(Image,OpeningCopperArt.State(Brick.CurrentHealth),.76f);Image.color=Color.white;
+  float blend=Mathf.SmoothStep(0,1,Mathf.Clamp01(age/.12f));previous.enabled=age<.12f;
+  if(previous.enabled){OpeningCopperArt.Fit(previous,OpeningCopperArt.State(oldHp),.76f);previous.color=new Color(1,1,1,1-blend);Image.color=new Color(1,1,1,blend);}
+  // Match the cat impact, deforming both sprite states and number together.
+  var stretch=ImpactStretch;visual.localScale=new Vector3(stretch.x,stretch.y,1);visual.localRotation=Quaternion.identity;
+  number.text=Brick.CurrentHealth.ToString();
+ }
+ void LateUpdate(){if(Brick!=null&&Brick.Alive)Brick.Face.enabled=false;}
+}
+public sealed class OpeningCopperEffect:MonoBehaviour {
+ System.Action strategyArrival;GameSession game;int generation;bool collect,credited;float age;SpriteRenderer burst,coin;Vector2 origin;
+ public bool Pending {get;private set;}public int VisibleFrame {get;private set;}
+ public static OpeningCopperEffect Play(GameSession owner,Transform parent,Vector2 position,bool collection){var e=new GameObject(collection?"Copper collect frames then target flight":"Copper impact 8 frames").AddComponent<OpeningCopperEffect>();e.game=owner;e.generation=owner.Generation;e.collect=collection;e.strategyArrival=owner.StrategyWrap(()=>owner.OpeningCopperArrived(position));e.origin=position;e.Pending=true;e.transform.SetParent(parent,false);e.transform.position=position;e.burst=OpeningCopperArt.Image(e.transform,"Registered burst frames",74);if(collection)e.coin=OpeningCopperArt.Image(e.transform,"Released intact coin",75);e.Render();return e;}
+ void Render(){VisibleFrame=Mathf.Clamp(Mathf.FloorToInt(age*20),0,7);OpeningCopperArt.Fit(burst,OpeningCopperArt.Frame("burst",VisibleFrame),collect?1.25f:.88f);burst.color=new Color(1,1,1,collect?1:.65f);if(coin!=null){float u=Mathf.Clamp01(age/.4f);OpeningCopperArt.Fit(coin,OpeningCopperArt.State(OpeningCopperArt.MaxHealth),Mathf.Lerp(.76f,.48f,Mathf.SmoothStep(0,1,u)));coin.transform.localPosition=Vector2.up*(Mathf.Sin(u*Mathf.PI)*.19f);coin.transform.localRotation=Quaternion.Euler(0,0,Mathf.Sin(u*Mathf.PI)*12);}}
+ public void Tick(float dt){if(game==null||generation!=game.Generation){Pending=false;Destroy(gameObject);return;}if(game.IsPaused||!Pending||dt<=0)return;age+=dt;Render();if(age<.4f)return;Pending=false;if(collect&&!credited){credited=true;strategyArrival();}Destroy(gameObject);}
+}
+}

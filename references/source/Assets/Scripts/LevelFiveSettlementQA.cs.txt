@@ -1,0 +1,37 @@
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public void QAVictoryLateFlowerWindup(){
+  QASevenClear();for(int r=4;r<8;r++)for(int c=0;c<9;c++)QAThirdNormal(c,r,c%5);
+  var first=QASevenTool(3,2,8,0);QASevenTool(3,3,8,1);QASevenTool(3,7,8,2);
+  ActivateSevenSpecial(first,true);
+ }
+}
+public sealed class LevelFiveSettlementQA:MonoBehaviour {
+ string dir;int failures,errors,checks;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--level-five-settlement-qa"))new GameObject("Level five settlement regression").AddComponent<LevelFiveSettlementQA>();}
+ void Check(bool ok,string message){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+message+"\n");}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.targetFrameRate=60;QualitySettings.vSyncCount=0;Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();
+  int selected=Array.IndexOf(args,"--qa-case");int firstCase=selected<0?0:int.Parse(args[selected+1]);int lastCase=selected<0?10:firstCase+1;
+  for(int mode=firstCase;mode<lastCase;mode++){
+   app.QAStartLevel(4);yield return app.QAWaitForLevel();var g=app.Session;g.QAIgnoreFocusLoss=true;
+   for(int i=0;i<120;i++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.02f);if(i>10&&!app.AlphabetIntroActive&&!g.IsPaused)break;}g.SetPaused(false);
+   if(mode>=4&&mode<8){
+    // Remove the actual yarns and surrounding cells, preserving their arrival
+    // callbacks and the live gravity paths at the instant the goal is earned.
+    for(int batch=0;batch<3;batch++){
+     var neighbours=g.QAOpeningYarns().SelectMany(y=>g.QAOpeningNeighbours(y)).Distinct().ToArray();g.QAOpeningBatch(neighbours);
+     yield return new WaitForSecondsRealtime(.08f);
+    }
+   }
+   Check(g.TryShoot(Vector2.up),"level five volley starts "+mode);yield return new WaitForSecondsRealtime(mode==0?.04f:.65f);
+   if(mode>=8)g.QAVictoryLateFlowerWindup();else if(mode>=2)g.QAFinaleSpecialRound();g.QAFinaleGoal(7,39200);float start=Time.realtimeSinceStartup;
+   while(g.IsPlaying&&Time.realtimeSinceStartup-start<2)yield return null;
+   Check(g.VictorySettlementActive,"winning with live balls starts settlement "+mode);if(mode%2==1)g.AccelerateVictoryPlayback();
+   while(app.QAVictoryPage==null&&Time.realtimeSinceStartup-start<30){if(Time.frameCount%120==0)File.AppendAllText(dir+"/state.txt","mode="+mode+" t="+(Time.realtimeSinceStartup-start)+" phase="+(app.QAVictoryPreparation!=null?app.QAVictoryPreparation.Phase:-1)+" replacements="+g.ChainPendingReplacements+" "+g.QARefillStatus()+"\n");yield return null;}
+   Check(app.QAVictoryPage!=null,"level five reaches results "+mode);Check(g.ScoreFinalized&&g.Shots==0&&g.VictoryBoardSwept,"steps rewarded and board cleared "+mode);
+  }
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

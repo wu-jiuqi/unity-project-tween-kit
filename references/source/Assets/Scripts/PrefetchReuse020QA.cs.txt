@@ -1,0 +1,22 @@
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ public void QAStartTrackedPrefetch(string page,int level=-1){if(!RuntimeQA.IsIsolated)return;CancelContentLoad();var operation=new ContentLoadOperation();contentPrefetch=operation;prefetchMenuPage=page;prefetchLevelIndex=level;StartCoroutine(QATrackedPrefetch(operation,page,level));}
+ IEnumerator QATrackedPrefetch(ContentLoadOperation operation,string page,int level){try{yield return operation.Run(page!=null?GameContent.PreparePage(page):GameContent.PrefetchLevel(level));}finally{FinishPrefetch(operation);}}
+}
+public sealed class PrefetchReuse020QA:MonoBehaviour {
+ string dir;int checks,failures,errors,starts,aborts;bool ready,loading;string target;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--prefetch-reuse-qa"))new GameObject("Foreground prefetch promotion QA").AddComponent<PrefetchReuse020QA>();}
+ void Check(bool ok,string message){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+message+"\n");}
+ IEnumerator Download(string key){if(key!=target)yield break;while(loading)yield return null;if(ready)yield break;starts++;loading=true;bool finished=false;try{float until=Time.realtimeSinceStartup+.45f;while(Time.realtimeSinceStartup<until)yield return null;ready=finished=true;}finally{loading=false;if(!finished)aborts++;}}
+ void Fixture(string key){target=key;ready=loading=false;starts=aborts=0;GameContent.Ready=page=>page!=target||ready;GameContent.Page=Download;GameContent.Prefetch=level=>Download("level-"+level);GameContent.Level=level=>Download("level-"+level);}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.targetFrameRate=60;QualitySettings.vSyncCount=0;Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();
+  Fixture("chapters");app.QAStartTrackedPrefetch("chapters");yield return new WaitForSecondsRealtime(.12f);app.QANavigate("chapters");float limit=Time.realtimeSinceStartup+2;while(app.CurrentPage!="chapters"&&Time.realtimeSinceStartup<limit)yield return null;Check(app.CurrentPage=="chapters"&&starts==1&&aborts==0,"opening map joins its in-flight preload without abort or duplicate download");
+  GameContent.Ready=null;app.QANavigate("home");Fixture("chapters");app.QAStartTrackedPrefetch("chapters");yield return new WaitForSecondsRealtime(.12f);app.QANavigate("shop");yield return new WaitForSecondsRealtime(.1f);Check(aborts==1&&app.CurrentPage=="shop","unrelated navigation cancels idle work and takes priority");
+  GameContent.Ready=null;app.QANavigate("home");Fixture("level-4");app.QAStartTrackedPrefetch(null,4);yield return new WaitForSecondsRealtime(.12f);app.QAStartLevel(4);yield return app.QAWaitForLevel();for(int n=0;n<120;n++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.02f);if(n>10&&!app.AlphabetIntroActive&&!app.Session.IsPaused)break;}app.Session.QAIgnoreFocusLoss=true;Check(app.Session.LevelIndex==4&&starts==1&&aborts==0,"starting the prefetched level preserves its current request");
+  Fixture("result-win");app.QAStartTrackedPrefetch("result-win");yield return new WaitForSecondsRealtime(.12f);app.Session.QAFinaleGoal(1,1800);limit=Time.realtimeSinceStartup+15;while(app.QAVictoryPage==null&&Time.realtimeSinceStartup<limit)yield return null;Check(app.QAVictoryPage!=null&&starts==1&&aborts==0,"victory joins result prefetch and completes rewards without restarting download");
+  GameContent.Ready=null;GameContent.Page=null;GameContent.Level=null;GameContent.Prefetch=null;
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

@@ -1,0 +1,842 @@
+{
+  "size": [
+    2048,
+    2048
+  ],
+  "padding": 4,
+  "rotated": false,
+  "sprites": [
+    {
+      "name": "panel_cream",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        4,
+        4,
+        970,
+        1339
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        705,
+        970,
+        1339
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        160,
+        170,
+        160,
+        170
+      ]
+    },
+    {
+      "name": "button_peach_normal",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        4,
+        1351,
+        849,
+        253
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        444,
+        849,
+        253
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        230,
+        0,
+        230,
+        0
+      ]
+    },
+    {
+      "name": "button_peach_pressed",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        4,
+        1612,
+        849,
+        253
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        183,
+        849,
+        253
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        230,
+        0,
+        230,
+        0
+      ]
+    },
+    {
+      "name": "button_cream_normal",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        4,
+        849,
+        252
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        1792,
+        849,
+        252
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        140,
+        0,
+        140,
+        0
+      ]
+    },
+    {
+      "name": "button_cream_pressed",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        264,
+        849,
+        252
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        1532,
+        849,
+        252
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        140,
+        0,
+        140,
+        0
+      ]
+    },
+    {
+      "name": "card_cream_help",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        524,
+        718,
+        348
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        1176,
+        718,
+        348
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        110,
+        95,
+        110,
+        95
+      ]
+    },
+    {
+      "name": "card_cream_wide",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        880,
+        707,
+        202
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        966,
+        707,
+        202
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        110,
+        70,
+        110,
+        70
+      ]
+    },
+    {
+      "name": "title_mint_wash",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        4,
+        1873,
+        581,
+        143
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        32,
+        581,
+        143
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "illustration_home",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        1090,
+        532,
+        178
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        780,
+        532,
+        178
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "illustration_about",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        1276,
+        494,
+        330
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        442,
+        494,
+        330
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "card_cream_tile",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1484,
+        1276,
+        450,
+        442
+      ],
+      "rectUnityBottomLeft": [
+        1484,
+        330,
+        450,
+        442
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        105,
+        105,
+        105,
+        105
+      ]
+    },
+    {
+      "name": "toggle_track_on",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        1614,
+        445,
+        235
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        199,
+        445,
+        235
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "toggle_track_off",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1484,
+        1726,
+        445,
+        235
+      ],
+      "rectUnityBottomLeft": [
+        1484,
+        87,
+        445,
+        235
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "illustration_restart",
+      "texture": "atlas-02.png",
+      "rectTopLeft": [
+        4,
+        4,
+        372,
+        225
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        1819,
+        372,
+        225
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "drag_handle_mint",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        593,
+        1873,
+        370,
+        91
+      ],
+      "rectUnityBottomLeft": [
+        593,
+        84,
+        370,
+        91
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "button_round_cream",
+      "texture": "atlas-02.png",
+      "rectTopLeft": [
+        4,
+        237,
+        350,
+        353
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        1458,
+        350,
+        353
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "divider_peach",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1708,
+        524,
+        41,
+        338
+      ],
+      "rectUnityBottomLeft": [
+        1708,
+        1186,
+        41,
+        338
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "help_basic",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1522,
+        1090,
+        329,
+        170
+      ],
+      "rectUnityBottomLeft": [
+        1522,
+        788,
+        329,
+        170
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "help_boosters",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        982,
+        1857,
+        328,
+        184
+      ],
+      "rectUnityBottomLeft": [
+        982,
+        7,
+        328,
+        184
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "help_mechanisms",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1697,
+        880,
+        327,
+        173
+      ],
+      "rectUnityBottomLeft": [
+        1697,
+        995,
+        327,
+        173
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "help_streak",
+      "texture": "atlas-02.png",
+      "rectTopLeft": [
+        384,
+        4,
+        316,
+        204
+      ],
+      "rectUnityBottomLeft": [
+        384,
+        1840,
+        316,
+        204
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "icon_about_jelly",
+      "texture": "atlas-02.png",
+      "rectTopLeft": [
+        4,
+        598,
+        300,
+        169
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        1281,
+        300,
+        169
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "decor_mint_accents",
+      "texture": "atlas-02.png",
+      "rectTopLeft": [
+        4,
+        775,
+        295,
+        77
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        1196,
+        295,
+        77
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "icon_help_book",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1757,
+        524,
+        279,
+        168
+      ],
+      "rectUnityBottomLeft": [
+        1757,
+        1356,
+        279,
+        168
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "toggle_knob",
+      "texture": "atlas-02.png",
+      "rectTopLeft": [
+        4,
+        860,
+        238,
+        244
+      ],
+      "rectUnityBottomLeft": [
+        4,
+        944,
+        238,
+        244
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "decor_cat_head",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1859,
+        1090,
+        178,
+        102
+      ],
+      "rectUnityBottomLeft": [
+        1859,
+        856,
+        178,
+        102
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "icon_vibration",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1318,
+        1857,
+        152,
+        144
+      ],
+      "rectUnityBottomLeft": [
+        1318,
+        47,
+        152,
+        144
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "icon_sound",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1757,
+        700,
+        135,
+        108
+      ],
+      "rectUnityBottomLeft": [
+        1757,
+        1240,
+        135,
+        108
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "decor_paw",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        861,
+        1351,
+        110,
+        97
+      ],
+      "rectUnityBottomLeft": [
+        861,
+        600,
+        110,
+        97
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "icon_home",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        593,
+        1972,
+        69,
+        72
+      ],
+      "rectUnityBottomLeft": [
+        593,
+        4,
+        69,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "icon_restart",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1859,
+        1200,
+        71,
+        68
+      ],
+      "rectUnityBottomLeft": [
+        1859,
+        780,
+        71,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "icon_back",
+      "texture": "atlas-01.png",
+      "rectTopLeft": [
+        1757,
+        816,
+        53,
+        54
+      ],
+      "rectUnityBottomLeft": [
+        1757,
+        1178,
+        53,
+        54
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "borderUnityLTRB": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

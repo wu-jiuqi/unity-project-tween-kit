@@ -1,0 +1,6 @@
+using UnityEngine;
+public static class CatCosmeticsBuild {
+ public static void Windows(){Validate();ReleaseBuild.Windows();}
+ public static void Android(){Validate();ReleaseBuild.Android();}
+ static void Validate(){Debug.Log("CAT_COSMETICS_TESTS "+BounceGarden.CatCosmeticCatalog.Validate());Debug.Log("LEAGUE_TESTS "+BounceGarden.LeagueSelfTests.RunAll());}
+}

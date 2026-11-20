@@ -1,0 +1,45 @@
+using System;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+[Serializable] public sealed class AlphabetCell {public int c,r,hp;public string kind;public bool armor;}
+[Serializable] public sealed class AlphabetChest {public int c,r;public string mode;public int[] contents;}
+[Serializable] public sealed class AlphabetStage {public string letter,name,lesson;public int fish,toy,blueJelly,moves,linkSeed;public float pressure;public string[] glyph;public AlphabetCell[] cells;public AlphabetChest[] chests;}
+[Serializable] public sealed class AlphabetIntro {public int id,level;public string title,key,rule;public string[] captions;}
+[Serializable] public sealed class AlphabetData {public int version;public string id;public AlphabetStage[] levels;public AlphabetIntro[] introductions;}
+public static class AlphabetCampaign {
+ public const int Count=OpeningCampaign.Count,OriginalCount=26,Version=38;public const string Id="alphabet-v38";
+ static AlphabetData data;
+ public static AlphabetData Data {get{if(data==null){var asset=Resources.Load<TextAsset>("Alphabet/campaign");if(asset==null)throw new InvalidOperationException("Alphabet campaign data is missing");data=JsonUtility.FromJson<AlphabetData>(asset.text);if(data.levels==null||data.levels.Length!=OriginalCount||data.introductions.Length!=12)throw new InvalidOperationException("Invalid alphabet campaign");}return data;}}
+ public static AlphabetStage Stage(int index,GameSession session=null)=>session!=null&&session.EditorDraft!=null&&session.EditorDraft.Index==index?session.EditorDraft.Metadata:OpeningCampaign.Metadata(index);
+ public static LevelData Get(int index,GameSession session=null){var s=Stage(index,session);return new LevelData{alphabetCampaign=true,label="第"+(index+1)+"关"+(OpeningCampaign.Contains(index)?" · "+s.name:""),note=s.lesson,initialShots=s.moves,volleyCount=5};}
+ public static bool Stroke(int index,int col,int row,GameSession session=null)=>col>=2&&col<=6&&row>=1&&row<=7&&Stage(index,session).glyph[row-1][col-2]=='1';
+ public static int Palette(int index,int col,int row,GameSession session=null)=>Stroke(index,col,row,session)?1:0;
+ public static int RefillHealth(int index,int round,int col)=>index<3?1:index<5?3:ChainCollectionBalance.OrdinaryHealth(round,col);
+ public static int[] Rewards(int index,int tier)=>ChainRatingRules.Rewards(tier);
+ public static AlphabetIntro[] Introductions(int index)=>index>=26?Array.Empty<AlphabetIntro>():Data.introductions.Where(p=>p.level==index).ToArray();
+ public static AlphabetIntro Intro(int id)=>Data.introductions.FirstOrDefault(p=>p.id==id);
+ public static int LinkSeed(int index,int activation,int fallback,GameSession session=null)=>index==18&&activation==1?Stage(index,session).linkSeed:fallback;
+ public static int Validate()=>OpeningCampaign.Validate();
+}
+public sealed partial class GameSession {
+ public bool IsAlphabet=>CurrentLevel!=null&&CurrentLevel.alphabetCampaign;
+ public void InitializeAlphabetGrid(){if(IsStreakTrial){InitializeStreakTrialGrid();return;}if(IsTutorial){InitializeTutorialGrid();return;}if(IsOpening){InitializeOpeningGrid();return;}var s=AlphabetCampaign.Stage(LevelIndex,this);CollectionGoal[0]=s.fish;CollectionGoal[1]=s.toy;
+  // IDs are allocated in row order, matching the reviewed S first-activation seed.
+  for(int r=0;r<9;r++)for(int c=0;c<9;c++){
+   var nest=s.chests.FirstOrDefault(b=>c>=b.c&&c<b.c+2&&r>=b.r&&r<b.r+2);
+   if(nest!=null){if(c==nest.c&&r==nest.r)SpawnChainNest(ChainGridRules.Center(c,r,2),nest.contents,nest.mode=="armor",nest.mode=="rear");continue;}
+   var p=s.cells.First(a=>a.c==c&&a.r==r);if(p.kind=="L"||p.kind=="B"||p.kind=="K"){SpawnChainTool(p.kind=="L"?SevenAuthoredTool(1):p.kind=="B"?2:3,ChainGridRules.Center(c,r));continue;}
+   int food=p.kind=="F"?1:p.kind=="T"?2:0;var role=p.kind=="S"?BrickKind.Stone:p.kind=="R"?BrickKind.RearWeak:p.kind=="A"||p.armor?BrickKind.Armor:BrickKind.Normal;
+   SpawnChainCell(c,r,food,p.hp,role,true);
+   if(p.kind=="N"&&AlphabetCampaign.Stroke(LevelIndex,c,r,this))RegisterJellyTarget(CollectionBricks.Last(),1);
+  }
+  ChainMessage="Level "+(LevelIndex+1);PlanChainRow();
+ }
+ int[] CampaignChainRewards(int tier){var packet=IsAlphabet?AlphabetCampaign.Rewards(LevelIndex,tier):ChainRatingRules.Rewards(tier);return SevenRewards(packet);}
+}
+public static class AlphabetArt {
+ // Reuse v37's complete jelly damage/destruction sequences, with only two colors.
+ public static Sprite[] Frames(int color)=>MainlineArt.Frames(color==1?6:0);
+}
+}

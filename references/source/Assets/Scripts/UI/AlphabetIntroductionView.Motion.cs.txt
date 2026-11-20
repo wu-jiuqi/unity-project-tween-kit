@@ -1,0 +1,27 @@
+using UnityEngine;
+using DG.Tweening;
+namespace BounceGarden {
+public sealed partial class AlphabetIntroductionView {
+ TutorialMotionBoard motion;bool motionSecond;TMPro.TMP_Text motionHeading,motionCaption,motionRule,motionNext;
+ bool UsesMotion=>page.id==1||page.id==4||page.id==5||page.id==10;
+ void BuildMotionIntroduction(){
+  motionHeading=Caption(content,page.title,0,930,940,155,68,new Color(1,.84f,.48f));
+  var holder=UICraft.Root(content,"Independent tutorial motion board",0,120,850,1310);motion=holder.gameObject.AddComponent<TutorialMotionBoard>();motion.Build();
+  motionCaption=Caption(content,"",0,-665,930,165,44,new Color(.99f,.92f,.77f));motionCaption.textWrappingMode=TMPro.TextWrappingModes.Normal;
+  motionRule=Caption(content,"",0,-850,920,145,30,new Color(.89f,.81f,.68f));motionRule.textWrappingMode=TMPro.TextWrappingModes.Normal;
+  motionNext=Caption(content,"点击继续",0,-1070,900,95,44,new Color(.99f,.92f,.77f));
+  LoadedArtCount=6;AnimatedElementCount=45;SetMotionLesson();
+  Enter(motionHeading.rectTransform,.1f,.94f);Enter(holder,.2f,.96f);Enter(motionCaption.rectTransform,.35f,.97f);Enter(motionNext.rectTransform,.45f,.97f);
+  entrance.OnComplete(()=>ready=true);Layout();SoundService.Play("whoosh");
+ }
+ void SetMotionLesson(){
+  int mode=page.id==1?(motionSecond?1:0):page.id==4?(motionSecond?3:2):page.id==5?4:5;motion.Configure(mode);
+  motionHeading.text=mode==0?"初次弹跳":mode==1?"收集黄色砖块":mode==2?"获得能力方块":page.title;
+  motionCaption.text=mode==0?"拖动瞄准\n松手发射":mode==1?"击碎黄色砖块，即可收集。":mode==2?"一组连发直接击碎4块砖。\n五颗球全部回收后，随机一块普通砖变成特殊砖。":mode==3?"命中后，清扫整行和整列。":mode==4?"命中后，爆破周围3×3区域。":"五色花的底砖颜色就是目标颜色。\n命中后作用于该色砖，附近有特殊砖则优先组合。";
+  motionRule.text=mode==0?"每步连发五颗球，接下来试一试吧！":mode==1?"普通果冻有五种明亮颜色；带黄色的砖才是本关目标。":mode==2?"按一组连发直接击碎的砖块数奖励，只取最高档；黄色目标不会被替换。":mode==3?"激光每次造成10点伤害；护甲减一层，地形不受伤且不挡光束。":mode==4?"完整护甲会先吸收本次攻击；达到“太棒啦”可获得炸弹。":"五色花优先组合附近五色花，其次同色特殊砖、十字及其他特殊砖。";
+  motionNext.text=(page.id==1||page.id==4)&&!motionSecond?"点击查看下一段演示":"点击试一试";
+ }
+ bool AdvanceMotion(){if(motion==null||motionSecond||page.id!=1&&page.id!=4)return false;motionSecond=true;started=Time.unscaledTime;SetMotionLesson();return true;}
+ public TutorialMotionBoard QAMotion=>motion;
+}
+}

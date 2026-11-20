@@ -1,0 +1,38 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class RefillColumnsQA:MonoBehaviour {
+ GameSession g;string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--refill-columns-qa"))new GameObject("Column ghost supply QA").AddComponent<RefillColumnsQA>();}
+ void Check(bool ok,string name){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+name+"\n");}
+ void Tick(int n){for(int i=0;i<n;i++)g.QAThirdStep(.02f);}
+ void Reset(){g.QAThirdFixture();}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  Application.logMessageReceived+=(s,t,k)=>{if(k==LogType.Error||k==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",s+"\n"+t+"\n");}};
+  yield return new WaitForSecondsRealtime(4);g=FindFirstObjectByType<AppUI>().Session;Physics2D.simulationMode=SimulationMode2D.Script;
+  Reset();Tick(10);Check(g.RefillLowBoardBatches==0&&g.RefillPending==0,"initial empty fixture does not start repeated refill");
+  for(int i=0;i<28;i++)g.QAThirdNormal(i%9,i/9+5);
+  g.QARefillRemove(g.CollectionBricks.Last());Tick(1);Check(g.ChainOccupiedCells()==27&&g.RefillLowBoardBatches==0,"exactly one third does not trigger low-board refill");
+  g.QARefillRemove(g.CollectionBricks.Last(b=>b.Alive));Tick(1);Check(g.RefillLowBoardBatches==1&&g.RefillGapSnapshot==55&&g.RefillPending+g.RefillGenerated==36,"crossing below one third reserves floor of two thirds of all gaps");
+  Tick(800);Check(g.RefillLowBoardBatches==1&&g.RefillGenerated==36&&g.ChainOccupiedCells()==62&&g.ChainGridReady&&g.ChainGridValid(false),"low-board batch settles once without topping off repeatedly");
+  foreach(var b in g.CollectionBricks.Where(b=>b.Alive).Take(36).ToArray())g.QARefillRemove(b);Tick(800);Check(g.RefillLowBoardBatches==2&&g.ChainGridReady,"density trigger rearms after recovery and a new drop below threshold");
+  Reset();var cat=g.QAThirdCat(4,3);var anchor=cat.transform.position;
+  for(int r=0;r<9;r++)for(int c=0;c<9;c++)if(c!=4||r<3)g.QAThirdNormal(c,r);
+  // Only the five cells below the fixed cat are vacant; all other columns are full.
+  g.QARefillFull();bool crossed=false,protectedAll=true;for(int i=0;i<800;i++){
+   Tick(1);foreach(var b in g.CollectionBricks.Where(b=>b.Alive&&g.QARefillIsProtected(b))){protectedAll&=!b.GetComponent<BoxCollider2D>().enabled&&b.Face.color.a<.6f;if(Mathf.Abs(b.GetComponent<Rigidbody2D>().position.y-anchor.y)<.35f)crossed=true;}
+   if(i%80==0)yield return null;
+  }
+  Check(crossed&&protectedAll,"ghost arrivals visibly cross the cat with collision disabled and reduced opacity");
+  Check(g.RefillGenerated==5&&g.ChainOccupiedCells()==81&&g.ChainGridReady&&g.ChainGridValid(),"column capacity selects only the cat column and fills every hidden gap");
+  Check(cat.transform.position==anchor&&cat.Brick.Alive,"ghost supply leaves fixed cat anchor and health intact");
+  Check(g.CollectionBricks.Where(b=>b.Alive&&!g.OpeningCatBrick(b)).All(b=>!g.QARefillIsProtected(b)&&b.GetComponent<BoxCollider2D>().enabled&&b.Face.color.a>.99f),"landed arrivals regain solid colliders and full opacity");
+  Reset();g.QAThirdNormal(0,8);g.QARefillRemove(g.CollectionBricks.Last());Tick(800);Check(g.RefillLowBoardBatches==1&&g.RefillGenerated==54&&g.ChainOccupiedCells()==54,"cleared board also uses the agreed two-thirds allowance");
+  File.WriteAllText(dir+"/report.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

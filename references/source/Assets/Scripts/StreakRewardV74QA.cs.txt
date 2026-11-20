@@ -1,0 +1,37 @@
+#if !BOUNCE_WECHAT
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class StreakRewardV74QA:MonoBehaviour {
+ string dir;int checks,failures,errors;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--streak-reward-v74-qa"))new GameObject("Streak reward audit").AddComponent<StreakRewardV74QA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var t=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,t);File.WriteAllBytes(dir+"/"+name+".png",t.EncodeToPNG());Destroy(t);rt.Release();Destroy(rt);}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};
+  yield return new WaitForSecondsRealtime(4);app=FindFirstObjectByType<AppUI>();app.QANavigate("home");SoundService.SetMuted(true);
+  foreach(int wins in new[]{0,3,5,10}){
+   app.QANavigate("home");app.Profile.ResetForTesting();app.Profile.InitializeChapterGates();
+   for(int n=0;n<wins;n++)app.Profile.CommitAlphabetWin("reward74-"+wins+"-"+n,n,100);
+   // Avoid unrelated first-time introductions so the actual start sequence can be observed.
+   for(int i=1;i<=3;i++){var k=(StreakBooster)i;app.Profile.MarkBoosterIntro(k);app.Profile.MarkBoosterGuide(k);}
+   app.QAStartLevel(wins);float deadline=Time.realtimeSinceStartup+30;bool saw=false;var phases=new System.Collections.Generic.HashSet<string>();
+   while(Time.realtimeSinceStartup<deadline){
+    if(app.AlphabetIntroActive)app.QAAdvanceAlphabetIntro();
+    var p=app.GetComponentInChildren<StreakRewardPresentation>();
+    if(p!=null){saw=true;Check(app.Session.IsPaused,"animation pauses session "+wins+" "+p.Phase);Check(app.Session.SelectedStreakBooster==StreakBooster.None,"animation never selects tool "+wins);Check(!app.Session.SelectStreakBooster(StreakBooster.Pierce)&&!app.Session.TryShoot(Vector2.up),"selection and shooting blocked during reward "+wins);
+     if(phases.Add(p.Phase)){if(p.Phase=="reveal")yield return new WaitForSecondsRealtime(.45f);yield return Capture("tier"+wins+"-"+p.Phase);}
+    }
+    if(app.Session.IsPlaying&&!app.Session.IsPaused&&!app.StreakRewardActive)break;
+    yield return new WaitForSecondsRealtime(.07f);
+   }
+   var g=app.Session;g.QAIgnoreFocusLoss=true;Check(app.Session.IsPlaying&&!g.IsPaused,"game resumes after presentation "+wins);Check(saw==(wins>=3),"reward only shown when eligible "+wins);Check(g.SelectedStreakBooster==StreakBooster.None,"nothing selected after reward "+wins);
+   if(wins>=3){Check(phases.Contains("reveal")&&phases.Contains("fly")&&phases.Contains("restore"),"all animation phases observed "+wins);int tier=wins>=10?3:wins>=5?2:1;for(int i=1;i<=tier;i++){var k=(StreakBooster)i;Check(app.Profile.StreakBonusStock(k,wins)==1,"gift retained until manual use "+k+" "+wins);}
+    var kind=(StreakBooster)tier;int own=app.Profile.BoosterStock(kind);Check(g.SelectStreakBooster(kind),"manual selection works "+wins);Check(g.TryShoot(Vector2.up),"manual gift volley fires "+wins);yield return new WaitForSecondsRealtime(.3f);Check(app.Profile.StreakBonusStock(kind,wins)==0&&app.Profile.BoosterStock(kind)==own,"manual shot consumes gift first "+wins);
+   }
+   yield return Capture("tier"+wins+"-game");
+  }
+  Check(errors==0,"zero runtime errors");File.WriteAllText(dir+"/result.json",$"{{\"checks\":{checks},\"failures\":{failures},\"errors\":{errors}}}");Application.Quit(failures+errors==0?0:1);
+ }
+}
+}
+
+#endif

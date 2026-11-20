@@ -1,0 +1,71 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden
+{
+    public enum BallAbility { Heavy, Pierce, Bloom, Split }
+    public enum BrickKind { Normal, Stone, Armor, Frost, Bomb, Rainbow, Resonance, Switch, Seal, Core, Guide, RearWeak }
+    [Serializable]
+    public sealed class LevelData
+    {
+        public bool mainline,pixelPainting,pixelDrop,alphabetCampaign,tutorial;
+        public string artName,series,designQuestion,mechanism,difficulty;
+        public string[] layout;
+        public string label;
+        public string note;
+        public int initialShots = 20;
+        public int volleyCount = 5;
+        public float ballInterval = 0.10f;
+        public float ballSpeed = 15.7f;
+        public float gravity = 0f;
+        public bool abilityRoute;
+        public bool colorMatch;
+        public bool bossTrial;
+        public JuiceMechanic juiceMechanic;
+        public string paintingId = "";
+        public BallAbility[] ballQueue = Array.Empty<BallAbility>();
+        public BrickSpawn[] bricks = new BrickSpawn[0];
+        public ObstacleSpawn[] obstacles = new ObstacleSpawn[0];
+    }
+
+    [Serializable]
+    public sealed class BrickSpawn
+    {
+        public string paintColor;public Vector2 paintOffset;
+        public int[] chainContents;
+        public int axis,paintIndex; public float angle;
+        public BrickKind kind;
+        public int juiceGroup=-1,juiceOrder=-1;
+        public Vector2 position;
+        public Vector2 size = new Vector2(0.78f, 0.72f);
+        public Vector2 visualSize;
+        public int hp = 1;
+        public int armorLayers=1;
+        public int colorIndex;
+        public string artKey;
+        public int referenceRow=-1,referenceCol=-1,referenceHp=-1;
+        public bool shutter;
+        public string reveal = "";
+        // Configurable study behaviour; purple-target durability was not verified in the sample.
+        public int revealTargetHp = 5;
+    }
+
+    [Serializable]
+    public sealed class ObstacleSpawn
+    {
+        public string kind = "wall";
+        public Vector2 position;
+        public Vector2 size;
+        public float speed;
+        public float travel;
+        public float angle;
+        public Vector2 visualSize;
+        public float phase;
+    }
+
+    public static class LevelCatalog {
+        public static int Count=>AlphabetCampaign.Count;
+        public static LevelData Get(int index)=>AlphabetCampaign.Get(index);
+    }
+}

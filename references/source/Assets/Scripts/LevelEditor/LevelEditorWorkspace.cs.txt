@@ -1,0 +1,250 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    public sealed partial class LevelEditorWorkspace
+    {
+        const string Schema = "bouncebusters-level-editor-workspace-v1";
+        const string AuthoringSchema = "bouncebusters-level-editor-workspace-v2";
+        static readonly string[] ChapterNames = { "Alphabet", "Picnic", "Snow" };
+        readonly List<LevelEditorDocument> documents = new List<LevelEditorDocument>();
+        readonly List<LevelEditorLevel> levels = new List<LevelEditorLevel>();
+        readonly Dictionary<string, string> observedFiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        readonly Dictionary<string, string> originHashes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        readonly HashSet<string> protectedSources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        bool authored;
+        string loadedRulesVersion;
+        public IReadOnlyList<LevelEditorDocument> Documents { get { return documents.AsReadOnly(); } }
+        public IReadOnlyList<LevelEditorLevel> Levels { get { return levels.AsReadOnly(); } }
+        public bool IsDirty { get { return documents.Any(document => document.IsDirty); } }
+        public bool IsAuthoring { get { return authored || documents.Any(document => document.IsAuthoring); } }
+        public string SavedRulesVersion { get { return loadedRulesVersion ?? ""; } }
+        public bool NeedsRulesReview { get { return !string.IsNullOrEmpty(loadedRulesVersion) && loadedRulesVersion != LevelEditorRuleCatalog.RulesVersion; } }
+        public string SourceDirectory { get; private set; }
+        public string LastSaveDirectory { get; private set; }
+
+        public static LevelEditorWorkspace CreateEmpty()
+        {
+            var workspace = new LevelEditorWorkspace { authored = true };
+            foreach (string chapter in ChapterNames) workspace.Add(LevelEditorDocument.CreateEmpty(chapter));
+            workspace.RebuildLevels(false); return workspace;
+        }
+
+        public LevelEditorLevel CreateLevel(string chapter, string name, bool fill = false)
+        {
+            var document = documents.FirstOrDefault(d => d.Chapter == chapter);
+            if (document == null) throw new ArgumentException("未知规则模板：" + chapter);
+            FinishEdits(); var level = document.AppendBlank(name); authored = true; RebuildLevels(true);
+            if (fill) { var result = level.TryFillEmpty(); if (!result.Success) throw new InvalidOperationException(result.Message); }
+            return level;
+        }
+
+        public LevelEditorLevel DuplicateLevel(LevelEditorLevel source)
+        {
+            if (source == null || !levels.Contains(source)) throw new ArgumentException("复制的关卡不属于当前项目。");
+            FinishEdits(); var level = documents.First(d => d.Chapter == source.Chapter).AppendClone(source);
+            authored = true; RebuildLevels(true); return level;
+        }
+
+        public OperationResult DeleteLevel(LevelEditorLevel level)
+        {
+            if (level == null || !levels.Contains(level)) return OperationResult.Fail("关卡不属于当前项目。");
+            FinishEdits(); documents.First(d => d.Chapter == level.Chapter).Remove(level); authored = true; RebuildLevels(true);
+            return OperationResult.Ok("已删除关卡；项目仍可保存。");
+        }
+        void FinishEdits() { foreach (var level in levels) level.EndEditGroup(); }
+        void RebuildLevels(bool updateStageIds)
+        {
+            levels.Clear();
+            foreach (var document in documents)
+                for (int local = 0; local < document.Levels.Count; local++)
+                {
+                    var level = document.Levels[local]; level.SetPosition(levels.Count, local, updateStageIds); levels.Add(level);
+                }
+        }
+
+        public static LevelEditorWorkspace LoadDirectory(string directory)
+        {
+            string root = Canonical(directory); var workspace = new LevelEditorWorkspace { SourceDirectory = root };
+            string manifestPath = Path.Combine(root, "manifest.json"); EditorJson manifest = null;
+            if (File.Exists(manifestPath))
+            {
+                manifest = EditorJson.Parse(File.ReadAllText(manifestPath, Encoding.UTF8));
+                if (manifest.Text("schema") != Schema && manifest.Text("schema") != AuthoringSchema) throw new FormatException("目录中的manifest不属于此关卡编辑器；请选择其他工作区。");
+                workspace.authored = manifest.Text("schema") == AuthoringSchema;
+                workspace.loadedRulesVersion = manifest.Text("rulesVersion");
+                workspace.observedFiles[manifestPath] = LevelEditorDocument.Hash(File.ReadAllBytes(manifestPath));
+            }
+            foreach (string chapter in ChapterNames)
+            {
+                string path = Path.Combine(root, chapter, "campaign.json");
+                if (!File.Exists(path)) throw new FileNotFoundException("工作区缺少关卡文件：" + path);
+                byte[] bytes = File.ReadAllBytes(path); string hash = LevelEditorDocument.Hash(bytes);
+                if (manifest != null)
+                {
+                    var files = manifest.RequireArray("files"); var entry = files.Items.FirstOrDefault(n => n.Text("path") == chapter + "/campaign.json");
+                    if (entry == null || entry.Text("sha256") != hash) throw new IOException("工作区文件与manifest不一致，可能有外部修改或未完成保存：" + chapter + "。请保留文件并从导出副本恢复。");
+                }
+                var document = new LevelEditorDocument(chapter, bytes, path); if (workspace.authored) document.IsAuthoring = true; workspace.Add(document);
+                workspace.observedFiles[path] = hash; workspace.originHashes[document.RelativePath] = hash;
+                if (manifest == null) workspace.protectedSources.Add(path); // Imported source folders never become writable implicitly.
+            }
+            workspace.RebuildLevels(false);
+            if (manifest != null)
+            {
+                var idRows = manifest.Get("editorIds");
+                var levelIds = new HashSet<string>();
+                if (idRows != null && idRows.Kind == EditorJson.Type.Array)
+                    foreach (var row in idRows.Items)
+                    {
+                        int number = row.Int("level"); var ids = row.Get("ids");
+                        LevelEditorLevel level = null;
+                        if (manifest.Text("schema") == AuthoringSchema)
+                        {
+                            var document = workspace.documents.FirstOrDefault(d => d.Chapter == row.Text("chapter")); int local = row.Int("localIndex", -1);
+                            if (document != null && local >= 0 && local < document.Levels.Count) level = document.Levels[local];
+                        }
+                        else if (number >= 1 && number <= workspace.levels.Count) level = workspace.levels[number - 1];
+                        if (level == null) continue;
+                        string levelId = row.Text("levelId");
+                        if (!string.IsNullOrWhiteSpace(levelId))
+                        {
+                            if (!levelIds.Add(levelId)) throw new FormatException("项目清单中的关卡身份重复，请从完整备份恢复。");
+                            level.EditorLevelId = levelId;
+                        }
+                        if (ids != null && ids.Kind == EditorJson.Type.Array) level.RestoreIds(ids.Items.Select(n => n.Kind == EditorJson.Type.String ? n.Scalar : null).ToArray());
+                    }
+                foreach (var document in workspace.documents) document.CaptureSavedStructure();
+                var origins = manifest.Get("originHashes");
+                if (origins != null && origins.Kind == EditorJson.Type.Object) foreach (var pair in origins.Properties) if (pair.Value.Kind == EditorJson.Type.String) workspace.originHashes[pair.Key] = pair.Value.Scalar;
+                workspace.LastSaveDirectory = root;
+            }
+            return workspace;
+        }
+        void Add(LevelEditorDocument document) { documents.Add(document); levels.AddRange(document.Levels); }
+        public LevelEditorLevel GetLevel(int zeroBasedIndex) { if (zeroBasedIndex < 0 || zeroBasedIndex >= levels.Count) throw new ArgumentOutOfRangeException("zeroBasedIndex"); return levels[zeroBasedIndex]; }
+        public IReadOnlyList<ValidationIssue> ValidateAll()
+        {
+            var issues = levels.SelectMany(level => level.Validate()).ToList();
+            if (NeedsRulesReview)
+                issues.Add(new ValidationIssue { Severity = ValidationSeverity.Warning, Code = "RULES_VERSION", Message = "项目保存于不同规则版本；草稿仍可编辑，请用当前规则重新试玩。", LevelNumber = 0 });
+            return issues.AsReadOnly();
+        }
+
+        public OperationResult SaveWorkspace(string directory) { return Write(directory, false); }
+        public OperationResult Export(string directory) { return Write(directory, true); }
+        OperationResult Write(string directory, bool export)
+        {
+            IReadOnlyList<ValidationIssue> issues;
+            try { issues = ValidateAll(); } catch (Exception ex) { return OperationResult.Fail("校验失败：" + ex.Message); }
+            if (export && levels.Count == 0) return OperationResult.Fail("项目中尚无关卡，请先新建关卡；空项目可保存。", issues);
+            if (export && issues.Any(issue => issue.IsError)) return OperationResult.Fail("导出已阻止：先修复" + issues.Count(issue => issue.IsError) + "项硬错误。草稿仍可保存。", issues);
+            var staged = new List<PendingFile>();
+            try
+            {
+                string targetRoot = Canonical(directory);
+                var writeIssues = issues.ToList();
+                foreach (var observed in observedFiles)
+                    if (!Within(observed.Key, targetRoot) && (!File.Exists(observed.Key) || LevelEditorDocument.Hash(File.ReadAllBytes(observed.Key)) != observed.Value))
+                        writeIssues.Add(new ValidationIssue { Severity = ValidationSeverity.Warning, Code = "SOURCE_CHANGED", Message = "来源已有外部修改；本次另存保留已导入快照及原始哈希：" + observed.Key, LevelNumber = 0 });
+                issues = writeIssues.AsReadOnly();
+                foreach (var document in documents) if (protectedSources.Contains(Path.Combine(targetRoot, document.Chapter, "campaign.json"))) throw new IOException("此目录是导入的原始关卡源。请另选独立工作区，不覆盖生产资源。");
+                if (export && Directory.Exists(targetRoot) && Directory.GetFileSystemEntries(targetRoot).Length > 0) throw new IOException("导出目录必须为空；请选择新的独立目录。");
+                foreach (var document in documents)
+                {
+                    string target = Path.Combine(targetRoot, document.Chapter, "campaign.json");
+                    if (File.Exists(target) && !observedFiles.ContainsKey(target)) throw new IOException("目标已有未打开的关卡文件；请先打开该工作区，避免覆盖其他修改。");
+                }
+                string manifestTarget = Path.Combine(targetRoot, "manifest.json");
+                if (File.Exists(manifestTarget) && !observedFiles.ContainsKey(manifestTarget)) throw new IOException("目标已有未打开的工作区；请先打开后再保存。");
+                Directory.CreateDirectory(targetRoot);
+                using (var gate = new FileStream(Path.Combine(targetRoot, ".level-editor.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+                {
+                    CheckObservedFiles(targetRoot);
+                    var bytes = documents.Select(doc => doc.GetBytes()).ToArray();
+                    string revision = Guid.NewGuid().ToString("N");
+                    for (int i = 0; i < documents.Count; i++) staged.Add(Stage(Path.Combine(targetRoot, documents[i].Chapter, "campaign.json"), bytes[i], revision));
+                    staged.Add(Stage(manifestTarget, new UTF8Encoding(false).GetBytes(Manifest(bytes, issues, revision, export).ToJson(0, true) + "\n"), revision));
+                    CheckObservedFiles(targetRoot);
+                    // Each replacement is atomic. All three JSON files are staged
+                    // first, the manifest commits last, and any reported failure
+                    // restores earlier files from the transaction's backups.
+                    foreach (var file in staged)
+                    {
+                        if (file.Existed) File.Replace(file.Temp, file.Target, file.Backup, true);
+                        else File.Move(file.Temp, file.Target);
+                        file.Committed = true;
+                    }
+                    if (!export)
+                    {
+                        foreach (var file in staged) observedFiles[file.Target] = LevelEditorDocument.Hash(file.Bytes);
+                        foreach (var document in documents) document.MarkSaved();
+                        LastSaveDirectory = targetRoot; loadedRulesVersion = LevelEditorRuleCatalog.RulesVersion;
+                    }
+                    // Cleanup failure must not roll a successfully committed
+                    // generation back after other backups have been removed.
+                    foreach (var file in staged) try { if (File.Exists(file.Backup)) File.Delete(file.Backup); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+                return OperationResult.Ok(export ? "已导出" + levels.Count + "关与校验manifest。" : issues.Any(i => i.IsError) ? "草稿已保存；试玩/导出前需修复硬错误。" : levels.Count + "关项目已保存。", issues: issues);
+            }
+            catch (Exception ex)
+            {
+                var rollbackErrors = new List<string>();
+                for (int i = staged.Count - 1; i >= 0; i--)
+                {
+                    var file = staged[i]; if (!file.Committed) continue;
+                    try
+                    {
+                        if (file.Existed && File.Exists(file.Backup)) { if (File.Exists(file.Target)) File.Replace(file.Backup, file.Target, null, true); else File.Move(file.Backup, file.Target); }
+                        else if (!file.Existed && File.Exists(file.Target)) File.Delete(file.Target);
+                    }
+                    catch (Exception restore) { rollbackErrors.Add(file.Target + ": " + restore.Message); }
+                }
+                string message = "保存失败：" + ex.Message;
+                if (rollbackErrors.Count > 0) message += "；恢复失败，保留.bak备份：" + string.Join("；", rollbackErrors);
+                return OperationResult.Fail(message, issues);
+            }
+            finally
+            {
+                foreach (var file in staged) try { if (File.Exists(file.Temp)) File.Delete(file.Temp); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            }
+        }
+        void CheckObservedFiles(string targetRoot)
+        {
+            foreach (var file in observedFiles) if (Within(file.Key, targetRoot) && (!File.Exists(file.Key) || LevelEditorDocument.Hash(File.ReadAllBytes(file.Key)) != file.Value)) throw new IOException("检测到外部修改或删除，已停止写入：" + file.Key + "。可另存到新目录保留当前草稿，再重新打开。");
+        }
+        static bool Within(string path, string directory) { return path.StartsWith(directory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase); }
+        EditorJson Manifest(byte[][] bytes, IReadOnlyList<ValidationIssue> issues, string revision, bool export)
+        {
+            var result = EditorJson.Object(); result.Set("schema", IsAuthoring ? AuthoringSchema : Schema); result.Set("revision", revision); result.Set("savedUtc", DateTime.UtcNow.ToString("O")); result.Set("kind", export ? "export" : "workspace"); result.Set("levelCount", levels.Count);
+            result.Set("formatVersion", LevelEditorRuleCatalog.FormatVersion); result.Set("rulesVersion", LevelEditorRuleCatalog.RulesVersion);
+            result.Set("gameVersion", BounceGarden.GameVersion.Name); result.Set("unityVersion", Application.unityVersion);
+            result.Set("hardErrorCount", issues.Count(i => i.IsError)); result.Set("warningCount", issues.Count(i => !i.IsError));
+            var files = EditorJson.Array(); for (int i = 0; i < documents.Count; i++) { var file = EditorJson.Object(); file.Set("path", documents[i].RelativePath); file.Set("sha256", LevelEditorDocument.Hash(bytes[i])); files.Items.Add(file); } result.Set("files", files);
+            var origins = EditorJson.Object(); foreach (var pair in originHashes) origins.Set(pair.Key, pair.Value); result.Set("originHashes", origins);
+            var identity = EditorJson.Array(); foreach (var level in levels) { var row = EditorJson.Object(); row.Set("level", level.Number); row.Set("chapter", level.Chapter); row.Set("localIndex", level.LocalIndex); row.Set("levelId", level.EditorLevelId); var ids = EditorJson.Array(); foreach (string id in level.ExportIds()) ids.Items.Add(EditorJson.Value(id)); row.Set("ids", ids); identity.Items.Add(row); } result.Set("editorIds", identity);
+            return result;
+        }
+        sealed class PendingFile { internal string Target, Temp, Backup; internal byte[] Bytes; internal bool Existed, Committed; }
+        static PendingFile Stage(string target, byte[] bytes, string revision)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(target));
+            var file = new PendingFile { Target = target, Temp = target + "." + revision + ".tmp", Backup = target + "." + revision + ".bak", Bytes = bytes, Existed = File.Exists(target) };
+            try { using (var output = new FileStream(file.Temp, FileMode.CreateNew, FileAccess.Write, FileShare.None)) { output.Write(bytes, 0, bytes.Length); output.Flush(true); } }
+            catch { try { if (File.Exists(file.Temp)) File.Delete(file.Temp); } catch (IOException) { } catch (UnauthorizedAccessException) { } throw; }
+            return file;
+        }
+        static string Canonical(string directory)
+        {
+            if (string.IsNullOrWhiteSpace(directory)) throw new ArgumentException("请选择工作区目录。");
+            string full = Path.GetFullPath(Environment.ExpandEnvironmentVariables(directory.Trim()));
+            string root = Path.GetPathRoot(full);
+            return full.Length == root.Length ? root : full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+    }
+}

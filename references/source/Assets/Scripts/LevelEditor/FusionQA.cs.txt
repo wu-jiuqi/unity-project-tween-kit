@@ -1,0 +1,540 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+    /// <summary>Opt-in real-physics sample exploration. No damage or outcome injection.</summary>
+    public sealed class FusionQA : MonoBehaviour {
+        [Serializable] sealed class Assertion { public string name, detail; public bool passed; }
+        [Serializable] sealed class InputRecord { public int physicsStep, shotsBefore; public float angle, simulationTime; public bool accepted; }
+        [Serializable] sealed class PieceState {
+            public string id, kind; public string[] goalIds; public int authoredCol, authoredRow, hp, ice, stock, charge;
+            public float x, y; public bool alive, enabled, armor;
+        }
+        [Serializable] sealed class GoalState { public string id, ownerId, kind, state; }
+        [Serializable] sealed class Run {
+            public string sample, name, policy, scenario = "bare", cadence, draftSha256, result, error;
+            public int seed, shotsUsed, remainingShots, physicsSteps, peakBalls, goalsTotal, goalsCredited, outcomeCount, loggedRuntimeErrors;
+            public bool won, timedOut, completed;
+            public float simulatedSeconds, wallClockSeconds;
+            public FusionMetrics metrics;
+            public FusionEventRecord[] events;
+            public InputRecord[] inputs;
+            public PieceState[] finalPieces;
+            public GoalState[] finalGoals;
+        }
+        [Serializable] sealed class Report {
+            public string status, startedAtUtc, completedAtUtc, unityVersion, scope, mode, sourceSamplesPath, sourceSamplesSha256, sampleProjectPath;
+            public int checks, passed, failed, runtimeErrors, applicationErrors, naturalRunErrors, naturalAffectedRuns, outsideNaturalLogErrors, samples, runs, naturalWins, timeouts;
+            public bool profileUnchanged, bundledCampaignsUnchanged, baselineRegressionExecuted, superRangeRegressionExecuted, flowRegressionExecuted;
+            public Assertion[] assertions;
+            public string[] runtimeErrorMessages;
+            public Run[] naturalRuns;
+        }
+        readonly List<Assertion> checks = new List<Assertion>();
+        readonly List<Run> runs = new List<Run>();
+        readonly List<string> errors = new List<string>();
+        readonly Dictionary<string,string> campaignHashes = new Dictionary<string,string>();
+        string output, started, profileBefore, sourceSamplesPath, sourceSamplesSha256, sampleProjectPath;
+        bool externalMode, superRangeRegression, flowRegression;
+        int seeds;
+        int outsideNaturalLogErrors;
+        Run activeNaturalRun;
+        GameSession session;
+        SimulationMode2D oldMode;
+        float oldTimeScale;
+        bool capturedSimulation;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void Boot() { if (LevelEditorRuntime.HasArg("--fusion-qa")) new GameObject("Fusion isolated real physics QA").AddComponent<FusionQA>(); }
+        static string Hash(string text) { using (var sha = SHA256.Create()) return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(text))).Replace("-", "").ToLowerInvariant(); }
+        void Check(string name, bool passed, string detail = "") { checks.Add(new Assertion { name = name, passed = passed, detail = detail }); }
+        void OnLog(string message, string trace, LogType type) {
+            if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert) return;
+            errors.Add(message + "\n" + trace);
+            if (activeNaturalRun != null) activeNaturalRun.loggedRuntimeErrors++; else outsideNaturalLogErrors++;
+        }
+        static FusionLevelDefinition Clone(FusionLevelDefinition value) => JsonUtility.FromJson<FusionLevelDefinition>(JsonUtility.ToJson(value));
+
+        IEnumerator Start() {
+            started = DateTime.UtcNow.ToString("o");
+            output = Path.GetFullPath(LevelEditorRuntime.Arg("--fusion-qa-out", Path.Combine(Application.persistentDataPath, "FusionQA")));
+            Directory.CreateDirectory(output); Directory.CreateDirectory(Path.Combine(output, "runs")); Directory.CreateDirectory(Path.Combine(output, "captures"));
+            if (!int.TryParse(LevelEditorRuntime.Arg("--fusion-seeds", "10"), out seeds)) seeds = 10;
+            seeds = Mathf.Clamp(seeds, 1, 100);
+            Application.logMessageReceived += OnLog;
+            profileBefore = PlayerPrefs.GetString("BounceGarden.LocalProfile.v1", "<missing>");
+            Check("QA process is isolated", RuntimeQA.IsIsolated);
+            foreach (string chapter in new[] {"Opening"}) {
+                var asset = Resources.Load<TextAsset>(chapter + "/levels");
+                Check("bundled campaign exists " + chapter, asset != null);
+                if (asset != null) campaignHashes[chapter] = Hash(asset.text);
+            }
+            externalMode = LevelEditorRuntime.HasArg("--fusion-samples");
+            superRangeRegression = LevelEditorRuntime.HasArg("--fusion-super-range-qa");
+            flowRegression = LevelEditorRuntime.HasArg("--fusion-flow-qa");
+            FusionSampleDefinition[] samples = Array.Empty<FusionSampleDefinition>(); string[] superSampleIds = Array.Empty<string>();
+            if (externalMode) {
+                bool inputReady = false;
+                try {
+                    string argument = LevelEditorRuntime.Arg("--fusion-samples");
+                    if (string.IsNullOrWhiteSpace(argument) || argument.StartsWith("--", StringComparison.Ordinal)) throw new ArgumentException("--fusion-samples后必须提供JSON路径。");
+                    sourceSamplesPath = Path.GetFullPath(argument);
+                    var pack = FusionExternalSamples.Load(sourceSamplesPath);
+                    samples = pack.samples; superSampleIds = pack.superSampleIds;
+                    using (var sha = SHA256.Create()) sourceSamplesSha256 = BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(sourceSamplesPath))).Replace("-", "").ToLowerInvariant();
+                    File.Copy(sourceSamplesPath, Path.Combine(output, "input-samples.json"), false);
+                    ExternalDataChecks(samples);
+                    inputReady = true;
+                } catch (Exception ex) { Check("external samples load and validate", false, ex.ToString()); }
+                if (!inputReady) { Finish(0); yield break; }
+            } else {
+                samples = FusionSamples.CreateDefinitions(); superSampleIds = new[] { "P-03", "P-07" };
+                Check("seven independent samples", samples.Length == 7 && samples.Select(s => s.id).Distinct().Count() == 7);
+                try { DataChecks(samples); } catch (Exception ex) { Check("sample authoring regression", false, ex.ToString()); }
+                try { FusionAuthoringQA.DataChecks(Check); } catch (Exception ex) { Check("fusion authoring constraints execute", false, ex.ToString()); }
+            }
+            yield return null;
+            oldMode = Physics2D.simulationMode; oldTimeScale = Time.timeScale; capturedSimulation = true;
+            Physics2D.simulationMode = SimulationMode2D.Script; Time.timeScale = 0;
+            session = new GameObject("Fusion QA production GameSession").AddComponent<GameSession>();
+            session.enabled = false; session.QAIgnoreFocusLoss = true;
+            if (superRangeRegression) yield return FusionSuperRangeQA.Run(session, output, Check);
+            if (flowRegression) yield return FusionFlowQA.Run(session, Check);
+            if (!externalMode) {
+                yield return FusionRearQA.Run(session, Check);
+                yield return RuleFixtures(samples);
+                yield return FusionDeviceQA.Run(session, Check);
+                yield return FusionCoreQA.Run(session, Check);
+                yield return LifecycleChecks(samples[0]);
+                yield return BoosterFixtures(samples[0]);
+                yield return EditorBoosterScenarioChecks(samples[0]);
+            }
+            foreach (var sample in samples) {
+                for (int policy = 0; policy < 3; policy++) for (int seedIndex = 0; seedIndex < seeds; seedIndex++) {
+                    yield return NaturalRun(sample, policy, seedIndex);
+                    session.StopLevel();
+                    yield return null; // Destroy must complete before another board simulates.
+                }
+                var sampleRuns = runs.Where(r => r.sample == sample.id).ToArray();
+                Check(sample.id + " has a naturally completed route", sampleRuns.Any(r => r.won),
+                    "natural wins=" + sampleRuns.Count(r => r.won) + "/" + sampleRuns.Length + "; bot exploration, not human win rate");
+                Debug.Log("FUSION_QA_PROGRESS " + sample.id + " runs=" + sampleRuns.Length + " naturalWins=" + sampleRuns.Count(r => r.won));
+            }
+            foreach (var sample in samples.Where(s => superSampleIds.Contains(s.id)))
+                for (int seedIndex = 0; seedIndex < seeds; seedIndex++) foreach (string scenario in new[] { "finite_super", "unlimited_super" }) {
+                    yield return NaturalRun(sample, 0, seedIndex, scenario);
+                    session.StopLevel(); session.BoosterProfile = null; yield return null;
+                }
+            session.StopLevel(); Destroy(session.gameObject); session = null;
+            RestoreSimulation();
+            yield return null;
+            Finish(samples.Length);
+        }
+
+        void ExternalDataChecks(FusionSampleDefinition[] samples) {
+            Check("external exploration uses independent unique sample IDs", samples.Length > 0 && samples.Select(s => s.id).Distinct(StringComparer.Ordinal).Count() == samples.Length);
+            sampleProjectPath = FusionProjectExport.SaveNew(samples, Path.Combine(output, "Project"));
+            var reopened = LevelEditorWorkspace.LoadDirectory(sampleProjectPath);
+            Check("external sample project reloads every level", reopened.Levels.Count == samples.Length && reopened.Levels.All(l => l.IsFusion));
+            for (int i = 0; i < samples.Length; i++) {
+                var level = reopened.Levels[i];
+                Check(samples[i].id + " external definition roundtrips", level.Moves == samples[i].moves && JsonUtility.ToJson(level.FusionDefinition) == JsonUtility.ToJson(samples[i].definition));
+                var stage = EditorJson.Parse(level.SnapshotJson());
+                Check(samples[i].id + " focus is present in playable project", stage.Text("focus") == (samples[i].focus ?? ""));
+                Check(samples[i].id + " sample identity is present in playable project", stage.Text("sampleId") == samples[i].id);
+            }
+            bool overwriteRejected = false;
+            try { FusionProjectExport.SaveNew(samples, sampleProjectPath); } catch (IOException) { overwriteRejected = true; }
+            Check("external project export refuses an existing nonempty directory", overwriteRejected);
+            Debug.Log("FUSION_EXTERNAL_EXPLORATION samples=" + samples.Length + " baselineRegressionExecuted=false source=" + sourceSamplesPath);
+        }
+
+        void DataChecks(FusionSampleDefinition[] samples) {
+            var workspace = LevelEditorWorkspace.CreateEmpty();
+            foreach (var sample in samples) {
+                var issues = FusionRules.Validate(sample.definition, sample.moves);
+                Check(sample.id + " legal full-board configuration", !issues.Any(i => i.IsError), string.Join(" | ", issues.Select(i => i.ObjectId + ": " + i.Message)));
+                var goals = FusionRules.Goals(sample.definition);
+                Check(sample.id + " finite unique preregistered goals", goals.Count > 0 && goals.Select(g => g.id).Distinct().Count() == goals.Count);
+                var level = workspace.CreateFusionLevel("Alphabet", sample.name, Clone(sample.definition), sample.moves);
+                Check(sample.id + " created as isolated fusion level", level.IsFusion && !level.Validate().Any(i => i.IsError));
+                string before = level.SnapshotJson();
+                var editable = level.FusionDefinition.pieces.First(p => p.kind == "normal");
+                editable.hp = 2;
+                Check(sample.id + " edit properties through authoring API", level.TryUpdateFusionPiece(editable.id, editable).Success && level.GetFusionPiece(editable.id).hp == 2);
+                Check(sample.id + " undo restores exact fusion document", level.Undo().Success && level.SnapshotJson() == before);
+                Check(sample.id + " redo retains stable entity identity", level.Redo().Success && level.GetFusionPiece(editable.id).hp == 2);
+                Check(sample.id + " undo leaves shipped sample original", level.Undo().Success && level.SnapshotJson() == before);
+            }
+            string path = Path.Combine(output, "sample-workspace");
+            var saved = workspace.SaveWorkspace(path); Check("save seven sample authoring workspace", saved.Success, saved.Message);
+            var reopened = LevelEditorWorkspace.LoadDirectory(path);
+            Check("reopen all fusion samples", reopened.Levels.Count == samples.Length && reopened.Levels.All(l => l.IsFusion));
+            for (int i = 0; i < Math.Min(reopened.Levels.Count, workspace.Levels.Count); i++)
+                Check(samples[i].id + " exact stage roundtrip", reopened.Levels[i].SnapshotJson() == workspace.Levels[i].SnapshotJson());
+            var exported = reopened.Export(Path.Combine(output, "sample-export")); Check("export sample content without replacing campaign", exported.Success, exported.Message);
+            var invalidType = EditorJson.Parse(reopened.Levels[0].SnapshotJson());
+            invalidType.Get("fusion").Set("refillBudget", "80");
+            Check("fusion JSON number string is rejected", LevelEditorDocument.ValidateStage(0, invalidType.ToJson()).Any(i => i.IsError));
+            var unknownProfile = EditorJson.Parse(reopened.Levels[0].SnapshotJson()); unknownProfile.Set("rulesProfile", "fusion_unknown_version");
+            Check("unsupported rules profile cannot run", LevelEditorDocument.ValidateStage(0, unknownProfile.ToJson()).Any(i => i.IsError));
+            var empty = LevelEditorWorkspace.CreateEmpty(); empty.CreateFusionLevel("Alphabet", "空融合草稿", new FusionLevelDefinition(), 8);
+            Check("empty fusion draft can be saved", empty.SaveWorkspace(Path.Combine(output, "empty-fusion-draft")).Success);
+            Check("empty fusion draft cannot export", !empty.Export(Path.Combine(output, "empty-fusion-export")).Success);
+            UnknownFieldChecks(workspace);
+            var duplicate = Clone(samples[0].definition); duplicate.pieces[1].id = duplicate.pieces[0].id;
+            Check("duplicate entity identity rejected", FusionRules.Validate(duplicate, 8).Any(i => i.IsError));
+            var overflow = Clone(samples[0].definition);
+            overflow.pieces = overflow.pieces.Concat(new[] { new FusionPieceDefinition { id = "invalid_overflow", kind = "snowball", c = int.MaxValue, r = 0, size = 4, layers = 4 } }).ToArray();
+            Check("overflowing coordinates rejected without indexing board", FusionRules.Validate(overflow, 8).Any(i => i.IsError));
+            var stockOverflow = Clone(samples[2].definition); var container = stockOverflow.pieces.First(p => p.kind == "chest"); container.kind = "basket"; container.stock = int.MaxValue; container.contents = Array.Empty<FusionContentDefinition>();
+            Check("unbounded invalid stock cannot allocate goal ledger", FusionRules.Validate(stockOverflow, 8).Any(i => i.IsError) && FusionRules.Goals(stockOverflow).Count < 100);
+            var badGoal = Clone(samples[0].definition); badGoal.pieces[0].goal = "unregistered";
+            Check("unknown goal kind rejected", FusionRules.Validate(badGoal, 8).Any(i => i.IsError));
+            var producer = Clone(samples[5].definition); producer.pieces.First(p => p.kind == "producer").contents = Array.Empty<FusionContentDefinition>();
+            Check("producer cannot omit preregistered stock", FusionRules.Validate(producer, 11).Any(i => i.IsError));
+            var gate = Clone(samples[4].definition); gate.pieces.First(p => p.kind == "gate").links = new[] { "missing" };
+            Check("dangling gate reference rejected", FusionRules.Validate(gate, 10).Any(i => i.IsError));
+            Check("authoring move range remains 1 through 999", !FusionRules.Validate(samples[0].definition, 1).Any(i => i.IsError) && !FusionRules.Validate(samples[0].definition, 999).Any(i => i.IsError)
+                && FusionRules.Validate(samples[0].definition, 0).Any(i => i.IsError) && FusionRules.Validate(samples[0].definition, 1000).Any(i => i.IsError));
+            var fresh = FusionSamples.CreateDefinitions(); fresh[0].definition.pieces[0].hp = 9;
+            Check("sample factory does not share mutable definitions", samples[0].definition.pieces[0].hp != 9);
+        }
+
+        void UnknownFieldChecks(LevelEditorWorkspace source) {
+            string path = Path.Combine(output, "extension-workspace");
+            Check("save extension preservation fixture", source.SaveWorkspace(path).Success);
+            string file = Path.Combine(path, "Alphabet", "campaign.json");
+            var document = EditorJson.Parse(File.ReadAllText(file)); var levels = document.RequireArray("levels");
+            var piece = levels.Items[0].Get("fusion").RequireArray("pieces").Items.First(p => p.Text("kind") == "normal");
+            piece.Set("futureExtension", "preserve-object"); string id = piece.Text("id");
+            var chest = levels.Items[2].Get("fusion").RequireArray("pieces").Items.First(p => p.Text("kind") == "chest");
+            chest.RequireArray("contents").Items[0].Set("futureExtension", "preserve-content"); string chestId = chest.Text("id");
+            // Read the deliberately extended fixture through the document parser. Workspace integrity
+            // manifests must continue rejecting out-of-band campaign edits; this is not a save bypass.
+            var reopened = new LevelEditorDocument("Alphabet", Encoding.UTF8.GetBytes(document.ToJson(4, true)));
+            var change = reopened.Levels[0].GetFusionPiece(id); change.hp = 2; change.rewardSequence = new[] { "blast", "blast", "assistant" };
+            Check("known-field edit accepts repeated reward sequence", reopened.Levels[0].TryUpdateFusionPiece(id, change).Success);
+            var after = EditorJson.Parse(reopened.Levels[0].SnapshotJson()).Get("fusion").RequireArray("pieces").Items.First(p => p.Text("id") == id);
+            Check("unknown object fields survive typed editing", after.Text("futureExtension") == "preserve-object");
+            Check("reward sequence duplicates are meaningful and retained", reopened.Levels[0].GetFusionPiece(id).rewardSequence.SequenceEqual(new[] { "blast", "blast", "assistant" }));
+            var box = reopened.Levels[2].GetFusionPiece(chestId); box.hp++;
+            Check("container typed property editing succeeds", reopened.Levels[2].TryUpdateFusionPiece(chestId, box).Success);
+            var afterBox = EditorJson.Parse(reopened.Levels[2].SnapshotJson()).Get("fusion").RequireArray("pieces").Items.First(p => p.Text("id") == chestId);
+            Check("unknown content fields survive typed container editing", afterBox.RequireArray("contents").Items[0].Text("futureExtension") == "preserve-content");
+        }
+
+        IEnumerator RuleFixtures(FusionSampleDefinition[] samples) {
+            // Explicit event injection checks identity/stage rules only; never contributes to natural-run outcomes.
+            try {
+                session.StartFusionSample(Clone(samples[1].definition), samples[1].moves, "QA rule_fixture protection", 171);
+                session.enabled = false;
+                var piece = session.FusionPieces.First(p => p.Definition.armor);
+                int hp = piece.Brick.CurrentHealth, total = session.FusionGoalsTotal;
+                session.FusionRunAttack("qa:compound", 1, () => {
+                    session.FusionHit(piece, 99, Vector2.up, piece.Position, true);
+                    session.FusionHit(piece, 99, Vector2.up, piece.Position);
+                });
+                Check("rule_fixture compound attack removes only protection", !piece.Brick.ShellIntact && piece.Alive && piece.Brick.CurrentHealth == hp && session.FusionGoalsCredited == 0);
+                session.FusionRunAttack("qa:independent", 1, () => session.FusionHit(piece, 1, Vector2.up, piece.Position));
+                Check("rule_fixture independent attack advances exposed body", !piece.Alive && session.FusionGoalsCredited == 1 && session.FusionGoalsTotal == total);
+                session.FusionRunAttack("qa:duplicate_deleted", 1, () => session.FusionHit(piece, 99, Vector2.up, piece.Position));
+                Check("rule_fixture credited identity cannot be collected twice", session.FusionGoalsCredited == 1);
+            } catch (Exception ex) { Check("rule_fixture protection executes", false, ex.ToString()); }
+            session.StopLevel(); yield return null;
+            try {
+                session.StartFusionSample(Clone(samples[2].definition), samples[2].moves, "QA rule_fixture multi-cell", 172);
+                session.enabled = false;
+                var chest = session.FusionPieces.First(p => p.Definition.kind == "chest");
+                int before = chest.Brick.CurrentHealth, total = session.FusionGoalsTotal;
+                session.FusionRunAttack("qa:four_cells", 1, () => { for (int i = 0; i < 4; i++) session.FusionHit(chest, 1, Vector2.up, chest.Position); });
+                Check("rule_fixture four occupied cells receive one attack", chest.Alive && chest.Brick.CurrentHealth == before - 1);
+                session.FusionRunAttack("qa:open_chest", 1, () => session.FusionHit(chest, 99, Vector2.up, chest.Position));
+                for (int i = 0; i < 8; i++) session.QAAdvanceOneStep();
+                var ids = chest.Definition.contents.Select(c => c.id).ToArray();
+                Check("rule_fixture chest activates four reserved identities", ids.All(id => session.FusionPieces.Any(p => p.Definition.id == id && p.Alive)) && session.FusionGoalsTotal == total);
+                Check("rule_fixture opening chest does not credit its contents", session.FusionGoalsCredited == 0);
+            } catch (Exception ex) { Check("rule_fixture chest executes", false, ex.ToString()); }
+            session.StopLevel(); yield return null;
+            try {
+                session.StartFusionSample(Clone(samples[5].definition), samples[5].moves, "QA rule_fixture spawn snapshot", 173);
+                session.enabled = false;
+                var producer = session.FusionPieces.First(p => p.Definition.kind == "producer");
+                FusionRuntimePiece child = null; int total = session.FusionGoalsTotal;
+                session.FusionRunAttack("qa:spawn_then_cover", 1, () => {
+                    child = session.FusionSpawnContent(producer.Definition.contents[0], 4, 4);
+                    session.FusionHit(child, 99, Vector2.up, child != null ? child.Position : Vector2.zero);
+                });
+                Check("rule_fixture parent snapshot excludes newly activated content", child != null && child.Alive && child.Brick.CurrentHealth == 1 && session.FusionGoalsCredited == 0 && session.FusionGoalsTotal == total);
+            } catch (Exception ex) { Check("rule_fixture spawn snapshot executes", false, ex.ToString()); }
+            session.StopLevel(); yield return null;
+        }
+
+        IEnumerator LifecycleChecks(FusionSampleDefinition source) {
+            // A labelled stress fixture makes every collectible durable. It is never a natural run or difficulty sample.
+            var definition = Clone(source.definition);
+            foreach (var p in definition.pieces) { if (FusionRules.IsTool(p.kind)) p.kind = "normal"; p.hp = 99; }
+            bool startedFixture = false;
+            try {
+                session.StartFusionSample(definition, 8, "QA lifecycle fixture (not a player sample)", 731);
+                session.enabled = false; session.QAIgnoreFocusLoss = true; startedFixture = true;
+                for (int i = 0; i < 80 && !session.ChainCanLaunch; i++) session.QAAdvanceOneStep();
+                bool first = session.TryShoot(new Vector2(1, .28f));
+                for (int i = 0; i < 8; i++) session.QAAdvanceOneStep();
+                int shots = session.Shots, pending = session.PendingBurstBalls, step = session.PhysicsStep;
+                session.SetPaused(true);
+                bool pauseRejected = !session.TryShoot(Vector2.up);
+                for (int i = 0; i < 20; i++) session.QAAdvanceOneStep();
+                Check("lifecycle fixture pause preserves steps and pending balls", first && pauseRejected && session.Shots == shots && session.PendingBurstBalls == pending && session.PhysicsStep == step);
+                session.SetPaused(false);
+                for (int i = 0; i < 40 && !session.ChainCanLaunch; i++) session.QAAdvanceOneStep();
+                bool hadOldBalls = session.ActiveBalls > 0;
+                bool second = session.TryShoot(new Vector2(.15f, 1));
+                for (int i = 0; i < 32; i++) session.QAAdvanceOneStep();
+                Check("lifecycle fixture two five-ball groups cost exactly two steps", second && session.Shots == 6 && session.SpawnCount == 10, "second=" + second + " shots=" + session.Shots + " spawned=" + session.SpawnCount);
+                Check("lifecycle fixture accepts second launch while first balls live", hadOldBalls && second, "oldBalls=" + hadOldBalls + " second=" + second);
+                Check("lifecycle fixture records two causal volleys", session.FusionMetrics.Volleys.Count == 2, "groups=" + session.FusionMetrics.Volleys.Count);
+            } catch (Exception ex) { Check("lifecycle fixture executes", false, ex.ToString()); }
+            if (startedFixture) {
+                int oldGeneration = session.Generation;
+                session.StopLevel(); yield return null;
+                try {
+                    session.StartFusionSample(Clone(source.definition), source.moves, source.name, 732);
+                    session.enabled = false; session.QAIgnoreFocusLoss = true;
+                    Check("restart clears prior session resources and events", session.Generation != oldGeneration && session.ActiveBalls == 0 && session.PendingBurstBalls == 0 && session.Shots == source.moves && session.FusionMetrics.Volleys.Count == 0);
+                } catch (Exception ex) { Check("restart fixture executes", false, ex.ToString()); }
+            }
+            session.StopLevel(); yield return null;
+        }
+
+        IEnumerator BoosterFixtures(FusionSampleDefinition source) {
+            foreach (bool enhanced in new[] { false, true }) {
+                try {
+                    var definition = Clone(source.definition);
+                    foreach (var p in definition.pieces) { if (FusionRules.IsTool(p.kind)) p.kind = "normal"; p.hp = 99; }
+                    definition.finiteBoosters = true; definition.superPerBall = 1;
+                    session.StartFusionSample(definition, 8, "QA rule_fixture " + (enhanced ? "finite super" : "ordinary"), 811);
+                    session.enabled = false; session.QAIgnoreFocusLoss = true;
+                    bool accepted = session.TryShoot(new Vector2(1, .28f));
+                    var assigned = new HashSet<int>(); int peak = 0;
+                    for (int i = 0; i < Mathf.CeilToInt(14f / Time.fixedDeltaTime); i++) {
+                        // Explicit fixture injection seeds each spawned ball's ability, not inventory.
+                        // Inventory selection/consumption is verified separately through the editor scenario.
+                        foreach (var ball in FindObjectsByType<BallBody>(FindObjectsSortMode.None).Where(b => b.Active && b.SessionGeneration == session.Generation))
+                            if (assigned.Add(ball.Id) && enhanced) ball.SetStreakBooster(StreakBooster.Super);
+                        session.QAAdvanceOneStep(); peak = Math.Max(peak, session.ActiveBalls);
+                        if (session.PendingBurstBalls == 0 && session.ActiveBalls == 0 && i > 40) break;
+                    }
+                    var procs = session.FusionEvents.Where(e => e.Kind == "BoosterProc").ToArray();
+                    Check("rule_fixture " + (enhanced ? "finite super" : "ordinary") + " emits five physical balls for one move", accepted && session.SpawnCount == 5 && session.Shots == 7 && assigned.Count == 5, "spawned=" + session.SpawnCount + " assigned=" + assigned.Count + " peak=" + peak);
+                    Check("rule_fixture " + (enhanced ? "super has at most one activation per ball" : "ordinary has zero power activations"), enhanced
+                        ? procs.Length > 0 && procs.Length <= 5 && procs.GroupBy(e => e.TargetId).All(g => g.Count() <= 1)
+                        : procs.Length == 0, "powerActivations=" + procs.Length);
+                    Check("rule_fixture booster run keeps initial goal total", session.FusionGoalsTotal == FusionRules.Goals(definition).Count && string.IsNullOrEmpty(session.FusionRuleError));
+                    File.WriteAllText(Path.Combine(output, "booster-fixture-" + (enhanced ? "finite-super" : "ordinary") + ".json"), JsonUtility.ToJson(session.FusionMetrics, true), new UTF8Encoding(false));
+                } catch (Exception ex) { Check("rule_fixture booster executes", false, ex.ToString()); }
+                session.StopLevel(); yield return null;
+            }
+        }
+
+        IEnumerator EditorBoosterScenarioChecks(FusionSampleDefinition source) {
+            var definition = Clone(source.definition);
+            foreach (var p in definition.pieces) { if (FusionRules.IsTool(p.kind)) p.kind = "normal"; p.hp = 99; }
+            var workspace = LevelEditorWorkspace.CreateEmpty();
+            var level = workspace.CreateFusionLevel("Alphabet", "QA editor inventory fixture", definition, 8);
+            var runner = new GameObject("Fusion editor inventory QA").AddComponent<LevelEditorPlaytest>();
+            foreach (string scenario in new[] { "bare", "stocked", "streak10" }) {
+                try {
+                    bool started = runner.StartDraft(level, scenario);
+                    Check("editor " + scenario + " fusion scenario starts", started, runner.LastError);
+                    if (started) {
+                        var game = runner.Session; game.enabled = false; game.QAIgnoreFocusLoss = true;
+                        int expected = scenario == "bare" ? 0 : scenario == "stocked" ? 3 : 1;
+                        Check("editor " + scenario + " Super inventory is isolated", game.StreakStock(StreakBooster.Super) == expected, "actual=" + game.StreakStock(StreakBooster.Super));
+                        bool selected = game.SelectStreakBooster(StreakBooster.Super);
+                        if (expected == 0) Check("bare scenario cannot select unavailable Super", !selected);
+                        else {
+                            bool shot = game.TryShoot(new Vector2(1, .28f)); var observed = new HashSet<int>();
+                            for (int i = 0; i < 50; i++) {
+                                game.QAAdvanceOneStep();
+                                foreach (var ball in FindObjectsByType<BallBody>(FindObjectsSortMode.None).Where(b => b.Active && b.SessionGeneration == game.Generation))
+                                    if (ball.StreakPower == StreakBooster.Super && game.FusionBallCharges(ball) == 1) observed.Add(ball.Id);
+                            }
+                            Check("editor " + scenario + " selection consumes exactly one item and move", selected && shot && game.StreakStock(StreakBooster.Super) == expected - 1 && game.Shots == 7 && game.SelectedStreakBooster == StreakBooster.None);
+                            Check("editor " + scenario + " all five real balls receive finite Super", game.SpawnCount == 5 && observed.Count == 5, "spawned=" + game.SpawnCount + " observed=" + observed.Count);
+                            Check("editor " + scenario + " per-ball Super usage cannot exceed one", game.FusionEvents.Where(e => e.Kind == "BoosterProc").GroupBy(e => e.TargetId).All(g => g.Count() <= 1));
+                        }
+                    }
+                } catch (Exception ex) { Check("editor booster scenario executes " + scenario, false, ex.ToString()); }
+                runner.Stop(); yield return null;
+            }
+            Destroy(runner.gameObject); yield return null;
+        }
+
+        IEnumerator NaturalRun(FusionSampleDefinition sample, int policy, int seedIndex, string scenario = "bare") {
+            string[] policies = { "visible_tools", "visible_objectives", "wide_lane_rotation" };
+            var definition = Clone(sample.definition); if (scenario == "unlimited_super") definition.finiteBoosters = false;
+            var run = new Run { sample = sample.id, name = sample.name, policy = policies[policy], scenario = scenario, cadence = policy == 0 ? "observe_settled" : "rapid_0.56s", seed = 20261111 + seedIndex * 1319,
+                draftSha256 = Hash(JsonUtility.ToJson(definition)), result = "not_started" };
+            activeNaturalRun = run;
+            var inputs = new List<InputRecord>();
+            float wallStart = Time.realtimeSinceStartup;
+            Action<bool> outcome = won => { run.outcomeCount++; run.won = won; run.completed = true; };
+            session.Outcome += outcome;
+            bool startedRun = false;
+            try {
+                session.StartFusionSample(definition, sample.moves, sample.name, run.seed);
+                session.enabled = false; session.QAIgnoreFocusLoss = true;
+                session.BoosterProfile = scenario == "bare" ? null : LocalProfile.CreateLevelEditorProfile(9, "stocked");
+                run.goalsTotal = session.FusionGoalsTotal; startedRun = true;
+                Check(sample.id + " runtime accepts configured steps " + policy + "/" + seedIndex, session.Shots == sample.moves);
+            } catch (Exception ex) { run.error = ex.ToString(); Check(sample.id + " runtime start", false, run.error); }
+            int limit = Mathf.CeilToInt(Mathf.Max(90f, sample.moves * 15f + 10) / Time.fixedDeltaTime), iterations = 0;
+            float nextAim = 0, settledSince = -1;
+            bool goalConserved = true, tookFirstCapture = false, tookProgressCapture = false, tookTailCapture = false;
+            while (startedRun && session.IsPlaying && session.PhysicsStep < limit && iterations++ < limit + 512) {
+                try {
+                    if (!string.IsNullOrEmpty(session.FusionRuleError)) throw new InvalidOperationException(session.FusionRuleError);
+                    float time = session.PhysicsStep * Time.fixedDeltaTime;
+                    bool settled = session.ActiveBalls == 0 && session.PendingBurstBalls == 0 && !session.FusionActionsPending && session.ChainGridReady;
+                    if (settled) { if (settledSince < 0) settledSince = time; } else settledSince = -1;
+                    bool decisionReady = policy != 0 || inputs.Count == 0 || settledSince >= 0 && time - settledSince >= .20f;
+                    if (session.ChainCanLaunch && time >= nextAim && decisionReady) {
+                        if (scenario != "bare" && inputs.Count == 0)
+                            Check(sample.id + " " + scenario + " selects actual inventory Super", session.SelectStreakBooster(StreakBooster.Super));
+                        float angle = ChooseAngle(policy, inputs.Count, seedIndex);
+                        var input = new InputRecord { physicsStep = session.PhysicsStep, simulationTime = time, shotsBefore = session.Shots, angle = angle };
+                        float radians = angle * Mathf.Deg2Rad;
+                        input.accepted = session.TryShoot(new Vector2(Mathf.Cos(radians), Mathf.Sin(radians)));
+                        inputs.Add(input); nextAim = time + .56f;
+                    }
+                    session.QAAdvanceOneStep();
+                    run.peakBalls = Math.Max(run.peakBalls, session.ActiveBalls);
+                    goalConserved &= session.FusionGoalsTotal == run.goalsTotal && session.FusionGoalsCredited >= 0 && session.FusionGoalsCredited <= run.goalsTotal;
+                    if (seedIndex == 0 && policy == 0) {
+                        if (!tookFirstCapture && session.PhysicsStep >= 1) { Capture(sample.id + "-" + scenario + "-01-opening"); tookFirstCapture = true; }
+                        if (!tookProgressCapture && session.FusionMetrics.Transitions > 0) { Capture(sample.id + "-" + scenario + "-02-transition"); tookProgressCapture = true; }
+                        if (!tookTailCapture && session.FusionGoalsCredited >= Math.Ceiling(run.goalsTotal * .8)) { Capture(sample.id + "-" + scenario + "-03-tail"); tookTailCapture = true; }
+                    }
+                } catch (Exception ex) { run.error = ex.ToString(); Check(sample.id + " physics execution", false, run.error); break; }
+                if (session.PhysicsStep % 150 == 0) yield return null;
+            }
+            if (startedRun) {
+                run.physicsSteps = session.PhysicsStep; run.simulatedSeconds = session.PhysicsStep * Time.fixedDeltaTime;
+                run.shotsUsed = sample.moves - session.Shots; run.remainingShots = session.Shots;
+                run.goalsCredited = session.FusionGoalsCredited;
+                run.timedOut = session.IsPlaying && string.IsNullOrEmpty(run.error);
+                run.result = !string.IsNullOrEmpty(run.error) ? "runtime_error" : run.timedOut ? "incomplete_timeout" : run.won ? "won" : "lost";
+                run.metrics = JsonUtility.FromJson<FusionMetrics>(JsonUtility.ToJson(session.FusionMetrics));
+                run.events = session.FusionEvents.ToArray();
+                run.finalPieces = session.FusionPieces.Where(p => p.Alive).Select(p => new PieceState {
+                    id=p.Definition.id,kind=p.Definition.kind,goalIds=p.GoalIds.ToArray(),authoredCol=p.Definition.c,authoredRow=p.Definition.r,
+                    hp=p.Brick!=null?p.Brick.CurrentHealth:0,ice=p.Ice,stock=p.Stock,charge=p.Charge,x=p.Position.x,y=p.Position.y,
+                    alive=p.Alive,enabled=p.Enabled,armor=p.Brick!=null&&p.Brick.ShellIntact }).ToArray();
+                run.finalGoals = session.fusionGoals.Values.Select(g => new GoalState { id=g.Definition.id,ownerId=g.Definition.ownerId,kind=g.Definition.kind,state=g.State.ToString() }).ToArray();
+                Check(sample.id + " goal conservation " + policy + "/" + seedIndex, goalConserved);
+                Check(sample.id + " no fusion rule errors " + policy + "/" + seedIndex, string.IsNullOrEmpty(session.FusionRuleError), session.FusionRuleError);
+                Check(sample.id + " finite natural outcome " + policy + "/" + seedIndex, !run.timedOut && run.outcomeCount == 1, run.result);
+                Check(sample.id + " victory implies all initial goals " + policy + "/" + seedIndex, !run.won || run.goalsCredited == run.goalsTotal);
+                var credits = run.events.Where(e => e.Kind == "GoalCredited").ToArray();
+                Check(sample.id + " unique credited goal events " + policy + "/" + seedIndex, credits.Select(e => e.TargetId).Distinct().Count() == credits.Length && credits.Length == run.goalsCredited);
+                Check(sample.id + " events retain current session identity " + policy + "/" + seedIndex, run.events.All(e => e.SessionId == session.Generation) && run.events.Select(e => e.EventId).Distinct().Count() == run.events.Length);
+                var eventIds = new HashSet<long>(run.events.Select(e => e.EventId));
+                Check(sample.id + " event ancestry points to earlier real events " + policy + "/" + seedIndex,
+                    run.events.All(e => e.ParentEventId == 0 || e.ParentEventId < e.EventId && eventIds.Contains(e.ParentEventId))
+                    && run.events.Zip(run.events.Skip(1), (a, b) => a.EventId < b.EventId).All(increasing => increasing));
+                Check(sample.id + " successful launch accounting matches used moves " + policy + "/" + seedIndex, run.metrics.Shots == run.shotsUsed && run.events.Count(e => e.Kind == "VolleyStarted") == run.shotsUsed);
+                if (scenario != "bare") Check(sample.id + " " + scenario + " spends one real inventory item", session.StreakStock(StreakBooster.Super) == 2);
+                if (policy == 0 && seedIndex == 0) Capture(sample.id + "-" + scenario + "-04-result");
+            }
+            session.Outcome -= outcome;
+            run.wallClockSeconds = Time.realtimeSinceStartup - wallStart; run.inputs = inputs.ToArray(); runs.Add(run);
+            string file = sample.id + "-" + scenario + "-" + policies[policy] + "-" + seedIndex.ToString("D2");
+            File.WriteAllText(Path.Combine(output, "runs", file + ".json"), JsonUtility.ToJson(run, true), new UTF8Encoding(false));
+            activeNaturalRun = null;
+        }
+
+        float ChooseAngle(int policy, int shot, int seedIndex) {
+            float perturb = new[] { 0f, -2f, 2f, -1f, 1f }[seedIndex % 5];
+            if (policy == 2) return new[] { 90f, 68f, 112f, 80f, 100f }[shot % 5] + perturb;
+            var pieces = session.FusionPieces.Where(p => p.Alive && p.Enabled && p.Transform != null).ToArray();
+            var lookup = new Dictionary<Collider2D,FusionRuntimePiece>();
+            foreach (var piece in pieces) foreach (var collider in piece.Transform.GetComponentsInChildren<Collider2D>()) lookup[collider] = piece;
+            float best = float.NegativeInfinity, chosen = 90;
+            for (int angle = 15; angle <= 165; angle += 3) {
+                float radians = angle * Mathf.Deg2Rad;
+                var direction = new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
+                var position = session.SpawnPosition(direction); float remaining = 48, score = 0;
+                Collider2D previous = null; var scored = new HashSet<string>();
+                for (int bounce = 0; bounce < 22 && remaining > .01f; bounce++) {
+                    var hits = Physics2D.CircleCastAll(position, FlightGeometry.Radius, direction, remaining, 1 << 8).OrderBy(h => h.distance);
+                    RaycastHit2D found = default; bool any = false;
+                    foreach (var hit in hits) { if (hit.collider == null || hit.collider.isTrigger || hit.distance < .005f && hit.collider == previous) continue; found = hit; any = true; break; }
+                    float segment = any ? found.distance : remaining;
+                    foreach (var tool in pieces.Where(p => p.Tool != null)) {
+                        Vector2 offset = tool.Position - position; float along = Vector2.Dot(offset, direction);
+                        float radius = CollectionLevels.Pitch * .42f + FlightGeometry.Radius;
+                        if (along >= 0 && along <= segment && (offset - direction * along).sqrMagnitude <= radius * radius && scored.Add(tool.Definition.id))
+                            score += policy == 0 ? 12 : 5;
+                    }
+                    if (!any || direction.y < 0 && found.centroid.y < session.ReturnLineY) break;
+                    remaining -= Mathf.Max(.02f, found.distance);
+                    if (lookup.TryGetValue(found.collider, out var piece) && scored.Add(piece.Definition.id)) {
+                        var p = piece.Definition;
+                        if (p.kind == "stone" || p.kind == "gate") score -= 1;
+                        else if (FusionRules.IsTool(p.kind)) score += policy == 0 ? 12 : 5;
+                        else if (!string.IsNullOrEmpty(FusionRules.GoalKind(p))) score += policy == 1 ? 8 : 3;
+                        else if (p.kind == "producer") score += piece.Stock > 0 ? 9 : .1f;
+                        else if (FusionRules.IsDevice(p.kind) || p.kind == "chest") score += 4;
+                        else score += .5f;
+                    }
+                    previous = found.collider; direction = Vector2.Reflect(direction, found.normal).normalized; position = found.centroid + found.normal * .02f;
+                }
+                score += Mathf.Sin((angle + shot * 23) * .12f) * .05f;
+                if (score > best) { best = score; chosen = angle; }
+            }
+            return Mathf.Clamp(chosen + perturb, 15, 165);
+        }
+        void Capture(string name) {
+            var camera = Camera.main; if (camera == null) return;
+            var target = new RenderTexture(540, 1170, 24); var texture = new Texture2D(540, 1170, TextureFormat.RGB24, false);
+            try { target.Create(); QARecorder.Capture(camera, target, texture); File.WriteAllBytes(Path.Combine(output, "captures", name + ".png"), texture.EncodeToPNG()); }
+            finally { target.Release(); Destroy(target); Destroy(texture); }
+        }
+        void RestoreSimulation() { if (!capturedSimulation) return; Physics2D.simulationMode = oldMode; Time.timeScale = oldTimeScale; capturedSimulation = false; }
+        void Finish(int count) {
+            bool profileUnchanged = profileBefore == PlayerPrefs.GetString("BounceGarden.LocalProfile.v1", "<missing>");
+            bool campaignsUnchanged = campaignHashes.All(k => Hash(Resources.Load<TextAsset>(k.Key + "/campaign").text) == k.Value);
+            int caughtRuns = runs.Count(r => !string.IsNullOrEmpty(r.error));
+            int affectedRuns = runs.Count(r => !string.IsNullOrEmpty(r.error) || r.loggedRuntimeErrors > 0);
+            int runtimeErrors = affectedRuns + outsideNaturalLogErrors;
+            Check("isolated profile unchanged", profileUnchanged); Check("bundled campaign assets unchanged", campaignsUnchanged);
+            Check("no runtime errors", runtimeErrors == 0, "affected natural runs=" + affectedRuns + "; caught runs=" + caughtRuns + "; outside-run log errors=" + outsideNaturalLogErrors + "; all application log messages=" + errors.Count + "\n" + string.Join("\n", errors));
+            int failed = checks.Count(c => !c.passed);
+            var report = new Report { status = failed == 0 ? "passed" : "failed", startedAtUtc = started, completedAtUtc = DateTime.UtcNow.ToString("o"),
+                unityVersion = Application.unityVersion,
+                mode = externalMode ? "external_natural_exploration" : "builtin_regression_and_exploration",
+                sourceSamplesPath = sourceSamplesPath, sourceSamplesSha256 = sourceSamplesSha256, sampleProjectPath = sampleProjectPath, baselineRegressionExecuted = !externalMode, superRangeRegressionExecuted = superRangeRegression, flowRegressionExecuted = flowRegression,
+                scope = (externalMode ? "External sample configuration validation, independent project export and actual Physics2D natural exploration. Built-in full rule fixtures and seven-sample baseline regression were NOT run. " : "Isolated fusion authoring roundtrip and built-in regression plus actual production Physics2D. ") + (superRangeRegression ? "Targeted Super-range authoring, physical collision and explicitly controlled-contact rule fixtures were also run; excluded from natural-run statistics. " : "") + (flowRegression ? "Targeted flow-planning rule fixtures were also run; excluded from natural-run statistics. " : "") + "Three visible-state aiming policies with seeds/angle perturbations. No forced damage, deletion or outcomes in natural runs. Bot outcomes are not player win rates or evidence of subjective fun. Camera captures do not validate desktop IMGUI or mobile performance.",
+                checks = checks.Count, passed = checks.Count - failed, failed = failed, runtimeErrors = runtimeErrors, applicationErrors = errors.Count, naturalRunErrors = caughtRuns, naturalAffectedRuns = affectedRuns, outsideNaturalLogErrors = outsideNaturalLogErrors, samples = count, runs = runs.Count,
+                naturalWins = runs.Count(r => r.won), timeouts = runs.Count(r => r.timedOut), profileUnchanged = profileUnchanged, bundledCampaignsUnchanged = campaignsUnchanged,
+                assertions = checks.ToArray(), runtimeErrorMessages = errors.ToArray(), naturalRuns = runs.Select(r => new Run { sample=r.sample,name=r.name,policy=r.policy,scenario=r.scenario,cadence=r.cadence,seed=r.seed,result=r.result,error=r.error,loggedRuntimeErrors=r.loggedRuntimeErrors,won=r.won,completed=r.completed,timedOut=r.timedOut,shotsUsed=r.shotsUsed,remainingShots=r.remainingShots,goalsTotal=r.goalsTotal,goalsCredited=r.goalsCredited,simulatedSeconds=r.simulatedSeconds,wallClockSeconds=r.wallClockSeconds,peakBalls=r.peakBalls,draftSha256=r.draftSha256 }).ToArray() };
+            File.WriteAllText(Path.Combine(output, "verification.json"), JsonUtility.ToJson(report, true), new UTF8Encoding(false));
+            var csv = new StringBuilder("sample,scenario,policy,cadence,seed,result,shotsUsed,remainingShots,goalsTotal,goalsCredited,simulatedSeconds,peakBalls\n");
+            foreach (var r in runs) csv.AppendLine(string.Join(",", r.sample,r.scenario,r.policy,r.cadence,r.seed,r.result,r.shotsUsed,r.remainingShots,r.goalsTotal,r.goalsCredited,r.simulatedSeconds.ToString("F3",CultureInfo.InvariantCulture),r.peakBalls));
+            File.WriteAllText(Path.Combine(output,"natural-runs.csv"),csv.ToString(),new UTF8Encoding(false));
+            Application.logMessageReceived -= OnLog;
+            string marker = externalMode ? (failed == 0 ? "FUSION_EXPLORATION_OK" : "FUSION_EXPLORATION_FAILED") : (failed == 0 ? "FUSION_QA_OK" : "FUSION_QA_FAILED");
+            Debug.Log(marker + " checks=" + checks.Count + " failed=" + failed + " naturalWins=" + report.naturalWins + "/" + runs.Count);
+            Application.Quit(failed == 0 ? 0 : 2);
+        }
+        void OnDestroy() { Application.logMessageReceived -= OnLog; if(session != null) session.StopLevel(); RestoreSimulation(); }
+    }
+}

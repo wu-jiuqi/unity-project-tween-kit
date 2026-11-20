@@ -1,0 +1,11 @@
+using UnityEngine;
+namespace ProjectTweenKit {
+// Shared visual-only motion; callers retain their layout anchors and colliders.
+public static class JellyMotion {
+ public const float HitDuration=.45f;
+ public static Vector2 HitStretch(float age,Vector2 incoming){float t=Mathf.Clamp01(age/HitDuration);float wave=t>=1?0:Mathf.Sin(t*Mathf.PI*4)*Mathf.Exp(-5*t)*.28f;return Mathf.Abs(incoming.y)>=Mathf.Abs(incoming.x)?new Vector2(1+wave,1-wave):new Vector2(1-wave,1+wave);}
+ public static Vector2 FloatOffset(float age,int index)=>new Vector2(Mathf.Sin(age*7+index)*5,Mathf.Sin(age*5.3f+index*2)*8);
+ public static Vector3 FloatScale(float age,int index)=>new Vector3(1+Mathf.Sin(age*9+index)*.1f,1+Mathf.Sin(age*7.7f+index*2)*.12f,1);
+ public static float FloatAngle(float age,int index)=>Mathf.Sin(age*6+index)*7;
+}
+}

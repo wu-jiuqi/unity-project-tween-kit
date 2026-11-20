@@ -1,0 +1,21 @@
+using System;
+using System.IO;
+using UnityEngine;
+
+/// <summary>Builds the isolated editor containing fusion examples and opt-in QA.</summary>
+public static class FusionBuild {
+    public static void Windows() {
+        string old = Environment.GetEnvironmentVariable("BOUNCE_LEVEL_EDITOR_OUTPUT");
+        try {
+            if (string.IsNullOrWhiteSpace(old)) {
+                var root = new DirectoryInfo(Application.dataPath);
+                while (root != null && !File.Exists(Path.Combine(root.FullName, "version.json"))) root = root.Parent;
+                if (root == null) throw new InvalidOperationException("Cannot locate repository root.");
+                Environment.SetEnvironmentVariable("BOUNCE_LEVEL_EDITOR_OUTPUT",
+                    Path.Combine(root.FullName, "Builds/MechanicsP01/Authoring/BounceBustersLevelEditor.exe"));
+            }
+            LevelEditorBuild.Windows();
+            Debug.Log("FUSION_BUILD_OK");
+        } finally { Environment.SetEnvironmentVariable("BOUNCE_LEVEL_EDITOR_OUTPUT", old); }
+    }
+}

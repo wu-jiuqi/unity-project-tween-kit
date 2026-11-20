@@ -1,0 +1,7 @@
+namespace BounceGarden {
+// Shared rules used by the current jelly journey; no legacy renderer.
+public static class TreeJourney80 {
+ public static int Stars(int score)=>score>=60000?3:score>=30000?2:1;
+ public static bool CanPlay(LocalProfile p,int index)=>index>=0&&index<AlphabetCampaign.Count&&index<=p.AlphabetUnlocked;
+}
+}

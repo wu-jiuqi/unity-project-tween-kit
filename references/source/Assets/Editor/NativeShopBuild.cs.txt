@@ -1,0 +1,15 @@
+using System;
+using UnityEngine;
+using BounceGarden;
+public static class NativeShopBuild {
+ public static void Windows(){int count=0;Action<bool,string> check=(ok,label)=>{count++;if(!ok)throw new Exception(label);};
+ var p=new LocalProfile();p.ReadLeague();string id=CatCosmeticCatalog.Items[1].id;int start=p.Coins;
+ check(p.OwnsShopCosmetic(CatCosmeticCatalog.Default.id,false),"Original default stays free");
+ check(p.PurchaseCosmetic(id,false),"Purchase original avatar");check(p.Coins==start-LocalProfile.CosmeticPrice(id,false),"Exact debit");check(!p.PurchaseCosmetic(id,false),"Duplicate rejected");
+ check(p.PurchaseCosmetic(id,true),"Separate frame purchase");check(p.EquipShopCosmetics(id,id),"Equip original pair");
+ var reload=LocalProfile.ImportForQA(p.ExportForQA());check(reload.EquippedAvatarId==id&&reload.EquippedFrameId==id&&reload.Coins==p.Coins,"Ownership and equipment reload");
+ check(reload.EquipShopCosmetics("",id),"Independent default/avatar");check(!reload.PurchaseCosmetic("unknown",false),"Unknown rejected");check(!reload.PurchaseCosmetic(CatCosmeticCatalog.Items[9].id,true),"Insufficient balance rejected");
+ check(CatCosmeticCatalog.Validate().StartsWith("PASS"),"Original 20 sprites and all 100 measured layouts");
+ Debug.Log("NATIVE_SHOP_TESTS PASS "+count);Debug.Log("LEAGUE_TESTS "+LeagueSelfTests.RunAll());ReleaseBuild.Windows();
+ }
+}

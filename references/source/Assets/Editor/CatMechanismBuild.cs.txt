@@ -1,0 +1,16 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class CatMechanismBuild {
+ public static void Windows(){
+  BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  var root=new DirectoryInfo(Application.dataPath).Parent.Parent.Parent.FullName;
+  var path=Path.Combine(root,"Builds/CatMechanism/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+  Debug.Log("CAT_MECHANISM_BUILD "+result.summary.result+" errors="+result.summary.totalErrors);
+  if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Cat mechanism build failed");
+ }
+}

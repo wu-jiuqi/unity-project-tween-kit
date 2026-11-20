@@ -1,0 +1,19 @@
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ bool leagueFocused=true;float leagueIdle,leagueMenuTime;double leaguePending;
+ void OnApplicationQuit(){FlushLeagueActivity(true);}
+ void TickLeagueActivity(){
+  if(Profile==null||Session==null)return;
+  float dt=Mathf.Min(Time.unscaledDeltaTime,.25f);
+  if(Input.touchCount>0||Input.GetMouseButton(0)||Input.anyKeyDown||aiming)leagueIdle=0;else leagueIdle+=dt;
+  bool battle=leagueFocused&&playing&&!busy&&results==null&&modal==null&&Session.IsPlaying&&!Session.IsPaused&&!Session.IsTutorial&&!Session.IsStreakTrial;
+  bool active=battle&&(Session.ActiveBalls>0||leagueIdle<45);
+  if(battle)leagueMenuTime=0;else leagueMenuTime+=dt;
+  if(leagueFocused&&!playing&&modal==null&&leagueMenuTime<20&&leagueIdle<20)active=true;
+  if(active)leaguePending+=dt;
+  if(leaguePending>=5)FlushLeagueActivity(false);
+ }
+ void FlushLeagueActivity(bool suspend){if(Profile==null)return;if(leaguePending>0){Profile.TickLeague(leaguePending);leaguePending=0;}if(suspend)Profile.SuspendLeague();}
+}
+}

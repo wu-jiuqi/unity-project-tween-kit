@@ -1,0 +1,132 @@
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+// Coordinates, pivots and borders copied from the two supplied manifests. No raster changes.
+public sealed class ArtImporter : AssetPostprocessor {
+ void OnPreprocessTexture(){
+ if(!assetPath.StartsWith("Assets/Resources/Art/Source/"))return;
+ var t=(TextureImporter)assetImporter; t.textureType=TextureImporterType.Sprite; t.spritePixelsPerUnit=100;
+ t.mipmapEnabled=false;t.isReadable=false;t.filterMode=FilterMode.Bilinear;t.wrapMode=TextureWrapMode.Clamp;
+ t.maxTextureSize=4096;t.textureCompression=TextureImporterCompression.Uncompressed;
+ switch(Path.GetFileNameWithoutExtension(assetPath)){
+ case "garden_gameplay_bg_v3":
+ t.alphaIsTransparency=false;
+ t.spriteImportMode=SpriteImportMode.Single;break;
+ case "cannon_barrel":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="cannon_barrel",rect=new Rect(301,49,651,1147),alignment=9,pivot=new Vector2(0.5f,0.25f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "cannon_base":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="cannon_base",rect=new Rect(75,105,1121,1051),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "ball_blue_star":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="ball_blue_star",rect=new Rect(121,117,1006,1008),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "bricks_color_atlas":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="red",rect=new Rect(18,662,288,301),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="orange",rect=new Rect(329,662,287,301),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="yellow",rect=new Rect(638,662,288,301),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="green",rect=new Rect(949,662,288,301),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="blue",rect=new Rect(18,270,288,303),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="cyan",rect=new Rect(329,270,287,303),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="ivory",rect=new Rect(638,270,288,303),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="slate",rect=new Rect(949,270,288,303),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "buttons_gold_atlas":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="green",rect=new Rect(83,847,1089,352),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(150,100,150,100)},
+ new SpriteMetaData{name="orange",rect=new Rect(82,445,1090,353),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(150,100,150,100)},
+ new SpriteMetaData{name="blue",rect=new Rect(82,43,1090,353),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(150,100,150,100)},
+ };
+#pragma warning restore 0618
+ break;
+ case "garden_home_bg":
+ t.alphaIsTransparency=false;
+ t.spriteImportMode=SpriteImportMode.Single;break;
+ case "special_objects_atlas":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="pinwheel",rect=new Rect(68,710,516,484),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="paddle",rect=new Rect(653,818,566,225),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="bird_doors",rect=new Rect(51,74,549,552),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="ivory_block",rect=new Rect(680,95,517,502),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "rewards_star_atlas":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="star_stamp_tintable",rect=new Rect(63,700,536,504),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="star_coin",rect=new Rect(698,690,496,515),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="coin_stack",rect=new Rect(45,96,607,502),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="spade_badge",rect=new Rect(692,91,510,539),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "modal_header_atlas":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="modal_panel",rect=new Rect(54,561,527,608),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(55,60,55,130)},
+ new SpriteMetaData{name="level_header",rect=new Rect(641,756,587,236),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(60,45,60,45)},
+ new SpriteMetaData{name="ribbon_header",rect=new Rect(31,167,716,198),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="round_button_blank",rect=new Rect(807,86,380,381),alignment=9,pivot=new Vector2(0.5f,0.5f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "mascot_tall_poses":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="idle",rect=new Rect(134,13,477,705),alignment=9,pivot=new Vector2(0.503145f,0.007092f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="cheer",rect=new Rect(756,12,661,708),alignment=9,pivot=new Vector2(0.522693f,0.007062f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="wave",rect=new Rect(1606,9,532,710),alignment=9,pivot=new Vector2(0.368421f,0.007042f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ case "mascot_short_poses":
+ t.alphaIsTransparency=true;
+ t.spriteImportMode=SpriteImportMode.Multiple;
+#pragma warning disable 0618
+ t.spritesheet=new SpriteMetaData[]{
+ new SpriteMetaData{name="idle",rect=new Rect(65,75,585,609),alignment=9,pivot=new Vector2(0.491453f,0.00821f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="cheer",rect=new Rect(719,70,747,597),alignment=9,pivot=new Vector2(0.493976f,0.008375f),border=new Vector4(0,0,0,0)},
+ new SpriteMetaData{name="wave",rect=new Rect(1485,74,663,587),alignment=9,pivot=new Vector2(0.487179f,0.008518f),border=new Vector4(0,0,0,0)},
+ };
+#pragma warning restore 0618
+ break;
+ }
+ }
+}

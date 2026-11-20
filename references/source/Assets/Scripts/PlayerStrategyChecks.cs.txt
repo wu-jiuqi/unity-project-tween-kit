@@ -1,0 +1,41 @@
+using System;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public static class PlayerStrategyChecks {
+ public static void Run(GameSession game,Action<bool,string> check,string folder){
+  var original=game.StrategyObserver;var data=new StrategyRound();var recorder=new PlayerStrategyRecorder(game,data);game.StrategyObserver=recorder.Observe;
+  var random=UnityEngine.Random.state;int score=game.Score,shots=game.Shots;
+  try{
+   recorder.Tick(.25f,false);check(data.seconds==0,"strategy pause/focus clock excluded");recorder.Tick(.25f,true);
+   game.StrategyEmit(new StrategyEvent{kind="shot",group=11,y=1,detail="settled"});
+   recorder.Tick(.2f,true);game.StrategyEmit(new StrategyEvent{kind="shot",group=22,y=1,liveGroups=1,activeBalls=3});
+   Action deferred;
+   using(game.StrategyCause("fixture A",11)){
+    game.StrategyEmit(new StrategyEvent{kind="score",amount=100});
+    deferred=game.StrategyWrap(()=>game.StrategyEmit(new StrategyEvent{kind="goal",amount=1,goal=0}));
+   }
+   using(game.StrategyCause("fixture B",22)){game.StrategyEmit(new StrategyEvent{kind="score",amount=200});deferred();game.StrategyEmit(new StrategyEvent{kind="score",amount=25});}
+   check(data.shots[0].score==100&&data.shots[1].score==225,"overlapping group credit does not follow latest shot");
+   check(data.shots[0].goals==1&&data.shots[1].goals==0,"deferred goal keeps originating group after another launch");
+   var goal=data.events.Single(e=>e.kind=="goal");check(goal.group==11&&goal.root>0&&goal.parent>0,"deferred event preserves root and parent identity");
+   check(data.shots[0].mode=="initial"&&data.shots[1].mode=="rapid"&&data.comparableShots==1,"initial shot excluded from timing denominator");
+   check(Mathf.Abs(data.shots[1].interval-.2f)<.0001f,"effective inter-shot interval captured");
+   using(game.StrategyCause("reward",11)){var tool=game.ChainTools.FirstOrDefault()??new ChainTool{Kind=2};if(tool!=null){game.StrategyToolSpawned(tool);using(game.StrategyCause("trigger",22))using(game.StrategyToolCause(tool)){game.StrategyEmit(new StrategyEvent{kind="special",target=game.StrategyToolId(tool),earnedBy=game.StrategyEarned(tool)});game.StrategyEmit(new StrategyEvent{kind="score",amount=80});}check(data.events.First(e=>e.kind=="special").group==22&&data.events.First(e=>e.kind=="special").earnedBy==11,"earned-by and triggered-by groups remain distinct");}}
+   game.StrategyEmit(new StrategyEvent{kind="request",request=9,detail="rejected"});check(data.specialUses.Single().score==80,"special credit is separate from group and follows its causal context");
+   check(data.requests==1&&data.rejectedRequests==1&&data.shotCount==2,"rejected requests never become charged shots");
+   game.StrategyEmit(new StrategyEvent{kind="group-return",group=11});check(data.shots[0].returnedAt>=0&&data.shots[0].returnState=="balls_returned","ball return is separate from full settlement");
+   game.StrategyEmit(new StrategyEvent{kind="score",amount=30});check(data.unattributedScore==30,"unknown effects are not assigned to latest group");
+   var history=new BalanceHistory();history.rounds.Add(new BalanceRound{id="strategy-fixture",level=5,configHash="fixture",outcome="loss",strategyVersion=2,strategy=data});
+   File.WriteAllText(Path.Combine(folder,"strategy-fixture.html"),PlayerStrategyReport.Html(history));File.WriteAllText(Path.Combine(folder,"strategy-fixture.json"),BalanceReport.Json(history));
+   check(PlayerStrategyReport.ShotsCsv(history).Contains("角度_竖直0左负右正"),"shot CSV documents angle convention");
+   check(PlayerStrategyReport.Calibration(history).Contains("insufficient-samples"),"small samples cannot auto-calibrate weights");
+   for(int i=0;i<PlayerStrategyRecorder.EventLimit+10;i++)game.StrategyEmit(new StrategyEvent{kind="score",amount=1,group=11});
+   check(data.events.Count==PlayerStrategyRecorder.EventLimit&&data.omittedEvents>0&&data.shots[0].score==100+PlayerStrategyRecorder.EventLimit+10,"bounded details preserve aggregate credits and report omissions");
+   check(random.Equals(UnityEngine.Random.state)&&game.Score==score&&game.Shots==shots,"observation consumes no random or gameplay state");
+   game.StrategyObserver=_=>throw new IOException("injected observer failure");game.StrategyEmit(new StrategyEvent());check(game.StrategyObserver==null&&game.Score==score&&game.Shots==shots,"observer failure is isolated from gameplay");
+  }finally{game.StrategyObserver=original;}
+ }
+}
+}

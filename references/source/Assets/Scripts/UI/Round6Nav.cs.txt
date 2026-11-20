@@ -1,0 +1,37 @@
+using System;using System.Collections;using DG.Tweening;using UnityEngine;using UnityEngine.UI;using TMPro;
+namespace BounceGarden {
+public sealed class Round6Nav:MonoBehaviour {
+ public const float RaisedY=84,PopDuration=.85f;
+ readonly Button[] buttons=new Button[3];readonly Image[] panels=new Image[3],strips=new Image[3];readonly RectTransform[] icons=new RectTransform[3];readonly TMP_Text[] labels=new TMP_Text[3];readonly CanvasGroup[] captions=new CanvasGroup[3];readonly Tween[] moves=new Tween[3];readonly int[] popVersions=new int[3];string selected;int selectedLevel;
+ static readonly string[] Keys={"shop","home","ranking"};
+ public void Build(Action<string> request){var root=UICraft.Root(transform,"Pastel fixed navigation",0,-1025,1080,250);var rail=UICraft.Art(root,"pastel/bottomnav_rail",0,0,1100,250);rail.type=Image.Type.Sliced;rail.preserveAspect=false;
+ string[] names={"小铺","花园","排行"},arts={"icon_shop","icon_home","icon_ranking"};
+ for(int i=0;i<3;i++){int index=i;float x=(i-1)*356;var panel=UICraft.Art(root,"pastel/button_mint",x,0,330,230);panel.type=Image.Type.Sliced;panel.preserveAspect=false;panel.name="Selection "+Keys[i];panels[i]=panel;
+ var rt=UICraft.Root(root,"Nav button "+Keys[i],x,0,340,240);var hit=rt.gameObject.AddComponent<Image>();hit.color=Color.clear;var b=rt.gameObject.AddComponent<Button>();b.targetGraphic=hit;b.transition=Selectable.Transition.None;b.onClick.AddListener(()=>{SoundService.Play("click");request(Keys[index]);});buttons[i]=b;
+ var press=UICraft.Root(rt,"Press visual",0,0,340,240);rt.gameObject.AddComponent<UIBounce>().Target=press;
+ icons[i]=UICraft.Root(press,"Pop icon",0,0,110,110);var info=PastelArt.Info(arts[i]);float width=84*Mathf.Min(1,info.visible[2]/(float)info.visible[3]);HeaderMedallions.CenteredArt(icons[i],arts[i],width);
+ var strip=UICraft.Box(press,"Selected label strip "+Keys[i],0,-30,242,58,Color.white);strip.pixelsPerUnitMultiplier=.6f;strips[i]=strip;captions[i]=strip.gameObject.AddComponent<CanvasGroup>();captions[i].alpha=0;captions[i].interactable=captions[i].blocksRaycasts=false;
+ labels[i]=UICraft.Label(strip.transform,names[i],0,0,222,54,39,UICraft.Ink);labels[i].alignment=TextAlignmentOptions.Center;
+ }}
+ void ApplyDifficulty(int level){string key=HomeProgress.ButtonKey(level);var info=PastelArt.Info(key);for(int i=0;i<3;i++){var panel=panels[i];panel.sprite=PastelArt.Get(key);panel.pixelsPerUnitMultiplier=Mathf.Clamp(info.size[1]/230f,.1f,8);float offsetX=(info.visible[0]-(info.size[0]-info.visible[0]-info.visible[2]))*.5f/panel.pixelsPerUnitMultiplier;float offsetY=(.5f-(info.visible[1]+info.visible[3]*.5f)/info.size[1])*230;panel.rectTransform.anchoredPosition=new Vector2((i-1)*356-offsetX,-offsetY);strips[i].color=Color.Lerp(HomeProgress.DifficultyColor(level),Color.white,.40f);}}
+ public void Select(string key,int level=0){selectedLevel=level;ApplyDifficulty(level);if(selected==key)return;selected=key;
+ for(int i=0;i<3;i++){int index=i;bool active=Keys[i]==key;buttons[i].interactable=!active;panels[i].enabled=active;moves[i]?.Kill();int version=++popVersions[i];strips[i].gameObject.SetActive(active);captions[i].alpha=0;
+ if(!FeedbackProfile.Active.enabledFeedback){SetFinal(i,active);continue;}
+ var icon=icons[i];Vector2 from=icon.anchoredPosition;Vector3 scale=icon.localScale;float angle=icon.localEulerAngles.z;float progress=0;
+ if(active){icon.localScale=new Vector3(1.16f,.78f,1);StartCoroutine(StartPopAfterVisibleFrame(index,version,from));}
+ else moves[i]=DOTween.To(()=>progress,v=>{progress=v;icon.anchoredPosition=Vector2.Lerp(from,Vector2.zero,v);icon.localScale=Vector3.Lerp(scale,Vector3.one,v);icon.localRotation=Quaternion.Euler(0,0,Mathf.LerpAngle(angle,0,v));},1,.22f).SetEase(Ease.OutCubic).SetUpdate(true).OnComplete(()=>SetFinal(index,false));
+ }}
+ IEnumerator StartPopAfterVisibleFrame(int i,int version,Vector2 from){yield return new WaitForEndOfFrame();yield return null;if(version!=popVersions[i]||!isActiveAndEnabled)yield break;float progress=0;var scale=new Vector3(1.16f,.78f,1);moves[i]=DOTween.To(()=>progress,v=>{progress=v;RenderPop(i,v,from,scale);},1,PopDuration).SetEase(Ease.Linear).SetUpdate(true).OnComplete(()=>SetFinal(i,true));}
+ void RenderPop(int i,float t,Vector2 from,Vector3 startScale){var icon=icons[i];float y;Vector3 scale;float rotation=0;
+ if(t<.12f){float q=t/.12f;y=Mathf.Lerp(from.y,from.y-5,q);scale=Vector3.Lerp(startScale,new Vector3(1.16f,.78f,1),q);}
+ else if(t<.38f){float q=(t-.12f)/.26f;y=Mathf.Lerp(from.y-5,RaisedY+22,1-Mathf.Pow(1-q,3));scale=Vector3.Lerp(new Vector3(1.16f,.78f,1),new Vector3(.92f,1.36f,1),q);}
+ else{float q=(t-.38f)/.62f;float envelope=Mathf.Exp(-5*q)*(1-q);y=RaisedY+22*envelope*Mathf.Cos(q*Mathf.PI*3.5f);float wobble=Mathf.Sin(q*Mathf.PI*4)*.16f*envelope;scale=Vector3.Lerp(new Vector3(.92f,1.36f,1),new Vector3(1.24f,1.24f,1),1-Mathf.Pow(1-q,2))+new Vector3(wobble,-wobble,0);rotation=Mathf.Sin(q*11)*4*envelope;}
+ icon.anchoredPosition=new Vector2(0,y);icon.localScale=scale;icon.localRotation=Quaternion.Euler(0,0,rotation);captions[i].alpha=Mathf.Clamp01((t*PopDuration-.24f)/.18f);
+ }
+ void SetFinal(int i,bool active){icons[i].anchoredPosition=new Vector2(0,active?RaisedY:0);icons[i].localScale=active?new Vector3(1.24f,1.24f,1):Vector3.one;icons[i].localRotation=Quaternion.identity;captions[i].alpha=active?1:0;strips[i].gameObject.SetActive(active);}
+ void SnapSelection(){for(int i=0;i<3;i++){popVersions[i]++;moves[i]?.Kill();if(icons[i]!=null)SetFinal(i,Keys[i]==selected);}}
+ void OnApplicationFocus(bool focused){if(!focused&&icons[0]!=null)SnapSelection();}
+ void OnDisable(){SnapSelection();}
+ void OnEnable(){if(icons[0]!=null){for(int i=0;i<3;i++){icons[i].anchoredPosition=Vector2.zero;icons[i].localScale=Vector3.one;}var key=selected;selected=null;Select(key,selectedLevel);}}
+}
+}

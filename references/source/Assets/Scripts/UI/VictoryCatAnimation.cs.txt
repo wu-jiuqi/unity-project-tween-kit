@@ -1,0 +1,31 @@
+using System;
+using UnityEngine;
+
+namespace BounceGarden {
+// Same sixteen PNG frames and timing as the approved standalone HTML preview.
+public static class VictoryCatAnimation {
+    public const int FrameCount = 16;
+    public const float Duration = 1.92f;
+    static readonly float[] durations = { .30f, .10f, .10f, .18f, .08f, .08f, .08f, .12f, .10f, .08f, .08f, .08f, .10f, .10f, .14f, .20f };
+    static readonly Sprite[] frames = new Sprite[FrameCount];
+    public static int FrameAt(float age) {
+        for (int i = 0; i < FrameCount - 1; i++) {
+            if (age < durations[i]) return i;
+            age -= durations[i];
+        }
+        return FrameCount - 1;
+    }
+    public static Sprite Get(int index) {
+        index = Mathf.Clamp(index, 0, FrameCount - 1);
+        if (frames[index] != null) return frames[index];
+        var atlas = Resources.Load<Texture2D>("Art/VictoryCatV23/cat-atlas");
+        if (atlas == null) throw new InvalidOperationException("Victory cat sequence atlas is missing.");
+        for (int i = 0; i < FrameCount; i++) {
+            float w=atlas.width/4f,h=atlas.height/4f;
+            frames[i] = Sprite.Create(atlas, new Rect(i % 4*w, (3-i/4)*h, w,h), new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect);
+            frames[i].name = "victory_cat_" + i.ToString("D2");
+        }
+        return frames[index];
+    }
+}
+}

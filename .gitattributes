@@ -1,0 +1,2 @@
+# Preserve source/resource bytes: provenance and importer fingerprints are byte exact.
+* -text whitespace=cr-at-eol

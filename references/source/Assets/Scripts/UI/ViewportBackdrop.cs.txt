@@ -1,0 +1,23 @@
+using UnityEngine;
+namespace BounceGarden {
+// A viewport camera clears only its own rectangle. Clear the entire surface first,
+// so newly exposed system/letterbox areas never retain pixels from the previous page.
+[RequireComponent(typeof(Camera))]
+public sealed class ViewportBackdrop:MonoBehaviour {
+ Camera sceneCamera,backdrop;GameObject garden;Mesh mesh;Material material;bool showGarden;Rect lastRect;float lastAspect;
+ void Awake(){sceneCamera=GetComponent<Camera>();var root=new GameObject("Full screen cream clear");root.transform.SetParent(transform,false);backdrop=root.AddComponent<Camera>();backdrop.cullingMask=1<<30;sceneCamera.cullingMask&=~(1<<30);backdrop.clearFlags=CameraClearFlags.SolidColor;backdrop.backgroundColor=new Color32(248,242,233,255);backdrop.allowHDR=false;backdrop.allowMSAA=false;backdrop.orthographic=true;}
+ public void ShowGarden(bool value){showGarden=value;if(garden!=null)garden.SetActive(value);}
+ void LateUpdate(){if(backdrop==null||sceneCamera==null)return;backdrop.depth=sceneCamera.depth-1;backdrop.targetTexture=sceneCamera.targetTexture;backdrop.targetDisplay=sceneCamera.targetDisplay;backdrop.rect=new Rect(0,0,1,1);backdrop.enabled=sceneCamera.enabled;
+  if(!showGarden)return;
+  if(garden==null){garden=new GameObject("Full screen original garden fill");garden.layer=30;garden.transform.SetParent(backdrop.transform,false);mesh=new Mesh();mesh.name="Garden edge extension";garden.AddComponent<MeshFilter>().sharedMesh=mesh;material=new Material(Resources.Load<Shader>("GardenViewportFill"));material.mainTexture=Resources.Load<Texture2D>("Art/GardenBackgroundV2/reference-plate");garden.AddComponent<MeshRenderer>().sharedMaterial=material;lastRect=Rect.zero;}
+  var rect=sceneCamera.rect;float aspect=sceneCamera.targetTexture!=null?(float)sceneCamera.targetTexture.width/sceneCamera.targetTexture.height:(float)Screen.width/Screen.height;
+  if(rect==lastRect&&Mathf.Abs(aspect-lastAspect)<.00001f)return;lastRect=rect;lastAspect=aspect;
+  float h=sceneCamera.orthographicSize/Mathf.Max(.01f,rect.height),w=h*aspect;backdrop.orthographicSize=h;
+  var pos=sceneCamera.transform.position;pos.x-=(rect.center.x-.5f)*2*w;pos.y-=(rect.center.y-.5f)*2*h;backdrop.transform.position=pos;
+  mesh.vertices=new[]{new Vector3(-w,-h,10),new Vector3(w,-h,10),new Vector3(w,h,10),new Vector3(-w,h,10)};
+  mesh.uv=new[]{UV(pos.x-w,pos.y-h),UV(pos.x+w,pos.y-h),UV(pos.x+w,pos.y+h),UV(pos.x-w,pos.y+h)};mesh.triangles=new[]{0,1,2,0,2,3};mesh.RecalculateBounds();
+ }
+ static Vector2 UV(float x,float y)=>new Vector2(x/10.8f+.5f,y/23.4f+.5f);
+ void OnDestroy(){if(mesh!=null)Destroy(mesh);if(material!=null)Destroy(material);}
+}
+}

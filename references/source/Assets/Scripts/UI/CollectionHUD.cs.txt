@@ -1,0 +1,28 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+public sealed partial class AppUI {
+ public void OpenCollectionPicker(){OpenAlphabetStagePage(0);}
+}
+public sealed class CollectionHUD:MonoBehaviour {
+ GameSession game;TMP_Text goal,energy,hint;Button paw,yarn;Image fill;
+ public void Initialize(GameSession session){game=session;if(game.IsChainCollection){gameObject.AddComponent<ChainCollectionHUD>().Initialize(game);enabled=false;return;}var root=(RectTransform)transform;
+  goal=UICraft.Label(root,"",0,795,890,72,34,UICraft.Ink);
+  UICraft.Label(root,"下一排",0,680,830,34,20,UICraft.Ink);
+  energy=UICraft.Label(root,"",0,-880,850,54,29,UICraft.Ink);
+  var track=UICraft.Art(root,"pastel/resource_capsule",0,-924,700,24);track.color=new Color(.72f,.82f,.82f);track.preserveAspect=false;
+  fill=UICraft.Art(root,"pastel/resource_capsule",-350,-924,700,24);fill.preserveAspect=false;fill.color=new Color(.91f,.68f,.28f);fill.rectTransform.pivot=new Vector2(0,.5f);
+  paw=UICraft.Button(root,"PAW PICK · 12",-225,-1000,420,104,UICraft.Blue,()=>game.SelectCollectionTool(1),30);
+  yarn=UICraft.Button(root,"CLEAR YARN · 20",225,-1000,420,104,UICraft.Green,()=>game.SelectCollectionTool(2),30);
+  hint=UICraft.Label(root,"",0,-1100,920,86,27,UICraft.Ink);
+  game.StateChanged+=Refresh;Refresh();
+ }
+ void OnDestroy(){if(game!=null)game.StateChanged-=Refresh;}
+ void Refresh(){if(game==null||game.IsChainCollection)return;goal.text=(game.CollectionGoal[0]>0?"FISH  "+game.Collected[0]+" / "+game.CollectionGoal[0]+"     ":"")+(game.CollectionGoal[1]>0?"BERRY  "+game.Collected[1]+" / "+game.CollectionGoal[1]:"");
+  energy.text="COLLECTION ENERGY  "+game.CollectionEnergy+" / 40";fill.rectTransform.sizeDelta=new Vector2(700*game.CollectionEnergy/40f,24);
+  paw.interactable=game.CollectionReady&&game.CollectionEnergy>=12&&game.CollectionTreats.Count>0;yarn.interactable=game.CollectionReady&&game.CollectionEnergy>=20;
+  hint.text=game.CollectionTool==1?"Tap a RELEASED treat · tap PAW again to cancel":game.CollectionTool==2?"Tap a column · removes up to 3 ordinary bricks":game.CollectionBusy?"Treats settle, then the bricks move down…":"Break jelly to RELEASE · clear below to COLLECT";
+ }
+}
+}

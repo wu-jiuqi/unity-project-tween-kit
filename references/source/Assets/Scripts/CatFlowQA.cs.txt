@@ -1,0 +1,79 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public void QACatFlowChecks(Action<bool,string> check){
+  Action<int> tick=count=>{for(int i=0;i<count;i++)QAThirdStep(.02f);};
+  Action dense=()=>{QAThirdFixture();QAThirdCat(4,4);for(int r=0;r<9;r++)for(int c=0;c<9;c++)if(c!=4||r!=4)QAThirdNormal(c,r);};
+  dense();var cat=openingCats[0];
+  check(TryShoot(new Vector2(.5f,1)),"launch before cast accepted");FixedUpdate();
+  var ball=active.Values.First();var before=ball.Body.position;SetAim(Vector2.up);int aim=aimDots.Count(d=>d.gameObject.activeSelf);
+  cat.Queued=1;TickOpeningThird(.01f);
+  check(OpeningCatBusy&&!RefillFreezeBalls&&!SevenFreezeBoard&&ball.Body.simulated,"cat cast leaves real ball physics and board running");
+  check(aim>0&&aimDots.Count(d=>d.gameObject.activeSelf)==aim,"cat cast preserves current aim");
+  Physics2D.Simulate(.02f);check(Vector2.Distance(before,ball.Body.position)>.001f,"active ball moves during cat windup");
+  int pending=PendingBurstBalls;for(int i=0;i<20;i++)FixedUpdate();check(PendingBurstBalls<pending,"remaining volley balls continue spawning during cast");
+
+  dense();cat=openingCats[0];cat.Queued=1;TickOpeningThird(.01f);
+  var flight=openingCasts[0].Flights.First(f=>f.Brick!=null);var victim=flight.Brick;
+  check(ApplyChainImpact(victim,999,Vector2.up,victim.transform.position,true)&&!victim.Alive,"direct ball damage still eliminates a selected target during cast");
+  tick(60);check(OpeningIngotConversions==5&&OpeningThirdPending==0,"destroyed target retargets and delivers five ingots exactly once");
+  check(ChainGridValid(false),"retargeting during live gravity preserves unique cells");
+
+  dense();cat=openingCats[0];cat.Queued=1;TickOpeningThird(.01f);
+  flight=openingCasts[0].Flights.First(f=>f.Brick!=null);victim=flight.Brick;var grid=victim.GetComponent<ChainGridPiece>();
+  var hole=CollectionBricks.First(b=>b.Alive&&!OpeningCatBrick(b)&&b!=victim);hole.Remove();
+  var holeGrid=hole.GetComponent<ChainGridPiece>();grid.Col=holeGrid.Col;grid.Row=holeGrid.Row;victim.GetComponent<Rigidbody2D>().position=ChainGridRules.Center(grid.Col,grid.Row);
+  TickOpeningThird(.20f);check(Vector2.Distance(flight.End,victim.GetComponent<Rigidbody2D>().position)<.001f,"projectile follows target physical position");
+  for(int i=0;i<27;i++)TickOpeningThird(.02f);check(OpeningIngotBrick(victim)&&OpeningIngotConversions==5,"moving target converts at its current position");
+  check(!OpeningCatBusy&&OpeningThirdPending==0&&openingGhosts.Count>0,"visual tails do not hold gameplay settlement");
+
+  dense();cat=openingCats[0];cat.Queued=1;TickOpeningThird(.01f);flight=openingCasts[0].Flights.First(f=>f.Brick!=null);victim=flight.Brick;
+  var oldDefinition=victim.Definition;grid=victim.GetComponent<ChainGridPiece>();int oldCol=grid.Col,oldRow=grid.Row;QARefillRemove(victim);RetireDeadChainBricks();
+  // Reuse exactly the same component with a different brick identity.
+  var reused=QAThirdNormal(oldCol,oldRow);
+  check(reused==victim&&!ReferenceEquals(oldDefinition,reused.Definition),"fixture reuses selected brick component with a new definition");
+  TickOpeningThird(.02f);check(!ReferenceEquals(flight.Definition,oldDefinition),"pooled brick cannot retain stale target identity");
+
+  QAThirdFixture();cat=QAThirdCat(4,4);var special=QASevenTool(6,0,8,0);for(int c=1;c<9;c++)QAThirdNormal(c,8);
+  cat.Queued=1;TickOpeningThird(.01f);ActivateChainTool(special,Vector2.up);
+  check(special.Consumed,"special brick activates during cat cast");tick(150);
+  check(OpeningIngotConversions==5&&OpeningThirdPending==0&&ChainGridValid(false),"consumed special target retargets without duplicate conversion");
+
+  QAThirdFixture();cat=QAThirdCat(4,4);var cat2=QAThirdCat(6,4);for(int c=0;c<9;c++)QAThirdNormal(c,8);
+  cat.Queued=cat2.Queued=1;TickOpeningThird(.01f);
+  var casts=openingCasts.ToArray();var flights=casts.SelectMany(c=>c.Flights).ToArray();
+  check(casts.Length==2&&flights.Length==10&&flights.Where(f=>f.Brick!=null).Select(f=>f.Brick).Distinct().Count()==9,"simultaneous cats reserve ten distinct targets");
+  var empty=flights.Single(f=>f.EmptyTarget);check(FlowReserved(empty.Col,empty.Row),"empty landing cell is reserved from gravity and refill");
+  QAThirdFill();for(int i=0;i<35;i++){QAThirdStep(.02f);check(ChainGridValid(false),"concurrent refill has no overlapping cells at step "+i);}
+  tick(700);check(OpeningIngotConversions==10&&OpeningThirdPending==0&&ChainGridReady&&ChainGridValid(false),"two cats and full refill finish without losing or duplicating ingots");
+
+  QAThirdFixture();cat=QAThirdCat(4,4);for(int r=0;r<9;r++)for(int c=0;c<9;c++)if(c!=4||r!=4)QAThirdIngot(QAThirdNormal(c,r));
+  var only=CollectionBricks.First(b=>!OpeningCatBrick(b));only.Definition.reveal="opening-N";cat.PendingIngots=1;TickOpeningThird(.01f);
+  grid=only.GetComponent<ChainGridPiece>();oldCol=grid.Col;oldRow=grid.Row;only.Remove();QAThirdIngot(QAThirdNormal(oldCol,oldRow));TickOpeningThird(.02f);
+  check(cat.PendingIngots==1&&OpeningThirdPending==0&&!OpeningCatBusy,"exhausted target retains one ingot without blocking settlement");
+  tick(50);var blocked=CollectionBricks.First(b=>b.Alive&&!OpeningCatBrick(b)&&b.GetComponent<ChainGridPiece>().Col==oldCol&&b.GetComponent<ChainGridPiece>().Row==oldRow);QARefillRemove(blocked);
+  tick(200);check(OpeningIngotConversions==1&&cat.PendingIngots==0&&OpeningThirdPending==0,"a single undelivered ingot is preserved and retried without creating a new five-ingot cycle");
+
+  dense();cat=openingCats[0];cat.Queued=1;TickOpeningThird(.01f);float age=cat.WaveAge;
+  SetPaused(true);TickOpeningThird(.5f);check(cat.WaveAge==age,"explicit player pause still freezes cat presentation");SetPaused(false);
+  TickOpeningThird(.70f);check(OpeningIngotConversions==5&&!OpeningCatBusy,"five ingots land within 0.71 seconds");
+  TickOpeningThird(.10f);check(cat.WaveAge<0,"cat wave completes within 0.81 seconds");
+  QAThirdFixture();check(!OpeningCatBusy&&OpeningThirdPending==0&&!CatReservedCell(0,0,9),"level reset clears flights, pending ingots and cell reservations");
+ }
+}
+public sealed class CatFlowQA:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--cat-flow-qa"))new GameObject("Nonblocking lucky cat QA").AddComponent<CatFlowQA>();}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();string dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);int checks=0,failures=0,errors=0;
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);Physics2D.simulationMode=SimulationMode2D.Script;
+  try{FindFirstObjectByType<AppUI>().Session.QACatFlowChecks((ok,name)=>{checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+name+"\n");});}
+  catch(Exception e){errors++;File.AppendAllText(dir+"/errors.txt",e.ToString());}
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

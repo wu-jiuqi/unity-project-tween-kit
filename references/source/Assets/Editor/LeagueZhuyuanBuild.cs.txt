@@ -1,0 +1,14 @@
+using System;using System.IO;using System.Linq;using UnityEditor;using UnityEditor.Build;using UnityEditor.Build.Reporting;using UnityEngine;using BounceGarden;
+public static class LeagueZhuyuanBuild {
+ public static void Windows(){
+  BuildEntry.Configure();if(GameVersion.Name!="0.4.0"||GameVersion.Code!=400)throw new Exception("Expected version 0.4.0 (400)");var target=NamedBuildTarget.Standalone;string defines=PlayerSettings.GetScriptingDefineSymbols(target);
+  if(defines.Contains("BOUNCE_STRATEGY_PLAYTEST"))throw new Exception("Normal league build must not include test define");
+  var config=new ResourceLeagueConfigProvider().Load();config.Validate();if(!config.calendarSeasons)throw new Exception("Calendar league base missing");
+  PlayerSettings.productName="Bounce Garden";PlayerSettings.SetScriptingBackend(target,ScriptingImplementation.Mono2x);
+  string output=Path.GetFullPath("../../Builds/League-v0.4.0/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));
+  var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=BuildTarget.StandaloneWindows64,locationPathName=output,options=BuildOptions.CompressWithLz4HC});
+  File.WriteAllText(Path.GetFullPath("../../Builds/League-v0.4.0/build-summary.json"),"{\"result\":\""+result.summary.result+"\",\"errors\":"+result.summary.totalErrors+",\"warnings\":"+result.summary.totalWarnings+",\"strategyTestBuild\":false,\"base\":\"LeagueCalendar-v1\",\"settingsUIIntegrated\":false}");
+  if(result.summary.result!=BuildResult.Succeeded)throw new Exception("League font build failed");
+ }
+}
+

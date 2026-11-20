@@ -1,0 +1,222 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public static class ChainCollectionLevel {
+ public const int Index=53;
+ public static LevelData Get()=>AlphabetCampaign.Get(0);
+}
+public sealed class ChainTool {
+ public int Kind,ColorIndex;public bool Waiting,Consumed,Ingot;public Vector2 Direction=Vector2.up;public Transform View;public float ReadyAt;public Vector2 PreviousPosition;
+ public Vector2 Position=>(Vector2)View.position;
+}
+public sealed class ChainMini {
+ public Transform View;public Vector2 Position,Direction;public float Life=2.4f;public int Depth;
+}
+public sealed class ChainLoot {public System.Action StrategyCredit;
+ public Transform View;public Vector2 Start;public int Kind,JellyColor=-1,OpeningTarget=-1;public float Age;
+}
+public sealed partial class GameSession {
+ public System.Func<int,Vector2> ChainLootDestination {get;set;}
+ public bool IsChainCollection=>IsAlphabet;
+ public float ChainDescentRows=>0;
+ public int[] NextChainRowHealth {get;private set;}=new int[9];
+ public BrickKind[] NextChainRowKinds {get;private set;}=new BrickKind[9];
+ public int[] NextChainRowTools {get;private set;}=new int[9];
+ public int ChainRatingBreaks {get;private set;}
+ public int ChainRatingHits=>ChainRatingBreaks; // Historical accessor; ratings now count direct ball breaks.
+ public int ChainRatingTier {get;private set;}=-1;
+ public int ChainRatingSerial {get;private set;}
+ public int ChainStoneExits {get;private set;}
+ int chainRewardTier=-1;
+ 
+ public int ChainBlocks {get;private set;}
+ public int ChainArmorBreaks {get;private set;}
+ public int ChainRearHits {get;private set;}
+ public readonly List<ChainTool> ChainTools=new List<ChainTool>();
+ public readonly List<ChainMini> ChainMinis=new List<ChainMini>();
+ readonly List<ChainLoot> chainLoot=new List<ChainLoot>();
+ readonly List<Transform> chainPreview=new List<Transform>();
+ readonly List<ChainBeam> chainBeams=new List<ChainBeam>();
+ public int ChainGeneratedCount {get;private set;}
+ public int ChainActivationCount {get;private set;}
+ public readonly int[] ChainKindActivations=new int[6];
+ public int ChainDepth {get;private set;}
+ public string ChainMessage {get;private set;}
+ public bool ChainEffectsPending=>OpeningCopperPending>0||OpeningThirdPending>0||OpeningCookiePending>0||OpeningYarnPending>0||SevenSettlementPending||ChainMinis.Count>0||chainLoot.Count>0||chainBeams.Count>0;
+ public const float ChainProtection=.14f;
+ sealed class ChainBeam {public Transform View;public float Life,Duration=.22f,StartAlpha=1;}
+ void ClearChainCollection(){ClearOpening();ClearSevenSpecials();ClearChainBrickPool();System.Array.Clear(ChainKindActivations,0,ChainKindActivations.Length);ChainLootDestination=null;ClearChainPowers();ClearChainGravity();ChainTools.Clear();ChainMinis.Clear();chainLoot.Clear();chainPreview.Clear();chainBeams.Clear();NextChainRowHealth=new int[9];NextChainRowKinds=new BrickKind[9];NextChainRowTools=new int[9];chainRewardTier=ChainRatingTier=-1;ChainRatingBreaks=ChainRatingSerial=ChainStoneExits=0;ChainBlocks=ChainArmorBreaks=ChainRearHits=0;ChainGeneratedCount=ChainActivationCount=ChainDepth=0;ChainMessage="";}
+ void StartChainCollection(){StartChainGrid();}
+ void CreateChainBrick(int col,int row,int kind,int health=0){SpawnChainCell(col,row,kind,health,BrickKind.Normal);}
+ void SpawnChainCell(int col,int row,int kind,int health,BrickKind role,bool authored=false){
+  if(FusionActive){SpawnFusionRefill(col,row);return;}
+  int hp=health>0?health:kind==1?ChainCollectionBalance.JarHealth:kind==2?ChainCollectionBalance.BoxHealth:role==BrickKind.Armor?ChainCollectionBalance.ArmorHealth:role==BrickKind.RearWeak?ChainCollectionBalance.RearHealth:role==BrickKind.Stone?1:AlphabetCampaign.RefillHealth(LevelIndex,CollectionRound,col);
+  CreateBrick(new BrickSpawn{position=CollectionLevels.Cell(col,row),size=Vector2.one*.76f,hp=hp,colorIndex=authored?(IsTutorial?(FirstBounceTutorial.Yellow(col,row)?4:0):AlphabetCampaign.Palette(LevelIndex,col,row,this)):0,referenceCol=col,referenceRow=row,juiceGroup=kind,kind=role},0);
+ }
+ void PlanChainRow(){NextCollectionRow=new int[9];NextChainRowHealth=new int[9];NextChainRowKinds=new BrickKind[9];ApplyChainRatingReward();}
+ void BeginChainVolley(){BeginChainLiveBurst();}
+ void RecordChainRatingBreak(){
+  ChainRatingBreaks++;int tier=ChainRatingRules.Tier(ChainRatingBreaks);if(tier<=ChainRatingTier){changed=true;return;}
+  ChainRatingTier=chainRewardTier=tier;ChainRatingSerial++;ChainMessage=ChainRatingRules.Names[tier]+" · POWER BLOCKS REPLACE JELLIES";ApplyChainRatingReward();changed=true;
+ }
+ void ApplyChainRatingReward(){NextChainRowTools=new int[9];var packet=CampaignChainRewards(chainRewardTier);for(int i=0;i<packet.Length;i++)NextChainRowTools[i]=packet[i];RenderChainPreview();}
+ void RenderChainPreview(){foreach(var t in chainPreview)if(t!=null)Destroy(t.gameObject);chainPreview.Clear();}
+ public void OnChainWall(BallBody ball,int side){
+  if(!IsChainCollection)return;
+  // Every wall closes the previous bank window; only side walls open a new one.
+  ball.ChainBank=side!=1;ball.ChainBankBreaks=0;
+ }
+ void HitChainBrick(BrickBody brick,BallBody ball,Vector2 contact){
+  bool moving=chainMovedThisStep.Contains(brick.transform);int before=HitCount;bool destroyed=ApplyChainImpact(brick,1,ball.IncomingDirection,contact,true);
+  if(destroyed)RecordChainLiveBreak(ball);
+  if(HitCount>before&&moving){ChainMovingHits++;if(destroyed)ChainMovingBreaks++;}
+ }
+ bool DamageChainBrick(BrickBody brick,int damage)=>ApplyChainImpact(brick,damage,Vector2.up,brick==null?Vector2.zero:(Vector2)brick.transform.position+Vector2.down*.41f,false);
+ public bool ChainRearEntry(BrickBody brick,Vector2 incoming,Vector2 contact){
+  var body=brick.GetComponent<Rigidbody2D>();float top=(body!=null?body.position.y:brick.transform.position.y)+brick.GetComponent<BoxCollider2D>().size.y*.5f-.035f;
+  return incoming.sqrMagnitude>.0001f&&incoming.normalized.y<-.15f&&contact.y>=top;
+ }
+ public bool ApplyChainImpact(BrickBody brick,int damage,Vector2 incoming,Vector2 contact,bool directBall){
+  feedbackIncoming=incoming;
+  if(FusionActive){if(brick!=null&&fusionBricks.TryGetValue(brick.Id,out var p)){bool alive=p.Alive;FusionHit(p,damage,incoming,contact,directBall);return alive&&!p.Alive;}return false;}
+  if(!IsChainCollection||!IsPlaying||IsPaused||damage<=0||brick==null||!brick.Alive||RefillProtected(brick))return false;
+  if(OpeningCopperBrick(brick))return OpeningDamageCopper(brick,damage,!directBall);
+  if(!directBall&&(OpeningHitCookie(brick)||OpeningHitYarn(brick)))return false;if(OpeningBlockCat(brick,directBall,incoming)||OpeningBlockCookie(brick)||OpeningBlockYarn(brick))return false;
+  if(brick.Definition.kind==BrickKind.Stone){ChainBlocks++;changed=true;ChainCollectionArt.Block(brick,contact);SoundService.Play("blocked");EmitFeedback(contact,"wall",Color.gray);return false;}
+  if(brick.Definition.kind==BrickKind.RearWeak){
+   if(!ChainRearEntry(brick,incoming,contact)){ChainCollectionArt.Block(brick,contact);ChainBlocks++;ChainMessage="BLOCKED · HIT THE GREEN TOP FROM ABOVE";SoundService.Play("blocked");EmitFeedback(contact,"wall",new Color(.45f,.66f,.8f));changed=true;return false;}
+   SoundService.Play("rear_critical");ChainRearHits++;damage=int.MaxValue;
+  }
+  if(brick.ShellIntact){brick.BreakShell();ChainCollectionArt.SpecialDamage(brick);SoundService.Play("armor_break");ChainArmorBreaks++;AddScore(ScoreRules.Damage);HitCount++;noDamageTime=0;changed=true;EmitFeedback(contact,"hit",new Color(1,.75f,.3f));return false;}
+  return DealChainHealth(brick,damage);
+ }
+ bool DealChainHealth(BrickBody brick,int damage,Vector2? originalPosition=null){
+  if(brick==null||!brick.Alive||RefillProtected(brick))return false;int priorHp=rules.Health(brick.Id);if(!rules.DamageTarget(brick.Id,damage,out bool destroyed))return false;
+  StrategyEmit(new StrategyEvent{kind="damage",target=StrategyBrickId(brick),targetKind=StrategyKind(brick),amount=priorHp-rules.Health(brick.Id)});
+  if(destroyed)StrategyEmit(new StrategyEvent{kind="break",target=StrategyBrickId(brick),amount=1});
+  ScoreImpact(brick,priorHp-rules.Health(brick.Id),destroyed);
+  noDamageTime=0;HitCount++;changed=true;
+  if(!destroyed){if(brick.Definition.juiceGroup>0)SoundService.Play("container_hit");brick.Damage(rules.Health(brick.Id));ChainCollectionArt.Damage(brick);EmitFeedback(brick.transform.position,"hit",brick.Tint);return false;}
+  BreakCount++;if(!sevenAbsorbing&&!OpeningIngotBrick(brick)){if(!ChainCollectionArt.Broken(brick))fx.PlayJelly(brick);EmitFeedback(brick.transform.position,"break",CombatParticleTint(brick));}
+  int kind=brick.Definition.juiceGroup;
+  if(kind>0){SoundService.Play("container_open");Vector2 p=brick.transform.position;chainLoot.Add(new ChainLoot{Kind=kind,Start=p,View=ChainCollectionArt.Loot(world,kind,p,.55f,75)});}
+  ReleaseJellyCollection(brick);OpeningRemoved(brick,originalPosition);brick.Remove();if(ChainPowerRules.IsNest(brick.Definition))SplitChainNest(brick);BreakChainBond(brick);ScheduleChainGravity();return true;
+ }
+ // Calibrated from the opaque body of the shipped art, not its gameplay color
+ // index (which differs from several chapter skins). No runtime pixel readback.
+ static readonly Color[] liquidBodyColors={new Color(.998f,.941f,.818f),new Color(.419f,.330f,.419f),new Color(.916f,.639f,.669f),new Color(.623f,.810f,.698f),new Color(.940f,.805f,.521f),new Color(.745f,.647f,.824f),new Color(.666f,.818f,.870f),new Color(.753f,.600f,.484f),new Color(.940f,.688f,.531f)};
+ internal Color CombatParticleTint(BrickBody brick){
+  if(SevenColorTarget(brick))return SevenSpecialArt.Palette[Mathf.Clamp(brick.Definition.colorIndex,0,SevenSpecialArt.ColorCount-1)];
+  if(!brick.Face.enabled&&brick.Definition.juiceGroup>0)return brick.Definition.juiceGroup==1?new Color(.959f,.635f,.159f):new Color(.582f,.898f,.720f);
+  string skin=brick.Face.sprite!=null?brick.Face.sprite.texture.name:"";
+  if(skin.Length==9&&skin.StartsWith("palette-",System.StringComparison.Ordinal)&&skin[8]>='0'&&skin[8]<='8')return liquidBodyColors[skin[8]-'0'];
+  switch(skin){
+   case "lemon":return new Color(.952f,.790f,.165f);
+   case "strawberry":return new Color(.969f,.480f,.521f);
+   case "cookie":return new Color(.922f,.547f,.038f);
+   case "food":return new Color(.986f,.899f,.739f);
+   case "basket":return new Color(.597f,.858f,.627f);
+   case "soda":return new Color(.353f,.856f,.697f);
+   case "cocoa":return new Color(.772f,.445f,.298f);
+   case "ice":return new Color(.462f,.838f,.883f);
+   case "snowball":return new Color(.780f,.858f,.861f);
+   case "snowdrift":return new Color(.786f,.793f,.893f);
+   case "cubes":return brick.Definition.juiceGroup==1?new Color(.959f,.635f,.159f):new Color(.582f,.898f,.720f);
+  }
+  if(IsAlphabet&&brick.Definition.juiceGroup==0)return liquidBodyColors[brick.Definition.colorIndex==1?6:0];
+  return brick.Tint;
+ }
+ public ChainTool SpawnChainTool(int kind,Vector2 position,int authoredColor=-1){
+  // Stable kind IDs; authored laser variety is resolved by the level loader.
+  var tool=new ChainTool{Kind=kind,ColorIndex=authoredColor>=0?authoredColor:SevenSpecialActive?NextSevenColor():0,PreviousPosition=position,ReadyAt=simulationClock+ChainProtection};
+  tool.View=SevenSpecialActive&&SevenSpecialRules.IsSpecial(kind)?SevenSpecialArt.Tool(this,world,tool,position):ChainCollectionArt.Tool(world,kind,position);
+  if(SevenSpecialActive){var spark=ChainVisualArt.Draw(world,"Special spawn starlight",BattleJellyArt.Get("vine-star-on"),.18f,76);spark.transform.position=position;spark.gameObject.AddComponent<ChainGlint>().Initialize(this,spark);}
+  else ChainVisualArt.Effect(this,3,3,position,.42f);
+  SoundService.Play("tool_spawn");ChainTools.Add(tool);RegisterChainGrid(tool.View,1);ChainGeneratedCount++;StrategyToolSpawned(tool);ChainMessage=SevenSpecialActive?SevenSpecialArt.Name(kind)+"已生成":kind==1?"CROSS LASER READY":kind==2?"BOMB READY":"LINK READY";changed=true;return tool;
+ }
+ static float Along(Vector2 p,Vector2 start,Vector2 direction,float distance,float radius){
+  float t=Vector2.Dot(p-start,direction);if(t<0||t>distance)return float.PositiveInfinity;
+  return ((start+direction*t)-p).sqrMagnitude<=radius*radius?t:float.PositiveInfinity;
+ }
+ sealed class ChainRayTarget {public BrickBody Brick;public float Distance;public Vector2 Point;}
+ static bool ChainRayEntry(BrickBody brick,Vector2 origin,Vector2 direction,float limit,out float entry,out Vector2 point){
+  var box=brick.GetComponent<BoxCollider2D>();var body=brick.GetComponent<Rigidbody2D>();Vector2 center=body!=null?body.position+box.offset:(Vector2)brick.transform.TransformPoint(box.offset);
+  Vector2 half=Vector2.Scale(box.size,(Vector2)brick.transform.lossyScale)*.5f,min=center-half,max=center+half;
+  float near=0,far=limit;
+  for(int axis=0;axis<2;axis++){
+   float v=direction[axis],o=origin[axis];
+   if(Mathf.Abs(v)<.00001f){if(o<min[axis]||o>max[axis]){entry=0;point=origin;return false;}continue;}
+   float a=(min[axis]-o)/v,b=(max[axis]-o)/v;if(a>b){float swap=a;a=b;b=swap;}
+   near=Mathf.Max(near,a);far=Mathf.Min(far,b);if(far<near){entry=0;point=origin;return false;}
+  }
+  entry=near;point=origin+direction*near;return near<=limit;
+ }
+ readonly List<ChainTool> chainToolHitSnapshot=new List<ChainTool>(16);
+ public void CheckChainTools(BallBody ball,Vector2 from,Vector2 to){
+  if(!IsChainCollection||!IsPlaying||IsPaused||RefillFreezeBalls||ChainTools.Count==0)return;
+  Vector2 delta=to-from;float length=delta.magnitude;if(length<.00001f)return;
+  chainToolHitSnapshot.Clear();chainToolHitSnapshot.AddRange(ChainTools);
+  foreach(var tool in chainToolHitSnapshot)if(simulationClock>=tool.ReadyAt&&ChainTools.Contains(tool)){Vector2 a=from-tool.PreviousPosition,b=to-tool.Position,v=b-a;float t=v.sqrMagnitude>.000001f?Mathf.Clamp01(-Vector2.Dot(a,v)/v.sqrMagnitude):0;if((a+v*t).sqrMagnitude<=.43f*.43f){if(FusionActive)FusionTouchTool(tool,ball);else {using(StrategyCause("ball-tool",ball.ChainBurstId,StrategyToolId(tool))){StrategyEmit(new StrategyEvent{kind="hit",target=StrategyToolId(tool),targetKind="special/"+SevenSpecialArt.Name(tool.Kind)});ActivateChainTool(tool,delta.normalized,1);}}}}
+  chainToolHitSnapshot.Clear();
+
+ }
+ public void ActivateChainTool(ChainTool tool,Vector2 incoming,int depth=1){
+  if(TryFusionTool(tool))return;
+  if(ActivateSevenSpecial(tool))return;
+  if(!IsChainCollection||!IsPlaying||IsPaused||simulationClock<tool.ReadyAt||!ChainTools.Remove(tool))return;
+  PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);
+  long previous=powerAttack;powerAttack=++powerAttackSerial;try{ActivateChainPower(tool,incoming,depth);}finally{powerAttack=previous;}ScheduleChainGravity();
+ }
+
+ void TickChainMinis(float dt){
+  foreach(var mini in ChainMinis.ToArray()){
+   mini.Life-=dt;if(mini.Life<=0||mini.Position.y<-6.1f){Destroy(mini.View.gameObject);ChainMinis.Remove(mini);continue;}
+   float remaining=11*dt;
+   // Swept collisions prevent tunneling. Only layer 8 contains board colliders.
+   for(int bounceIndex=0;remaining>.0001f&&bounceIndex<5;bounceIndex++){
+    var hits=Physics2D.CircleCastAll(mini.Position,.09f,mini.Direction,remaining,1<<8);
+    var hit=hits.Where(h=>h.collider!=null&&!h.collider.isTrigger).OrderBy(h=>h.distance).FirstOrDefault();
+    float travel=hit.collider!=null?hit.distance:remaining;
+    var tool=ChainTools.Where(t=>simulationClock>=t.ReadyAt).OrderBy(t=>Along(t.Position,mini.Position,mini.Direction,travel,.4f)).FirstOrDefault();
+    if(tool!=null&&!float.IsPositiveInfinity(Along(tool.Position,mini.Position,mini.Direction,travel,.4f)))ActivateChainTool(tool,mini.Direction,mini.Depth);
+    mini.Position+=mini.Direction*travel;remaining-=travel;
+    if(hit.collider==null)break;
+    PlayerHaptics71.Pulse();
+    var brick=hit.collider.GetComponentInParent<BrickBody>();if(brick!=null)ApplyChainImpact(brick,1,mini.Direction,hit.point,false);
+    mini.Direction=Vector2.Reflect(mini.Direction,hit.normal).normalized;mini.Position+=hit.normal*.02f;remaining=Mathf.Max(0,remaining-.02f);
+   }
+   mini.View.position=mini.Position;mini.View.localRotation=Quaternion.Euler(0,0,simulationClock*240);
+  }
+ }
+ bool EarnedChainGoal(){
+  if(IsOpening)return OpeningGoalsEarned;
+  if(FusionActive)return FusionGoalsTotal>0&&FusionGoalsCredited==FusionGoalsTotal;
+  for(int kind=0;kind<CollectionGoal.Length;kind++){int count=Collected[kind];foreach(var loot in chainLoot)if(loot.JellyColor<0&&loot.Kind==kind+1)count++;if(count<CollectionGoal[kind])return false;}
+  for(int color=0;color<JellyGoal.Length;color++){int count=JellyCollected[color];foreach(var loot in chainLoot)if(loot.JellyColor==color)count++;if(count<JellyGoal[color])return false;}
+  return true;
+ }
+ void CompleteEarnedChainLoot(){
+  if(FusionActive)return;
+  // These rewards were already earned by destroyed targets. Their HUD flight
+  // is presentation, so credit each exactly once before deciding the outcome.
+  foreach(var loot in chainLoot){if(loot.OpeningTarget>=0){if(loot.StrategyCredit!=null)loot.StrategyCredit();else OpeningCreditTarget(loot.OpeningTarget);}else if(loot.JellyColor>=0)CollectJelly(loot.JellyColor);else if(loot.Kind>=1&&loot.Kind<=Collected.Length)Collected[loot.Kind-1]=Mathf.Min(CollectionGoal[loot.Kind-1],Collected[loot.Kind-1]+1);if(loot.View!=null)Destroy(loot.View.gameObject);}
+  if(chainLoot.Count>0){chainLoot.Clear();changed=true;}
+ }
+ void TickChainCollection(float dt){
+  TickOpeningYarn(dt);if(FusionActive){TickFusion(dt);return;}
+  TickSevenSpecials();TickRefill80(dt);
+  if(!SevenSpecialActive&&ActiveBalls==0&&PendingBurstBalls==0&&ChainMinis.Count==0&&!queuedShot.HasValue&&(Shots==0||CollectionWon||EarnedChainGoal())){CompleteEarnedChainLoot();return;}
+  TickChainMinis(dt);
+  foreach(var beam in chainBeams.ToArray()){beam.Life-=dt;if(beam.Life<=0){Destroy(beam.View.gameObject);chainBeams.Remove(beam);}else if(beam.View!=null){var sprite=beam.View.GetComponent<SpriteRenderer>();var color=sprite.color;color.a=beam.StartAlpha*Mathf.Clamp01(beam.Life/beam.Duration);sprite.color=color;}}
+  foreach(var loot in chainLoot.ToArray()){
+   loot.Age+=dt;float t=Mathf.Clamp01(loot.Age/.6f);Vector2 target=loot.OpeningTarget>=0?(OpeningLootDestination!=null?OpeningLootDestination(loot.OpeningTarget):new Vector2(0,7.95f)):loot.JellyColor>=0?(JellyLootDestination!=null?JellyLootDestination(loot.JellyColor):new Vector2(-2.4f,7.95f)):(ChainLootDestination!=null?ChainLootDestination(loot.Kind):new Vector2(loot.Kind==1?-1.35f:1.6f,7.95f));
+   if(IsOpening||IsTutorial){CollectionFlightMotion.Apply(loot,target,IsOpening&&loot.OpeningTarget>=0?OpeningTargets[loot.OpeningTarget].kind:"ordinary_color");}else loot.View.position=Vector2.Lerp(loot.Start,target,t*t)+Vector2.up*(Mathf.Sin(t*Mathf.PI)*.7f);
+   float absorb=Mathf.Sin(Mathf.Clamp01((t-.78f)/.22f)*Mathf.PI)*.28f;if(!IsOpening&&!IsTutorial)loot.View.localScale=new Vector3(1+absorb,1-absorb,1)*Mathf.Lerp(.55f,.25f,t);
+   if(t>=1){SoundService.Play("collect_arrive");if(loot.OpeningTarget>=0){if(loot.StrategyCredit!=null)loot.StrategyCredit();else OpeningCreditTarget(loot.OpeningTarget);}else if(loot.JellyColor>=0)CollectJelly(loot.JellyColor);else{if(Collected[loot.Kind-1]<CollectionGoal[loot.Kind-1]&&Collected[loot.Kind-1]+1>=CollectionGoal[loot.Kind-1])SoundService.Play("goal_complete");Collected[loot.Kind-1]=Mathf.Min(CollectionGoal[loot.Kind-1],Collected[loot.Kind-1]+1);}if(!IsOpening&&!IsTutorial){ChainVisualArt.Effect(this,2,3,target,.7f);ChainVisualArt.Glint(this,target,3,.28f);EmitFeedback(target,"break",loot.JellyColor>=0?JellyCollectionArt.Color(loot.JellyColor):loot.Kind==1?new Color(1,.73f,.3f):new Color(1,.58f,.68f));}Destroy(loot.View.gameObject);chainLoot.Remove(loot);changed=true;}
+  }
+  TickChainGravity(dt);
+ }
+}
+}

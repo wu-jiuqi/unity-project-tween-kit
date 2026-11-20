@@ -1,0 +1,14 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+namespace BounceGarden {
+// The normal jelly button keeps its fixed hit target; vertical drags are also
+// passed to the containing list, so a card never traps touch scrolling.
+public sealed class ShopScrollDrag:MonoBehaviour,IInitializePotentialDragHandler,IBeginDragHandler,IDragHandler,IEndDragHandler {
+ ScrollRect List=>GetComponentInParent<ScrollRect>();
+ public void OnInitializePotentialDrag(PointerEventData e){List?.OnInitializePotentialDrag(e);}
+ public void OnBeginDrag(PointerEventData e){if(List!=null){e.eligibleForClick=false;List.OnBeginDrag(e);}}
+ public void OnDrag(PointerEventData e){List?.OnDrag(e);}
+ public void OnEndDrag(PointerEventData e){List?.OnEndDrag(e);}
+}
+}

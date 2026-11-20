@@ -1,0 +1,34 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class OpeningCookieBoxView:MonoBehaviour {
+ GameSession game;CookieBoxArtView art;Transform lift;float jumpAge=1,startHeight,peakHeight;
+ readonly Dictionary<long,int[]> attacks=new Dictionary<long,int[]>();
+ public BrickBody Brick {get;private set;}
+ public int Remaining {get;private set;}
+ public int CollectionHops {get;private set;}
+ public float VisualHeight=>lift==null?0:lift.localPosition.y;
+ public void Initialize(GameSession owner,BrickBody brick,int capacity){
+  game=owner;Brick=brick;Remaining=capacity;brick.Face.enabled=false;
+  foreach(var label in brick.GetComponentsInChildren<TMPro.TMP_Text>())label.gameObject.SetActive(false);
+  lift=new GameObject("Whole 2x2 box hop · visual only").transform;lift.SetParent(transform,false);
+  var image=new GameObject("One complete box state");image.transform.SetParent(lift,false);image.AddComponent<SpriteRenderer>();art=image.AddComponent<CookieBoxArtView>();art.SetState(Remaining,false);
+ }
+ public Vector2 Cell(int slot)=>Brick.GetComponent<Rigidbody2D>().position+new Vector2(slot%2==0?-.5f:.5f,slot<2?.5f:-.5f)*CollectionLevels.Pitch;
+ public int Collect(int slot,long batch,int strength){
+  if(Remaining<=0)return 0;if(!attacks.TryGetValue(batch,out var cells))attacks[batch]=cells=new int[4];
+  int amount=Mathf.Min(Remaining,Mathf.Max(0,strength-cells[slot]));cells[slot]=Mathf.Max(cells[slot],strength);if(amount==0)return 0;
+  Remaining-=amount;art.SetState(Remaining,true);CollectionHops++;
+  startHeight=lift.localPosition.y;peakHeight=Mathf.Min(.25f,Mathf.Max(.17f,startHeight+.07f));jumpAge=0;return amount;
+ }
+ public void Tick(float dt){
+  if(game==null||game.IsPaused||lift==null)return;jumpAge+=dt;float y;
+  if(jumpAge<.11f){float t=Mathf.Clamp01(jumpAge/.11f);y=Mathf.Lerp(startHeight,peakHeight,1-(1-t)*(1-t));}
+  else if(jumpAge<.34f){float t=(jumpAge-.11f)/.23f;y=peakHeight*(1-t*t);}
+  else y=0;
+  lift.localPosition=Vector3.up*y;lift.localRotation=Quaternion.Euler(0,0,Mathf.Sin(Mathf.Clamp01(jumpAge/.34f)*Mathf.PI*2)*2.5f);
+  if(Remaining==0&&jumpAge>=.34f)game.OpeningRetireCookie(this);
+ }
+ void LateUpdate(){if(Brick!=null)Brick.Face.enabled=false;}
+}
+}

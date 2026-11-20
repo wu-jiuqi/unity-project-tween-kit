@@ -1,0 +1,53 @@
+using System;
+using System.Collections;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+// Controlled rule fixtures; these are not estimates of player difficulty.
+public static class FusionRearQA {
+ public static IEnumerator Run(GameSession game,Action<string,bool,string> check){
+#if BOUNCE_LEVEL_EDITOR
+  for(int variant=0;variant<3;variant++){
+   try{Scenario(game,check,variant);}catch(Exception e){check("rear fixture executes",false,e.ToString());}
+   game.StopLevel();yield return null;
+  }
+#endif
+  yield break;
+ }
+ static void Scenario(GameSession game,Action<string,bool,string> check,int variant){
+  Action<string,bool> test=(name,ok)=>check("rear "+variant+" "+name,ok,"");
+  var board=new FusionLevelDefinition{refillBudget=0,requiredMechanisms=new[]{"BRK-04"},pieces=Enumerable.Range(0,81).Select(i=>new FusionPieceDefinition{id="cell"+i,c=i%9,r=i/9,kind="normal",hp=1}).ToArray()};
+  var rear=board.pieces[40];rear.kind="rear";rear.goal="fish";
+  board.pieces[0].goal="toy";
+  var copy=JsonUtility.FromJson<FusionLevelDefinition>(JsonUtility.ToJson(board));
+  test("serialized kind and objective survive",copy.pieces[40].kind=="rear"&&copy.pieces[40].goal=="fish");
+  test("valid configuration",!FusionRules.Validate(copy,12).Any(i=>i.IsError));
+  copy.pieces[40].ice=1;test("reject layered protection",FusionRules.Validate(copy,12).Any(i=>i.IsError));copy.pieces[40].ice=0;
+  game.StartFusionSample(copy,12,"背击入口验证",90100+variant);game.enabled=false;game.QAIgnoreFocusLoss=true;
+  var target=game.FusionPieces.Single(p=>p.Definition.id==rear.id);var center=target.Position;
+  float half=target.Brick.GetComponent<BoxCollider2D>().size.y*.5f;
+  if(variant==0){
+   game.FusionRunAttack("qa:front",1,()=>game.FusionHit(target,int.MaxValue,Vector2.up,center+Vector2.down*half,true,true));
+   test("front cannot bypass with clear strength",target.Alive&&game.FusionGoalsCredited==0);
+   game.FusionRunAttack("qa:side",2,()=>game.FusionHit(target,1,new Vector2(.98f,-.2f),center+Vector2.left*half,true));
+   test("downward side contact is not top entry",target.Alive);
+   game.FusionRunAttack("qa:shallow",3,()=>game.FusionHit(target,1,new Vector2(1,-.1f),center+Vector2.up*half,true));
+   test("too shallow blocked",target.Alive);
+   game.FusionRunAttack("qa:top",4,()=>game.FusionHit(target,1,new Vector2(.8f,-.3f),center+Vector2.up*half,true));
+  }else if(variant==1){
+   game.FusionRunAttack("qa:blast-below",1,()=>game.FusionArea(center+Vector2.down*CollectionLevels.Pitch,1,99,true));
+   test("blast below preserves rear",target.Alive&&game.FusionGoalsCredited==0);
+   game.FusionRunAttack("qa:blast-above",2,()=>game.FusionArea(center+Vector2.up*CollectionLevels.Pitch,1,99,true));
+  }else{
+   var behind=game.FusionPieces.Single(p=>p.Definition.c==4&&p.Definition.r==3);
+   game.FusionRunAttack("qa:ray-below",1,()=>game.FusionRay(center+Vector2.down*CollectionLevels.Pitch,Vector2.up,9,99,true));
+   test("wrong ray stops before brick behind",target.Alive&&behind.Alive);
+   game.FusionRunAttack("qa:ray-above",2,()=>game.FusionRay(center+Vector2.up*CollectionLevels.Pitch,Vector2.down,9,99,true));
+  }
+  test("valid top entry clears and credits once",!target.Alive&&game.FusionGoalsCredited==1);
+  game.FusionRunAttack("qa:duplicate",5,()=>game.FusionHit(target,99,Vector2.down,center+Vector2.up*half,true,true));
+  test("repeat hit never duplicates objective",game.FusionGoalsCredited==1);
+ }
+}
+}

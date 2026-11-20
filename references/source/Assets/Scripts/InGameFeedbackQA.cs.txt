@@ -1,0 +1,45 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class InGameFeedbackQA:MonoBehaviour {
+ const BindingFlags Private=BindingFlags.Instance|BindingFlags.NonPublic;
+ AppUI app;GameSession g;InGameFeedbackView view;string dir;int checks,failed,errors,width=540,height=1170;Camera cam;RenderTexture target;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Array.IndexOf(Environment.GetCommandLineArgs(),"--ingame-feedback-qa")>=0)new GameObject("In-game feedback audit").AddComponent<InGameFeedbackQA>();}
+ void Check(bool pass,string label){checks++;if(!pass)failed++;File.AppendAllText(Path.Combine(dir,"checks.txt"),(pass?"PASS ":"FAIL ")+label+"\n");}
+ void ModelTests(){
+  var s=new InGameFeedbackState();s.Break();s.Break();s.Break();Check(!s.TryCheer(out _),"under four eliminations stays quiet");s.Break();Check(s.TryCheer(out int t)&&t==0,"four elimination entry tier");for(int i=0;i<14;i++)s.Break();Check(!s.TryCheer(out _),"upgrades respect two second cooldown");s.Advance(1.8f);s.Break();s.Advance(.21f);Check(s.TryCheer(out t)&&t==3,"sustained chain coalesces pending upgrades to highest tier");s.Advance(2);Check(s.ChainCount==0&&s.PendingTier<0,"two second gap resets count and stale pending text");
+  s=new InGameFeedbackState();for(int i=0;i<18;i++)s.Break();Check(s.TryCheer(out t)&&t==3,"instant area destruction only shows highest tier");Check(!s.TryCheer(out _),"no duplicate playback");
+  s=new InGameFeedbackState();s.Shoot();s.Advance(.9f);Check(!s.TryBullet(true,18),"first bullet waits one second after real shot");s.Shoot();s.Advance(.11f);Check(s.TryBullet(true,18),"extra balls do not postpone first bullet");s.Advance(18);Check(!s.TryBullet(false,18),"no idle bullet without active ball");for(int i=0;i<4;i++)s.Break();Check(!s.TryBullet(true,18),"pending cheer takes priority over bullet");s.TryCheer(out _);Check(!s.TryBullet(true,18),"active cheer defers bullet");s.Advance(1.51f);Check(s.TryBullet(true,18),"deferred bullet resumes after cheer");
+ }
+ IEnumerator Level(int index){app.QAStartLevel(index);yield return app.QAWaitForLevel();yield return null;view=FindFirstObjectByType<InGameFeedbackView>();Check(view!=null,"feedback view attached to stage "+index);}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();Canvas.ForceUpdateCanvases();cam.Render();var old=RenderTexture.active;RenderTexture.active=target;var im=new Texture2D(width,height,TextureFormat.RGB24,false);im.ReadPixels(new Rect(0,0,width,height),0,0);im.Apply();RenderTexture.active=old;File.WriteAllBytes(Path.Combine(dir,name+".png"),im.EncodeToPNG());Destroy(im);}
+ void ClearContacts(){((System.Collections.Generic.HashSet<long>)typeof(GameSession).GetField("contactsThisStep",Private).GetValue(g)).Clear();}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(Path.Combine(dir,"checks.txt"),"");int size=Array.IndexOf(args,"--qa-size");if(size>=0){var v=args[size+1].Split('x');width=int.Parse(v[0]);height=int.Parse(v[1]);}
+  Application.logMessageReceived+=(m,stack,type)=>{if(type==LogType.Error||type==LogType.Exception){errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),m+"\n"+stack+"\n");}};
+  ModelTests();yield return new WaitForSecondsRealtime(1);app=FindFirstObjectByType<AppUI>();g=app.Session;cam=Camera.main;target=new RenderTexture(width,height,24);target.Create();cam.targetTexture=target;var canvas=FindFirstObjectByType<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=cam;canvas.planeDistance=1;app.QASetViewport(new Vector2Int(width,height));Check(RuntimeQA.IsIsolated,"player save isolated");
+  yield return Level(1);Check(!view.State.HasShot&&!view.BulletVisible,"no pre-shot bullet");Check(g.TryShoot(Vector2.up),"classic launch accepted");float burstEnd=Time.realtimeSinceStartup+.55f;while(Time.realtimeSinceStartup<burstEnd){yield return new WaitForFixedUpdate();foreach(var held in g.GetComponentsInChildren<BallBody>())if(held.Active){held.Body.simulated=false;held.Body.position=new Vector2(0,-4);}}Check(g.SpawnCount==5&&g.Shots==g.CurrentLevel.initialShots-1,"five ball volley and one shot cost retained");
+  var ball=g.GetComponentsInChildren<BallBody>().First(b=>b.Active);foreach(var b in g.GetComponentsInChildren<BallBody>())if(b.Active){b.Body.position=new Vector2(0,-4);b.Body.linearVelocity=Vector2.right*g.CurrentLevel.ballSpeed;}
+  var brick=g.GetComponentsInChildren<BrickBody>().First(b=>b.Alive&&b.CurrentHealth>1);int before=g.BreakCount;ClearContacts();g.HitBrick(brick,ball,brick.transform.position);Check(g.BreakCount==before&&view.State.ChainCount==0,"nonlethal HP damage does not count");
+  foreach(var b in g.GetComponentsInChildren<BrickBody>().Where(b=>b.Alive).Take(4)){while(b.Alive){ClearContacts();g.HitBrick(b,ball,b.transform.position);}}
+  yield return null;Check(view.VisibleTier==0&&view.State.ChainCount==4,"real classic eliminations trigger NICE");yield return new WaitForSecondsRealtime(.45f);g.SetPaused(true);yield return Capture("classic-nice");float c=view.State.Clock,a=view.BulletAge;yield return new WaitForSecondsRealtime(.25f);Check(view.State.Clock==c&&view.BulletAge==a,"pause freezes chain and both presentation clocks");g.SetPaused(false);
+  yield return new WaitForSecondsRealtime(1.5f);Check(view.BulletVisible,"first shot eventually produces companion bullet");Check(view.Caption.text.Contains(view.Audience),"stable in-session audience inserted");float x=view.BulletX;yield return new WaitForSecondsRealtime(.3f);Check(view.BulletX<x,"bubble moves from right to left");yield return new WaitForSecondsRealtime(1.5f);Check(!view.Caption.textInfo.characterInfo.Take(view.Caption.textInfo.characterCount).Any(ch=>ch.character=='\u25a1'),"Chinese caption contains no replacement boxes");g.SetPaused(true);yield return Capture("classic-danmaku");var bubble=view.transform.Find("Danmaku viewport/Danmaku bubble");Check(bubble.GetComponent<Image>().sprite.border.x==20,"gray plate uses 20px nine slice");Check(view.GetComponentsInChildren<Graphic>(true).All(i=>!i.raycastTarget),"feedback never intercepts aim input");g.SetPaused(false);
+  yield return Level(6);Check(view.State.ChainCount==0&&!view.State.HasShot,"new level discards old chain and pending bullet");string audience=view.Audience;
+  foreach(int total in new[]{4,8,12,18}){
+   yield return Level(11);int remaining=total;
+   foreach(var b in g.GetComponentsInChildren<BrickBody>().Where(b=>b.Alive&&b.Definition.kind==BrickKind.Normal).Take(remaining))g.ApplyAbilityDamage(b,999,true);
+   yield return null;Check(view.VisibleTier==Array.IndexOf(new[]{4,8,12,18},total),"ability eliminations show tier at "+total);
+   yield return new WaitForSecondsRealtime(.45f);g.SetPaused(true);yield return Capture("ability-tier-"+total);g.SetPaused(false);
+  }
+  Check(!string.IsNullOrEmpty(view.Audience),"audience generated for ability stage");
+  app.QAResult(false);yield return null;Check(!view.BulletVisible&&view.VisibleTier<0&&view.State.PendingTier<0,"result immediately clears feedback");app.QANavigate("home");yield return null;Check(FindFirstObjectByType<InGameFeedbackView>()==null,"leaving battle destroys subscriptions and views");
+  yield return Level(11);foreach(var b in g.GetComponentsInChildren<BrickBody>().Where(b=>b.Alive&&b.Definition.kind==BrickKind.Normal).Take(18))g.ApplyAbilityDamage(b,999,true);yield return null;Check(view.VisibleTier==3,"same-frame ability burst skips lower tiers");
+  string result="RESULT checks="+checks+" failed="+failed+" errors="+errors;File.AppendAllText(Path.Combine(dir,"checks.txt"),result+"\n");Debug.Log(result);Application.Quit(failed==0&&errors==0?0:1);
+ }
+}
+}

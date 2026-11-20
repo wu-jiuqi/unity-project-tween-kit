@@ -1,0 +1,5 @@
+using System;using UnityEngine;
+namespace BounceGarden {public static class AbilityLevels {
+ public static readonly string[] Names=Array.Empty<string>(),Hints=Array.Empty<string>();
+ public static LevelData Create(int chapter)=>throw new InvalidOperationException("Legacy routes are archived in v37");
+}}

@@ -1,0 +1,98 @@
+using System;
+using System.Collections;
+using System.IO;
+using UnityEngine;
+
+namespace BounceGarden {
+// Opt-in isolated regression; the user's profile is never read or written.
+[DefaultExecutionOrder(10000)]public sealed class YarnQA:MonoBehaviour {
+ string dir;int checks,failed,errors;AppUI app;RenderTexture capture;
+ bool measureHeads;int headSamples;float maxHeadError;
+ void LateUpdate(){
+  if(!measureHeads||app==null||app.Session.IsPaused)return;
+  foreach(var trail in FindObjectsByType<FlightTrail>(FindObjectsSortMode.None)){
+   var line=trail.GetComponent<LineRenderer>();
+   if(trail.TrackedBall==null||!trail.TrackedBall.gameObject.activeInHierarchy||line.positionCount<2)continue;
+   maxHeadError=Mathf.Max(maxHeadError,Vector3.Distance(line.GetPosition(line.positionCount-1),trail.TrackedBall.position));headSamples++;
+  }
+ }
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){
+  var args=Environment.GetCommandLineArgs();if(Array.IndexOf(args,"--yarn-qa")>=0&&Array.IndexOf(args,"--qa")>=0)new GameObject("Yarn V20 regression").AddComponent<YarnQA>();
+ }
+ void Check(bool ok,string label){checks++;if(!ok)failed++;File.AppendAllText(Path.Combine(dir,"checks.txt"),(ok?"PASS ":"FAIL ")+label+"\n");}
+ void Log(string message,string stack,LogType type){if(type==LogType.Error||type==LogType.Exception||type==LogType.Assert){errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),message+"\n"+stack+"\n");}}
+ IEnumerator Capture(string name){
+  yield return null;Canvas.ForceUpdateCanvases();Camera.main.Render();var previous=RenderTexture.active;RenderTexture.active=capture;
+  var image=new Texture2D(capture.width,capture.height,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,capture.width,capture.height),0,0);image.Apply();
+  File.WriteAllBytes(Path.Combine(dir,name+".png"),image.EncodeToPNG());RenderTexture.active=previous;Destroy(image);
+ }
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);
+  File.WriteAllText(Path.Combine(dir,"checks.txt"),"Yarn V20 actual Windows player; isolated profile; GPU captures are not phone tests.\n");Application.logMessageReceived+=Log;
+  yield return new WaitForSecondsRealtime(.8f);app=FindFirstObjectByType<AppUI>();Check(app!=null&&RuntimeQA.IsIsolated,"isolated real application");
+  capture=new RenderTexture(540,1170,24);capture.Create();Camera.main.targetTexture=capture;
+  var canvas=FindFirstObjectByType<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=Camera.main;canvas.planeDistance=1;
+  app.QASetViewport(new Vector2Int(540,1170));yield return null;Canvas.ForceUpdateCanvases();app.QASetViewport(new Vector2Int(540,1170));
+  var mode=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;
+  for(int level=0;level<4;level++){
+   app.QAStartLevel(level);yield return app.QAWaitForLevel();yield return new WaitForSecondsRealtime(.7f);
+   var game=app.Session;game.SetPaused(false);var cat=FindFirstObjectByType<RearCatLauncher>();
+   Check(cat!=null&&cat.FrameIndex==0,"whole rear cat initialized in idle L"+level);
+   var root=GameObject.Find("CannonRoot").transform;var pivot=root.Find("AimPivot");var loaded=pivot.Find("LoadedBall").GetComponent<SpriteRenderer>();
+   Check(Vector2.Distance(root.position,game.LauncherPosition)<.00001f,"fixed root equals launcher position L"+level);
+   Check(cat.transform.localPosition==Vector3.zero&&cat.transform.localScale==Vector3.one,"cat has no local offset/scale compensation L"+level);
+   Check(loaded.sprite.name=="ball_yarn_"+YarnArt.ColorName(level),"loaded yarn matches level color L"+level);
+   Check(loaded.transform.localPosition==(Vector3)(Vector2.up*GameSession.MuzzleOffset),"loaded socket is fixed local muzzle L"+level);
+   Check(Mathf.Abs(loaded.sprite.bounds.size.x*.875f-FlightGeometry.Radius*2)<.0001f,"visible yarn diameter enlarged by 35 percent L"+level);
+   Check(GameObject.Find("LauncherRear")==null&&GameObject.Find("LauncherFront")==null&&GameObject.Find("Fixed base guide")==null,"old bowl and guide removed L"+level);
+   foreach(var b in FindObjectsByType<BrickBody>(FindObjectsSortMode.None)){
+    Check(b.Face.sprite==JellyBrickArt.Rest,"existing jelly rest sprite retained L"+level+" brick="+b.Id);b.GetComponent<Collider2D>().enabled=false;
+   }
+   Physics2D.SyncTransforms();
+   foreach(int angle in new[]{12,45,90,135,168}){
+    var d=new Vector2(Mathf.Cos(angle*Mathf.Deg2Rad),Mathf.Sin(angle*Mathf.Deg2Rad));var anchor=root.position;
+    game.SetAim(d);yield return new WaitForSecondsRealtime(.58f);
+    Check(root.position==anchor&&cat.transform.localPosition==Vector3.zero&&cat.transform.localScale==Vector3.one,"all aiming frames preserve fixed pivot L"+level+" angle="+angle);
+    Check(Mathf.Abs(Mathf.DeltaAngle(pivot.localEulerAngles.z,angle-90))<.001f,"same whole cat rotates only by aim angle L"+level+" angle="+angle);
+    Check(Vector2.Distance(loaded.transform.position,game.SpawnPosition(d))<.0001f,"loaded yarn exactly follows SpawnPosition L"+level+" angle="+angle);
+    var contact=cat.transform.TransformPoint(Vector2.up*GameSession.MuzzleOffset);
+    Check(Vector2.Distance(contact,game.SpawnPosition(d))<.0001f,"registered contact matches physical spawn L"+level+" angle="+angle);
+    Check(cat.FrameIndex==5,"aim prep holds before contact without automatic firing L"+level+" angle="+angle);
+    if(level==0)yield return Capture("aim-"+angle.ToString("D3"));
+   }
+   var up=Vector2.up;int ammo=game.Shots;Check(game.TryShoot(up),"shoot accepted during preparation L"+level);
+   Check(game.SpawnCount==0&&game.Shots==ammo,"queued shot still follows original fixed step L"+level);
+   game.QAAdvanceOneStep();
+   Check(game.SpawnCount==1&&game.Shots==ammo-1,"real ball spawns immediately with no540ms animation delay L"+level);
+   Check(cat.FrameIndex==6&&Mathf.Abs(cat.ClockMs-YarnArt.Calibration.contact_ms)<.01f,"actual spawn enters contact frame immediately L"+level);
+   var first=FindFirstObjectByType<BallBody>();
+   Check(first.GetComponent<CircleCollider2D>().radius==FlightGeometry.Radius,"collider radius matches visible yarn L"+level);
+   Check(first.transform.Find("BallVisual").GetComponent<SpriteRenderer>().sprite==YarnArt.Ball(level),"physical yarn color matches loaded yarn L"+level);
+   var trails=FindObjectsByType<FlightTrail>(FindObjectsSortMode.None);bool strand=false;
+   foreach(var t in trails)strand|=t.GetComponent<LineRenderer>().sharedMaterial==YarnArt.Strand(level);
+   Check(strand,"flight uses matching continuous yarn strand texture L"+level);
+   game.SetPaused(true);int frame=cat.FrameIndex;float clock=cat.ClockMs;var pos=first.Body.position;
+   yield return new WaitForSecondsRealtime(.25f);
+   Check(cat.FrameIndex==frame&&cat.ClockMs==clock&&first.Body.position==pos,"pause freezes cat animation and real ball L"+level);
+   Check(!loaded.gameObject.activeSelf,"just-fired loaded ball stays hidden while paused L"+level);
+   yield return Capture("contact-color-"+level);
+   game.SetPaused(false);for(int i=0;i<45;i++)game.QAAdvanceOneStep();
+   Check(game.SpawnCount==game.CurrentLevel.volleyCount,"full original burst completes independently of cat animation L"+level);
+   foreach(var b in FindObjectsByType<BallBody>(FindObjectsSortMode.None))game.LoseBall(b,b.Body.position);
+   int spawned=game.SpawnCount;Check(game.TryShoot(up),"new shot accepted before full animation has ended L"+level);game.QAAdvanceOneStep();
+   Check(game.SpawnCount==spawned+1&&cat.FrameIndex==6,"rapid follow-up reenters contact with no visual offset L"+level);
+   Check(root.position==anchorFor(game)&&cat.transform.localPosition==Vector3.zero&&cat.transform.localScale==Vector3.one,"shooting adds no recoil translation or scaling L"+level);
+   game.StopLevel();yield return null;
+  }
+  Physics2D.simulationMode=mode;
+  app.QAStartLevel(0);yield return app.QAWaitForLevel();yield return new WaitForSecondsRealtime(.6f);app.Session.SetPaused(false);app.Session.SetAim(Vector2.up);
+  yield return new WaitForSecondsRealtime(.58f);yield return Capture("integrated-level-1");
+  measureHeads=true;app.Session.TryShoot(new Vector2(.28f,1));
+  for(int i=0;i<40;i++){yield return null;if(i%2==0)yield return Capture("motion-"+i.ToString("D3"));}
+  measureHeads=false;Check(headSamples>0&&maxHeadError<.003f,"rendered yarn strand remains attached during interpolation samples="+headSamples+" maxError="+maxHeadError);
+  File.AppendAllText(Path.Combine(dir,"checks.txt"),"RESULT checks="+checks+" failed="+failed+" errors="+errors+"\n");Application.logMessageReceived-=Log;
+  Application.Quit(failed==0&&errors==0?0:4);
+ }
+ static Vector3 anchorFor(GameSession game)=>game.LauncherPosition;
+}
+}

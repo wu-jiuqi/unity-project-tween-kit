@@ -1,0 +1,993 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    // Runtime desktop UI: shipped in the standalone player, never requires UnityEditor.
+    public sealed partial class LevelEditorApp : MonoBehaviour
+    {
+        public LevelEditorWorkspace Workspace { get; private set; }
+        public LevelEditorLevel CurrentLevel => Workspace == null || selectedLevel < 0 || selectedLevel >= Workspace.Levels.Count ? null : Workspace.GetLevel(selectedLevel);
+        public LevelEditorPlaytest Playtest { get; private set; }
+        public bool IsPlaytesting { get; private set; }
+        public string WorkspaceDirectory => workspaceDirectory;
+        public string LastExportDirectory { get; private set; }
+        public string StatusMessage => status;
+
+        const float Sidebar = 222, InspectorWidth = 326;
+        static readonly Color Background = Hex(0x101A28), Panel = Hex(0x192638), Line = Hex(0x304157);
+        static readonly Color Ink = Hex(0xECF1F6), Muted = Hex(0xA9B9CA), Accent = Hex(0x7EE2BD), Amber = Hex(0xFFD18C);
+        static readonly string[] Chapters = LevelEditorRuleCatalog.ChapterIds.ToArray();
+        static readonly string[] ChapterNames = Chapters.Select(LevelEditorRuleCatalog.ChapterName).ToArray();
+        static readonly string[] Scenarios = { "bare", "streak3", "streak5", "streak10", "stocked" };
+        static readonly string[] ScenarioNames = { "无道具", "3 连胜", "5 连胜", "10 连胜", "测试库存" };
+        GUIStyle body, muted, heading, title, button, selectedButton, primaryButton, input, small, center, cellLabel;
+        readonly List<Texture2D> styleTextures = new List<Texture2D>();
+        readonly Dictionary<string, Sprite> spriteCache = new Dictionary<string, Sprite>();
+        readonly List<ShotRecord> shotRecords = new List<ShotRecord>();
+        int selectedLevel = -1, selectedChapter, scenario, toolMode;
+        string selectedPiece, paintKind = "N", search = "", status = "正在载入关卡…", workspaceDirectory, rootDirectory;
+        string editName = "", movesText = "20", hpText = "1", colText = "0", rowText = "0", sizeText = "1", iceText = "0", layersText = "1", ringText = "2", ripenText = "2";
+        string contentsText = "1,0,2,0", direction = "up", chestMode = "plain";
+        bool armor, statusError, aiming, closeRequested, qaMode, loaded, recordWritten;
+        bool showIssues;
+        float scale = 1, width = 1440, height = 900, nextSave, runStart, inspectorContentHeight = 1200;
+        Rect boardRect, previewRect;
+        Vector2 levelScroll, paletteScroll, inspectorScroll, issueScroll, folderScroll;
+        Vector2 pointerStart;
+        IReadOnlyList<ValidationIssue> issues = Array.Empty<ValidationIssue>();
+        string folderMode, folderPath, folderError = "", exportParent, confirmAction;
+        string[] folderChildren = Array.Empty<string>();
+        LevelEditorPiece copiedPiece;
+        string copiedChapter;
+        string runHash, runScenario;
+        LevelEditorLevel gestureLevel;
+        int boardControlId, gestureControlId, gestureMode, gestureScreenWidth, gestureScreenHeight;
+        Vector2? previousStrokePoint;
+        Vector2 gestureStart;
+        Vector2Int moveOffset;
+        string movingPiece;
+        readonly HashSet<Vector2Int> strokeVisited = new HashSet<Vector2Int>();
+
+        public static bool HasArgument(string value) => Array.IndexOf(Environment.GetCommandLineArgs(), value) >= 0;
+        public static string Argument(string key)
+        {
+            var args = Environment.GetCommandLineArgs(); int i = Array.IndexOf(args, key);
+            return i >= 0 && i + 1 < args.Length ? args[i + 1] : null;
+        }
+
+        void Awake()
+        {
+            Application.targetFrameRate = 60;
+            Application.runInBackground = true;
+            qaMode = HasArgument("--level-editor-qa");
+            rootDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BounceBustersLevelEditor");
+            if (qaMode) rootDirectory = Argument("--level-editor-qa-out") ?? Path.Combine(Path.GetTempPath(), "BounceBustersLevelEditorQA");
+            workspaceDirectory = Argument("--level-editor-workspace") ?? Path.Combine(rootDirectory, "Projects", "MyLevels");
+            if (!qaMode && Argument("--level-editor-workspace") == null)
+            {
+                try { var path = Path.Combine(rootDirectory, "authoring-settings.json"); if (File.Exists(path)) { var settings = JsonUtility.FromJson<WorkspaceSettings>(File.ReadAllText(path)); if (!string.IsNullOrWhiteSpace(settings.workspace)) workspaceDirectory = settings.workspace; } }
+                catch (Exception ex) { Debug.LogWarning("Level editor workspace preference: " + ex.Message); }
+            }
+            exportParent = Path.Combine(rootDirectory, "Exports");
+            Playtest = gameObject.AddComponent<LevelEditorPlaytest>();
+            Playtest.Completed += OnCompleted;
+            try
+            {
+                Directory.CreateDirectory(rootDirectory);
+                bool anyCampaign = Directory.Exists(workspaceDirectory) && Directory.GetFiles(workspaceDirectory, "campaign.json", SearchOption.AllDirectories).Length > 0;
+                Workspace = anyCampaign ? LevelEditorWorkspace.LoadDirectory(workspaceDirectory) : LevelEditorWorkspace.CreateEmpty();
+                if (anyCampaign && string.IsNullOrEmpty(Workspace.LastSaveDirectory)) workspaceDirectory = Path.Combine(rootDirectory, "Imports", DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
+                if (!anyCampaign || string.IsNullOrEmpty(Workspace.LastSaveDirectory))
+                {
+                    var saved = Workspace.SaveWorkspace(workspaceDirectory);
+                    if (!saved.Success) throw new IOException(saved.Message);
+                }
+                loaded = true; SelectLevel(0);
+                RememberWorkspace();
+                SetStatus(Workspace.Levels.Count == 0 ? "新项目已就绪 · 选择规则模板，点击「＋ 新建关卡」从空棋盘开始" : "已载入 " + Workspace.Levels.Count + " 关 · 草稿每 15 秒自动保存 · " + workspaceDirectory);
+            }
+            catch (Exception ex) { SetStatus("工作区载入失败：" + ex.Message, true); }
+            nextSave = Time.unscaledTime + 15;
+            Application.wantsToQuit += CanQuit;
+        }
+
+        void OnDestroy()
+        {
+            FinishBoardGesture();
+            Application.wantsToQuit -= CanQuit;
+            foreach (var texture in styleTextures) if (texture != null) Destroy(texture);
+        }
+
+        bool CanQuit()
+        {
+            FinishBoardGesture();
+            if (qaMode || !loaded || closeRequested) return true;
+            if (IsPlaytesting) WriteRecord(false, false);
+            if (!Workspace.IsDirty) return true;
+            if (SaveWorkspace()) return true;
+            SetStatus("退出前保存失败。请先解决工作区冲突，或导出到其他目录后再退出。", true);
+            return false;
+        }
+
+        void Update()
+        {
+            // A release outside the native window may not deliver a GUI MouseUp.
+            if (gestureLevel != null && !Input.GetMouseButton(0) && !Input.GetMouseButtonUp(0)) FinishBoardGesture();
+            if (loaded && !qaMode && !IsPlaytesting && gestureLevel == null && Time.unscaledTime >= nextSave)
+            {
+                nextSave = Time.unscaledTime + 15;
+                if (Workspace.IsDirty) SaveWorkspace();
+            }
+            if (IsPlaytesting && Camera.main != null)
+            {
+                var rect = previewRect;
+                Camera.main.rect = new Rect(rect.x * scale / Screen.width, 1 - (rect.y + rect.height) * scale / Screen.height,
+                    rect.width * scale / Screen.width, rect.height * scale / Screen.height);
+            }
+        }
+
+        public void SelectLevel(int index)
+        {
+            if (Workspace == null || IsPlaytesting) return;
+            FinishBoardGesture();
+            selectedLevel = index < 0 || Workspace.Levels.Count == 0 ? -1 : Mathf.Clamp(index, 0, Workspace.Levels.Count - 1);
+            if (CurrentLevel != null) selectedChapter = Array.IndexOf(Chapters, CurrentLevel.Chapter);
+            selectedPiece = null; paintKind = CurrentLevel != null && CurrentLevel.IsFusion ? "normal" : "N"; fusionLoadedLevel = null; copiedPiece = null; toolMode = 0;
+            editName = CurrentLevel?.Name ?? ""; movesText = (CurrentLevel?.Moves ?? 20).ToString(); inspectorScroll = Vector2.zero; RefreshValidation();
+        }
+
+        void SelectChapter(int chapter)
+        {
+            FinishBoardGesture(); selectedChapter = chapter;
+            var first = Workspace.Levels.FirstOrDefault(l => l.Chapter == Chapters[chapter]);
+            SelectLevel(first == null ? -1 : first.Index); levelScroll = Vector2.zero;
+        }
+
+        public bool CreateLevel()
+        {
+            if (Workspace == null || IsPlaytesting) return false;
+            FinishBoardGesture();
+            try
+            {
+                var level = Workspace.CreateLevel(Chapters[selectedChapter], "新关卡 " + (Workspace.Levels.Count + 1));
+                search = ""; SelectLevel(level.Index); toolMode = 1; levelScroll = new Vector2(0, float.MaxValue);
+                SetStatus("已新建空白关卡 · 拖动画笔布置砖块，或先补满普通砖 · Ctrl S 保存"); return true;
+            }
+            catch (Exception ex) { SetStatus("新建失败：" + ex.Message, true); return false; }
+        }
+
+        void DuplicateLevel()
+        {
+            if (CurrentLevel == null) return; FinishBoardGesture();
+            try { var level = Workspace.DuplicateLevel(CurrentLevel); search = ""; SelectLevel(level.Index); SetStatus("已创建独立副本，可以分别编辑。"); }
+            catch (Exception ex) { SetStatus("复制失败：" + ex.Message, true); }
+        }
+
+        public bool CreateProject(string directory)
+        {
+            FinishBoardGesture();
+            if (loaded && !SaveWorkspace()) return false;
+            try
+            {
+                if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length > 0) throw new IOException("新项目目录须为空，请另选目录。");
+                var next = LevelEditorWorkspace.CreateEmpty(); var result = next.SaveWorkspace(directory);
+                if (!result.Success) { SetStatus(result.Message, true); return false; }
+                Workspace = next; workspaceDirectory = directory; loaded = true; selectedChapter = 0; search = ""; showIssues = false; confirmAction = null; SelectLevel(-1); RememberWorkspace();
+                SetStatus("已创建空白项目 · 选择规则模板并新建关卡 · " + directory); return true;
+            }
+            catch (Exception ex) { SetStatus("新建项目失败：" + ex.Message, true); return false; }
+        }
+
+        public bool SaveWorkspace()
+        {
+            if (Workspace == null) return false;
+            FinishBoardGesture();
+            try { var result = Workspace.SaveWorkspace(workspaceDirectory); SetStatus(result.Message, !result.Success); if (result.Success) SetStatus("草稿已保存 · " + DateTime.Now.ToString("HH:mm:ss") + " · " + workspaceDirectory); return result.Success; }
+            catch (Exception ex) { SetStatus("保存失败：" + ex.Message, true); return false; }
+        }
+
+        public bool ExportTo(string directory)
+        {
+            if (Workspace == null) return false;
+            FinishBoardGesture();
+            try
+            {
+                var result = Workspace.Export(directory); SetStatus(result.Message, !result.Success);
+                if (result.Success) { LastExportDirectory = directory; SetStatus("导出完成：" + directory); }
+                else { issues = result.Issues; issueScroll = Vector2.zero; showIssues = true; }
+                return result.Success;
+            }
+            catch (Exception ex) { SetStatus("导出失败：" + ex.Message, true); return false; }
+        }
+
+        public bool BeginPlaytest()
+        {
+            if (CurrentLevel == null || IsPlaytesting) return false;
+            FinishBoardGesture();
+            RefreshValidation();
+            if (issues.Any(p => p.IsError)) { SetStatus("请先修复当前关卡的校验错误，再开始试玩。", true); return false; }
+            if (!SaveWorkspace()) return false;
+            string snapshot = CurrentLevel.SnapshotJson();
+            if (!Playtest.StartDraft(CurrentLevel, Scenarios[scenario])) { SetStatus(Playtest.LastError, true); return false; }
+            IsPlaytesting = true; aiming = false; runStart = Time.unscaledTime; recordWritten = false;
+            fusionPlayScroll = Vector2.zero;
+            shotRecords.Clear(); runScenario = Scenarios[scenario];
+            using (var hash = SHA256.Create()) runHash = BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(snapshot))).Replace("-", "").ToLowerInvariant();
+            Playtest.Session.VolleyStarted -= OnVolley; Playtest.Session.VolleyStarted += OnVolley;
+            if (Camera.main != null) Camera.main.enabled = true;
+            SetStatus("真实试玩 · 按住棋盘瞄准，松开发射 · 道具需手动选择 · Esc 返回编辑");
+            return true;
+        }
+
+        void RestartPlaytest()
+        {
+            WriteRecord(false, false); ReturnToEditor(); BeginPlaytest();
+        }
+
+        public void ReturnToEditor()
+        {
+            if (!IsPlaytesting) return;
+            WriteRecord(false, false);
+            Playtest.Session.VolleyStarted -= OnVolley;
+            Playtest.Stop(); IsPlaytesting = false; aiming = false;
+            if (Camera.main != null) Camera.main.rect = new Rect(0, 0, 1, 1);
+            SetStatus("已返回编辑 · 棋盘修改保留，试玩状态已清理");
+        }
+
+        void OnVolley(StreakBooster booster)
+        {
+            shotRecords.Add(new ShotRecord { elapsedSeconds = Time.unscaledTime - runStart, booster = booster.ToString(),
+                remainingShots = Playtest.Session.Shots, hits = Playtest.Session.HitCount, breaks = Playtest.Session.BreakCount,
+                collected = (int[])Playtest.Session.Collected.Clone(), jellyCollected = (int[])Playtest.Session.JellyCollected.Clone() });
+        }
+
+        void OnCompleted(LevelEditorPlaytestResult result)
+        {
+            WriteRecord(true, result.Won);
+            SetStatus(result.Won ? "试玩通关 · 结果已保存，可返回继续编辑" : "试玩结束 · 结果已保存，可重开比较");
+        }
+
+        void WriteRecord(bool completed, bool won)
+        {
+            if (recordWritten || !IsPlaytesting || Playtest.Session == null) return;
+            try
+            {
+                var g = Playtest.Session;
+                var report = new RunRecord { level = selectedLevel + 1, editorLevelId = CurrentLevel.EditorLevelId, chapter = CurrentLevel.Chapter, runtimeIndex = CurrentLevel.RuntimeIndex, draftSha256 = runHash, scenario = runScenario, rulesProfile = CurrentLevel.RulesProfile, fusionRuleVersion = CurrentLevel.IsFusion ? CurrentLevel.FusionDefinition.ruleVersion : 0,
+                    utc = DateTime.UtcNow.ToString("o"), unityVersion = Application.unityVersion, gameVersion = GameVersion.Name, seed = Playtest.Seed, completed = completed, won = won,
+                    elapsedSeconds = Playtest.ElapsedSeconds, shotsUsed = g.CurrentLevel.initialShots - g.Shots,
+                    remainingShots = g.Shots, score = g.Score, hits = g.HitCount, breaks = g.BreakCount,
+                    specialActivations = g.ChainActivationCount, boosterExplosions = g.StreakExplosions, boosterLasers = g.StreakLasers,
+                    volleys = shotRecords.ToArray(), fusion = g.FusionActive ? g.FusionMetrics : null, fusionEvents = g.FusionActive ? g.FusionEvents.ToArray() : null };
+                string directory = Path.Combine(rootDirectory, "Playtests"); Directory.CreateDirectory(directory);
+                File.WriteAllText(Path.Combine(directory, DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + "-L" + (selectedLevel + 1) + ".json"), JsonUtility.ToJson(report, true), new UTF8Encoding(false));
+                recordWritten = true;
+            }
+            catch (Exception ex) { SetStatus("试玩记录保存失败：" + ex.Message, true); }
+        }
+
+        [Serializable] sealed class ShotRecord { public float elapsedSeconds; public string booster; public int remainingShots, hits, breaks; public int[] collected, jellyCollected; }
+        [Serializable] sealed class RunRecord
+        {
+            public int level, runtimeIndex, shotsUsed, remainingShots, score, hits, breaks, specialActivations, boosterExplosions, boosterLasers, seed;
+            public string editorLevelId, chapter, draftSha256, scenario, utc, unityVersion, gameVersion, rulesProfile; public int fusionRuleVersion; public bool completed, won; public float elapsedSeconds; public ShotRecord[] volleys;
+            public FusionMetrics fusion; public FusionEventRecord[] fusionEvents;
+        }
+
+        [Serializable] sealed class WorkspaceSettings { public string workspace; }
+        void RememberWorkspace()
+        {
+            if (qaMode || Argument("--level-editor-workspace") != null) return;
+            try { File.WriteAllText(Path.Combine(rootDirectory, "authoring-settings.json"), JsonUtility.ToJson(new WorkspaceSettings { workspace = workspaceDirectory }, true), new UTF8Encoding(false)); }
+            catch (Exception ex) { Debug.LogWarning("Could not remember workspace: " + ex.Message); }
+        }
+
+        void OnGUI()
+        {
+            EnsureStyles();
+            scale = Mathf.Min(Screen.width / 1440f, Screen.height / 900f);
+            scale = Mathf.Max(.3f, scale); width = Screen.width / scale; height = Screen.height / scale;
+            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one * scale);
+            boardControlId = GUIUtility.GetControlID(0x424253, FocusType.Passive);
+            HandleBoardGesture();
+            // Modal input never reaches the canvas or controls behind the dialog.
+            if ((folderMode != null || showIssues || confirmAction != null || showFusionSamples) && Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout)
+            {
+                if (showFusionSamples) DrawFusionSamples(); else if (folderMode != null) DrawFolderDialog(); else if (confirmAction != null) DrawConfirmDialog(); else DrawIssuesDialog();
+                return;
+            }
+            if (!IsPlaytesting) Fill(new Rect(0, 0, width, height), Background);
+            else
+            {
+                float ph = height - 173, pw = ph * 1080 / 2340;
+                previewRect = new Rect((width - pw) * .5f, 108, pw, ph);
+                Fill(new Rect(0, 0, previewRect.x, height), Background);
+                Fill(new Rect(previewRect.xMax, 0, width - previewRect.xMax, height), Background);
+                Fill(new Rect(previewRect.x, 0, previewRect.width, previewRect.y), Background);
+                Fill(new Rect(previewRect.x, previewRect.yMax, previewRect.width, height - previewRect.yMax), Background);
+            }
+            DrawHeader();
+            if (!loaded)
+            {
+                GUI.Label(new Rect(36, 160, width - 72, 100), status, heading);
+                if (Btn(new Rect(36, 280, 230, 42), "选择有效的工作区")) OpenFolderDialog("open", workspaceDirectory);
+            }
+            else if (IsPlaytesting) DrawPlaytest();
+            else { DrawSidebar(); if (CurrentLevel != null) { DrawBoard(); DrawInspector(); DrawFooter(); } else DrawEmptyProject(); }
+            Fill(new Rect(0, height - 37, width, 37), Hex(0x0B1420));
+            GUI.Label(new Rect(18, height - 31, width - 36, 26), status, statusError ? ErrorStyle() : small);
+            if (showFusionSamples) DrawFusionSamples();
+            else if (folderMode != null) DrawFolderDialog();
+            else if (confirmAction != null) DrawConfirmDialog();
+            else if (showIssues) DrawIssuesDialog();
+            else HandleShortcuts();
+        }
+
+        void DrawHeader()
+        {
+            Fill(new Rect(0, 0, width, 83), Panel);
+            GUI.Label(new Rect(22, 12, 480, 33), "BounceBusters  /  关卡工作台", title);
+            GUI.Label(new Rect(23, 48, 680, 23), IsPlaytesting ? "PLAYTEST    原游戏规则与物理 · 独立测试存档" : "LEVEL EDITOR    自由创建 · " + (Workspace?.Levels.Count ?? 0) + " 个关卡 · 规则 " + LevelEditorRuleCatalog.RulesVersion, small);
+            if (IsPlaytesting)
+            {
+                if (Btn(new Rect(width - 353, 23, 148, 38), "重新试玩")) RestartPlaytest();
+                if (Btn(new Rect(width - 190, 23, 166, 38), "返回编辑  Esc", true)) ReturnToEditor();
+            }
+            else
+            {
+                if (Btn(new Rect(width - 678, 23, 110, 38), "新建项目")) OpenFolderDialog("new", Path.Combine(rootDirectory, "Projects"));
+                if (Btn(new Rect(width - 555, 23, 110, 38), "打开工作区")) OpenFolderDialog("open", workspaceDirectory);
+                if (Btn(new Rect(width - 432, 23, 100, 38), "保存  Ctrl S")) SaveWorkspace();
+                if (Btn(new Rect(width - 319, 23, 119, 38), "导出全部关卡")) OpenFolderDialog("export", exportParent);
+                GUI.enabled = loaded && CurrentLevel != null;
+                if (Btn(new Rect(width - 187, 23, 163, 38), "▶  一键真实试玩", true)) BeginPlaytest();
+                GUI.enabled = true;
+            }
+        }
+
+        void DrawSidebar()
+        {
+            Rect area = new Rect(14, 98, Sidebar, height - 148); Fill(area, Panel);
+            GUI.Label(new Rect(28, 109, 180, 26), "规则模板 / 关卡", heading);
+            for (int i = 0; i < 3; i++) if (Tab(new Rect(25 + i * 67, 147, 63, 31), new[] { "字母", "野餐", "冬日" }[i], selectedChapter == i)) SelectChapter(i);
+            GUI.SetNextControlName("level-search"); search = GUI.TextField(new Rect(26, 187, 198, 31), search, input);
+            if (string.IsNullOrEmpty(search)) GUI.Label(new Rect(35, 191, 178, 25), "搜索关号 / 名称", small);
+            if (Btn(new Rect(26, 228, 95, 33), "＋ 旧规则关")) CreateLevel();
+            if (Btn(new Rect(129, 228, 95, 33), "＋ 融合关", true)) CreateFusionLevel();
+            if (Btn(new Rect(26, 269, 198, 29), "导入融合样板")) { FinishBoardGesture(); showFusionSamples = true; }
+            GUI.enabled = CurrentLevel != null;
+            if (Btn(new Rect(26, 309, 95, 29), "复制关卡")) DuplicateLevel();
+            if (Btn(new Rect(129, 309, 95, 29), "删除关卡")) { FinishBoardGesture(); confirmAction = "delete"; }
+            GUI.enabled = true;
+            float paletteY = Mathf.Min(height - 376, 550);
+            var levels = Workspace.Levels.Where(l => l.Chapter == Chapters[selectedChapter] && (string.IsNullOrWhiteSpace(search) || l.Number.ToString().Contains(search) || (l.Name ?? "").IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)).ToArray();
+            Rect scrollRect = new Rect(24, 349, 202, paletteY - 361);
+            levelScroll = GUI.BeginScrollView(scrollRect, levelScroll, new Rect(0, 0, 180, levels.Length * 40));
+            for (int i = 0; i < levels.Length; i++)
+            {
+                var level = levels[i]; string label = level.Number.ToString("00") + "   " + level.Name;
+                if (level.IsFusion) label = "◆ " + label;
+                if (level.IsDirty) label += "  •";
+                if (Tab(new Rect(0, i * 40, 179, 35), label, selectedLevel == level.Index)) SelectLevel(level.Index);
+            }
+            GUI.EndScrollView();
+            Fill(new Rect(26, paletteY, 196, 1), Line);
+            GUI.Label(new Rect(28, paletteY + 12, 180, 28), "砖块画笔", heading);
+            if (CurrentLevel != null && CurrentLevel.IsFusion)
+            {
+                string[] tabs = { "全部", "砖块", "工具", "装置" };
+                for (int i = 0; i < tabs.Length; i++) if (Tab(new Rect(26 + i * 50, paletteY + 43, 47, 25), tabs[i], fusionPaletteGroup == i)) { fusionPaletteGroup = i; paletteScroll = Vector2.zero; }
+            }
+            else GUI.Label(new Rect(28, paletteY + 43, 182, 24), "按住拖动连续绘制", small);
+            string[] kinds = Kinds();
+            GUI.enabled = CurrentLevel != null;
+            paletteScroll = GUI.BeginScrollView(new Rect(24, paletteY + 74, 202, height - paletteY - 139), paletteScroll, new Rect(0, 0, 181, Mathf.Ceil(kinds.Length / 2f) * 39));
+            for (int i = 0; i < kinds.Length; i++)
+            {
+                string kind = kinds[i];
+                if (Tab(new Rect((i % 2) * 92, i / 2 * 39, 88, 34), KindName(kind), toolMode == 1 && paintKind == kind)) { FinishBoardGesture(); paintKind = kind; toolMode = 1; copiedPiece = null; GUI.FocusControl(null); }
+            }
+            GUI.EndScrollView();
+            GUI.enabled = true;
+        }
+
+        void DrawEmptyProject()
+        {
+            float left = Sidebar + 60, room = width - left - 52;
+            Fill(new Rect(left, 138, room, height - 226), Panel);
+            GUI.Label(new Rect(left + 38, 180, room - 76, 40), "从空白创建你的关卡", title);
+            GUI.Label(new Rect(left + 38, 244, room - 76, 92), "当前选择：" + ChapterNames[selectedChapter] + "\n只使用规则与砖块，不复制任何现有关卡布局。\n可随时添加关卡，数量不受原 78 关限制。", body);
+            if (Btn(new Rect(left + 38, 371, 240, 44), "＋ 新建空白关卡", true)) CreateLevel();
+            GUI.Label(new Rect(left + 38, 454, room - 76, 84), "绘制 → 保存草稿 → 真实试玩 → 导出项目\n每种规则的砖块在左侧列出。新机制接入游戏运行时后，更新工具即可继续编辑已有项目。", small);
+            GUI.Label(new Rect(left + 38, height - 158, room - 76, 36), "项目：" + workspaceDirectory, small);
+        }
+
+        void DrawBoard()
+        {
+            float left = Sidebar + 44, right = width - InspectorWidth - 30, centerWidth = right - left;
+            GUI.Label(new Rect(left, 105, centerWidth - 145, 32), "第 " + (selectedLevel + 1).ToString("00") + " 关  ·  " + (CurrentLevel.IsFusion ? "融合规则" : ChapterNames[selectedChapter]), heading);
+            GUI.enabled = CurrentLevel.CanUndo;
+            if (Btn(new Rect(right - 142, 103, 66, 33), "撤销")) ApplyResult(CurrentLevel.Undo());
+            GUI.enabled = CurrentLevel.CanRedo;
+            if (Btn(new Rect(right - 68, 103, 66, 33), "重做")) ApplyResult(CurrentLevel.Redo());
+            GUI.enabled = true;
+            string[] modes = { "选择 / 移动", "画笔", "橡皮擦", CurrentLevel.IsFusion ? "关联对象" : "蓝色目标" };
+            int modeCount = CurrentLevel.IsFusion || selectedChapter == 0 ? 4 : 3;
+            for (int i = 0; i < modeCount; i++) if (Tab(new Rect(left + i * 113, 150, 106, 33), modes[i], toolMode == i)) { FinishBoardGesture(); toolMode = i; copiedPiece = null; }
+            if (Btn(new Rect(right - 209, 150, 126, 33), "补满普通砖")) { FinishBoardGesture(); ApplyResult(CurrentLevel.TryFillEmpty()); }
+            if (Btn(new Rect(right - 76, 150, 74, 33), "清空")) { FinishBoardGesture(); confirmAction = "clear"; }
+            float size = Mathf.Min(centerWidth - 44, height - 356);
+            size = Mathf.Floor(size / 9) * 9;
+            boardRect = new Rect(left + (centerWidth - size) / 2, 219, size, size);
+            float cell = size / 9;
+            Fill(new Rect(boardRect.x - 5, boardRect.y - 5, size + 10, size + 10), Hex(0x526571));
+            for (int r = 0; r < 9; r++) for (int c = 0; c < 9; c++)
+            {
+                var rect = CellRect(c, r, 1);
+                Fill(rect, ((c + r) % 2 == 0) ? Hex(0xEEF0E5) : Hex(0xDDE5DA));
+            }
+            for (int i = 0; i < 9; i++)
+            {
+                GUI.Label(new Rect(boardRect.x + i * cell, boardRect.y - 27, cell, 23), (i + 1).ToString(), center);
+                GUI.Label(new Rect(boardRect.x - 29, boardRect.y + i * cell + cell / 2 - 12, 24, 25), (i + 1).ToString(), center);
+            }
+            foreach (var piece in CurrentLevel.Pieces)
+            {
+                if (piece.Size < 1 || piece.Size > 9 || piece.Col < 0 || piece.Row < 0 || piece.Col > 9 - piece.Size || piece.Row > 9 - piece.Size) continue;
+                Rect rect = CellRect(piece.Col, piece.Row, piece.Size); DrawPiece(piece, rect);
+                if (piece.Id == selectedPiece) Border(rect, Accent, 3);
+            }
+            if (CurrentLevel.IsFusion) DrawFusionOverlays();
+            var mouse = Event.current.mousePosition;
+            if (boardRect.Contains(mouse))
+            {
+                int c = Mathf.Clamp((int)((mouse.x - boardRect.x) / cell), 0, 8), r = Mathf.Clamp((int)((mouse.y - boardRect.y) / cell), 0, 8);
+                Border(CellRect(c, r, 1), new Color(1, 1, 1, .8f), 2);
+                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && GUIUtility.hotControl == 0)
+                {
+                    GUI.FocusControl(null);
+                    if (toolMode == 3) { if (CurrentLevel.IsFusion) ToggleFusionLink(c, r); else ToggleGlyph(c, r); }
+                    else BeginBoardGesture(mouse, c, r);
+                    Event.current.Use();
+                }
+            }
+            string hint = toolMode == 1 ? "画笔：" + KindName(paintKind) + " · 按住拖动连续绘制 · 一次拖动一次撤销" : toolMode == 2 ? "橡皮擦：按住拖动连续擦除 · 松开停止 · 一次拖动一次撤销" : toolMode == 3 ? (CurrentLevel.IsFusion ? "关联：先选源对象，再点击目标添加 / 取消连线" : "点击字母区域（第3–7列、第2–8行）的普通砖切换目标") : "点击查看属性 · 拖拽移动 · Ctrl C / Ctrl V 复制画笔";
+            GUI.Label(new Rect(left, boardRect.yMax + 18, centerWidth, 30), hint, small);
+        }
+
+        void BeginBoardGesture(Vector2 pointer, int col, int row)
+        {
+            gestureLevel = CurrentLevel; gestureMode = toolMode; gestureStart = pointer;
+            gestureScreenWidth = Screen.width; gestureScreenHeight = Screen.height;
+            gestureControlId = boardControlId; GUIUtility.hotControl = gestureControlId;
+            strokeVisited.Clear(); previousStrokePoint = null;
+            if (gestureMode == 1 || gestureMode == 2)
+            {
+                gestureLevel.BeginEditGroup(); ContinueBoardStroke(pointer);
+            }
+            else
+            {
+                var p = gestureLevel.PieceAt(col, row); movingPiece = selectedPiece = p?.Id;
+                moveOffset = p == null ? Vector2Int.zero : new Vector2Int(col - p.Col, row - p.Row); LoadInspector();
+            }
+        }
+
+        void HandleBoardGesture()
+        {
+            if (gestureLevel == null) return;
+            if (IsPlaytesting || folderMode != null || showIssues || confirmAction != null || showFusionSamples || GUIUtility.hotControl != gestureControlId
+                || Screen.width != gestureScreenWidth || Screen.height != gestureScreenHeight)
+            { FinishBoardGesture(); return; }
+            var e = Event.current;
+            if (e.button != 0) return;
+            if (e.type == EventType.MouseDrag)
+            {
+                if (gestureMode == 1 || gestureMode == 2) ContinueBoardStroke(e.mousePosition);
+                e.Use();
+            }
+            else if (e.type == EventType.MouseUp)
+            {
+                if (gestureMode == 1 || gestureMode == 2) ContinueBoardStroke(e.mousePosition);
+                else if (movingPiece != null && boardRect.Contains(e.mousePosition) && (e.mousePosition - gestureStart).sqrMagnitude * scale * scale > 16)
+                {
+                    var cell = GridPoint(e.mousePosition);
+                    int col = Mathf.FloorToInt(cell.x) - moveOffset.x, row = Mathf.FloorToInt(cell.y) - moveOffset.y;
+                    ApplyResult(gestureLevel.TryMove(movingPiece, col, row));
+                }
+                FinishBoardGesture(); e.Use();
+            }
+        }
+
+        Vector2 GridPoint(Vector2 pointer) => (pointer - boardRect.position) / (boardRect.width / 9);
+        void ContinueBoardStroke(Vector2 pointer)
+        {
+            bool inside = boardRect.Contains(pointer);
+            Vector2 current = GridPoint(pointer);
+            if (previousStrokePoint.HasValue || inside)
+                foreach (var cell in LevelEditorStrokePath.Cells(previousStrokePoint ?? current, current))
+                {
+                    if (!strokeVisited.Add(cell)) continue;
+                    if (gestureMode == 1) Paint(cell.x, cell.y);
+                    else
+                    {
+                        var p = gestureLevel.PieceAt(cell.x, cell.y);
+                        if (p != null) { ApplyResult(gestureLevel.TryDelete(p.Id)); selectedPiece = null; }
+                    }
+                }
+            // Resume at the re-entry point, never join a route taken outside the board.
+            previousStrokePoint = inside ? current : (Vector2?)null;
+        }
+
+        void FinishBoardGesture()
+        {
+            if (gestureLevel == null) return;
+            var level = gestureLevel; gestureLevel = null;
+            if (level.IsEditGroupActive) level.EndEditGroup();
+            if (GUIUtility.hotControl == gestureControlId) GUIUtility.hotControl = 0;
+            gestureControlId = 0; movingPiece = null; previousStrokePoint = null; strokeVisited.Clear();
+            RefreshValidation();
+        }
+
+        void OnApplicationFocus(bool focused) { if (!focused) FinishBoardGesture(); }
+        void OnApplicationPause(bool paused) { if (paused) FinishBoardGesture(); }
+        void OnDisable() { FinishBoardGesture(); }
+
+        Rect CellRect(int c, int r, int size) => new Rect(boardRect.x + c * boardRect.width / 9 + 1, boardRect.y + r * boardRect.height / 9 + 1, size * boardRect.width / 9 - 2, size * boardRect.height / 9 - 2);
+
+        void DrawPiece(LevelEditorPiece piece, Rect rect)
+        {
+            if (CurrentLevel.IsFusion) { DrawFusionPiece(piece, rect); return; }
+            Color tint = piece.IsTarget ? Hex(0x84D9E7) : piece.IsChest ? Hex(0xDCA97F) : piece.Kind == "N" ? Hex(0xE1E3D9) : Hex(0xCDD9D6);
+            Fill(new Rect(rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4), tint);
+            var sprite = PieceSprite(piece);
+            if (sprite != null) DrawSprite(sprite, new Rect(rect.x + 4, rect.y + 3, rect.width - 8, rect.height - 7));
+            else GUI.Label(new Rect(rect.x, rect.y + 4, rect.width, rect.height - 10), KindName(piece.Kind), cellLabel);
+            if (piece.IsTarget) { Fill(new Rect(rect.x + 3, rect.y + 3, 7, 7), Hex(0x197B9B)); }
+            if (piece.Hp > 0 && !new[] { "L", "B", "K", "D", "S", "X", "O" }.Contains(piece.Kind) || selectedChapter == 2 && (piece.Kind == "L" || piece.Kind == "B"))
+            {
+                Rect hp = new Rect(rect.xMax - 26, rect.yMax - 22, 23, 19); Fill(hp, new Color(.08f, .14f, .19f, .8f)); GUI.Label(hp, piece.Hp.ToString(), center);
+            }
+            if (piece.Armor || piece.Ice > 0) { string tag = piece.Armor ? "甲" : "冰" + piece.Ice; GUI.Label(new Rect(rect.x + 3, rect.y + 2, rect.width - 6, 22), tag, cellLabel); }
+            if (piece.Size > 1) GUI.Label(new Rect(rect.x + 3, rect.yMax - 24, rect.width - 6, 21), piece.Size + "×" + piece.Size, cellLabel);
+        }
+
+        Sprite PieceSprite(LevelEditorPiece p)
+        {
+            string key = CurrentLevel.Chapter + "/" + p.Kind + "/" + p.IsTarget;
+            if (spriteCache.TryGetValue(key, out var cached)) return cached;
+            Sprite sprite = null;
+            try
+            {
+                if (p.IsChest) sprite = ChainCubeArt.Frame(3, 0);
+                else if (selectedChapter != 1 && (p.Kind == "F" || p.Kind == "T")) sprite = ChainCubeArt.Frame(p.Kind == "F" ? 0 : 1, 0);
+                else if (p.Kind == "L" || p.Kind == "B" || p.Kind == "K") sprite = ScoreSkillArt.Get("PropsV65", p.Kind == "L" ? "cross" : p.Kind == "B" ? "blast" : "link");
+                else if (p.Kind == "N") sprite = AlphabetArt.Frames(p.IsTarget ? 1 : 0).FirstOrDefault();
+            }
+            catch { /* The readable labeled tile remains usable if an optional preview sprite is unavailable. */ }
+            spriteCache[key] = sprite; return sprite;
+        }
+
+        void DrawInspector()
+        {
+            if (CurrentLevel.IsFusion) { DrawFusionInspector(); return; }
+            float x = width - InspectorWidth - 14;
+            Fill(new Rect(x, 98, InspectorWidth, height - 148), Panel);
+            GUI.Label(new Rect(x + 16, 110, 280, 30), "关卡与砖块属性", heading);
+            inspectorScroll = GUI.BeginScrollView(new Rect(x + 12, 150, InspectorWidth - 24, height - 221), inspectorScroll, new Rect(0, 0, InspectorWidth - 44, inspectorContentHeight));
+            float y = 0;
+            editName = TextField("关卡名称", editName, ref y);
+            if (Btn(new Rect(0, y, 280, 30), "应用名称")) ApplyResult(CurrentLevel.TryRename(editName)); y += 44;
+            movesText = TextField("可用步数（1–999）", movesText, ref y);
+            if (Btn(new Rect(0, y, 280, 30), "应用步数"))
+            {
+                int moves; if (int.TryParse(movesText, out moves)) ApplyResult(CurrentLevel.TrySetMoves(moves)); else SetStatus("步数需为 1–999 的整数。", true);
+            }
+            y += 43;
+            GUI.Label(new Rect(0, y, 280, 27), "当前规则：" + CurrentLevel.Moves + " 步 / 每组 5 球", body); y += 32;
+            var goals = CurrentLevel.Goals;
+            GUI.Label(new Rect(0, y, 280, 27), (selectedChapter == 1 ? "食物 " : "鱼 ") + goals.F + "   " + (selectedChapter == 1 ? "草莓 " : "玩具 ") + goals.T + "   " + (selectedChapter == 1 ? "柠檬 " : "蓝冻 ") + goals.J, body); y += 32;
+            GUI.Label(new Rect(0, y, 280, 48), "收集目标随砖块与箱内物品自动更新。\n修改后可撤销；试玩使用保存的快照。", small); y += 64;
+            var piece = Selected();
+            if (piece == null)
+            {
+                GUI.Label(new Rect(0, y, 280, 60), "点击棋盘砖块查看属性。\n选择左侧画笔可替换砖块。", body); y += 82;
+            }
+            else
+            {
+                Fill(new Rect(0, y, 278, 1), Line); y += 16;
+                GUI.Label(new Rect(0, y, 280, 28), KindName(piece.Kind) + (piece.IsTarget ? "  · 收集目标" : ""), heading); y += 42;
+                colText = TextField("列（1–9）", colText, ref y); rowText = TextField("行（1–9）", rowText, ref y);
+                if (piece.IsChest || piece.Kind == "Q" || piece.Kind == "O")
+                {
+                    if (piece.Kind == "O") sizeText = TextField("雪球边长（1–4）", sizeText, ref y);
+                    else { GUI.Label(new Rect(0, y, 278, 25), "固定占格：2 × 2", body); y += 37; }
+                }
+                bool health = !piece.IsChest && !(selectedChapter != 2 && new[] { "L", "B", "K", "D" }.Contains(piece.Kind)) && !(selectedChapter == 2 && new[] { "O", "S", "X" }.Contains(piece.Kind));
+                if (health) hpText = TextField("生命值", hpText, ref y);
+                if (piece.IsChest)
+                {
+                    GUI.Label(new Rect(0, y, 278, 24), "箱体 30 HP / 空子砖 5 HP（固定）", small); y += 34;
+                    string[] modes = { "plain", "armor", "rear" }, labels = { "普通箱", "护甲箱", "背击箱" };
+                    for (int i = 0; i < 3; i++) if (Tab(new Rect(i * 94, y, 88, 31), labels[i], chestMode == modes[i])) chestMode = modes[i]; y += 44;
+                    contentsText = TextField("箱内4项：0空 / 1鱼 / 2玩具", contentsText, ref y);
+                }
+                if (selectedChapter == 2)
+                {
+                    if (piece.Kind == "S") layersText = TextField("雪堆层数（1–4）", layersText, ref y);
+                    if (piece.Kind == "O") ringText = TextField("每层命中次数", ringText, ref y);
+                    if (!new[] { "O", "S", "X" }.Contains(piece.Kind)) iceText = TextField("冰层（0表示无）", iceText, ref y);
+                }
+                if (selectedChapter == 1 && piece.Kind == "T") ripenText = TextField("成熟所需邻居数", ripenText, ref y);
+                if (selectedChapter == 1 && piece.Kind == "D")
+                {
+                    GUI.Label(new Rect(0, y, 278, 24), "汽水喷射方向", body); y += 30;
+                    string[] ds = { "up", "right", "down", "left" }, ls = { "↑", "→", "↓", "←" };
+                    for (int i = 0; i < 4; i++) if (Tab(new Rect(i * 70, y, 64, 32), ls[i], direction == ds[i])) direction = ds[i]; y += 43;
+                }
+                if (!piece.IsChest && !new[] { "S", "X", "O", "Q", "L", "B", "K", "D", "R", "A" }.Contains(piece.Kind))
+                {
+                    if (Tab(new Rect(0, y, 280, 32), armor ? "☑  护甲开启" : "□  护甲关闭", armor)) armor = !armor; y += 44;
+                }
+                if (Btn(new Rect(0, y, 280, 36), "应用砖块属性", true)) ApplyInspector(piece, health); y += 47;
+                if (Btn(new Rect(0, y, 134, 32), "复制为画笔")) CopySelection();
+                if (Btn(new Rect(144, y, 134, 32), "移除砖块")) { ApplyResult(CurrentLevel.TryDelete(piece.Id)); selectedPiece = null; } y += 46;
+                if (piece.Kind == "Q") { GUI.Label(new Rect(0, y, 278, 65), "野餐篮：10 份 / 每份 3 击。\n首版保持游戏现有规则。", small); y += 70; }
+            }
+            Fill(new Rect(0, y, 278, 1), Line); y += 18;
+            GUI.Label(new Rect(0, y, 278, 27), "试玩开局", heading); y += 39;
+            for (int i = 0; i < ScenarioNames.Length; i++) if (Tab(new Rect(i % 2 * 143, y + i / 2 * 39, 135, 33), ScenarioNames[i], scenario == i)) scenario = i;
+            y += 123; GUI.Label(new Rect(0, y, 278, 70), "试玩规则位置：" + (CurrentLevel.RuntimeIndex + 1) + "（道具解锁）\n连胜奖励沿用此位置的真实规则。\n测试库存提供各 3 个道具。", small);
+            inspectorContentHeight = y + 90;
+            GUI.EndScrollView();
+        }
+
+        void DrawFooter()
+        {
+            float left = Sidebar + 44, right = width - InspectorWidth - 30;
+            float y = height - 120;
+            Fill(new Rect(left, y, right - left, 69), Panel);
+            int errors = issues.Count(p => p.IsError), warnings = issues.Count - errors;
+            string summary = errors == 0 ? "✓  当前关卡校验通过" : "!  " + errors + " 项错误需修复";
+            GUI.Label(new Rect(left + 14, y + 9, right - left - 130, 25), summary + (warnings > 0 ? " · " + warnings + " 个提示" : ""), errors == 0 ? body : ErrorStyle());
+            if (Btn(new Rect(right - 107, y + 7, 93, 28), "查看检查")) { issues = CurrentLevel.Validate(); showIssues = true; issueScroll = Vector2.zero; }
+            var first = issues.FirstOrDefault(p => p.IsError) ?? issues.FirstOrDefault();
+            GUI.Label(new Rect(left + 14, y + 37, right - left - 28, 25), first != null ? first.Message : CurrentLevel.Pieces.Count + " 个对象 · " + CurrentLevel.Pieces.Sum(p => p.Size * p.Size) + "/81 占格 · 结构检查不代表真实胜率", small);
+        }
+
+        void DrawPlaytest()
+        {
+            var g = Playtest.Session; float left = 26, infoWidth = Mathf.Max(240, previewRect.x - 54), right = previewRect.xMax + 30;
+            GUI.Label(new Rect(left, 117, infoWidth, 33), "第 " + (selectedLevel + 1) + " 关 · " + CurrentLevel.Name, heading);
+            GUI.Label(new Rect(left, 158, infoWidth, 26), "开局：" + ScenarioNames[scenario], body);
+            if (g.FusionActive) DrawFusionPlaytestProgress(g, left, infoWidth);
+            else {
+            float y = 221;
+            Metric(left, ref y, infoWidth, "剩余步数", g.Shots.ToString());
+            Metric(left, ref y, infoWidth, "场上球数", g.ActiveBalls.ToString());
+            Metric(left, ref y, infoWidth, "实际命中 / 破坏", g.HitCount + " / " + g.BreakCount);
+            Metric(left, ref y, infoWidth, "特殊砖触发", g.ChainActivationCount.ToString());
+            Metric(left, ref y, infoWidth, "道具爆炸 / 激光", g.StreakExplosions + " / " + g.StreakLasers);
+            Metric(left, ref y, infoWidth, "得分", g.Score.ToString("N0"));
+            y += 12;
+            GUI.Label(new Rect(left, y, infoWidth, 27), "收集进度", heading); y += 38;
+            if (g.CollectionGoal[0] > 0) { GUI.Label(new Rect(left, y, infoWidth, 25), (!g.FusionActive && selectedChapter == 1 ? "食物" : "鱼") + "   " + g.Collected[0] + " / " + g.CollectionGoal[0], body); y += 34; }
+            if (g.CollectionGoal[1] > 0) { GUI.Label(new Rect(left, y, infoWidth, 25), (!g.FusionActive && selectedChapter == 1 ? "草莓" : "玩具") + "   " + g.Collected[1] + " / " + g.CollectionGoal[1], body); y += 34; }
+            for (int i = 0; i < g.JellyGoal.Length; i++) if (g.JellyGoal[i] > 0) { GUI.Label(new Rect(left, y, infoWidth, 25), (!g.FusionActive && selectedChapter == 1 ? "柠檬" : "蓝色果冻") + "   " + g.JellyCollected[i] + " / " + g.JellyGoal[i], body); y += 34; }
+            }
+            float rw = width - right - 26;
+            GUI.Label(new Rect(right, 118, rw, 30), "下一组球", heading);
+            GUI.Label(new Rect(right, 159, rw, 54), "按住棋盘任意位置瞄准，松开发射。\n每组5颗球，消耗1步。", body);
+            for (int i = 0; i < 4; i++)
+            {
+                var kind = (StreakBooster)i; bool available = i == 0 || g.BoosterAvailable(kind) && g.StreakStock(kind) > 0;
+                GUI.enabled = g.CanSelectStreakBooster && available;
+                string text = StreakTrials.Name(kind) + (i == 0 ? "" : g.BoosterAvailable(kind) ? "   × " + g.StreakStock(kind) : "   未解锁");
+                if (Tab(new Rect(right, 238 + i * 53, rw, 43), text, g.SelectedStreakBooster == kind)) g.SelectStreakBooster(kind);
+            }
+            GUI.enabled = true;
+            GUI.Label(new Rect(right, 470, rw, 91), g.FusionActive ? FusionBoosterRule(g) : StreakTrials.Rule(g.SelectedStreakBooster), body);
+            if (Btn(new Rect(right, 575, rw, 39), g.IsPaused ? "继续" : "暂停")) g.SetPaused(!g.IsPaused);
+            GUI.enabled = g.RecallAvailable;
+            if (Btn(new Rect(right, 626, rw, 39), "召回球（长时间无命中后可用）")) g.RecallBalls();
+            GUI.enabled = true;
+            GUI.Label(new Rect(right, 690, rw, 100), "试玩结果和逐组记录自动保存。\n本局进度、金币和连胜不写入玩家存档。", small);
+            if (!g.IsPlaying)
+            {
+                Rect result = new Rect(previewRect.x + 18, previewRect.y + 32, previewRect.width - 36, 83);
+                Fill(result, new Color(.06f, .13f, .19f, .94f));
+                GUI.Label(new Rect(result.x + 8, result.y + 12, result.width - 16, 30), g.CollectionWon ? "通关成功" : "本局结束", heading);
+                GUI.Label(new Rect(result.x + 8, result.y + 49, result.width - 16, 26), "结果已记录 · 可重开或返回编辑", small);
+            }
+            HandlePlayInput();
+        }
+
+        void HandlePlayInput()
+        {
+            if (folderMode != null || !Playtest.Session.IsPlaying || Playtest.Session.IsPaused) return;
+            var e = Event.current;
+            if (e.type == EventType.MouseDown && e.button == 0 && previewRect.Contains(e.mousePosition)) { aiming = true; pointerStart = e.mousePosition * scale; e.Use(); }
+            if (aiming && (e.type == EventType.MouseDrag || e.type == EventType.MouseDown || e.type == EventType.Repaint))
+            {
+                Playtest.SetAim(AimDirection(e.mousePosition));
+            }
+            if (aiming && e.type == EventType.MouseUp)
+            {
+                aiming = false;
+                if (previewRect.Contains(e.mousePosition) && (e.mousePosition * scale - pointerStart).sqrMagnitude > 36)
+                {
+                    Playtest.Shoot(AimDirection(e.mousePosition));
+                }
+                Playtest.SetAim(null); e.Use();
+            }
+        }
+
+        Vector2 AimDirection(Vector2 pointer)
+        {
+            var p = new Vector3(pointer.x * scale, Screen.height - pointer.y * scale, 10);
+            var d = BoardDisplay.Inverse(Camera.main.ScreenToWorldPoint(p)) - Playtest.Session.LauncherPosition;
+            if (d.y < .2f) d.y = .2f;
+            return d.sqrMagnitude < .01f ? Vector2.up : d.normalized;
+        }
+
+        void Metric(float x, ref float y, float w, string label, string value)
+        {
+            GUI.Label(new Rect(x, y, w * .62f, 27), label, muted); GUI.Label(new Rect(x + w * .64f, y, w * .36f, 27), value, body); y += 48;
+        }
+
+        void Paint(int c, int r)
+        {
+            if (copiedPiece != null)
+            {
+                var clone = CurrentLevel.TryCloneAt(copiedPiece.Id, c, r); ApplyResult(clone);
+                if (clone.Success && !string.IsNullOrEmpty(clone.PieceId))
+                {
+                    var template = CurrentLevel.Pieces.FirstOrDefault(p => p.Id == clone.PieceId);
+                    if (template != null) copiedPiece = template;
+                }
+                return;
+            }
+            int size = paintKind == "chest" || paintKind == "Chest" || paintKind == "Q" ? 2 : copiedPiece != null ? copiedPiece.Size : 1;
+            var result = CurrentLevel.TryPlace(paintKind, c, r, size); ApplyResult(result);
+        }
+
+        void ToggleGlyph(int c, int r)
+        {
+            if (c < 2 || c > 6 || r < 1 || r > 7) { SetStatus("字母目标仅能放在第3–7列、第2–8行。", true); return; }
+            var glyph = CurrentLevel.Glyph.ToArray(); var row = glyph[r - 1].ToCharArray(); row[c - 2] = row[c - 2] == '1' ? '0' : '1'; glyph[r - 1] = new string(row);
+            ApplyResult(CurrentLevel.TrySetGlyph(glyph));
+        }
+
+        void ApplyInspector(LevelEditorPiece piece, bool health)
+        {
+            if (!int.TryParse(colText, out int c) || !int.TryParse(rowText, out int r)) { SetStatus("行列必须填写整数。", true); return; }
+            var edit = new LevelEditorPieceEdit { Col = c - 1, Row = r - 1 };
+            if (health) { if (!int.TryParse(hpText, out int hp) || hp < 1) { SetStatus("生命值必须是正整数。", true); return; } edit.Hp = hp; }
+            if (!piece.IsChest && !new[] { "S", "X", "O", "Q", "L", "B", "K", "D", "R", "A" }.Contains(piece.Kind)) edit.Armor = armor;
+            if (piece.IsChest)
+            {
+                var values = contentsText.Split(new[] { ',', '，', ' ' }, StringSplitOptions.RemoveEmptyEntries); var contents = new List<int>();
+                foreach (string v in values) { if (!int.TryParse(v, out int n) || n < 0 || n > 2) { SetStatus("箱内内容填写4个0/1/2，以逗号分隔。", true); return; } contents.Add(n); }
+                if (contents.Count != 4) { SetStatus("箱内必须恰好4项。", true); return; } edit.Contents = contents.ToArray(); edit.Mode = chestMode;
+            }
+            if (selectedChapter == 2)
+            {
+                if (piece.Kind == "O")
+                {
+                    if (!int.TryParse(sizeText, out int s) || !int.TryParse(ringText, out int ring)) { SetStatus("雪球参数需填写整数。", true); return; } edit.Size = s; edit.HitsPerRing = ring;
+                }
+                else if (piece.Kind == "S") { if (!int.TryParse(layersText, out int l)) { SetStatus("雪层需填写整数。", true); return; } edit.Layers = l; }
+                else if (piece.Kind != "X") { if (!int.TryParse(iceText, out int ice)) { SetStatus("冰层需填写整数。", true); return; } edit.Ice = ice; }
+            }
+            if (selectedChapter == 1 && piece.Kind == "D") edit.Direction = direction;
+            if (selectedChapter == 1 && piece.Kind == "T") { if (!int.TryParse(ripenText, out int n)) { SetStatus("成熟条件需填写整数。", true); return; } edit.RipenNeeds = n; }
+            ApplyResult(CurrentLevel.TryUpdate(piece.Id, edit));
+        }
+
+        LevelEditorPiece Selected() => CurrentLevel?.Pieces.FirstOrDefault(p => p.Id == selectedPiece);
+        void LoadInspector()
+        {
+            if (CurrentLevel != null && CurrentLevel.IsFusion) { LoadFusionInspector(); return; }
+            var p = Selected(); if (p == null) return;
+            hpText = p.Hp.ToString(); colText = (p.Col + 1).ToString(); rowText = (p.Row + 1).ToString(); sizeText = p.Size.ToString();
+            armor = p.Armor; iceText = p.Ice.ToString(); layersText = p.Layers.ToString(); ringText = p.HitsPerRing.ToString(); ripenText = p.RipenNeeds.ToString();
+            chestMode = string.IsNullOrEmpty(p.Mode) ? "plain" : p.Mode; direction = string.IsNullOrEmpty(p.Direction) ? "up" : p.Direction;
+            contentsText = p.Contents == null ? "1,0,2,0" : string.Join(",", p.Contents);
+        }
+
+        void CopySelection()
+        {
+            FinishBoardGesture();
+            var p = Selected(); if (p == null) return; copiedPiece = p; copiedChapter = CurrentLevel.Chapter; paintKind = p.Kind; toolMode = 1; SetStatus("已复制 " + KindName(p.Kind) + "，点击棋盘粘贴；Esc 返回选择工具。");
+        }
+
+        void ApplyResult(OperationResult result)
+        {
+            if (result == null) return; SetStatus(result.Message, !result.Success);
+            if (result.Success) { if (!string.IsNullOrEmpty(result.PieceId)) selectedPiece = result.PieceId; if (CurrentLevel != null) { editName = CurrentLevel.Name; movesText = CurrentLevel.Moves.ToString(); } RefreshValidation(); LoadInspector(); }
+        }
+        void RefreshValidation()
+        {
+            var current = CurrentLevel == null ? new List<ValidationIssue>() : CurrentLevel.Validate().ToList();
+            if (Workspace != null && Workspace.NeedsRulesReview) current.Add(new ValidationIssue { Severity = ValidationSeverity.Warning, Code = "RULES_VERSION", LevelNumber = 0,
+                Message = "项目规则 " + Workspace.SavedRulesVersion + " → 当前 " + LevelEditorRuleCatalog.RulesVersion + "，请重新试玩验证。" });
+            issues = current.AsReadOnly();
+        }
+        void SetStatus(string value, bool error = false) { status = value ?? ""; statusError = error; }
+
+        void HandleShortcuts()
+        {
+            var e = Event.current; if (e.type != EventType.KeyDown) return;
+            if (e.keyCode == KeyCode.Escape || e.keyCode == KeyCode.Delete || e.control) FinishBoardGesture();
+            if (e.keyCode == KeyCode.Escape) { if (IsPlaytesting) ReturnToEditor(); else { toolMode = 0; copiedPiece = null; GUI.FocusControl(null); } e.Use(); return; }
+            if (IsPlaytesting) return;
+            if (e.control && e.keyCode == KeyCode.S) { SaveWorkspace(); e.Use(); return; }
+            if (CurrentLevel == null) return;
+            bool textEditing = !string.IsNullOrEmpty(GUI.GetNameOfFocusedControl());
+            if (e.control && e.keyCode == KeyCode.S) { SaveWorkspace(); e.Use(); }
+            else if (!textEditing && e.control && e.keyCode == KeyCode.Z) { ApplyResult(e.shift ? CurrentLevel.Redo() : CurrentLevel.Undo()); e.Use(); }
+            else if (!textEditing && e.control && e.keyCode == KeyCode.Y) { ApplyResult(CurrentLevel.Redo()); e.Use(); }
+            else if (!textEditing && e.control && e.keyCode == KeyCode.C) { CopySelection(); e.Use(); }
+            else if (!textEditing && e.control && e.keyCode == KeyCode.V && copiedPiece != null && copiedChapter == CurrentLevel.Chapter) { toolMode = 1; paintKind = copiedPiece.Kind; e.Use(); }
+            else if (!textEditing && e.keyCode == KeyCode.Delete && Selected() != null) { ApplyResult(CurrentLevel.TryDelete(selectedPiece)); selectedPiece = null; e.Use(); }
+        }
+
+        void OpenFolderDialog(string mode, string path) { FinishBoardGesture(); folderMode = mode; folderPath = path; folderError = ""; folderScroll = Vector2.zero; RefreshFolders(); }
+        void RefreshFolders()
+        {
+            try { folderChildren = Directory.Exists(folderPath) ? Directory.GetDirectories(folderPath).OrderBy(p => p).ToArray() : Array.Empty<string>(); folderError = ""; }
+            catch (Exception ex) { folderChildren = Array.Empty<string>(); folderError = ex.Message; }
+        }
+
+        void DrawFolderDialog()
+        {
+            Fill(new Rect(0, 83, width, height - 83), new Color(0, 0, 0, .78f));
+            Rect box = new Rect((width - 760) / 2, (height - 570) / 2, 760, 570); Fill(box, Panel); Border(box, Line, 1);
+            GUI.Label(new Rect(box.x + 24, box.y + 20, 710, 35), folderMode == "open" ? "打开关卡项目" : folderMode == "new" ? "创建空白关卡项目" : "导出项目关卡与内容清单", title);
+            GUI.Label(new Rect(box.x + 24, box.y + 64, 710, 47), folderMode == "open" ? "选择包含 Alphabet、Picnic、Snow 文件夹的项目目录。也可显式导入旧关卡。" : folderMode == "new" ? "在所选目录中新建独立项目文件夹，从零添加关卡；当前项目会先保存。" : "将在所选目录中新建带时间戳的导出文件夹。仅检查和导出此项目中的关卡。", body);
+            GUI.SetNextControlName("folderpath"); folderPath = GUI.TextField(new Rect(box.x + 24, box.y + 126, 590, 36), folderPath, input);
+            if (Btn(new Rect(box.x + 625, box.y + 126, 111, 36), "读取路径")) RefreshFolders();
+            if (Btn(new Rect(box.x + 24, box.y + 177, 130, 32), "上一级")) { var p = Directory.GetParent(folderPath); if (p != null) { folderPath = p.FullName; RefreshFolders(); } }
+            if (Btn(new Rect(box.x + 165, box.y + 177, 130, 32), "我的工作区")) { folderPath = rootDirectory; RefreshFolders(); }
+            folderScroll = GUI.BeginScrollView(new Rect(box.x + 24, box.y + 224, 712, 236), folderScroll, new Rect(0, 0, 688, Math.Max(236, folderChildren.Length * 36)));
+            for (int i = 0; i < folderChildren.Length; i++) if (Btn(new Rect(0, i * 36, 685, 32), "▸  " + Path.GetFileName(folderChildren[i]))) { folderPath = folderChildren[i]; folderScroll = Vector2.zero; RefreshFolders(); break; }
+            GUI.EndScrollView();
+            GUI.Label(new Rect(box.x + 24, box.y + 468, 712, 39), folderError, ErrorStyle());
+            if (Btn(new Rect(box.x + 421, box.y + 516, 135, 34), "取消")) folderMode = null;
+            if (Btn(new Rect(box.x + 570, box.y + 516, 166, 34), folderMode == "open" ? "打开此项目" : folderMode == "new" ? "在此新建项目" : "导出到此目录", true))
+            {
+                try
+                {
+                    string path = Path.GetFullPath(folderPath.Trim());
+                    if (folderMode == "new")
+                    {
+                        string dest = Path.Combine(path, "Project-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
+                        if (CreateProject(dest)) folderMode = null; else folderError = status;
+                    }
+                    else if (folderMode == "export")
+                    {
+                        string dest = Path.Combine(path, "Levels-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
+                        if (ExportTo(dest)) { exportParent = path; folderMode = null; } else folderError = status;
+                    }
+                    else
+                    {
+                        if (loaded && !SaveWorkspace()) { folderError = status; return; }
+                        var next = LevelEditorWorkspace.LoadDirectory(path);
+                        string writable = next.LastSaveDirectory;
+                        if (string.IsNullOrEmpty(writable))
+                        {
+                            writable = Path.Combine(rootDirectory, "Imports", DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
+                            var imported = next.SaveWorkspace(writable);
+                            if (!imported.Success) { folderError = imported.Message; return; }
+                        }
+                        Workspace = next; workspaceDirectory = writable; loaded = true; selectedChapter = 0; search = ""; showIssues = false; confirmAction = null; SelectLevel(0); RememberWorkspace(); folderMode = null; SetStatus("已打开 " + Workspace.Levels.Count + " 关 · " + writable);
+                    }
+                }
+                catch (Exception ex) { folderError = ex.Message; }
+            }
+        }
+
+        void DrawConfirmDialog()
+        {
+            Fill(new Rect(0, 83, width, height - 83), new Color(0, 0, 0, .78f));
+            Rect box = new Rect((width - 620) / 2, (height - 280) / 2, 620, 280); Fill(box, Panel); Border(box, Line, 1);
+            bool deleting = confirmAction == "delete";
+            GUI.Label(new Rect(box.x + 28, box.y + 24, 564, 36), deleting ? "删除此关卡" : "清空此关卡的棋盘", title);
+            GUI.Label(new Rect(box.x + 28, box.y + 85, 564, 90), deleting ? "将删除「" + CurrentLevel?.Name + "」及其本次撤销历史。\n其他关卡不受影响，此操作不能通过 Ctrl+Z 恢复。" : "移除全部砖块和目标，保留此关卡。\n可以用一次 Ctrl+Z 恢复整个棋盘。", body);
+            if (Btn(new Rect(box.x + 286, box.y + 213, 130, 36), "取消") || Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) { confirmAction = null; return; }
+            if (Btn(new Rect(box.x + 432, box.y + 213, 160, 36), deleting ? "删除关卡" : "清空棋盘", true))
+            {
+                confirmAction = null;
+                if (CurrentLevel == null) return;
+                if (deleting)
+                {
+                    var result = Workspace.DeleteLevel(CurrentLevel);
+                    if (result.Success) SelectChapter(selectedChapter);
+                    SetStatus(result.Message, !result.Success);
+                }
+                else { selectedPiece = null; ApplyResult(CurrentLevel.TryClear()); }
+            }
+        }
+
+        void DrawIssuesDialog()
+        {
+            Fill(new Rect(0, 83, width, height - 83), new Color(0, 0, 0, .78f));
+            Rect box = new Rect((width - 800) / 2, (height - 520) / 2, 800, 520); Fill(box, Panel); Border(box, Line, 1);
+            GUI.Label(new Rect(box.x + 24, box.y + 20, 730, 35), "关卡数据检查", title);
+            GUI.Label(new Rect(box.x + 24, box.y + 65, 730, 48), "硬错误阻止试玩与导出；提示保留原始设计数据，不代表关卡无法通关。", body);
+            issueScroll = GUI.BeginScrollView(new Rect(box.x + 24, box.y + 123, 752, 314), issueScroll, new Rect(0, 0, 727, Math.Max(314, issues.Count * 65)));
+            if (issues.Count == 0) GUI.Label(new Rect(8, 30, 710, 40), "✓  当前关卡没有数据错误或提示。", heading);
+            for (int i = 0; i < issues.Count; i++)
+            {
+                var item = issues[i];
+                GUI.Label(new Rect(8, i * 65 + 3, 600, 24), (item.IsError ? "错误" : "提示") + " · 第" + item.LevelNumber + "关 · " + item.Code, item.IsError ? ErrorStyle() : small);
+                if (!string.IsNullOrEmpty(item.PieceId) && Btn(new Rect(615, i * 65, 98, 26), "定位对象"))
+                {
+                    var level = Workspace.Levels.FirstOrDefault(l => l.Number == item.LevelNumber);
+                    if (level != null)
+                    {
+                        SelectLevel(level.Index); var piece = CurrentLevel.Pieces.FirstOrDefault(p => p.Id == item.PieceId || p.LegacyId == item.PieceId);
+                        selectedPiece = piece?.Id; LoadInspector(); showIssues = false;
+                        if (piece == null && CurrentLevel.IsFusion) { fusionShowMilestones = true; SetStatus("问题关联到关卡级配置，请检查里程碑或规则参数。"); }
+                    }
+                }
+                GUI.Label(new Rect(8, i * 65 + 26, 710, 36), item.Message, body);
+            }
+            GUI.EndScrollView();
+            if (Btn(new Rect(box.x + 608, box.y + 463, 168, 35), "返回编辑", true) || Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) showIssues = false;
+        }
+
+        string[] Kinds() => CurrentLevel != null && CurrentLevel.IsFusion ? FusionPaletteKinds() : LevelEditorRuleCatalog.GetKinds(Chapters[selectedChapter]);
+        string KindName(string kind) => CurrentLevel != null && CurrentLevel.IsFusion ? LevelEditorRuleCatalog.FusionKindName(kind) : LevelEditorRuleCatalog.KindName(Chapters[selectedChapter], kind);
+
+        string TextField(string label, string value, ref float y)
+        {
+            GUI.Label(new Rect(0, y, 280, 24), label, muted); y += 28;
+            GUI.SetNextControlName("field-" + label); string next = GUI.TextField(new Rect(0, y, 278, 32), value ?? "", input); y += 43; return next;
+        }
+        bool Btn(Rect rect, string text, bool primary = false) => GUI.Button(rect, text, primary ? primaryButton : button);
+        bool Tab(Rect rect, string text, bool active) => GUI.Button(rect, text, active ? selectedButton : button);
+        static Color Hex(int rgb) => new Color32((byte)(rgb >> 16), (byte)(rgb >> 8), (byte)rgb, 255);
+        static void Fill(Rect rect, Color color) { var prior = GUI.color; GUI.color = color; GUI.DrawTexture(rect, Texture2D.whiteTexture); GUI.color = prior; }
+        static void Border(Rect r, Color c, float size) { Fill(new Rect(r.x, r.y, r.width, size), c); Fill(new Rect(r.x, r.yMax - size, r.width, size), c); Fill(new Rect(r.x, r.y, size, r.height), c); Fill(new Rect(r.xMax - size, r.y, size, r.height), c); }
+        static void DrawSprite(Sprite sprite, Rect rect)
+        {
+            var t = sprite.texture; var sr = sprite.rect; float ratio = sr.width / sr.height;
+            if (rect.width / rect.height > ratio) { float w = rect.height * ratio; rect.x += (rect.width - w) / 2; rect.width = w; }
+            else { float h = rect.width / ratio; rect.y += (rect.height - h) / 2; rect.height = h; }
+            GUI.DrawTextureWithTexCoords(rect, t, new Rect(sr.x / t.width, sr.y / t.height, sr.width / t.width, sr.height / t.height), true);
+        }
+
+        Texture2D Solid(Color color)
+        {
+            var t = new Texture2D(1, 1); t.SetPixel(0, 0, color); t.Apply(); styleTextures.Add(t); return t;
+        }
+        GUIStyle ErrorStyle() { var s = new GUIStyle(small); s.normal.textColor = Amber; return s; }
+        void EnsureStyles()
+        {
+            if (body != null) return;
+            Font font = Resources.Load<Font>("Fonts/FeedbackSansSC") ?? UICraft.Font;
+            body = new GUIStyle(GUI.skin.label) { font = font, fontSize = 17, wordWrap = true, alignment = TextAnchor.MiddleLeft }; body.normal.textColor = Ink;
+            muted = new GUIStyle(body); muted.normal.textColor = Muted;
+            heading = new GUIStyle(body) { fontSize = 21, fontStyle = FontStyle.Bold };
+            title = new GUIStyle(heading) { fontSize = 24 };
+            small = new GUIStyle(muted) { fontSize = 14 };
+            center = new GUIStyle(body) { fontSize = 14, alignment = TextAnchor.MiddleCenter };
+            cellLabel = new GUIStyle(center) { fontSize = 15, fontStyle = FontStyle.Bold }; cellLabel.normal.textColor = Hex(0x263C46);
+            button = new GUIStyle(GUI.skin.button) { font = font, fontSize = 15, alignment = TextAnchor.MiddleCenter, padding = new RectOffset(6, 6, 4, 4), border = new RectOffset(0, 0, 0, 0), wordWrap = false };
+            button.normal.background = Solid(Hex(0x28394D)); button.normal.textColor = Ink;
+            button.hover.background = Solid(Hex(0x3A5068)); button.hover.textColor = Color.white;
+            button.active.background = Solid(Hex(0x466581)); button.active.textColor = Color.white;
+            selectedButton = new GUIStyle(button); selectedButton.normal.background = Solid(Hex(0x304E52)); selectedButton.normal.textColor = Accent;
+            primaryButton = new GUIStyle(button) { fontStyle = FontStyle.Bold }; primaryButton.normal.background = Solid(Accent); primaryButton.normal.textColor = Hex(0x102E2A); primaryButton.hover.background = Solid(Hex(0xA4F2D6)); primaryButton.hover.textColor = Hex(0x102E2A);
+            input = new GUIStyle(GUI.skin.textField) { font = font, fontSize = 17, padding = new RectOffset(9, 8, 4, 4), alignment = TextAnchor.MiddleLeft };
+            input.normal.background = Solid(Hex(0x0E1C2C)); input.normal.textColor = Ink; input.focused.background = Solid(Hex(0x20364C)); input.focused.textColor = Color.white;
+            GUI.skin.settings.cursorColor = Accent; GUI.skin.settings.selectionColor = Hex(0x3A676B);
+        }
+    }
+}

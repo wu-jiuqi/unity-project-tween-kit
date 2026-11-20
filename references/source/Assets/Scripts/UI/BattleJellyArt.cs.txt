@@ -1,0 +1,23 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+public static class BattleJellyArt {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ public static Sprite Get(string key){if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/BattleJellyV5/"+key);if(t==null)throw new System.InvalidOperationException("Missing battle art "+key);return cache[key]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);}
+ public static string GoalPad(GameSession g,int index,int jelly,int food){if(g.IsTutorial)return "goal-pad-honey";if(index>=0){var target=g.OpeningTargets[index];if(target.kind!="ordinary_color")return "goal-pad-honey";return target.color=="Y"?"goal-pad-honey":target.color=="P"?"goal-pad-pink":target.color=="M"?"booster-body-mint":target.color=="L"?"booster-body-lavender":"goal-pad-blue";}return food==1?"goal-pad-pink":food==0||jelly==4?"goal-pad-honey":"goal-pad-blue";}
+ public static Image Image(Transform p,string key,float x,float y,float w,float h){var i=UICraft.Box(p,key,x,y,w,h,Color.white);i.type=UnityEngine.UI.Image.Type.Simple;i.sprite=Get(key);i.preserveAspect=false;i.raycastTarget=false;return i;}
+}
+static class BattleCountExtensions {public static int SumCounts(this int[] a){int n=0;foreach(int v in a)n+=v;return n;}}
+public static class CollectionFlightMotion {
+ public static void Apply(ChainLoot loot,Vector2 target,string kind){
+  float t=Mathf.Clamp01(loot.Age/.6f),u=t*t*(3-2*t);Vector2 delta=target-loot.Start;
+  float side=kind=="cookie"?-.18f:kind=="yarn"?.18f:0;Vector2 control=loot.Start+delta*.22f+Vector2.up*(kind=="ingot"?.65f:.4f)+Vector2.right*side;
+  loot.View.position=(1-u)*(1-u)*loot.Start+2*(1-u)*u*control+u*u*target;
+  float enter=1+Mathf.Sin(Mathf.Min(1,t/.2f)*Mathf.PI)*.10f,shrink=Mathf.Lerp(1,.28f,Mathf.Pow(t,3));
+  float ripple=Mathf.Sin(t*Mathf.PI*2)*.035f*(1-t);loot.View.localScale=new Vector3(1+ripple,1-ripple,1)*(enter*shrink);
+  float angle=kind=="yarn"?12:kind=="cookie"?7:kind=="copper_coin"?4:2;loot.View.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*Mathf.PI*2)*angle*(1-t));
+ }
+}
+}

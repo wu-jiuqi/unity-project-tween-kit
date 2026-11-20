@@ -1,0 +1,4 @@
+using UnityEngine;
+public static class LeagueV79PlatformValidation {
+ public static void Run(){SharedSourceValidation76.Validate();Debug.Log(BounceGarden.LocalProfile.RunSelfTests());Debug.Log(BounceGarden.LeagueSelfTests.RunAll());Debug.Log(BounceGarden.LeagueActiveSelfTests.RunAll());Debug.Log(BounceGarden.LeagueRoundSelfTests.RunAll());Debug.Log("LEAGUE_V79_PLATFORM_OK");}
+}

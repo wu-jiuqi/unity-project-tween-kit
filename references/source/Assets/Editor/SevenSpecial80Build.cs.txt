@@ -1,0 +1,22 @@
+using System;
+using System.IO;
+using UnityEngine;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+public static class SevenSpecial80Build {
+ public static void Windows(){
+  BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  foreach(var key in new[]{"combo-cross","combo-bands","combo-bomb","combo-merge","flower-vortex"})for(int f=0;f<16;f++)if(BounceGarden.SevenSpecialArt.Frame(key,f)==null)throw new Exception("Missing generated frame "+key+f);
+  for(int c=0;c<BounceGarden.SevenSpecialArt.ColorCount;c++)for(int f=0;f<16;f++){if(BounceGarden.SevenSpecialArt.Ordinary(c,f)==null)throw new Exception("Missing baked ordinary jelly frame");foreach(int kind in new[]{1,2,3,5,6})if(BounceGarden.SevenSpecialArt.Special(kind,c,f)==null)throw new Exception("Missing baked special jelly frame");}
+  if(Resources.Load<Shader>("JellyPairFx")==null)throw new Exception("Missing source-color effect shader");
+  string output=Path.GetFullPath("../../Builds/SevenSpecial-v80-r2/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));
+  var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=output,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+  Debug.Log("SEVEN_SPECIAL_BUILD "+result.summary.result+" errors="+result.summary.totalErrors+" warnings="+result.summary.totalWarnings);
+  if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Seven-special mainline build failed");
+ }
+}
+public sealed class SevenSpecial80Importer:AssetPostprocessor {
+ public override int GetPostprocessOrder()=>31000;
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/SevenSpecialV80/")&&!assetPath.Contains("/Art/FiveBakedV80/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.npotScale=TextureImporterNPOTScale.None;t.mipmapEnabled=false;t.alphaIsTransparency=true;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=1024;t.isReadable=false;t.textureCompression=TextureImporterCompression.Uncompressed;var phone=t.GetPlatformTextureSettings("Android");phone.overridden=true;phone.maxTextureSize=512;phone.format=TextureImporterFormat.ETC2_RGBA8;t.SetPlatformTextureSettings(phone);var web=t.GetPlatformTextureSettings("WebGL");web.overridden=true;web.maxTextureSize=512;web.format=TextureImporterFormat.ETC2_RGBA8;t.SetPlatformTextureSettings(web);}
+}

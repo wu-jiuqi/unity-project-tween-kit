@@ -1,0 +1,50 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using DG.Tweening;
+namespace BounceGarden {
+public partial class AppUI {
+ public CSettingsSheet QASettingsSheet=>modal==null?null:modal.GetComponent<CSettingsSheet>();
+ void OpenSettingsSheetC(string title,float height,string page,System.Action back=null,bool hero=false){
+  RemoveModal(false);modal=UICraft.Root(overlayRoot,"Modal",0,0,1000,height);modal.gameObject.AddComponent<UILightSurface>();
+  var sheet=modal.gameObject.AddComponent<CSettingsSheet>();sheet.Initialize(this,height,page);
+  var dim=UICraft.Box(modal,"Dimmer",0,0,15000,15000,new Color(.20f,.16f,.15f,.43f),false,true);dim.sprite=null;
+  var panel=CSettingsArt.Image(modal,"panel_cream",0,0,1000,height,true);panel.raycastTarget=true;
+  CSettingsArt.Image(modal,"drag_handle_mint",0,height*.5f-65,150,33);
+  float titleY=height*.5f-(hero?500:350);
+  if(!hero){
+   CSettingsArt.Image(modal,"decor_mint_accents",0,height*.5f-200,345,100);
+   var cat=CSettingsArt.Image(modal,"decor_cat_head",0,height*.5f-200,190,115);var idle=cat.gameObject.AddComponent<UIFloat>();idle.amplitude=3;idle.speed=1.4f;
+  }
+  CSettingsArt.Image(modal,"decor_paw",-355,titleY+55,100,98);var paw=CSettingsArt.Image(modal,"decor_paw",355,titleY+55,100,98);paw.rectTransform.localScale=new Vector3(-1,1,1);
+  CSettingsArt.Image(modal,"title_mint_wash",0,titleY-30,520,85);
+  SettingsTextC(title,0,titleY,790,130,title.Length>6?76:92);
+  if(back!=null){var button=CSettingsArt.Button(modal,"返回设置入口","",-400,height*.5f-160,105,105,back,"button_round_cream");CSettingsArt.Image(button.transform.Find("ButtonVisual"),"icon_back",0,0,55,55);}
+
+  OpenModalMotion();
+ }
+ TMP_Text SettingsTextC(string text,float x,float y,float w,float h,int size,bool left=false,bool muted=false){
+  var label=UICraft.Label(modal,text,x,y,w,h,size,muted?CSettingsArt.Muted:CSettingsArt.Ink,left?TextAnchor.MiddleLeft:TextAnchor.MiddleCenter);label.color=muted?CSettingsArt.Muted:CSettingsArt.Ink;label.fontSizeMin=size*.8f;label.fontSizeMax=size;return label;
+ }
+ void SettingsVersionC(float y){SettingsTextC("版本 "+GameVersion.Name,0,y,700,60,31,false,true);}
+ internal void LayoutSettingsSheetC(CSettingsSheet sheet,bool animate){
+  if(sheet==null||modal==null||sheet.transform!=modal)return;var group=modal.GetComponent<CanvasGroup>();if(group==null||!group.blocksRaycasts)return;
+  var pixels=MenuAvoidanceViewport;var safe=AlphabetSafeRect;if(WeChatLayoutMetrics.TryGetBlockedRect(pixels,out var blocked))safe.yMax=Mathf.Min(safe.yMax,blocked.yMin-12);
+  float cw=canvasRoot.rect.width,ch=canvasRoot.rect.height,availableW=safe.width/Mathf.Max(1,pixels.x)*cw,availableH=safe.height/Mathf.Max(1,pixels.y)*ch;
+  float fit=Mathf.Min(1,Mathf.Min(Mathf.Max(.1f,availableW-44)/1000,Mathf.Max(.1f,availableH-70)/sheet.Height));
+  var parent=(RectTransform)modal.parent;var basis=new Vector3(canvasRoot.lossyScale.x/parent.lossyScale.x,canvasRoot.lossyScale.y/parent.lossyScale.y,1);var target=basis*fit;
+  var center=new Vector3((safe.center.x/Mathf.Max(1,pixels.x)-.5f)*cw,(safe.yMin/Mathf.Max(1,pixels.y)-.5f)*ch+30+sheet.Height*fit*.5f,0);
+  modal.anchoredPosition=(Vector2)parent.InverseTransformPoint(canvasRoot.TransformPoint(center));sheet.Remember(pixels,AlphabetSafeRect,parent.lossyScale);
+  if(animate){modalMotion?.Kill(false);modal.localScale=target*.96f;group.alpha=0;modalMotion=DOTween.Sequence().SetUpdate(true).SetId(modal);modalMotion.Append(modal.DOScale(target,.18f).SetEase(Ease.OutCubic));modalMotion.Join(group.DOFade(1,.18f));}
+  else{modalMotion?.Kill(false);modal.localScale=target;group.alpha=1;}
+ }
+}
+// Stable, uniformly fitted sheet inside the existing overlay hierarchy. The battle canvas may stretch.
+public sealed class CSettingsSheet:MonoBehaviour {
+ AppUI app;Vector2Int viewport;Rect safe;Vector3 parentScale;int revision;
+ public float Height{get;private set;}public string Page{get;private set;}
+ public void Initialize(AppUI owner,float height,string page){app=owner;Height=height;Page=page;}
+ public void Remember(Vector2Int pixels,Rect area,Vector3 scale){viewport=pixels;safe=area;parentScale=scale;revision=WeChatLayoutMetrics.Revision;}
+ void LateUpdate(){if(app!=null&&(viewport!=app.MenuAvoidanceViewport||safe!=app.AlphabetSafeRect||parentScale!=transform.parent.lossyScale||revision!=WeChatLayoutMetrics.Revision))app.LayoutSettingsSheetC(this,false);}
+}
+}

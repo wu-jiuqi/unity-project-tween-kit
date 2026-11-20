@@ -1,0 +1,8 @@
+using UnityEngine;
+namespace BounceGarden {
+public static class Round4ReferenceData {
+public const float PixelsToWorld=10.8f/592f;
+public static Vector2 Point(float x,float y)=>new Vector2((x-296)*PixelsToWorld,(640-y)*PixelsToWorld);
+public static readonly string[] Grid={"....OOOO....","..OOYYYYOO..",".OYYYYYYYYO.",".OYBYYYYBYO.","OYBPBYYBPBYO","OYYYY..YYYYO","OYYYY..YYYYO","OYYBIIIIBYYO",".OYYBBBBYYO.",".OYYYBBYYYO.","..OOYYYYOO..","....OOOO...."};
+}
+}

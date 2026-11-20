@@ -1,0 +1,18 @@
+using System;
+using System.IO;
+using UnityEngine;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using BounceGarden;
+public static class SfxV87Build {
+ [Serializable]class Manifest{public Entry[] clips;}[Serializable]class Entry{public string cue,path,bus;public bool loop;}
+ public static void Validate(){
+  PackageCleanupBuild.Validate();
+  var text=Resources.Load<TextAsset>("Audio/DeliveryV87/manifest");if(text==null)throw new Exception("V87 audio manifest missing");
+  var data=JsonUtility.FromJson<Manifest>(text.text);if(data.clips.Length!=34)throw new Exception("Expected 34 delivered WAVs");
+  foreach(var entry in data.clips){var clip=Resources.Load<AudioClip>(entry.path);if(clip==null||clip.channels!=1||(clip.frequency!=40000&&!(EditorUserBuildSettings.activeBuildTarget==BuildTarget.WebGL&&clip.frequency==44100))||clip.length<=0||entry.loop)throw new Exception("Audio import mismatch: "+entry.cue+" clip="+(clip==null?"null":clip.channels+"ch/"+clip.frequency+"Hz/"+clip.length+"s"));var importer=(AudioImporter)AssetImporter.GetAtPath("Assets/Resources/"+entry.path+".wav");if(importer.defaultSampleSettings.compressionFormat!=AudioCompressionFormat.PCM||importer.defaultSampleSettings.sampleRateSetting!=AudioSampleRateSetting.PreserveSampleRate)throw new Exception("V87 SFX must preserve PCM and sample rate: "+entry.cue);if(entry.cue=="cat_happy_c"&&entry.bus!="cat")throw new Exception("Cat voice bus mismatch");}
+  SharedSourceValidation76.Validate();Debug.Log("SFX_V87_VALIDATED clips=34 pcm=34 mono=34 preserveMasterSampleRate=true decodedSampleRate="+Resources.Load<AudioClip>(data.clips[0].path).frequency);
+ }
+ public static void Windows(){Validate();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);string path=Path.GetFullPath("../../Builds/Sfx-v87/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(path));var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("SFX_V87_BUILD "+result.summary.result+" errors="+result.summary.totalErrors+" bytes="+result.summary.totalSize);if(result.summary.result!=BuildResult.Succeeded)throw new Exception("SFX build failed");}
+}

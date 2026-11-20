@@ -1,0 +1,42 @@
+using System;
+using System.IO;
+using System.Linq;
+
+namespace BounceGarden.LevelEditing {
+    /// <summary>Creates a new preloaded project without opening or modifying an existing workspace.</summary>
+    public static class FusionProjectExport {
+        public static string SaveNew(FusionSampleDefinition[] samples, string projectDirectory) {
+            if (samples == null || samples.Length == 0) throw new ArgumentException("至少需要一个外部样板。");
+            if (string.IsNullOrWhiteSpace(projectDirectory)) throw new ArgumentException("项目目录不能为空。");
+            string path = Path.GetFullPath(projectDirectory);
+            if (File.Exists(path) || Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any())
+                throw new IOException("目标目录已有内容；请使用新的独立项目目录。");
+            if (samples.Any(s => s == null || string.IsNullOrWhiteSpace(s.id)) || samples.Select(s => s.id).Distinct().Count() != samples.Length)
+                throw new ArgumentException("外部样板 ID 不能为空或重复。");
+            var workspace = LevelEditorWorkspace.CreateEmpty();
+            foreach (var sample in samples) {
+                var level = workspace.CreateFusionLevel("Alphabet", sample.name, sample.definition, sample.moves);
+                var guidance = level.TrySetFusionGuidance(sample.name, sample.focus, sample.id);
+                if (!guidance.Success) throw new ArgumentException(guidance.Message);
+                var errors = level.Validate().Where(i => i.IsError).ToArray();
+                if (errors.Length > 0) throw new ArgumentException(sample.id + ": " + string.Join(" | ", errors.Select(i => i.Message)));
+            }
+            var result = workspace.SaveWorkspace(path);
+            if (!result.Success) throw new IOException(result.Message);
+            return path;
+        }
+    }
+
+    public sealed partial class LevelEditorLevel {
+        public string FusionLesson => root.Text("lesson", "");
+        public string FusionFocus => root.Text("focus", "");
+        public OperationResult TrySetFusionGuidance(string lesson, string focus, string sampleId = null) {
+            if (!IsFusion) return OperationResult.Fail("仅融合关卡支持此说明接口。");
+            if ((lesson?.Length ?? 0) > 512 || (focus?.Length ?? 0) > 512) return OperationResult.Fail("关卡说明每项最多512字。");
+            return Edit(() => {
+                root.Set("lesson", lesson ?? ""); root.Set("focus", focus ?? "");
+                if (sampleId != null) root.Set("sampleId", sampleId);
+            });
+        }
+    }
+}

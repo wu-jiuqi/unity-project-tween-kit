@@ -1,0 +1,229 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    /// <summary>Isolated rule fixtures. Controlled ball placement and event injection are never natural-play evidence.</summary>
+    public static class FusionCoreQA
+    {
+        public static IEnumerator Run(GameSession session, Action<string, bool, string> check)
+        {
+            var fixtures = new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>[]
+            {
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("line-line", (g, c) => Combo(g, c, 1)),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("line-bomb", (g, c) => Combo(g, c, 2)),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("bomb-bomb", (g, c) => Combo(g, c, 3)),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("link identity", Link),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("adjacent mechanisms", AdjacentMechanisms),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("finite physical pierce", PhysicalPierce),
+                new KeyValuePair<string, Action<GameSession, Action<string, bool, string>>>("physical pierce gate", PhysicalPierceGate)
+            };
+            foreach (var fixture in fixtures)
+            {
+                try { fixture.Value(session, check); }
+                catch (Exception error) { check("core_rule_fixture " + fixture.Key + " executes", false, error.ToString()); }
+                session.StopLevel(); session.BoosterProfile = null;
+                yield return null;
+            }
+            foreach (string policy in FusionRules.PhysicsPolicies)
+            {
+                try { PhysicsPolicy(session, check, policy); }
+                catch (Exception error) { check("core_rule_fixture physics " + policy + " executes", false, error.ToString()); }
+                session.StopLevel(); session.BoosterProfile = null;
+                yield return null;
+            }
+        }
+
+        static FusionLevelDefinition Board(int hp = 1)
+        {
+            var definition = JsonUtility.FromJson<FusionLevelDefinition>(JsonUtility.ToJson(FusionSamples.CreateDefinitions()[0].definition));
+            definition.pieces = definition.pieces.Select(p => new FusionPieceDefinition
+                { id = "core_fixture_" + p.c + "_" + p.r, c = p.c, r = p.r, hp = hp, kind = "normal" }).ToArray();
+            definition.milestones = Array.Empty<FusionMilestoneDefinition>(); definition.refillBudget = 0;
+            Put(definition, "hold_goal", "fish", 0, 0, 99);
+            return definition;
+        }
+
+        static FusionPieceDefinition Put(FusionLevelDefinition board, string id, string kind, int c, int r, int hp = 1, int size = 1)
+        {
+            var p = FusionRules.DefaultPiece(kind, c, r); p.id = "core_qa_" + id; p.hp = hp; p.size = size;
+            board.pieces = board.pieces.Where(q => !(q.c < c + size && q.c + q.size > c && q.r < r + size && q.r + q.size > r)).Concat(new[] { p }).ToArray();
+            return p;
+        }
+
+        static void Start(GameSession game, FusionLevelDefinition board, string fixture)
+        {
+            game.StartFusionSample(board, 12, "QA core_rule_fixture " + fixture, 16103);
+            game.enabled = false; game.QAIgnoreFocusLoss = true; game.BoosterProfile = null;
+        }
+        static FusionRuntimePiece Piece(GameSession game, FusionPieceDefinition p) => game.FusionPieces.Single(q => q.Definition.id == p.id);
+        static void Step(GameSession game, int count) { for (int i = 0; i < count && game.IsPlaying && !game.CollectionVictoryPending; i++) game.QAAdvanceOneStep(); }
+        static void Hit(GameSession game, FusionRuntimePiece p, int damage = 1) => game.FusionRunAttack("qa:core_hit", 1, () => game.FusionHit(p, damage, Vector2.up, p.Position, true));
+        static BallBody[] Balls(GameSession game) => game.GetComponentsInChildren<BallBody>(true).Where(b => b.Active && b.SessionGeneration == game.Generation).OrderBy(b => b.Id).ToArray();
+        static void Assert(Action<string, bool, string> check, string name, bool ok, string detail = "") => check("core_rule_fixture " + name, ok, detail);
+
+        static void Combo(GameSession game, Action<string, bool, string> check, int rank)
+        {
+            var board = Board(99); var a = Put(board, "combo_a", rank == 3 ? "bomb" : "line_h", 4, 4);
+            var b = Put(board, "combo_b", rank == 1 ? "line_v" : "bomb", 5, 4);
+            var insideA = Put(board, "combo_inside_a", "fish", 2, rank == 1 ? 4 : rank == 2 ? 3 : 2, 99);
+            var insideB = Put(board, "combo_inside_b", "toy", rank == 1 ? 4 : rank == 2 ? 3 : 6, 2, 99);
+            var outside = Put(board, "combo_outside", "fish", rank == 3 ? 1 : 2, rank == 3 ? 1 : 2, 99);
+            Start(game, board, "combo " + rank);
+            var pa = Piece(game, a); var pb = Piece(game, b);
+            game.FusionRunAttack("qa:simultaneous_combo_contacts", 1, () =>
+            { game.FusionHit(pa, 1, Vector2.up, pa.Position, true); game.FusionHit(pb, 1, Vector2.up, pb.Position, true); });
+            Step(game, 12);
+            var activations = game.FusionEvents.Where(e => e.Kind == "ComboActivated").ToArray();
+            Assert(check, "combo " + rank + " atomically consumes both tools once", pa.Consumed && pb.Consumed
+                && activations.Length == 1 && activations[0].Amount == rank && !game.FusionEvents.Any(e => e.Kind == "ToolActivated"));
+            Assert(check, "combo " + rank + " matches its declared affected footprint", Piece(game, insideA).Consumed && Piece(game, insideB).Consumed
+                && Piece(game, outside).Alive && Piece(game, outside).Brick.CurrentHealth == 99);
+            Assert(check, "combo " + rank + " credits affected target identities once", game.FusionGoalsCredited == 2);
+        }
+
+        static void Link(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(99); var link = Put(board, "link", "link", 4, 7); var seed = Put(board, "link_seed", "normal", 4, 8, 1);
+            var a = Put(board, "link_goal_a", "fish", 4, 6, 5); var b = Put(board, "link_goal_b", "toy", 5, 6, 5);
+            Start(game, board, "link identity"); Hit(game, Piece(game, link)); Step(game, 8);
+            Assert(check, "link creates one real group with visible eligible members", game.FusionEvents.Count(e => e.Kind == "BondCreated") == 1
+                && game.FusionEvents.First(e => e.Kind == "BondCreated").Amount >= 3 && Piece(game, a).Alive && Piece(game, b).Alive);
+            game.FusionRunAttack("qa:link_member_and_external_target", 1, () =>
+            {
+                game.FusionHit(Piece(game, seed), 1, Vector2.up, Piece(game, seed).Position, true);
+                game.FusionRemove(Piece(game, a)); game.FusionRemove(Piece(game, a));
+            });
+            Step(game, 12);
+            Assert(check, "linked seed removal propagates through production queue", Piece(game, seed).Consumed && Piece(game, a).Consumed && Piece(game, b).Consumed);
+            Assert(check, "already collected link member never gets a second credit", game.FusionGoalsCredited == 2
+                && game.FusionEvents.Count(e => e.Kind == "GoalCredited" && e.TargetId == a.id + ":goal") == 1);
+        }
+
+        static void AdjacentMechanisms(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(); var berry = Put(board, "berry", "strawberry", 1, 2, 2); berry.ripenNeeds = 2;
+            var top = Put(board, "berry_neighbor_top", "normal", 1, 1); var right = Put(board, "berry_neighbor_right", "normal", 2, 2);
+            var cookieA = Put(board, "cookie_a", "cookie", 3, 4); Put(board, "cookie_b", "cookie", 4, 4); Put(board, "cookie_c", "cookie", 5, 4);
+            var basket = Put(board, "cookie_basket", "basket", 4, 5, 1, 2); basket.stock = 10; basket.bonusServings = 2;
+            var lemon = Put(board, "lemon", "lemon", 7, 7); var plain = Put(board, "lemon_plain", "normal", 6, 7, 2);
+            var fruit = Put(board, "lemon_goal_neighbor", "fish", 7, 6, 3); var protectedPlain = Put(board, "lemon_armor", "normal", 7, 8, 2); protectedPlain.armor = true;
+            Start(game, board, "adjacent mechanisms"); var strawberry = Piece(game, berry);
+            Hit(game, strawberry, 99);
+            Assert(check, "unripe strawberry blocks direct damage", strawberry.Alive && strawberry.Brick.CurrentHealth == 2);
+            game.FusionRunAttack("qa:ripening_and_damage_one_attack", 1, () =>
+            {
+                game.FusionRemove(Piece(game, top)); game.FusionRemove(Piece(game, right));
+                game.FusionHit(strawberry, 99, Vector2.up, strawberry.Position);
+            });
+            Assert(check, "two distinct neighbor clears ripen but cannot hit through old unripe state", strawberry.ClearedNeighbors.Count == 2
+                && strawberry.Alive && strawberry.Brick.CurrentHealth == 2);
+            Hit(game, strawberry, 2);
+            Assert(check, "independent later attack collects ripe strawberry once", strawberry.Consumed
+                && game.FusionEvents.Count(e => e.Kind == "GoalCredited" && e.TargetId == berry.id + ":goal") == 1);
+            Hit(game, Piece(game, cookieA)); Step(game, 20);
+            Assert(check, "connected cookie group breaks every member once", game.FusionPieces.Where(p => p.Definition.kind == "cookie").All(p => p.Consumed));
+            Assert(check, "one cookie group adds basket servings once despite two touching members", Piece(game, basket).Stock == 8,
+                "stock=" + Piece(game, basket).Stock);
+            Hit(game, Piece(game, lemon), 2); Step(game, 4);
+            Assert(check, "lemon adjacent burst damages ordinary exposed filler once", Piece(game, plain).Alive && Piece(game, plain).Brick.CurrentHealth == 1);
+            Assert(check, "lemon does not clear protected or goal-bearing neighbors", Piece(game, protectedPlain).Brick.ShellIntact
+                && Piece(game, fruit).Brick.CurrentHealth == 3);
+        }
+
+        static void PhysicsPolicy(GameSession game, Action<string, bool, string> check, string policy)
+        {
+            var board = Board(99); board.physicsPolicy = policy;
+            Start(game, board, "two real volleys " + policy);
+            bool first = game.TryShoot(Vector2.up);
+            for (int i = 0; i < 42; i++) { Park(game); Step(game, 1); }
+            bool second = game.TryShoot(Vector2.up);
+            for (int i = 0; i < 25; i++) { Park(game); Step(game, 1); }
+            var balls = Balls(game); var groups = balls.GroupBy(b => b.ChainBurstId).OrderBy(g => g.Key).ToArray();
+            Assert(check, policy + " creates two actual overlapping five-ball volleys", first && second && groups.Length == 2
+                && groups.All(g => g.Count() == 5) && game.SpawnCount == 10 && game.Shots == 10, "active=" + balls.Length + " groups=" + groups.Length);
+            if (groups.Length != 2 || groups[0].Count() < 2) return;
+            var sameA = groups[0].First(); var sameB = groups[0].Skip(1).First(); var cross = groups[1].First();
+            var ca = sameA.GetComponent<Collider2D>(); var cb = sameB.GetComponent<Collider2D>(); var cc = cross.GetComponent<Collider2D>();
+            bool expectedSame = policy == "no_ball_ball" || policy == "entry_protected";
+            bool expectedCross = policy != "legacy_all";
+            Assert(check, policy + " applies same-volley collision policy to real colliders", Physics2D.GetIgnoreCollision(ca, cb) == expectedSame);
+            Assert(check, policy + " applies cross-volley collision policy to real colliders", Physics2D.GetIgnoreCollision(ca, cc) == expectedCross);
+            if (policy == "entry_protected")
+            {
+                float below = CollectionLevels.Pitch * .5f + FlightGeometry.Radius + .12f;
+                sameA.ResumeChainFlight(ChainGridRules.Center(2, 8) + Vector2.down * below, Vector2.up * game.CurrentLevel.ballSpeed);
+                cross.ResumeChainFlight(ChainGridRules.Center(6, 8) + Vector2.down * below, Vector2.up * game.CurrentLevel.ballSpeed);
+                for (int i = 0; i < 7; i++) { Park(game, sameA, cross); Step(game, 1); }
+                Assert(check, "entry protection ends after both balls make real board contact", !Physics2D.GetIgnoreCollision(ca, cc)
+                    && game.FusionEvents.Any(e => e.SourceId == "ball:" + sameA.Id && e.Kind == "BodyDamaged")
+                    && game.FusionEvents.Any(e => e.SourceId == "ball:" + cross.Id && e.Kind == "BodyDamaged"));
+            }
+            var colliders = balls.Select(b => b.GetComponent<Collider2D>()).ToArray();
+            game.StopLevel();
+            bool restored = true;
+            for (int i = 0; i < colliders.Length; i++) for (int j = i + 1; j < colliders.Length; j++)
+                if (colliders[i] != null && colliders[j] != null && Physics2D.GetIgnoreCollision(colliders[i], colliders[j])) restored = false;
+            Assert(check, policy + " stop restores all pairwise collision overrides", restored);
+        }
+
+        static void Park(GameSession game, params BallBody[] excluded)
+        {
+            float y = (game.ReturnLineY + ChainGridRules.Center(0, 8).y) * .5f;
+            int index = 0;
+            foreach (var ball in Balls(game))
+            {
+                if (!excluded.Contains(ball)) ball.ResumeChainFlight(new Vector2(-3 + index * .6f, y), Vector2.right * game.CurrentLevel.ballSpeed);
+                index++;
+            }
+        }
+
+        static void PhysicalPierce(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(99); board.piercePerBall = 3; board.finiteBoosters = true; board.physicsPolicy = "no_ball_ball";
+            Start(game, board, "three physical passes and fourth bounce");
+            game.BoosterProfile = LocalProfile.CreateLevelEditorProfile(9, "stocked");
+            bool selected = game.SelectStreakBooster(StreakBooster.Pierce), shot = game.TryShoot(Vector2.up);
+            BallBody tracked = null; bool bouncedFourth = false;
+            var fourth = game.FusionPieces.Single(p => p.Definition.c == 4 && p.Definition.r == 5);
+            for (int i = 0; i < 180; i++)
+            {
+                var balls = Balls(game); if (tracked == null && balls.Length > 0) tracked = balls[0];
+                foreach (var other in balls) if (tracked != null && other != tracked) game.LoseBall(other, other.Body.position);
+                Step(game, 1);
+                if (tracked != null && tracked.Active && fourth.Brick.CurrentHealth < 99 && tracked.Body.linearVelocity.y < 0)
+                { bouncedFourth = true; break; }
+            }
+            int passes = tracked == null ? 0 : game.FusionEvents.Count(e => e.Kind == "PierceUsed" && e.TargetId == "ball:" + tracked.Id);
+            Assert(check, "finite Pierce uses actual selected inventory and physical ball", selected && shot && tracked != null);
+            Assert(check, "real ball spends exactly three penetration charges", passes == 3 && tracked != null && tracked.StreakPower == StreakBooster.None,
+                "passes=" + passes);
+            Assert(check, "fourth dense-lane brick causes ordinary bounce and one damage", bouncedFourth && fourth.Brick.CurrentHealth == 98,
+                "fourth HP=" + fourth.Brick.CurrentHealth + " bounced=" + bouncedFourth);
+        }
+
+        static void PhysicalPierceGate(GameSession game, Action<string, bool, string> check)
+        {
+            var board = Board(99); board.piercePerBall = 3;
+            var key = Put(board, "physical_gate_key", "key", 2, 8); var gate = Put(board, "physical_gate", "gate", 4, 8); gate.links = new[] { key.id };
+            Start(game, board, "physical Pierce gate"); game.BoosterProfile = LocalProfile.CreateLevelEditorProfile(9, "stocked");
+            bool selected = game.SelectStreakBooster(StreakBooster.Pierce), shot = game.TryShoot(Vector2.up);
+            BallBody tracked = null; bool bounced = false;
+            for (int i = 0; i < 100; i++)
+            {
+                var balls = Balls(game); if (tracked == null && balls.Length > 0) tracked = balls[0];
+                foreach (var other in balls) if (tracked != null && other != tracked) game.LoseBall(other, other.Body.position);
+                Step(game, 1);
+                if (tracked != null && tracked.Active && tracked.Body.linearVelocity.y < 0) { bounced = true; break; }
+            }
+            Assert(check, "real Pierce ball bounces at locked gate without spending charge", selected && shot && bounced && tracked != null
+                && game.FusionBallCharges(tracked) == 3 && Piece(game, gate).Alive
+                && !game.FusionEvents.Any(e => e.Kind == "PierceUsed" && e.TargetId == "ball:" + tracked.Id));
+            var behind = game.FusionPieces.Single(p => p.Definition.c == 4 && p.Definition.r == 7);
+            Assert(check, "locked gate prevents physical damage behind its footprint", behind.Brick.CurrentHealth == 99);
+        }
+    }
+}

@@ -1,0 +1,22 @@
+using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {public partial class AppUI {
+ void OpenAudioSettings(){
+  const float height=2050;OpenSettingsSheetC("声音设置",height,"audio",BuildPlayerSettings);modal.gameObject.AddComponent<SaveAudioMix71>();
+  CSettingsArt.Image(modal,"card_cream_wide",0,445,880,205,true);CSettingsArt.Image(modal,"icon_sound",-335,445,120,125);SettingsTextC("声音总开关",-65,445,390,80,48,true);
+  SettingsSwitch77.Create(modal,"声音总开关",315,445,()=>Profile.SoundEnabled,v=>{Profile.SoundEnabled=v;SoundService.SetMuted(!v);});
+  string[] names={"背景音乐","游戏音效与猫叫","鼓励语音"};
+  for(int i=0;i<3;i++){
+   int bus=i;float y=125-i*330;CSettingsArt.Image(modal,"card_cream_wide",0,y,880,270,true);
+   SettingsTextC(names[i],-130,y+62,540,70,45,true);var value=SettingsTextC("",330,y+62,150,60,34,false,true);
+   var root=UICraft.Root(modal,"Volume "+i,0,y-47,760,125);var touch=root.gameObject.AddComponent<Image>();touch.color=Color.clear;touch.raycastTarget=true;
+   var slider=root.gameObject.AddComponent<Slider>();slider.minValue=0;slider.maxValue=1;slider.wholeNumbers=false;
+   var track=CSettingsArt.Image(root,"toggle_track_off",0,0,740,20);track.preserveAspect=false;
+   var fillArea=UICraft.Root(root,"Fill area",0,0,740,20);var fill=CSettingsArt.Image(fillArea,"toggle_track_on",0,0,740,20);fill.preserveAspect=false;fill.rectTransform.anchorMin=Vector2.zero;fill.rectTransform.anchorMax=Vector2.one;fill.rectTransform.sizeDelta=Vector2.zero;
+   var handleArea=UICraft.Root(root,"Handle area",0,0,740,70);var handle=CSettingsArt.Image(handleArea,"toggle_knob",0,0,62,62);handle.rectTransform.sizeDelta=new Vector2(62,-8);
+   slider.fillRect=fill.rectTransform;slider.handleRect=handle.rectTransform;slider.targetGraphic=handle;root.gameObject.AddComponent<AudioSliderCommit76>();slider.direction=Slider.Direction.LeftToRight;slider.value=SoundService.BusVolume(i);value.text=Mathf.RoundToInt(slider.value*100)+"%";
+   slider.onValueChanged.AddListener(v=>{SoundService.SetBusVolume(bus,v);value.text=Mathf.RoundToInt(v*100)+"%";});
+  }
+  SettingsTextC("调整立即生效",0,-705,700,60,30,false,true);
+  CSettingsArt.Button(modal,"返回设置","返回设置",0,-865,860,155,()=>{SoundService.SaveMix();BuildPlayerSettings();});FitSettingsModal77(height);
+ }
+}}

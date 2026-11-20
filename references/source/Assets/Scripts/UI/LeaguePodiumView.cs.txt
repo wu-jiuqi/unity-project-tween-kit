@@ -1,0 +1,28 @@
+using System;
+using System.Linq;
+using UnityEngine;
+using TMPro;
+namespace BounceGarden {
+public sealed class LeaguePodiumView:MonoBehaviour {
+ sealed class Slot {public RectTransform root,portrait;public TMP_Text name,score;public string signature;}
+ readonly Slot[] slots=new Slot[3];public readonly string[] DisplayedIds=new string[3];
+ public static LeaguePodiumView Create(Transform parent,float y,float height,Action rewards){var root=UICraft.Root(parent,"League top three podium",0,y,1000,height);var view=root.gameObject.AddComponent<LeaguePodiumView>();view.Build(height,rewards);return view;}
+ void Build(float height,Action rewards){
+  int[] ranks={2,1,3};string[] caps={"button_lavender","button_yellow","button_blush"},chests={"chest_blue","chest_blush","chest_lavender"};
+  Color32[] colors={new Color32(192,198,249,255),new Color32(255,213,102,255),new Color32(255,182,132,255)};
+  for(int i=0;i<3;i++){
+   int rank=ranks[i];float raise=rank==1?38:0,baseY=-height/2+18,standHeight=height-226+raise,capY=baseY+standHeight;
+   var slot=UICraft.Root(transform,"Podium rank "+rank,(i-1)*335,0,300,height);var column=UICraft.Root(slot,"Fading podium column",0,baseY+standHeight/2,296,standHeight);var gradient=column.gameObject.AddComponent<LeagueTintGradient>();gradient.top=colors[i];gradient.bottom=new Color(colors[i].r/255f,colors[i].g/255f,colors[i].b/255f,0);gradient.raycastTarget=false;
+   var capRoot=UICraft.Root(slot,"Podium cap",0,capY,310,72);var cap=UICraft.Art(capRoot,"pastel/"+caps[i],0,0,310,72);LeagueSurface.Fit(cap,caps[i],310,64);
+   var portrait=UICraft.Root(slot,"Podium portrait",0,capY+105,192,192);
+   var badge=UICraft.Box(slot,"Podium rank badge",0,capY-6,78,78,colors[i],true);var number=UICraft.Label(badge.transform,rank.ToString(),0,0,70,70,49);number.color=Color.white;
+   UICraft.Art(badge.transform,"pastel/icon_crown",0,40,56,39);
+   var name=UICraft.Label(slot,"",0,capY-75,296,58,39);name.name="Podium name";
+   var pill=UICraft.Box(slot,"Podium medal capsule",0,capY-133,204,51,new Color32(255,251,238,230));UICraft.Art(pill.transform,"pastel/icon_medal",-60,0,42,42);var score=UICraft.Label(pill.transform,"",25,0,125,48,37);
+   var reward=UICraft.Button(slot,"",0,baseY+56,110,106,UICraft.Gold,rewards);reward.name="Podium reward "+rank;var visual=reward.transform.Find("ButtonVisual");foreach(Transform child in visual)child.gameObject.SetActive(false);UICraft.Art(visual,"pastel/"+chests[i],0,0,102,102);
+   slots[i]=new Slot{root=slot,portrait=portrait,name=name,score=score};slot.gameObject.AddComponent<LeagueJelly>().Play(i*.07f);
+  }
+ }
+ public void Bind(LeagueSnapshot snapshot,LocalProfile profile){int[] ranks={2,1,3};for(int i=0;i<3;i++){var e=snapshot.entries.FirstOrDefault(x=>x.rank==ranks[i]);var slot=slots[i];slot.root.gameObject.SetActive(e!=null);if(e==null){DisplayedIds[i]=null;continue;}DisplayedIds[i]=e.id;slot.name.text=e.name;slot.score.text=e.medals.ToString("N0");string signature=e.id+"|"+e.portrait+"|"+e.frame+(e.player?"|"+profile.EquippedAvatarId+"|"+profile.EquippedFrameId:"");if(signature==slot.signature)continue;slot.signature=signature;foreach(Transform child in slot.portrait){child.gameObject.SetActive(false);Destroy(child.gameObject);}LeaguePortrait.Create(slot.portrait,profile,e.portrait,0,0,192,e.player,e.frame);}}
+}
+}

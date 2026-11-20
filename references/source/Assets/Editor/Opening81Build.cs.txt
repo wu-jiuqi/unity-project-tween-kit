@@ -1,0 +1,18 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+
+public static class Opening81Build {
+ static void Validate(){Debug.Log("OPENING_DESIGN_CHECKS "+BounceGarden.OpeningCampaign.Validate());for(int i=0;i<16;i++){if(BounceGarden.OpeningYarnArt.Frame("yarn-layer-loss",i)==null||BounceGarden.OpeningYarnArt.Frame("yarn-unravel",i)==null)throw new Exception("Yarn sequence missing");}for(int r=0;r<4;r++)for(int c=0;c<6;c++){var s=BounceGarden.ChainCubeArt.Frame(r,c);if(s.rect.xMin<0||s.rect.yMin<0||s.rect.xMax>s.texture.width||s.rect.yMax>s.texture.height)throw new Exception("Container atlas rectangle");}Debug.Log("OPENING81_ASSETS_OK");}
+ public static void Windows(){Validate();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);Build(BuildTarget.StandaloneWindows64,"../../Builds/Opening-v81/Windows/BounceGarden.exe");}
+ public static void Android(){Validate();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;PlayerSettings.Android.useCustomKeystore=false;Build(BuildTarget.Android,"../../Builds/Opening-v81/Android/BounceGarden-v0.1.81-arm64.apk");}
+ public static void Check(){Validate();}
+ static void Build(BuildTarget target,string location){var root=new DirectoryInfo(Application.dataPath);while(root!=null&&!File.Exists(Path.Combine(root.FullName,"version.json")))root=root.Parent;if(root==null)throw new Exception("Workspace marker missing");var path=Path.Combine(root.FullName,location.Replace("../../",""));Directory.CreateDirectory(Path.GetDirectoryName(path));var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=target,options=BuildOptions.None});Debug.Log("OPENING81_BUILD "+target+" "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings);if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Opening81 build failed");}
+}
+public sealed class Opening81Importer:AssetPostprocessor {
+ public override int GetPostprocessOrder()=>32000;
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/YarnObstacleV2/")&&!assetPath.Contains("/Art/YarnObstacleV3/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.npotScale=TextureImporterNPOTScale.None;t.alphaSource=TextureImporterAlphaSource.FromInput;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.Uncompressed;foreach(var name in new[]{"Standalone","Android","WebGL"}){var p=t.GetPlatformTextureSettings(name);p.overridden=true;p.maxTextureSize=2048;p.format=name=="Android"||name=="WebGL"?TextureImporterFormat.ETC2_RGBA8:TextureImporterFormat.RGBA32;p.textureCompression=name=="Standalone"?TextureImporterCompression.Uncompressed:TextureImporterCompression.Compressed;t.SetPlatformTextureSettings(p);}}
+}

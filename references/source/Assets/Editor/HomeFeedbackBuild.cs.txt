@@ -1,0 +1,19 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+
+public static class HomeFeedbackBuild {
+ public static void Windows(){Build(BuildTarget.StandaloneWindows64,"BOUNCE_FEEDBACK_OUTPUT");}
+ public static void Android(){Build(BuildTarget.Android,"BOUNCE_APK_OUTPUT");}
+ static void Build(BuildTarget target,string env){
+  BuildEntry.Configure();BuildEntry.Rules();Debug.Log("PROFILE_TESTS "+BounceGarden.LocalProfile.RunSelfTests());Debug.Log("FEEDBACK_TESTS "+BounceGarden.LocalHomeFeedbackSource.RunSelfTests());
+  PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+  if(target==BuildTarget.StandaloneWindows64)PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  string path=Environment.GetEnvironmentVariable(env);if(string.IsNullOrEmpty(path))throw new Exception(env+" required");Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=target,locationPathName=path,options=BuildOptions.CompressWithLz4HC,extraScriptingDefines=new[]{"BOUNCE_TEST_TOOLS"}});
+  string summary="HOME_FEEDBACK_V13_BUILD "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings;Debug.Log(summary);File.WriteAllText(path+".build.txt",summary+"\nVersion=0.1.13(13) Test tools enabled; no automatic save clearing.\n");
+  if(report.summary.result!=BuildResult.Succeeded)throw new Exception(summary);
+ }
+}

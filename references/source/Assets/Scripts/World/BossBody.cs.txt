@@ -1,0 +1,84 @@
+using UnityEngine;
+
+namespace BounceGarden
+{
+    public static class BossArt
+    {
+        static Sprite[] frames;
+        public static Sprite Frame(int row, int frame)
+        {
+            if (frames == null)
+            {
+                var texture = Resources.Load<Texture2D>("Art/BossPudding/pudding-atlas");
+                if (texture == null) throw new System.InvalidOperationException("Pudding boss animation atlas missing");
+                frames = new Sprite[24];
+                int w = texture.width / 6, h = texture.height / 4;
+                for (int i = 0; i < frames.Length; i++)
+                {
+                    frames[i] = Sprite.Create(texture, new Rect(i % 6 * w, (3 - i / 6) * h, w, h), Vector2.one * .5f, 100, 0, SpriteMeshType.FullRect);
+                    frames[i].name = "pudding_" + i;
+                }
+            }
+            return frames[Mathf.Clamp(row, 0, 3) * 6 + Mathf.Clamp(frame, 0, 5)];
+        }
+    }
+
+    public sealed class BossBody : MonoBehaviour
+    {
+        public const float ActionDuration = .75f;
+        public const float DefeatDuration = 1.15f;
+        GameSession owner;
+        SpriteRenderer face, ghost;
+        BoxCollider2D hitbox;
+        float age;
+        public int AnimationRow { get; private set; }
+        public int AnimationFrame { get; private set; }
+        public SpriteRenderer Face => face;
+        public SpriteRenderer Telegraph => ghost;
+        public void Initialize(GameSession session, PhysicsMaterial2D material)
+        {
+            owner = session; gameObject.layer = 8;
+            transform.position = new Vector2(0, BossLevel.BossY);
+            hitbox = gameObject.AddComponent<BoxCollider2D>();
+            hitbox.size = new Vector2(2.34f, 1.90f);
+            hitbox.sharedMaterial = material;
+            face = NewRenderer(transform, "Pudding sequence frames", 24);
+            face.transform.localPosition = new Vector2(0, .5f);
+            var go = new GameObject("Next boss position preview"); go.transform.SetParent(transform.parent, false);
+            ghost = NewRenderer(go.transform, "Ghost", 9);
+            ghost.transform.localPosition = new Vector2(0, .5f);
+            ghost.color = new Color(1, 1, 1, .22f); ghost.gameObject.SetActive(false);
+            face.sprite = ghost.sprite = BossArt.Frame(0, 0);
+        }
+        static SpriteRenderer NewRenderer(Transform root, string name, int order)
+        {
+            var go = new GameObject(name); go.transform.SetParent(root, false);
+            var sr = go.AddComponent<SpriteRenderer>(); sr.sharedMaterial = WorldArt.BoardMaterial;
+            sr.sortingOrder = order; sr.sprite = BossArt.Frame(0, 0);
+            go.transform.localScale = Vector3.one * (3.12f / sr.sprite.bounds.size.x);
+            return sr;
+        }
+        public void Play(int row)
+        {
+            if (AnimationRow == 3) return;
+            // A stream of five hits must not continually restart the same first frame.
+            if (row == 1 && AnimationRow == 1) return;
+            AnimationRow = row; AnimationFrame = 0; age = 0;
+            face.sprite = BossArt.Frame(row, 0);
+        }
+        public void DisableCollision() { hitbox.enabled = false; }
+        void Update()
+        {
+            if (owner == null || owner.IsPaused || !owner.IsPlaying) return;
+            age += Time.deltaTime;
+            float fps = AnimationRow == 0 ? 8 : AnimationRow == 1 ? 18 : AnimationRow == 2 ? 8 : 6;
+            int f = Mathf.FloorToInt(age * fps);
+            if (AnimationRow == 0) f %= 6;
+            else if (f >= 6 && AnimationRow != 3) { AnimationRow = 0; age = 0; f = 0; }
+            AnimationFrame = Mathf.Min(5, f); face.sprite = BossArt.Frame(AnimationRow, AnimationFrame);
+            bool preview = owner.BossPhase > 1 && owner.BossShotCount >= 2 && !owner.BossActing && !owner.BossDefeating;
+            ghost.gameObject.SetActive(preview);
+            if (preview) ghost.transform.parent.position = owner.BossNextPosition;
+        }
+    }
+}

@@ -1,0 +1,18 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public sealed class CombatFeedback79Importer : AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.Contains("/CombatFeedback79/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.isReadable=false;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=1024;t.textureCompression=TextureImporterCompression.Compressed;}
+}
+public static class CombatFeedback79Build {
+ public static void Windows(){
+  OptimizationV76Build.Validate();Debug.Log(BounceGarden.LeagueRoundSelfTests.RunAll(Path.GetFullPath("../../BounceGarden/Evidence/CombatFeedback-v79/LeagueModel")));
+  BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  string output=Path.GetFullPath("../../Builds/CombatFeedback-v79/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));
+  var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=output,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+  Debug.Log("COMBAT_FEEDBACK_79_BUILD "+r.summary.result+" errors="+r.summary.totalErrors+" warnings="+r.summary.totalWarnings);if(r.summary.result!=BuildResult.Succeeded)throw new Exception("Combat feedback build failed");
+ }
+}

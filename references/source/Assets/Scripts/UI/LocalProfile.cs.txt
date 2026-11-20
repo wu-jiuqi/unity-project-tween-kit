@@ -1,0 +1,322 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden
+{
+    /// <summary>
+    /// Offline prototype profile. This is not an IAP receipt verifier, an ad SDK or a server wallet.
+    /// Each grant and its idempotency key are saved in the same serialized PlayerPrefs value.
+    /// The ledger is deliberately not evicted: evicting old keys would allow replayed grants.
+    /// </summary>
+    public sealed partial class LocalProfile
+    {
+        const string DefaultStorageKey = "BounceGarden.LocalProfile.v1";
+        // Opt-in process lifecycle tests use the same PlayerPrefs envelope and commit
+        // path with a separate key. The player's existing key is never cleared/migrated.
+        public static string PersistentTestKey {get{
+            var args=Environment.GetCommandLineArgs();int index=Array.IndexOf(args,"--qa-save-key");
+            if(Array.IndexOf(args,"--qa")<0||index<0||index+1>=args.Length)return null;
+            string suffix=args[index+1];if(suffix.Length<1||suffix.Length>80)throw new InvalidOperationException("Invalid test save key");
+            foreach(char c in suffix)if(!char.IsLetterOrDigit(c)&&c!='-')throw new InvalidOperationException("Invalid test save key");
+            return DefaultStorageKey+".QA."+suffix;
+        }}
+        static string StorageKey=>PersistentTestKey??DefaultStorageKey;
+        const int SchemaVersion = 2;
+        readonly bool memoryOnly;
+        IProfileStorage storage;
+        readonly HashSet<string> committed = new HashSet<string>(StringComparer.Ordinal);
+        bool soundEnabled = true;
+        bool storageHealthy = true;
+
+        [Serializable]
+        sealed class SavedProfile
+        {
+            public int schema = SchemaVersion;
+            public int coins = 400;
+            public int economyVersion, rescueLevel=-1, rescueFailures; public bool rescueReady;
+            public int campaignWinStreak,streakRoundLevel=-1;public string lastStreakWin="",streakRoundToken="";public int[] streakRoundTools=new int[4];
+            public int badges;
+            public int unlockedLevel;
+            public string campaignRoute="";public int alphabetUnlocked,legacyRouteUnlocked;public uint alphabetIntroductions,picnicIntroductions;public int picnicIntroRevision;public bool firstBounceComplete;public uint powerPractice;
+            public int[] boosters = new int[4], bestScores = new int[AlphabetCampaign.Count];
+            public bool soundEnabled = true;
+            public string[] committedKeys = new string[0];
+            public LeagueState league = new LeagueState();
+            public string[] ownedAvatars = new string[0], ownedFrames = new string[0];
+            public string equippedAvatar = "", equippedFrame = "";
+            public string equippedAvatarResource = "", equippedFrameResource = "";
+        }
+
+        public int Coins { get; private set; } = 400;
+        public int Badges { get; private set; }
+        public int UnlockedLevel { get; private set; }
+        public bool StorageHealthy { get { return storageHealthy; } }
+        public int CommittedTransactionCount { get { return committed.Count; } }
+
+        public bool SoundEnabled
+        {
+            get { return soundEnabled; }
+            set
+            {
+                if (soundEnabled == value) return;
+                soundEnabled = value;
+                Save();
+            }
+        }
+
+        /// <summary>Public construction is an isolated in-memory profile, useful for rule tests.</summary>
+        public LocalProfile(bool memoryOnly = true)
+        {
+            this.memoryOnly = memoryOnly;
+        }
+        public LocalProfile(IProfileStorage storage) { this.storage = storage ?? throw new ArgumentNullException(nameof(storage)); memoryOnly = false; }
+
+        public static LocalProfile Load()
+        {
+            if (RuntimeQA.IsIsolated&&PersistentTestKey==null) return new LocalProfile();
+            return Load(new PlayerPrefsProfileStorage(StorageKey));
+        }
+        public static LocalProfile Load(IProfileStorage storage)
+        {
+            var profile = new LocalProfile(storage);
+            try
+            {
+                if (storage.Exists) profile.Restore(storage.Read());
+            }
+            catch (Exception ex)
+            {
+                // Do not overwrite a damaged save with a fresh wallet and forget its grant ledger.
+                profile.storageHealthy = false;
+                Debug.LogError("Local profile could not be read. Grants are disabled to preserve the existing save. " + ex.Message);
+            }
+            return profile;
+        }
+
+        // Explicit test-menu action. Never DeleteAll: unrelated preferences and feedback have separate ownership.
+        public bool ResetForTesting()
+        {
+            if (!LocalTestTools.Available) return false;
+            string previous = Serialize();
+            try { boosters=new[]{0,1,1,1};bestScores=new int[AlphabetCampaign.Count];Coins=400;economyVersion=1;rescueLevel=-1;rescueFailures=0;rescueReady=false;Badges=0;UnlockedLevel=0;campaignRoute=AlphabetCampaign.Id;alphabetUnlocked=0;alphabetIntroductions=0;picnicIntroductions=0;firstBounceComplete=false;powerPractice=0;soundEnabled=true;committed.Clear();ResetCampaignStreak();committed.Add("streak-v70/migrated");ResetLeague();storageHealthy=true;SaveInternal();NotifyChanged();return true; }
+            catch(Exception ex) { Restore(previous);storageHealthy=false;Debug.LogWarning("Local test reset failed. "+ex.Message);return false; }
+        }
+
+        public bool CommitBase(string resultKey, int completedLevel)
+        {
+            if (!ValidKey(resultKey) || completedLevel < 0 || completedLevel == int.MaxValue) return false;
+            string key = resultKey + "/base";
+            return Commit(key, 20, 1, completedLevel + 1, true);
+        }
+
+        public bool CommitAdBonus(string resultKey)
+        {
+            if (!ValidKey(resultKey) || !committed.Contains(resultKey + "/base")) return false;
+            return Commit(resultKey + "/adBonus", 20, 0, UnlockedLevel);
+        }
+
+        public bool GrantPurchase(string transactionKey, int coins)
+        {
+            if (!ValidKey(transactionKey) || coins <= 0) return false;
+            return Commit(transactionKey + "/purchase", coins, 0, UnlockedLevel);
+        }
+
+        /// <summary>Checks are useful when an offline mock repeats a Completed callback.</summary>
+        public bool HasBaseReward(string resultKey)
+        {
+            return ValidKey(resultKey) && committed.Contains(resultKey + "/base");
+        }
+
+        public bool HasAdBonus(string resultKey)
+        {
+            return ValidKey(resultKey) && committed.Contains(resultKey + "/adBonus");
+        }
+
+        public bool HasPurchase(string transactionKey)
+        {
+            return ValidKey(transactionKey) && committed.Contains(transactionKey + "/purchase");
+        }
+
+        bool Commit(string key, int coinDelta, int badgeDelta, int unlockedLevel, bool victory = false)
+        {
+            if (!storageHealthy || committed.Contains(key)) return false;
+            if (coinDelta > int.MaxValue - Coins || badgeDelta > int.MaxValue - Badges) return false;
+
+            string previous = Serialize();
+            int oldBadges = Badges;
+            Coins += coinDelta;
+            Badges += badgeDelta;
+            UnlockedLevel = Math.Max(UnlockedLevel, unlockedLevel);
+            committed.Add(key);
+            try
+            {
+                if (badgeDelta > 0) LeagueEngine.Win(league, LeagueSettings, LeagueClock.UtcSeconds, oldBadges, Badges, victory);
+                SaveInternal();
+                NotifyChanged();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Keep the previous in-memory transaction state if persistence could not be completed.
+                Restore(previous);
+                storageHealthy = false;
+                Debug.LogError("Local reward save failed; further grants are disabled. " + ex.Message);
+                return false;
+            }
+        }
+
+        public void Save()
+        {
+            if (!storageHealthy) return;
+            try
+            {
+                SaveInternal();
+            }
+            catch (Exception ex)
+            {
+                storageHealthy = false;
+                Debug.LogError("Local profile save failed. " + ex.Message);
+            }
+        }
+
+        void SaveInternal()
+        {
+            if (memoryOnly) return;
+            // A single envelope avoids separately writing a new balance and an old transaction ledger.
+            // PlayerPrefs is a local prototype store, not a guarantee of disk atomicity or tamper resistance.
+            (storage ?? (storage = new PlayerPrefsProfileStorage(StorageKey))).Write(Serialize());
+        }
+
+        string Serialize()
+        {
+            var keys = new string[committed.Count];
+            committed.CopyTo(keys);
+            Array.Sort(keys, StringComparer.Ordinal);
+            var data = new SavedProfile
+            {
+                economyVersion=economyVersion,rescueLevel=rescueLevel,rescueFailures=rescueFailures,rescueReady=rescueReady,
+                campaignWinStreak=campaignWinStreak,lastStreakWin=lastStreakWin,streakRoundLevel=streakRoundLevel,streakRoundToken=streakRoundToken,streakRoundTools=(int[])streakRoundTools.Clone(),
+                boosters = (int[])boosters.Clone(), bestScores = (int[])bestScores.Clone(),
+                coins = Coins,
+                badges = Badges,
+                unlockedLevel = UnlockedLevel,
+                campaignRoute=campaignRoute,alphabetUnlocked=alphabetUnlocked,legacyRouteUnlocked=legacyRouteUnlocked,alphabetIntroductions=alphabetIntroductions,picnicIntroductions=picnicIntroductions,picnicIntroRevision=picnicIntroRevision,firstBounceComplete=firstBounceComplete,powerPractice=powerPractice,
+                soundEnabled = soundEnabled,
+                committedKeys = keys,
+                league = league,
+                ownedAvatars = ownedAvatars.ToArray(), ownedFrames = ownedFrames.ToArray(),
+                equippedAvatar = EquippedAvatarId, equippedFrame = EquippedFrameId,
+                equippedAvatarResource = EquippedAvatarResource, equippedFrameResource = EquippedFrameResource
+            };
+            return JsonUtility.ToJson(data);
+        }
+
+        void Restore(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) throw new InvalidOperationException("Empty profile.");
+            var data = JsonUtility.FromJson<SavedProfile>(json);
+            if (data == null || (data.schema != 1 && data.schema != SchemaVersion) || data.coins < 0 || data.badges < 0 ||
+                data.unlockedLevel < 0 || data.committedKeys == null)
+                throw new InvalidOperationException("Unsupported or invalid profile.");
+            var verified = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string key in data.committedKeys)
+            {
+                if (string.IsNullOrEmpty(key) || key.Length > 212 || !verified.Add(key))
+                    throw new InvalidOperationException("Invalid transaction ledger.");
+            }
+            RestoreSystems(data.boosters,data.bestScores);
+            RestoreEconomy(data.economyVersion,data.rescueLevel,data.rescueFailures,data.rescueReady);
+            RestoreStreak70(data.campaignWinStreak,data.lastStreakWin,data.streakRoundLevel,data.streakRoundToken,data.streakRoundTools);
+            Coins = data.coins;
+            Badges = data.badges;
+            UnlockedLevel = data.unlockedLevel;
+            campaignRoute=data.campaignRoute??"";alphabetUnlocked=Mathf.Clamp(data.alphabetUnlocked,0,AlphabetCampaign.Count);legacyRouteUnlocked=data.legacyRouteUnlocked;alphabetIntroductions=data.alphabetIntroductions&4095u;picnicIntroductions=data.picnicIntroductions&511u;picnicIntroRevision=data.picnicIntroRevision;firstBounceComplete=data.firstBounceComplete;powerPractice=data.powerPractice&7u;
+            soundEnabled = data.soundEnabled;
+            committed.Clear();
+            foreach (string key in verified) committed.Add(key);
+            league = data.schema == 1 ? new LeagueState() : data.league;
+            // JsonUtility expands an inline null period into an empty object on reload.
+            if(league!=null&&league.current!=null&&string.IsNullOrEmpty(league.current.id)&&league.current.startsAt==0&&league.current.endsAt==0&&league.current.lastObserved==0&&league.current.elapsed==0&&(league.current.rivals==null||league.current.rivals.Length==0))league.current=null;
+            LeagueEngine.Validate(league);
+            ownedAvatars = new List<string>(data.schema == 1 ? new string[0] : data.ownedAvatars ?? throw new InvalidOperationException("Missing avatars"));
+            ownedFrames = new List<string>(data.schema == 1 ? new string[0] : data.ownedFrames ?? throw new InvalidOperationException("Missing frames"));
+            EquippedAvatarId = data.equippedAvatar ?? ""; EquippedFrameId = data.equippedFrame ?? "";
+            EquippedAvatarResource = data.equippedAvatarResource ?? ""; EquippedFrameResource = data.equippedFrameResource ?? "";
+            if ((!string.IsNullOrEmpty(EquippedAvatarId) && !ownedAvatars.Contains(EquippedAvatarId)) || (!string.IsNullOrEmpty(EquippedFrameId) && !ownedFrames.Contains(EquippedFrameId))) throw new InvalidOperationException("Unowned equipped cosmetic");
+        }
+
+        static bool ValidKey(string key)
+        {
+            return !string.IsNullOrWhiteSpace(key) && key.Length <= 200;
+        }
+
+        /// <summary>In-memory checks only. Does not read or modify the player's PlayerPrefs.</summary>
+        public static string RunSelfTests()
+        {
+            int checks = 0;
+            Action<bool, string> check = (passed, description) =>
+            {
+                checks++;
+                if (!passed) throw new InvalidOperationException("Profile test failed: " + description);
+            };
+            var p = new LocalProfile();
+            check(p.Coins == 400 && p.Badges == 0 && p.UnlockedLevel == 0, "initial profile");
+            check(!p.CommitAdBonus("round-a"), "bonus cannot precede base reward");
+            check(p.CommitBase("round-a", 0), "first base grant accepted");
+            check(p.Coins == 420 && p.Badges == 1 && p.UnlockedLevel == 1, "base values");
+            check(!p.CommitBase("round-a", 5), "duplicate base rejected before progression update");
+            check(p.UnlockedLevel == 1 && p.Coins == 420, "duplicate does not advance or grant");
+            check(LocalMockServices.ResolveAd(p, "round-a", MockOutcome.Cancelled) == MockOutcome.Cancelled && p.Coins == 420, "cancelled ad grants nothing");
+            check(LocalMockServices.ResolveAd(p, "round-a", MockOutcome.Failed) == MockOutcome.Failed && p.Coins == 420, "failed ad grants nothing");
+            check(LocalMockServices.ResolveAd(p, "round-a", MockOutcome.Completed) == MockOutcome.Completed && p.Coins == 440, "completed ad grants increment");
+            check(LocalMockServices.ResolveAd(p, "round-a", MockOutcome.Completed) == MockOutcome.Completed && p.Coins == 440, "duplicate completed ad remains idempotent");
+            check(LocalMockServices.ResolvePurchase(p, "purchase-a", 1000, MockOutcome.Cancelled) == MockOutcome.Cancelled && p.Coins == 440, "cancelled purchase grants nothing");
+            check(LocalMockServices.ResolvePurchase(p, "purchase-a", 1000, MockOutcome.Failed) == MockOutcome.Failed && p.Coins == 440, "failed purchase grants nothing");
+            check(LocalMockServices.ResolvePurchase(p, "purchase-a", 1000, MockOutcome.Completed) == MockOutcome.Completed && p.Coins == 1440, "completed mock purchase");
+            check(!p.GrantPurchase("purchase-a", 100000), "purchase replay rejected");
+            check(!p.GrantPurchase("negative", -10), "negative purchase rejected");
+            check(!p.GrantPurchase("overflow", int.MaxValue), "overflow rejected");
+            check(!p.CommitBase("", 0) && !p.CommitBase("invalid", -1), "invalid result rejected");
+            p.SoundEnabled = false;
+            var restored = new LocalProfile();
+            restored.Restore(p.Serialize());
+            check(restored.Coins == p.Coins && restored.Badges == 1 && !restored.SoundEnabled, "serialized state restored");
+            check(!restored.CommitBase("round-a", 0) && !restored.CommitAdBonus("round-a") && !restored.GrantPurchase("purchase-a", 1000), "ledger survives reload");
+            check(restored.CommitBase("round-b", 2) && restored.Coins == 1460 && restored.Badges == 2 && restored.UnlockedLevel == 3, "new result remains valid after reload");
+            return "PASS: " + checks + " local profile / mock transaction checks (memory only).";
+        }
+    }
+
+    public enum MockOutcome
+    {
+        Completed,
+        Cancelled,
+        Failed
+    }
+
+    /// <summary>
+    /// Explicit synchronous local outcomes chosen by the demo UI. No ads, billing,
+    /// accounts, network calls, automatic timers or background callbacks are present.
+    /// </summary>
+    public static class LocalMockServices
+    {
+        public static MockOutcome ResolveAd(LocalProfile profile, string resultKey, MockOutcome outcome)
+        {
+            if (outcome != MockOutcome.Completed) return outcome;
+            if (profile == null) return MockOutcome.Failed;
+            return profile.CommitAdBonus(resultKey) || profile.HasAdBonus(resultKey)
+                ? MockOutcome.Completed : MockOutcome.Failed;
+        }
+
+        public static MockOutcome ResolvePurchase(LocalProfile profile, string transactionKey, int coins, MockOutcome outcome)
+        {
+            if (outcome != MockOutcome.Completed) return outcome;
+            if (profile == null) return MockOutcome.Failed;
+            return profile.GrantPurchase(transactionKey, coins) || profile.HasPurchase(transactionKey)
+                ? MockOutcome.Completed : MockOutcome.Failed;
+        }
+    }
+}
+
+
+

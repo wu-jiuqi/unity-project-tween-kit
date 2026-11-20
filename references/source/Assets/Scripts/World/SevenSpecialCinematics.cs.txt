@@ -1,0 +1,38 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+// Reserved source bricks are shown as complete portraits until the shared release.
+public sealed class SevenWindup:MonoBehaviour {
+ GameSession owner;int generation;float age,duration;Action release;readonly List<Transform> actors=new List<Transform>();bool wasPaused;
+ public bool IsConversion {get;private set;}
+ public int ActorCount=>actors.Count;
+ public Vector2[] ActorPositions=>actors.Select(a=>(Vector2)a.position).ToArray();
+ public bool ActorsEmphasized=>actors.Count>0&&actors.All(a=>a.localScale.x>1.02f&&a.localScale.y>1.02f);
+ public static void PlayCopies(GameSession game,Transform root,int kind,int color,IReadOnlyList<Vector2> positions,Action done,IReadOnlyList<bool> ingots=null){var fx=new GameObject("Converted specials simultaneous local windup").AddComponent<SevenWindup>();fx.transform.SetParent(root,false);fx.owner=game;fx.generation=game.Generation;fx.duration=.20f;fx.release=done;fx.IsConversion=true;SoundService.Play("special_windup");for(int i=0;i<positions.Count;i++)fx.Add(kind,color,positions[i],ingots!=null&&ingots[i]);game.CombatFeel?.EmphasizeSpecial(fx.duration+.04f);}
+ public static void Play(GameSession game,Transform root,int kind,int color,Vector2 position,int partnerKind,int partnerColor,Vector2 partnerPosition,Action done,bool ingot=false,bool partnerIngot=false){var fx=new GameObject("Special slow-motion jelly windup").AddComponent<SevenWindup>();fx.transform.SetParent(root,false);fx.owner=game;fx.generation=game.Generation;fx.duration=partnerKind==0?.14f:.18f;fx.release=done;SoundService.Play(partnerKind==0?"special_windup":"special_combo_windup");fx.Add(kind,color,position,ingot);if(partnerKind!=0)fx.Add(partnerKind,partnerColor,partnerPosition,partnerIngot);game.CombatFeel?.EmphasizeSpecial(fx.duration+.08f);}
+ void Add(int kind,int color,Vector2 position,bool ingot=false){var root=new GameObject("Complete bouncing source brick").transform;root.SetParent(transform,false);root.position=position;var image=new GameObject("Baked portrait").AddComponent<SpriteRenderer>();image.transform.SetParent(root,false);image.sprite=SevenSpecialArt.Special(kind,color);image.color=Color.white;image.sortingOrder=94;if(ingot)OpeningThirdArt.Fit(image,"ingot",OpeningThirdArt.Variant(kind),owner.Board.CellWidth);else SevenSpecialArt.FitBaked(image,owner.Board.CellWidth);actors.Add(root);}
+ void Update(){if(BalanceClock.Active)return;Advance(Time.unscaledDeltaTime);}
+ public void Advance(float dt){if(owner==null||owner.Generation!=generation){Destroy(gameObject);return;}if(owner.IsPaused){wasPaused=true;return;}if(wasPaused){owner.CombatFeel?.EmphasizeSpecial(duration-age+.05f);wasPaused=false;}age+=owner.PresentationDelta(dt);float t=Mathf.Clamp01(age/duration);
+  // Source bricks remain at their original anchors and rebound at 1.22x.
+  // Single specials never freeze the game.
+  float scale=t<.25f?Mathf.Lerp(1,1.22f,1-Mathf.Pow(1-t/.25f,3)):t<.55f?1.22f:Mathf.Lerp(1.22f,1,Mathf.SmoothStep(0,1,(t-.55f)/.45f));
+  float wobble=t>.55f?Mathf.Sin((t-.55f)/.45f*Mathf.PI*4)*.12f*(1-t):Mathf.Sin(t*Mathf.PI*4)*.04f;
+  foreach(var actor in actors)actor.localScale=new Vector3(scale+wobble,scale-wobble,1);
+   if(age<duration)return;var action=release;release=null;gameObject.SetActive(false);Destroy(gameObject);action?.Invoke();}
+}
+// Actual target sprites spiral inward; their logical reward/health settlement is separate.
+public sealed class SevenSuctionFx:MonoBehaviour {
+ static readonly Dictionary<GameSession,int> alive=new Dictionary<GameSession,int>();
+ GameSession owner;int generation;Vector2 start,center;Vector3 scale;SpriteRenderer image;float age,duration;Action done;
+ public static int Alive(GameSession game)=>alive.TryGetValue(game,out int n)?n:0;
+ static SevenSuctionFx Create(GameSession game,Transform root,float duration){var effect=new GameObject("Five-flower inward suction").AddComponent<SevenSuctionFx>();effect.transform.SetParent(root,false);effect.owner=game;effect.generation=game.Generation;effect.duration=duration;alive[game]=Alive(game)+1;return effect;}
+ public static void Pull(GameSession game,Transform root,BrickBody brick,Vector2 center,bool whole){var source=brick.Face;if(!source.enabled)source=brick.GetComponentsInChildren<SpriteRenderer>().Where(r=>r.enabled&&r.sprite!=null).OrderByDescending(r=>r.sortingOrder).FirstOrDefault();if(source==null||source.sprite==null)return;var effect=Create(game,root,.58f);effect.start=source.transform.position;effect.center=center;effect.image=effect.gameObject.AddComponent<SpriteRenderer>();effect.image.sprite=source.sprite;effect.image.sharedMaterial=SevenSpecialArt.Material(source.sprite);effect.image.color=new Color(1,1,1,whole?1:.55f);effect.image.sortingOrder=86;effect.scale=source.transform.lossyScale*(whole?1:.42f);effect.transform.position=effect.start;effect.transform.localScale=effect.scale;}
+ public static void PullTool(GameSession game,Transform root,ChainTool tool,Vector2 center){var effect=Create(game,root,.58f);effect.start=tool.Position;effect.center=center;effect.image=effect.gameObject.AddComponent<SpriteRenderer>();effect.image.sprite=SevenSpecialArt.Special(tool.Kind,tool.ColorIndex);effect.image.color=Color.white;effect.image.sortingOrder=86;if(tool.Ingot)OpeningThirdArt.Fit(effect.image,"ingot",OpeningThirdArt.Variant(tool.Kind),game.Board.CellWidth);else SevenSpecialArt.FitBaked(effect.image,game.Board.CellWidth);effect.scale=effect.transform.localScale;effect.transform.position=effect.start;}
+ public static void After(GameSession game,Transform root,float duration,Action done){Create(game,root,duration).done=done;}
+ void Update(){if(BalanceClock.Active)return;Advance(Time.unscaledDeltaTime);}
+ public void Advance(float dt){if(owner==null||owner.Generation!=generation){Destroy(gameObject);return;}if(owner.IsPaused)return;age+=owner.PresentationDelta(dt);float t=Mathf.Clamp01(age/duration);if(image!=null){var delta=start-center;float angle=t*t*4.4f;float c=Mathf.Cos(angle),s=Mathf.Sin(angle);var rotated=new Vector2(delta.x*c-delta.y*s,delta.x*s+delta.y*c);transform.position=center+rotated*Mathf.Pow(1-t,1.55f);transform.localScale=scale*Mathf.Pow(1-t,.7f);transform.rotation=Quaternion.Euler(0,0,t*210);var color=image.color;color.a=Mathf.Min(color.a,(1-t)*6);image.color=color;}if(age<duration)return;var action=done;done=null;if(BalanceClock.Active){OnDestroy();owner=null;gameObject.SetActive(false);}Destroy(gameObject);action?.Invoke();}
+ void OnDestroy(){if(!ReferenceEquals(owner,null)&&alive.TryGetValue(owner,out int n)){if(n<=1)alive.Remove(owner);else alive[owner]=n-1;}}
+}
+}

@@ -1,0 +1,33 @@
+using UnityEngine;
+namespace BounceGarden {
+// Runs after combat feedback queues the impact. Physics and the HUD stay fixed.
+[DefaultExecutionOrder(20000)]
+public sealed class CameraJuice:MonoBehaviour {
+ public GameSession Owner;
+ float left,duration=.20f,amplitude,episodeUntil;
+ Vector3 rest;Camera cameraView;
+ public Vector3 WorldOffset=>transform.parent==null?transform.localPosition-rest:transform.parent.TransformVector(transform.localPosition-rest);
+ public bool Active=>left>0;
+ void Awake(){rest=transform.localPosition;cameraView=GetComponent<Camera>();}
+ public void ImpactScreen(float screenHeightFraction,float seconds){Impact(screenHeightFraction*cameraView.orthographicSize*2,seconds);}
+ public void Impact(float strength=.12f,float seconds=.20f){
+  if(Owner==null||!Owner.IsPlaying||Owner.IsPaused||!FeedbackProfile.Active.enabledFeedback||!FeedbackProfile.Active.screenShake)return;
+  float limit=cameraView.orthographicSize*2*.0042f;strength=Mathf.Clamp(strength,0,limit);
+  // Repeated impulses coalesce without extending the shake forever.
+  if(left>0){amplitude=Mathf.Max(amplitude,strength);if(strength>=amplitude*.9f&&left<duration*.5f&&Time.unscaledTime<episodeUntil-.08f)left=Mathf.Min(duration*.7f,episodeUntil-Time.unscaledTime);return;}
+  amplitude=strength;duration=Mathf.Clamp(seconds,.18f,.34f);left=duration;episodeUntil=Time.unscaledTime+.40f;
+ }
+ public void ResetImpact(){left=0;amplitude=0;transform.localPosition=rest;}
+ public static Vector3 StableScreenToWorld(Camera view,Vector3 screen){var p=view.ScreenToWorldPoint(screen);var shake=view.GetComponent<CameraJuice>();return shake==null?p:p-shake.WorldOffset;}
+ void LateUpdate(){
+  if(Owner==null||!Owner.IsPlaying||Owner.IsPaused||!FeedbackProfile.Active.enabledFeedback||!FeedbackProfile.Active.screenShake||left<=0){ResetImpact();return;}
+  float t=1-left/duration,envelope=Mathf.Exp(-3*t)*(1-t),phase=t*Mathf.PI;
+  // Soft compression and one small rebound, with no instant sideways kick.
+  transform.localPosition=rest+new Vector3(Mathf.Sin(phase*2)*.32f,Mathf.Sin(phase*2.8f)*.82f,0)*amplitude*envelope;
+  left=Mathf.Max(0,left-Time.unscaledDeltaTime);
+ }
+ void OnApplicationFocus(bool focus){if(!focus)ResetImpact();}
+ void OnApplicationPause(bool pause){if(pause)ResetImpact();}
+ void OnDisable(){ResetImpact();}
+}
+}

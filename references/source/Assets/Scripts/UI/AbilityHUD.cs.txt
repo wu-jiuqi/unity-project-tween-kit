@@ -1,0 +1,26 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+public sealed class AbilityHUD:MonoBehaviour {
+ GameSession session;Button activate;TMP_Text caption,tip;readonly Button[] choices=new Button[3];readonly Image[] icons=new Image[3];readonly TMP_Text[] labels=new TMP_Text[3];
+ public void Initialize(GameSession owner){
+  session=owner;
+  activate=UICraft.Button(transform,"激活",-220,760,420,76,UICraft.Green,()=>session.ActivateAbility(),28);caption=activate.GetComponentInChildren<TMP_Text>();
+  var panel=UICraft.Box(transform,"Ability hint panel",0,695,970,50,new Color32(255,249,237,245));
+  tip=UICraft.Label(panel.transform,session.CurrentLevel.note,0,0,920,48,22,UICraft.Ink);
+  for(int i=0;i<3;i++){int ix=i;float x=(i-1)*306;
+   choices[i]=UICraft.Button(transform,"Choice "+i,x,-970,286,142,UICraft.Blue,()=>session.SelectAbility(ix),25);
+   labels[i]=choices[i].GetComponentInChildren<TMP_Text>();labels[i].rectTransform.anchoredPosition=new Vector2(32,0);labels[i].rectTransform.sizeDelta=new Vector2(170,100);
+   icons[i]=UICraft.Box(choices[i].transform,"Ability ball icon",-78,0,106,106,Color.white);icons[i].preserveAspect=true;
+  }
+  session.StateChanged+=Refresh;Refresh();
+ }
+ void Refresh(){if(session==null)return;activate.interactable=session.AbilityAvailable;
+  caption.text=session.ActiveBalls==0?"发射一颗毛线球":session.AbilityAvailable?"点击："+AbilityArt.Names[(int)ActiveKind()]:"能力已使用";
+  for(int i=0;i<3;i++){bool show=i<session.ChoiceCount;choices[i].gameObject.SetActive(show);if(!show)continue;var kind=session.Choice(i);icons[i].sprite=AbilityArt.Ball(kind,0);labels[i].text=(i==session.SelectedSlot?"> ":"")+AbilityArt.Names[(int)kind];choices[i].interactable=session.IsPlaying&&!session.IsPaused&&session.ActiveBalls==0;}
+ }
+ BallAbility ActiveKind(){foreach(var b in session.GetComponentsInChildren<BallBody>())if(b.Active&&!b.AbilityUsed)return b.Ability;return session.SelectedAbility;}
+ void OnDestroy(){if(session!=null)session.StateChanged-=Refresh;}
+}
+}

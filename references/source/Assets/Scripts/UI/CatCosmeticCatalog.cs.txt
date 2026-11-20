@@ -1,0 +1,44 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace BounceGarden {
+// One measured layout for every avatar/frame pairing. Saved reward IDs and old
+// resource paths are resolved at display time, without rewriting the save.
+public static class CatCosmeticCatalog {
+ [Serializable] public sealed class Asset {public string resource;}
+ [Serializable] public sealed class Layout {public string frameId;public float scale,offsetX,offsetY;public int unfilledHolePixels,outsideFrameLeakPixels;}
+ [Serializable] public sealed class Item {public string id,breed,frameName;public Asset avatar,frame;public Layout[] layouts;}
+ [Serializable] sealed class Catalog {public Item[] items;}
+ static Catalog catalog;
+ static readonly Dictionary<string,Sprite> sprites=new Dictionary<string,Sprite>();
+ public static Item[] Items {get{if(catalog==null){var text=Resources.Load<TextAsset>("Art/CatCosmeticsV3/catalog");if(text==null)throw new InvalidOperationException("Missing cat cosmetic catalog");catalog=JsonUtility.FromJson<Catalog>(text.text);if(catalog?.items==null||catalog.items.Length==0)throw new InvalidOperationException("Empty cat cosmetic catalog");}return catalog.items;}}
+ public static Item Default=>Items[0];
+ static string Key(string value){value=value??"";return value.StartsWith("Art/",StringComparison.Ordinal)?value.Substring(4):value;}
+ public static Item FindAvatar(string resource){
+  string key=Key(resource);if(key.StartsWith("LeagueV1/",StringComparison.Ordinal))key=key.Substring(9);
+  switch(key){case "flower-cat-v1":case "reward_avatar":case "avatar_luna":key="02_ragdoll";break;case "avatar_mochi":key="09_exotic_shorthair";break;case "avatar_sunny":key="04_maine_coon";break;case "avatar_clover":key="08_scottish_fold";break;case "avatar_poppy":key="03_siamese";break;case "HomeV7/garden_avatar":case "pastel/cat_avatar":key="01_british_shorthair";break;}
+  foreach(var item in Items)if(item.id==key||Key(item.avatar.resource)==key)return item;return null;
+ }
+ public static Item FindFrame(string resource){string key=Key(resource);if(key=="LeagueV1/reward_frame"||key=="reward_frame"||key=="flower-frame-v1")key="02_ragdoll";if(key=="HomeV7/garden_frame"||key=="pastel/avatar_ring")key=Default.id;foreach(var item in Items)if(item.id==key||Key(item.frame.resource)==key)return item;return null;}
+ public static Layout Pair(Item avatar,Item frame){foreach(var layout in avatar.layouts)if(layout.frameId==frame.id)return layout;throw new InvalidOperationException("Missing cosmetic layout "+avatar.id+"/"+frame.id);}
+ public static Sprite Sprite(string resource){if(!sprites.TryGetValue(resource,out var sprite)){sprite=Resources.Load<Sprite>(resource);if(sprite==null)throw new InvalidOperationException("Missing cosmetic sprite "+resource);sprites.Add(resource,sprite);}return sprite;}
+ public static RectTransform Create(Transform parent,string avatarResource,string frameResource,float x,float y,float size){
+  var avatar=FindAvatar(avatarResource)??Default;
+  var frame=string.IsNullOrEmpty(frameResource)?avatar:FindFrame(frameResource)??Default;
+  var layout=Pair(avatar,frame);
+  var root=UICraft.Root(parent,"Cat cosmetic portrait",x,y,size,size);
+  var marker=root.gameObject.AddComponent<CatCosmeticPortrait>();marker.AvatarId=avatar.id;marker.FrameId=frame.id;
+  Layer(root,"Avatar",Sprite(avatar.avatar.resource),layout.scale,layout.offsetX,-layout.offsetY);
+  Layer(root,"Frame",Sprite(frame.frame.resource),1,0,0);
+  return root;
+ }
+ static void Layer(RectTransform parent,string name,Sprite sprite,float scale,float x,float y){
+  var rt=UICraft.Root(parent,name,0,0,0,0);var center=new Vector2(.5f+x,.5f+y);var half=new Vector2(scale*.5f,scale*.5f);rt.anchorMin=center-half;rt.anchorMax=center+half;rt.offsetMin=rt.offsetMax=Vector2.zero;
+  var image=rt.gameObject.AddComponent<Image>();image.sprite=sprite;image.type=Image.Type.Simple;image.preserveAspect=true;image.raycastTarget=false;
+ }
+ public static string Validate(){int pairs=0;foreach(var item in Items){Sprite(item.avatar.resource);Sprite(item.frame.resource);foreach(var frame in Items){var layout=Pair(item,frame);if(layout.scale<=0||layout.scale>1||layout.unfilledHolePixels!=0||layout.outsideFrameLeakPixels!=0)throw new InvalidOperationException("Invalid cosmetic coverage");pairs++;}}if(Items.Length!=10||pairs!=100)throw new InvalidOperationException("Incomplete cosmetic collection");return "PASS: 20 cosmetic sprites, 100 measured pairs";}
+}
+public sealed class CatCosmeticPortrait:MonoBehaviour {public string AvatarId,FrameId;}
+}

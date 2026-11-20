@@ -1,0 +1,4 @@
+using System.IO;using UnityEditor;using UnityEditor.Build.Reporting;using UnityEngine;
+public static class StreakRewardV74Build {
+ public static void Windows(){BuildEntry.Configure();PlayerSettings.bundleVersion="0.1.74";var output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/StreakReward-v74/Windows/BounceGarden.exe"));Directory.CreateDirectory(Path.GetDirectoryName(output));var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=output,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("STREAK_REWARD_V74_BUILD "+r.summary.result+" errors="+r.summary.totalErrors);if(r.summary.result!=BuildResult.Succeeded)throw new System.Exception("v74 build failed");}
+}

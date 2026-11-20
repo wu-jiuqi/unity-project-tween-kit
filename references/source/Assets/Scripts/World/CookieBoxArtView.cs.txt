@@ -1,0 +1,27 @@
+using System;
+using UnityEngine;
+
+namespace BounceGarden {
+/// <summary>Visual adapter only: one renderer for the entire 2x2 box. Caller owns gameplay and collection.</summary>
+[ExecuteAlways,DisallowMultipleComponent,RequireComponent(typeof(SpriteRenderer))]
+public sealed class CookieBoxArtView:MonoBehaviour {
+ [SerializeField,Range(0,8)] int remaining=8;
+ [SerializeField] bool opened=true;
+ SpriteRenderer image;
+ public int Remaining=>remaining;
+ public bool Opened=>opened;
+ public const int GridSize=2;
+ public static Vector2 CollisionSize=>Vector2.one*(GridSize*CollectionLevels.Pitch);
+ public void SetState(int count,bool open=true){
+  if(count<0||count>8)throw new ArgumentOutOfRangeException(nameof(count),"Use a whole-box state with 0–8 biscuits");
+  remaining=count;opened=open;Render();
+ }
+ void OnEnable(){Render();}
+ void Render(){
+  if(image==null)image=GetComponent<SpriteRenderer>();
+  // Scale the renderer's child, not this grid / collider transform.
+  // The prefab uses this component on a visual child of one rigid 2x2 root.
+  SecondGroupArt.Apply(image,SecondGroupArt.BoxKey(remaining,opened),SecondGroupArt.Data.boxBody);image.sortingOrder=62;
+ }
+}
+}

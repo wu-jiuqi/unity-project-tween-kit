@@ -1,0 +1,65 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using UnityEngine;
+
+namespace BounceGarden {
+[Serializable] public sealed class BalanceGoal {
+ public string kind,color; public int required,collected;
+}
+[Serializable] public sealed class BalanceLaunch {
+ public int number,scoreBefore,scoreAfter,remainingShots,goalsBefore,goalsAfter,hits,breaks,specials,combos;
+ public string booster,endReason; public bool overlapsPrevious;
+ public float activeSeconds;
+}
+[Serializable] public sealed class BalanceRound {
+ public string id,startedUtc,endedUtc,version,configHash,configJson,outcome,continuedFrom;
+ public string mode="campaign",randomState="not_captured";
+ public int strategyVersion;public StrategyRound strategy;
+ public int level,attempt,configAttempt,initialShots,usedShots,remainingShots,continuedShots;
+ public int score,damageScore,breakScore,objectiveScore,otherScore,completionBonus;
+ // Phase breakdown is an alternative partition, not extra points on top.
+ public int playScore,victoryClearScore;public bool hasSettlementBreakdown;
+ public int hits,breaks,initialSpecials,generatedSpecials,activatedSpecials,remainingSpecials,combos;
+ public int streakTier,continues,boostedVolleys,consumedBoosters,omittedLaunches;
+ public float activeSeconds;
+ public BalanceGoal[] goals=Array.Empty<BalanceGoal>();
+ public List<BalanceLaunch> launches=new List<BalanceLaunch>();
+ public bool Assisted=>streakTier>0||boostedVolleys>0||continues>0||consumedBoosters>0;
+}
+[Serializable] public sealed class BalanceHistory {
+ public int schema=1,droppedRounds; public List<BalanceRound> rounds=new List<BalanceRound>();
+ public List<BalanceAttempt> attempts=new List<BalanceAttempt>();
+ public BalanceRound active;
+}
+[Serializable] public sealed class BalanceAttempt {public int level,count;public string configHash;}
+[Serializable] public sealed class BalanceExport {
+ public int schema=1; public string exportedUtc,scoreRules,launchSemantics;
+ public int droppedRounds; public bool hasActive; public BalanceRound[] rounds; public BalanceRound active;
+}
+// Pure aggregation. Different configurations, instrumentation versions and assistance groups never share a sample.
+public static class BalanceReport {
+ public static string Hash(string value){using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(value))).Replace("-","").ToLowerInvariant();}
+ public static string Group(BalanceRound r)=>r.level+"/"+r.configHash+"/strategy="+r.strategyVersion+"/"+(r.strategyVersion==2?r.strategy?.engineHash:"")+"/"+(r.Assisted?"assisted":"unassisted");
+ public static string Outcome(string value){switch(value){case "win":return "胜利";case "loss":return "失败";case "restarted":return "重开";case "abandoned":return "退出";case "interrupted":return "中断";default:return "进行中";}}
+ public static string Csv(object value)=>"\""+Convert.ToString(value,CultureInfo.InvariantCulture).Replace("\"","\"\"")+"\"";
+ public static string RoundsCsv(IEnumerable<BalanceRound> rounds){
+  var text=new StringBuilder("局ID,关卡,配置指纹,版本,结果,开始UTC,同配置挑战次数,辅助,初始步数,使用步数,剩余步数,有效秒数,总分,伤害分,击碎分,目标分,其他分,步数奖励,特殊砖触发,组合次数,续关次数,目标明细,操作阶段分,通关清场奖励,阶段拆分可用\n");
+  foreach(var r in rounds){var values=new object[]{r.id,r.level,r.configHash,r.version,r.outcome,r.startedUtc,r.configAttempt,r.Assisted,r.initialShots,r.usedShots,r.remainingShots,r.activeSeconds,r.score,r.damageScore,r.breakScore,r.objectiveScore,r.otherScore,r.completionBonus,r.activatedSpecials,r.combos,r.continues,string.Join(";",r.goals.Select(g=>g.kind+"/"+g.color+":"+g.collected+"/"+g.required)),r.playScore,r.victoryClearScore,r.hasSettlementBreakdown};text.AppendLine(string.Join(",",values.Select(Csv)));}return text.ToString();
+ }
+ public static string SummaryCsv(IEnumerable<BalanceRound> rounds){
+  var text=new StringBuilder("关卡,配置指纹,辅助,总局数,胜利,失败,重开,退出,中断,胜率分母_胜负局,胜率,胜局用步中位数,胜局剩余步中位数,胜局分数中位数,失败目标完成率中位数,建议\n");
+  foreach(var group in rounds.GroupBy(Group).OrderBy(g=>g.First().level)){
+   var all=group.ToArray();var wins=all.Where(r=>r.outcome=="win").ToArray();var losses=all.Where(r=>r.outcome=="loss").ToArray();int resolved=wins.Length+losses.Length;
+   string advice=resolved<5?"样本不足，继续试玩": "人工复核布局与用步后调整；不自动改关";
+   var first=all[0];var values=new object[]{first.level,first.configHash,first.Assisted,all.Length,wins.Length,losses.Length,all.Count(r=>r.outcome=="restarted"),all.Count(r=>r.outcome=="abandoned"),all.Count(r=>r.outcome=="interrupted"),resolved,resolved==0?"":((double)wins.Length/resolved).ToString("F3",CultureInfo.InvariantCulture),Median(wins.Select(r=>(double)r.usedShots)),Median(wins.Select(r=>(double)r.remainingShots)),Median(wins.Select(r=>(double)r.score)),Median(losses.Where(r=>r.goals.Sum(g=>g.required)>0).Select(r=>r.goals.Sum(g=>(double)Math.Min(g.required,g.collected))/r.goals.Sum(g=>g.required))),advice};
+   text.AppendLine(string.Join(",",values.Select(Csv)));
+  }return text.ToString();
+ }
+ public static string Median(IEnumerable<double> values){var sorted=values.OrderBy(v=>v).ToArray();if(sorted.Length==0)return "";int n=sorted.Length;return ((sorted[(n-1)/2]+sorted[n/2])*.5).ToString("0.##",CultureInfo.InvariantCulture);}
+ public static string Json(BalanceHistory history)=>JsonUtility.ToJson(new BalanceExport{exportedUtc=DateTime.UtcNow.ToString("o"),scoreRules=$"damage={ScoreRules.Damage};break={ScoreRules.Break};objective={ScoreRules.Objective};spareShot={ScoreRules.SpareShot};cap={ScoreRules.Cap}",launchSemantics="strategyVersion=2 adds independent causal group events, shot timing, estimated targets and local calibration; legacy absent strategy fields mean not collected. Intervals end on next launch or board settlement; overlapping volleys are not causal per-ball attribution. Objective score follows existing ScoreImpact rules, not all actual collection events. Current campaign includes post-win special clearing. When hasSettlementBreakdown=true, playScore + victoryClearScore + completionBonus = score. This phase partition is separate from damage/break/objective/other; do not sum the two partitions. Older records without this flag have no recorded phase partition. Read active only when hasActive=true (Unity may serialize null inline objects as empty objects).",droppedRounds=history.droppedRounds,hasActive=history.active!=null,rounds=history.rounds.ToArray(),active=history.active},true);
+}
+}

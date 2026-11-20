@@ -1,0 +1,16 @@
+using System;
+using BounceGarden;
+public static class AlphabetProfileTests {
+ sealed class Memory:IProfileStorage {public string Json;public bool Fail;public bool Exists=>Json!=null;public string Read()=>Json;public void Write(string json){if(Fail)throw new Exception("simulated storage failure");Json=json;}}
+ public static int Run(){int checks=0;Action<bool,string> test=(value,label)=>{checks++;if(!value)throw new Exception("Alphabet profile: "+label);};
+  var storage=new Memory();var legacy=LocalProfile.Load(storage);legacy.CommitBase("v37-old-win",53);legacy.GrantPurchase("old-wallet",100);int coins=legacy.Coins,badges=legacy.Badges;
+  var profile=LocalProfile.Load(storage);test(profile.EnsureAlphabetRoute(),"migration saves");test(profile.AlphabetUnlocked==0&&profile.UnlockedLevel==54&&profile.Coins==coins&&profile.Badges==badges,"legacy wallet and route record survive");
+  test(profile.MarkAlphabetIntro(1)&&profile.MarkAlphabetIntro(12),"first and last tutorial persist");test(profile.CommitAlphabetWin("alphabet-v38/A",0),"A rewards committed");profile=LocalProfile.Load(storage);
+  test(profile.EnsureAlphabetRoute()&&profile.AlphabetUnlocked==1&&profile.HasAlphabetIntro(1)&&profile.HasAlphabetIntro(12)&&!profile.HasAlphabetIntro(2),"restart retains independent progress and tutorial bits");
+  test(profile.Coins==coins+20&&profile.Badges==badges+1&&profile.UnlockedLevel==54,"new campaign rewards preserve legacy progress");test(profile.CommitAlphabetWin("alphabet-v38/A",0)&&profile.Coins==coins+20,"restart does not duplicate reward");
+  test(profile.CommitAlphabetWin("alphabet-v38/Z",25)&&!profile.AlphabetCompleted&&profile.AlphabetUnlocked==26,"level 26 keeps the campaign open");
+  test(profile.CommitAlphabetWin("opening-v87/final",AlphabetCampaign.Count-1)&&profile.AlphabetCompleted&&profile.AlphabetUnlocked==AlphabetCampaign.Count,"final opening stage completes the campaign");
+  storage.Fail=true;int before=profile.Coins;test(!profile.CommitAlphabetWin("alphabet-v38/fail",3)&&profile.Coins==before,"failed durable write rolls back wallet");storage.Fail=false;profile=LocalProfile.Load(storage);test(profile.AlphabetCompleted&&!profile.HasBaseReward("alphabet-v38/fail"),"failed commit cannot leak into durable ledger");
+  return checks;
+ }
+}

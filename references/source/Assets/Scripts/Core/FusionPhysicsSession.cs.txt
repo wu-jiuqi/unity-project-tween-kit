@@ -1,0 +1,82 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public sealed partial class GameSession {
+ sealed class FusionBallBudget {public int Pierce,Bomb,Super;public bool Entered;public float LastBomb=-100;}
+ readonly Dictionary<int,FusionBallBudget> fusionBallBudgets=new Dictionary<int,FusionBallBudget>();
+ readonly List<Tuple<Collider2D,Collider2D>> fusionIgnoredPairs=new List<Tuple<Collider2D,Collider2D>>();
+ void ConfigureFusionBall(BallBody ball){if(!FusionActive)return;fusionBallBudgets[ball.Id]=new FusionBallBudget{Pierce=FusionDefinition.piercePerBall,Bomb=FusionDefinition.bombPerBall,Super=FusionDefinition.superPerBall};var view=ball.GetComponent<FusionBallBudgetView>()??ball.gameObject.AddComponent<FusionBallBudgetView>();view.Initialize(this,ball);TickFusionPhysics();}
+ void ClearFusionPhysics(){foreach(var pair in fusionIgnoredPairs)if(pair.Item1!=null&&pair.Item2!=null)Physics2D.IgnoreCollision(pair.Item1,pair.Item2,false);fusionIgnoredPairs.Clear();fusionBallBudgets.Clear();fusionQueuedTools.Clear();fusionEarliestTool.Clear();}
+ void TickFusionPhysics(){
+  if(!FusionActive)return;var balls=active.Values.Where(b=>b.Active).ToArray();
+  for(int i=0;i<balls.Length;i++)for(int j=i+1;j<balls.Length;j++){
+   var a=balls[i];var b=balls[j];bool ignore=FusionDefinition.physicsPolicy=="no_ball_ball"||FusionDefinition.physicsPolicy=="same_volley_only"&&a.ChainBurstId!=b.ChainBurstId;
+   if(FusionDefinition.physicsPolicy=="entry_protected")ignore=!fusionBallBudgets.TryGetValue(a.Id,out var sa)||!sa.Entered||!fusionBallBudgets.TryGetValue(b.Id,out var sb)||!sb.Entered;
+   var ca=a.GetComponent<Collider2D>();var cb=b.GetComponent<Collider2D>();int existing=fusionIgnoredPairs.FindIndex(p=>p.Item1==ca&&p.Item2==cb||p.Item1==cb&&p.Item2==ca);
+   if(ignore&&existing<0){Physics2D.IgnoreCollision(ca,cb,true);fusionIgnoredPairs.Add(Tuple.Create(ca,cb));}
+   else if(!ignore&&existing>=0&&(a.Body.position-b.Body.position).sqrMagnitude>Mathf.Pow(FlightGeometry.Radius*2+.02f,2)){Physics2D.IgnoreCollision(ca,cb,false);fusionIgnoredPairs.RemoveAt(existing);}
+  }
+  for(int i=fusionIgnoredPairs.Count-1;i>=0;i--){var pair=fusionIgnoredPairs[i];if(pair.Item1==null||pair.Item2==null){fusionIgnoredPairs.RemoveAt(i);continue;}var a=pair.Item1.GetComponent<BallBody>();var b=pair.Item2.GetComponent<BallBody>();if(a==null||b==null||!a.Active||!b.Active){Physics2D.IgnoreCollision(pair.Item1,pair.Item2,false);fusionIgnoredPairs.RemoveAt(i);}}
+ }
+ public bool FusionPierceAvailable(BallBody ball)=>!FusionActive||!FusionDefinition.finiteBoosters||fusionBallBudgets.TryGetValue(ball.Id,out var budget)&&budget.Pierce>0;
+ public bool FusionPierceBlocked(BrickBody brick)=>FusionActive&&brick!=null&&fusionBricks.TryGetValue(brick.Id,out var piece)&&(piece.Definition.kind=="gate"||piece.Definition.kind=="stone");
+ public void FusionConsumePierce(BallBody ball){if(!FusionActive||!FusionDefinition.finiteBoosters)return;if(fusionBallBudgets.TryGetValue(ball.Id,out var budget)&&budget.Pierce>0){budget.Pierce--;FusionRecord("PierceUsed","ball:"+ball.Id,1);if(budget.Pierce==0)ball.SetStreakBooster(StreakBooster.None);}}
+ public int FusionBallCharges(BallBody ball){if(!FusionActive||!FusionDefinition.finiteBoosters)return -1;if(!fusionBallBudgets.TryGetValue(ball.Id,out var b))return 0;return ball.StreakPower==StreakBooster.Pierce?b.Pierce:ball.StreakPower==StreakBooster.Bomb?b.Bomb:ball.StreakPower==StreakBooster.Super?b.Super:0;}
+ public void HitFusionBallAndPower(BrickBody brick,BallBody ball,Vector2 point){
+  if(!FusionActive||!IsPlaying||IsPaused||ball==null||!ball.Active||ball.SessionGeneration!=Generation)return;
+  if(fusionBallBudgets.TryGetValue(ball.Id,out var budget))budget.Entered=true;
+  FusionRunAttack("ball:"+ball.Id,ball.ChainBurstId,()=>{HitBrick(brick,ball,point);TriggerFusionBooster(ball,point);});
+ }
+ void HitFusionBrick(BrickBody brick,BallBody ball,Vector2 contact){
+  if(!fusionBricks.TryGetValue(brick.Id,out var p))return;
+  if(fusionAttack==null){FusionRunAttack("ball:"+ball.Id,ball.ChainBurstId,()=>HitFusionBrick(brick,ball,contact));return;}
+  bool alive=p.Alive;FusionHit(p,1,ball.IncomingDirection,contact,true);
+  if(alive&&!p.Alive)RecordChainLiveBreak(ball);
+  if(fusionBallBudgets.TryGetValue(ball.Id,out var budget))budget.Entered=true;
+ }
+ int FusionSuperRange=>FusionDefinition.finiteBoosters?FusionDefinition.superRange:9;
+ bool FusionBoosterUseful(Vector2 center,bool bomb){
+  bool CanAdvance(FusionRuntimePiece p,FusionPreState pre){
+   if(!p.Alive||!pre.Enabled||pre.Unripe||p.Definition.kind=="stone"||p.Definition.kind=="gate")return false;
+   if(pre.Protected)return !fusionAttack.GateHits.Contains(p.Definition.id)&&FusionProtected(p);
+   if(fusionAttack.GateHits.Contains(p.Definition.id))return false;
+   if(p.Tool!=null)return !fusionQueuedTools.Contains(p.Definition.id)&&(!fusionEarliestTool.TryGetValue(p.Definition.id,out int earliest)||FusionCurrentVolley>=earliest);
+   if(new[]{"producer","cannon","reward","assistant"}.Contains(p.Definition.kind)&&p.Stock<=0)return false;
+   return p.Definition.kind!="battery";
+  }
+  if(bomb)return fusionAttack.Snapshot.Any(pair=>fusionPieces.TryGetValue(pair.Key,out var p)&&CanAdvance(p,pair.Value)&&Mathf.Abs(pair.Value.Position.x-center.x)<=CollectionLevels.Pitch*(1.5f+(pair.Value.Size-1)*.5f)&&Mathf.Abs(pair.Value.Position.y-center.y)<=CollectionLevels.Pitch*(1.5f+(pair.Value.Size-1)*.5f));
+  foreach(var direction in new[]{Vector2.up,Vector2.right,Vector2.down,Vector2.left}){
+   float limit=FusionRayLimit(center,direction,FusionSuperRange);var hits=new List<Tuple<FusionRuntimePiece,FusionPreState,float>>();
+   foreach(var pair in fusionAttack.Snapshot){
+    if(!fusionPieces.TryGetValue(pair.Key,out var p))continue;float distance;
+    if(p.Tool!=null){distance=Along(pair.Value.Position,center,direction,limit,.38f);if(float.IsPositiveInfinity(distance))continue;}
+    else if(!FusionSnapshotRayEntry(pair.Value.Position,pair.Value.Size,center,direction,limit,out distance,out _))continue;
+    hits.Add(Tuple.Create(p,pair.Value,distance));
+   }
+   foreach(var hit in hits.OrderBy(h=>h.Item3).ThenBy(h=>h.Item1.Definition.id,StringComparer.Ordinal)){
+    if(CanAdvance(hit.Item1,hit.Item2))return true;
+    if(hit.Item2.Protected||hit.Item2.Unripe||!hit.Item2.Enabled||new[]{"stone","gate","snowball","snowdrift"}.Contains(hit.Item1.Definition.kind))break;
+   }
+  }return false;
+ }
+ void TriggerFusionBooster(BallBody ball,Vector2 point){
+  if(!FusionActive||ball==null||!ball.Active||IsPaused||CollectionVictoryPending||ball.StreakProcStep==PhysicsStep)return;
+  if(ball.StreakPower!=StreakBooster.Bomb&&ball.StreakPower!=StreakBooster.Super)return;
+  if(fusionAttack==null){FusionRunAttack("ball:"+ball.Id,ball.ChainBurstId,()=>TriggerFusionBooster(ball,point));return;}
+  if(!fusionBallBudgets.TryGetValue(ball.Id,out var budget))return;bool bomb=ball.StreakPower==StreakBooster.Bomb;
+  if(FusionDefinition.finiteBoosters&&(bomb?budget.Bomb<=0:budget.Super<=0))return;
+  if(bomb&&simulationClock-budget.LastBomb<.12f)return;
+  int c=Mathf.Clamp(Mathf.RoundToInt(point.x/CollectionLevels.Pitch)+4,0,8),r=Mathf.Clamp(Mathf.RoundToInt((CollectionLevels.Top-point.y)/CollectionLevels.Pitch),0,8);var center=ChainGridRules.Center(c,r);
+  bool useful=FusionBoosterUseful(center,bomb);
+  if(!useful)return;
+  ball.StreakProcStep=PhysicsStep;var power=ball.StreakPower;
+  if(bomb){budget.Bomb--;budget.LastBomb=simulationClock;StreakExplosions++;FusionArea(center,1,2);}
+  else{budget.Super--;StreakLasers++;foreach(var d in new[]{Vector2.up,Vector2.right,Vector2.down,Vector2.left})FusionRay(center,d,FusionSuperRange,2);}
+  PlayStreakImpact(power,center);SoundService.Play(bomb?"bomb":"cross_laser");FusionRecord("BoosterProc","ball:"+ball.Id,1);
+  if(FusionDefinition.finiteBoosters&&(bomb?budget.Bomb<=0:budget.Super<=0))ball.SetStreakBooster(StreakBooster.None);
+ }
+}
+}

@@ -1,0 +1,12 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class VictoryBombArt {
+ static readonly Dictionary<int,Sprite[]> cache=new Dictionary<int,Sprite[]>();
+ public static Sprite Frame(int colors,int frame){colors=Mathf.Clamp(colors,1,5);if(colors==2)return SevenSpecialArt.Frame("combo-bomb",frame);
+  if(!cache.TryGetValue(colors,out var frames)){string key=colors==1?"single-burst":"bomb-"+colors+"-colors";var t=Resources.Load<Texture2D>("Art/VictoryFinaleV1/"+key);if(t==null)throw new System.InvalidOperationException("Victory bomb frames missing: "+key);frames=new Sprite[16];float w=t.width/4f,h=t.height/4f;for(int i=0;i<16;i++){frames[i]=Sprite.Create(t,new Rect(i%4*w,(3-i/4)*h,w,h),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);frames[i].name=key+"-"+i;}cache[colors]=frames;}
+  return frames[Mathf.Clamp(frame,0,15)];
+ }
+ public static void FrameMaterial(Material material,Sprite sprite){var t=sprite.texture;var r=sprite.rect;material.SetVector("_UvRect",new Vector4(r.x/t.width,r.y/t.height,r.width/t.width,r.height/t.height));}
+}
+}

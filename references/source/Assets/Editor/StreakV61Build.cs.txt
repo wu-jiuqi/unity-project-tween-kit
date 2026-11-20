@@ -1,0 +1,9 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class StreakV61Build {
+ public static void Windows(){AssetDatabase.Refresh();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);string p=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/Streak-v61/Windows/BounceGarden.exe"));Directory.CreateDirectory(Path.GetDirectoryName(p));var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=p,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("STREAK_V61_BUILD "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings);if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Streak trial build failed");}
+}

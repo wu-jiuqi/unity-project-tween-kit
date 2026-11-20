@@ -1,0 +1,47 @@
+using System;
+using System.Collections;
+using System.Globalization;
+using System.IO;
+using UnityEngine;
+namespace BounceGarden {
+// Isolated measurements only. The trajectory starts at the first observed sample,
+// not an asserted reconstruction of the original game's hidden launch instant.
+public sealed class Round4Audit:MonoBehaviour {
+ string directory;AppUI app;StreamWriter trace;float zero;BallBody tracked;
+ public static string ContactFile;public static float ContactZero;
+ static string F(float n)=>n.ToString("F6",CultureInfo.InvariantCulture);
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){var args=Environment.GetCommandLineArgs();if(Array.IndexOf(args,"--round4-audit")>=0)new GameObject("Round4 isolated audit").AddComponent<Round4Audit>();}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();int i=Array.IndexOf(args,"--qa-out");directory=i>=0?args[i+1]:Path.Combine(Application.persistentDataPath,"Round4Audit");Directory.CreateDirectory(directory);
+  yield return new WaitForSecondsRealtime(1);app=FindFirstObjectByType<AppUI>();
+  yield return Capture("home");app.QANavigate("shop");yield return new WaitForSecondsRealtime(.5f);yield return Capture("shop");app.QANavigate("ranking");yield return new WaitForSecondsRealtime(.5f);yield return Capture("ranking");app.QANavigate("home");yield return null;
+  app.QAStartLevel(2);yield return new WaitForSecondsRealtime(1);app.Session.SetPaused(true);foreach(var mechanism in FindObjectsByType<MovingObstacle>(FindObjectsSortMode.None))mechanism.QAResetPose();Physics2D.SyncTransforms();yield return Capture("round27-initial");ExportBounds();app.Session.SetPaused(false);
+  ContactFile=Path.Combine(directory,"contacts.csv");File.WriteAllText(ContactFile,"time_s,ball_id,target,point_x,point_y,normal_x,normal_y,pre_vx,pre_vy,post_vx,post_vy\n");
+  foreach(bool feedback in new[]{true,false}){
+   FeedbackProfile.Active.enabledFeedback=feedback;app.QAStartLevel(2);yield return new WaitForSecondsRealtime(.8f);UnityEngine.Random.InitState(20261026);
+   float angle=27.2262f*Mathf.Deg2Rad;Vector2 direction=new Vector2(-Mathf.Sin(angle),Mathf.Cos(angle));app.Session.TryShoot(direction);yield return new WaitForFixedUpdate();
+   tracked=null;foreach(var b in FindObjectsByType<BallBody>(FindObjectsSortMode.None))if(b.Active&&b.Id==1)tracked=b;
+   if(tracked==null)throw new Exception("Calibration first ball missing");
+   var point=(Vector2)Camera.main.ScreenToWorldPoint(new Vector3(219.42f,1280-922.63f,0));tracked.Initialize(1,app.Session.Generation,point,direction*app.Session.CurrentLevel.ballSpeed,app.Session.CurrentLevel.gravity);
+   tracked.gameObject.AddComponent<Round4ContactProbe>();zero=Time.fixedTime;ContactZero=zero;
+   trace=new StreamWriter(Path.Combine(directory,feedback?"trajectory-on.csv":"trajectory-off.csv"));trace.WriteLine("time_s,ball_id,x_px,y_px,world_x,world_y,vx,vy");WriteSample();
+   for(int step=0;step<28;step++){yield return new WaitForFixedUpdate();if(tracked.Active)WriteSample();}
+   trace.Dispose();trace=null;
+  }
+  FeedbackProfile.Active.enabledFeedback=true;ContactFile=null;
+  app.QAStartLevel(2);yield return new WaitForSecondsRealtime(.8f);app.Session.TryShoot(Vector2.up);yield return new WaitForSecondsRealtime(.55f);app.Session.TryShoot(new Vector2(-.45f,.89f));yield return new WaitForSecondsRealtime(.7f);yield return Capture("round27-live");
+  app.QAStartLevel(0);yield return new WaitForSecondsRealtime(.8f);app.QAResult(true);foreach(float time in new[]{.6f,1.5f,2.9f,3.25f,3.6f,4.3f,4.7f,5.2f}){var v=FindFirstObjectByType<VictoryPresentation>();while(v!=null&&v.Elapsed<time)yield return null;yield return Capture("victory-"+time.ToString("F2",CultureInfo.InvariantCulture));}
+  app.QANavigate("home");yield return AlphaSheets();File.WriteAllText(Path.Combine(directory,"audit-info.txt"),"Displayed geometry and pose screenshots; victory is a non-granting visual preview. Mechanism pose reset to its configured phase for static bounds. Trajectory fixture begins at source PTS3.083 first observed point; gravity unchanged; source launch time is not asserted. Alpha sheets are diagnostic overlays.\nFixedDelta="+F(Time.fixedDeltaTime)+"\nResolution="+Screen.width+"x"+Screen.height+"\n");
+  yield return null;Application.Quit();
+ }
+ void WriteSample(){var b=tracked.Body;var p=Camera.main.WorldToScreenPoint(b.position);trace.WriteLine(F(Time.fixedTime-zero)+","+tracked.Id+","+F(p.x)+","+F(Screen.height-p.y)+","+F(b.position.x)+","+F(b.position.y)+","+F(b.linearVelocity.x)+","+F(b.linearVelocity.y));}
+ void ExportBounds(){File.WriteAllText(Path.Combine(directory,"runtime-level.json"),JsonUtility.ToJson(app.Session.CurrentLevel,true));using(var output=new StreamWriter(Path.Combine(directory,"visual-bounds.csv"))){output.WriteLine("name,center_x_px,center_y_px,width_px,height_px");foreach(var r in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None)){if(r.name!="Pinwheel"&&r.name!="ElectricPillar"&&r.name!="Paddle"&&r.name!="Barrel"&&r.name!="Face")continue;var a=Camera.main.WorldToScreenPoint(r.bounds.min);var b=Camera.main.WorldToScreenPoint(r.bounds.max);output.WriteLine(r.name+","+F((a.x+b.x)/2)+","+F(Screen.height-(a.y+b.y)/2)+","+F(b.x-a.x)+","+F(b.y-a.y));}}}
+ IEnumerator AlphaSheets(){string[] keys={"home_background_empty","home_hero_group","victory_cake","victory_partyhat","victory_confetti","anticipate","celebrate","settle","logo_backing","logo_letter_B","logo_star_O","logo_letters_UNCE","logo_letters_BUSTERS","coin_single","coin_pile","badge_spade","settings_gold","home_nav","home_simple","ad_tv","shop_row","ranking_row","ranking_row_selected","tab_cyan","tab_purple","tab_orange","well_done"};var canvas=FindFirstObjectByType<Canvas>();for(int sheet=0;sheet<3;sheet++){var root=UICraft.Root(canvas.transform,"Round4 alpha diagnostic");for(int col=0;col<3;col++){Color color=col==0?Color.white:col==1?new Color(.04f,.08f,.16f):new Color(1,.2f,.6f);UICraft.Box(root,"Contrast background",(col-1)*360,0,360,2340,color);for(int row=0;row<9;row++){string key=keys[sheet*9+row];float y=1030-row*245;UICraft.Art(root,"round4/"+key,(col-1)*360,y,310,190);UICraft.Label(root,key,(col-1)*360,y+105,350,35,18,col==0?Color.black:Color.white);}}yield return Capture("alpha-"+sheet);Destroy(root.gameObject);yield return null;}}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var t=ScreenCapture.CaptureScreenshotAsTexture();File.WriteAllBytes(Path.Combine(directory,name+".png"),t.EncodeToPNG());Destroy(t);}
+}
+public sealed class Round4ContactProbe:MonoBehaviour {
+ Vector2 prior;void FixedUpdate(){prior=GetComponent<Rigidbody2D>().linearVelocity;}
+ void OnCollisionEnter2D(Collision2D collision){if(Round4Audit.ContactFile==null)return;var b=GetComponent<BallBody>();if(collision.contactCount==0)return;var c=collision.GetContact(0);var v=b.Body.linearVelocity;string F(float n)=>n.ToString("F6",CultureInfo.InvariantCulture);File.AppendAllText(Round4Audit.ContactFile,F(Time.fixedTime-Round4Audit.ContactZero)+","+b.Id+","+collision.collider.name+","+F(c.point.x)+","+F(c.point.y)+","+F(c.normal.x)+","+F(c.normal.y)+","+F(prior.x)+","+F(prior.y)+","+F(v.x)+","+F(v.y)+"\n");}
+}
+}
+

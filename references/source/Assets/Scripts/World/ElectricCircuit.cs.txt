@@ -1,0 +1,34 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+// A visual study only: original activation conditions and electrical damage are unknown.
+// Gameplay emits explicit contact events; the preview never changes health or ball velocity.
+public sealed class ElectricCircuit:MonoBehaviour {
+ sealed class Pillar {public Transform tip;public SpriteRenderer glow;}
+ sealed class Link {public int from,to;public LineRenderer halo,core,glow;}
+ readonly List<Pillar> pillars=new List<Pillar>();readonly List<Link> links=new List<Link>();
+ static Material lineMaterial;float remaining,clock,cooldown;
+ public GameSession Owner;public int ActivationCount{get;private set;}public bool Active=>remaining>0;public int PillarCount=>pillars.Count;
+ public void AddPillar(Transform root,Vector2 size){
+  WorldArt.Draw(root,"ElectricPillar","ElectricPillar",Vector2.zero,size,Color.white,16);
+  var tip=new GameObject("PillarTip").transform;tip.SetParent(root,false);tip.localPosition=new Vector3(0,size.y*.29f,0);
+  var glow=WorldArt.Draw(tip,"EndpointGlow","circle",Vector2.zero,Vector2.one*.37f,new Color(.25f,1,1,0),24);
+  root.gameObject.AddComponent<ElectricPillarContact>().Circuit=this;pillars.Add(new Pillar{tip=tip,glow=glow});
+ }
+ public void ClearVisuals(){remaining=cooldown=0;UpdateLines();}
+ public bool PreviewKnownConnections(){
+  if(pillars.Count<2||Owner==null||!Owner.IsPlaying||Owner.IsPaused||cooldown>0)return false;
+  if(links.Count==0){int[,] known={{0,1},{1,3},{3,5},{5,4},{4,2},{2,0},{2,3}};for(int i=0;i<known.GetLength(0);i++){if(known[i,0]>=pillars.Count||known[i,1]>=pillars.Count)continue;var link=new Link{from=known[i,0],to=known[i,1]};link.glow=Line("ArcOuterGlow",.22f,new Color(.05f,.75f,1,.16f),23);link.halo=Line("ArcHalo",.095f,new Color(.10f,1,1,.65f),24);link.core=Line("ArcCore",.04f,Color.white,25);links.Add(link);}}
+  remaining=FeedbackProfile.Active.electricDuration;cooldown=1.5f;ActivationCount++;UpdateLines();return true;
+ }
+ LineRenderer Line(string name,float width,Color color,int order){if(lineMaterial==null)lineMaterial=WorldArt.BoardMaterial;var go=new GameObject(name);go.transform.SetParent(transform,false);var line=go.AddComponent<LineRenderer>();line.sharedMaterial=lineMaterial;line.positionCount=33;line.startWidth=line.endWidth=width;line.startColor=line.endColor=color;line.sortingOrder=order;line.useWorldSpace=true;line.numCapVertices=2;line.enabled=false;return line;}
+ void Update(){if(Owner==null||Owner.IsPaused)return;cooldown=Mathf.Max(0,cooldown-Time.deltaTime);clock+=Time.deltaTime;remaining=Mathf.Max(0,remaining-Time.deltaTime);UpdateLines();}
+ void UpdateLines(){bool show=Active&&FeedbackProfile.Active.enabledFeedback;
+  foreach(var p in pillars)p.glow.color=new Color(.25f,1,1,show?.55f:0);
+  foreach(var link in links){link.glow.enabled=link.halo.enabled=link.core.enabled=show;if(!show)continue;Vector3 a=pillars[link.from].tip.position,b=pillars[link.to].tip.position;Vector3 side=Vector3.Cross((b-a).normalized,Vector3.forward);
+   for(int j=0;j<33;j++){float t=j/32f;float noise=j==0||j==32?0:(Mathf.Sin(j*12.41f+Mathf.Floor(clock*30)*2.3f+link.from)*.12f+(j%2==0?.055f:-.055f));Vector3 point=Vector3.Lerp(a,b,t)+side*noise;link.glow.SetPosition(j,point);link.halo.SetPosition(j,point);link.core.SetPosition(j,point);}}
+ }
+ public bool EndpointsAttached(){foreach(var link in links)if(Active&&(Vector3.Distance(link.core.GetPosition(0),pillars[link.from].tip.position)>.001f||Vector3.Distance(link.core.GetPosition(32),pillars[link.to].tip.position)>.001f))return false;return true;}
+}
+public sealed class ElectricPillarContact:MonoBehaviour {public ElectricCircuit Circuit;}
+}

@@ -1,0 +1,32 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public OpeningTarget[] OpeningTargets {get;private set;}=Array.Empty<OpeningTarget>();
+ public int[] OpeningCollected {get;private set;}=Array.Empty<int>();
+ int[] openingTargetPending=Array.Empty<int>();
+ public Func<int,Vector2> OpeningLootDestination;
+ public bool OpeningGoalsComplete=>OpeningTargets.Length>0&&OpeningTargets.Select((t,i)=>OpeningCollected[i]>=t.count).All(v=>v);
+ public bool OpeningGoalsEarned=>OpeningTargets.Length>0&&OpeningTargets.Select((t,i)=>OpeningCollected[i]+openingTargetPending[i]>=t.count).All(v=>v);
+ void InitializeOpeningTargets(){OpeningTargets=OpeningCampaign.Targets(OpeningStage);OpeningCollected=new int[OpeningTargets.Length];openingTargetPending=new int[OpeningTargets.Length];for(int i=0;i<OpeningTargets.Length;i++){var t=OpeningTargets[i];if(t.kind=="ordinary_color")JellyGoal[OpeningCampaign.Color(t.color)]=t.count;else if(t.kind=="yarn")CollectionGoal[0]=t.count;else if(t.kind=="cookie")CollectionGoal[1]=t.count;}}
+ void ClearOpeningTargets(){OpeningTargets=Array.Empty<OpeningTarget>();OpeningCollected=openingTargetPending=Array.Empty<int>();OpeningLootDestination=null;openingCreditedBricks.Clear();}
+ readonly HashSet<int> openingCreditedBricks=new HashSet<int>();
+ public Sprite OpeningTargetSprite(int index){var t=OpeningTargets[index];if(t.kind=="copper_coin")return OpeningCopperArt.State(OpeningCopperArt.MaxHealth);if(t.kind=="ingot")return OpeningThirdArt.Frame("ingot",0);if(t.kind=="yarn")return OpeningYarnArt.Icon;if(t.kind=="cookie")return SecondGroupArt.Sprite("fish-biscuit");if(t.kind=="ordinary_color")return SevenSpecialArt.OrdinaryIcon(OpeningCampaign.Color(t.color));return SevenSpecialArt.SpecialIcon(OpeningCampaign.ToolKind(t.kind),1);}
+ void OpeningCollect(string kind,Vector2 position,int color=-1,bool ingot=false){
+  if(!IsOpening)return;
+  for(int i=0;i<OpeningTargets.Length;i++){var t=OpeningTargets[i];bool match=t.kind=="ingot"?ingot:t.kind=="ordinary_color"?kind=="ordinary_color"&&!ingot&&OpeningCampaign.Color(t.color)==color:t.kind==kind;
+   if(!match||OpeningCollected[i]+openingTargetPending[i]>=t.count)continue;
+   openingTargetPending[i]++;var root=new GameObject("Opening collected "+t.kind).transform;root.SetParent(world,false);root.position=position;
+   var sprite=OpeningTargetSprite(i);var image=ChainVisualArt.Draw(root,"Independent target collectible",sprite,.48f/Mathf.Max(.01f,sprite.bounds.size.x),75);image.sharedMaterial=OpeningYarnArt.Material;
+   // A thin cream silhouette keeps the flying object readable over same-colour bricks.
+   var edge=new GameObject("Soft collectible rim").AddComponent<SpriteRenderer>();edge.transform.SetParent(root,false);edge.sprite=sprite;edge.sharedMaterial=SevenSpecialArt.Material(sprite);edge.sortingOrder=image.sortingOrder-1;edge.transform.localScale=image.transform.localScale*1.12f;edge.color=new Color(1,1,1,.82f);var block=new MaterialPropertyBlock();block.SetFloat("_Flash",1);edge.SetPropertyBlock(block);
+   int creditedTarget=i;chainLoot.Add(new ChainLoot{OpeningTarget=i,Start=position,View=root,StrategyCredit=StrategyObserver==null?null:StrategyWrap(()=>OpeningCreditTarget(creditedTarget))});changed=true;
+  }
+ }
+ void OpeningCreditTarget(int i){if(i<0||i>=OpeningTargets.Length)return;openingTargetPending[i]=Mathf.Max(0,openingTargetPending[i]-1);var t=OpeningTargets[i];if(OpeningCollected[i]>=t.count)return;OpeningCollected[i]++;StrategyEmit(new StrategyEvent{kind="goal",goal=i,amount=1,targetKind=t.kind});if(t.kind=="yarn")Collected[0]=OpeningCollected[i];if(t.kind=="cookie")Collected[1]=OpeningCollected[i];if(t.kind=="ordinary_color")JellyCollected[OpeningCampaign.Color(t.color)]=OpeningCollected[i];if(OpeningCollected[i]==t.count)SoundService.Play("goal_complete");changed=true;}
+ void OpeningCreditBrick(BrickBody brick){if(!IsOpening||!openingCreditedBricks.Add(brick.Id))return;if(brick.Definition.reveal=="opening-N"||OpeningIngotBrick(brick))OpeningCollect("ordinary_color",brick.transform.position,brick.Definition.colorIndex,OpeningIngotBrick(brick));}
+ void OpeningCreditTool(ChainTool tool){if(!IsOpening)return;OpeningCollect(OpeningThirdArt.KindName(tool.Kind),tool.Position,tool.ColorIndex,tool.Ingot);if(tool.Ingot&&!SevenSpecialActive)OpeningPlayRing(tool.Position);}
+}
+}

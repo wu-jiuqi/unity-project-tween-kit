@@ -1,0 +1,62 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class LeagueRoundSelfTests {
+ [Serializable] sealed class Envelope {public LeagueState league;}
+ [Serializable] sealed class Sample {public int seed,wins,player,rank,nearestBehind,leader,updatedRivals;}
+ [Serializable] sealed class Report {public int checks;public Sample[] samples;}
+ static string Scores(LeaguePeriod p)=>string.Join(",",p.rivals.Select(r=>r.id+":"+r.Medals(p.elapsed)));
+ static LeagueState Create(int seed,long now){var state=new LeagueState();LeagueEngine.Open(state,new LeagueConfig{activeCompetition=true},now,24);state.current.seed=seed;LeagueEngine.EnableActive(state.current,240);return state;}
+ public static string RunAll(string output=null){
+  int checks=0;Action<bool,string> check=(ok,msg)=>{checks++;if(!ok)throw new Exception("Round chase: "+msg);};
+  long now=1900000000;var config=new LeagueConfig{activeCompetition=true};var samples=new List<Sample>();
+  for(int seed=1;seed<=12;seed++){
+   var fast=Create(seed,now);var slow=Create(seed,now);int medals=24;
+   for(int win=1;win<=60;win++){
+    var p=fast.current;string before=Scores(p);for(int i=0;i<60;i++)LeagueEngine.ActiveTick(p,5,medals);
+    check(before==Scores(p),"five minutes of activity never causes a chase");
+    int[] prior=p.rivals.Select(r=>r.Medals(p.elapsed)).ToArray();
+    int earnedRank=LeagueEngine.Standings(p,medals+1).First(e=>e.player).rank;
+    LeagueEngine.Win(fast,config,now+win,medals,medals+1,true);
+    LeagueEngine.Win(slow,config,now+win*300,medals,medals+1,true);medals++;
+    check(p.chaseRounds==win&&p.winCount==win,"exactly one chase per true win, including first win");
+    check(p.lastChaseRivals>0&&p.lastChaseMedals>0,"every completed level produces actual rival medal growth");
+    check(Scores(p)==Scores(slow.current),"chase depends on wins rather than duration");
+    check(p.rivals.Select((r,i)=>r.Medals(p.elapsed)-prior[i]).All(g=>g>=0&&g<=2),"each rival gains at most two per result");
+    check(LeagueEngine.Standings(p,medals).First(e=>e.player).rank<=earnedRank+1,"result chase loses at most one earned rank");
+    LeagueEngine.Validate(fast);
+    if(win==1||win==5||win==15||win==30||win==60){var entries=LeagueEngine.Standings(p,medals);int own=entries.First(e=>e.player).rank;samples.Add(new Sample{seed=seed,wins=win,player=medals,rank=own,nearestBehind=entries.FirstOrDefault(e=>e.rank==own+1)?.medals??-1,leader=entries.Where(e=>!e.player).Max(e=>e.medals),updatedRivals=p.lastChaseRivals});}
+   }
+   var state=fast.current;string scores=Scores(state);int events=state.chaseRounds;
+   LeagueEngine.FinishRound(state,false,medals,medals);LeagueEngine.FinishRound(state,false,medals,medals);
+   check(scores==Scores(state)&&events==state.chaseRounds,"failures never run a chase");
+   LeagueEngine.Advance(fast,now+86400,medals,true);check(scores==Scores(state),"offline time never runs a chase");
+   LeagueEngine.Win(fast,config,now+86401,medals,medals+1,true);check(state.chaseRounds==events+1&&state.lastChaseRivals>0,"return and loss relief still update on a win");
+   check(state.lastChaseMedals<=state.lastChaseRivals,"relief caps every rival to one medal");
+  }
+  var provider=new LeagueSelfTests.ConfigProvider{Value=config};var clock=new LeagueSelfTests.Clock{Now=now};var store=new LeagueSelfTests.Store();var profile=LocalProfile.Load(store);profile.ConfigureLeague(provider,clock);profile.ReadLeague();
+  check(profile.CommitAlphabetWin("round-first",1),"production win transaction accepted");
+  var saved=JsonUtility.FromJson<Envelope>(profile.ExportForQA()).league;check(saved.current.chaseRounds==1&&saved.current.lastChaseRivals>0,"production first win immediately commits chase");
+  string original=profile.ExportForQA();check(profile.CommitAlphabetWin("round-first",1)&&original==profile.ExportForQA(),"duplicate result is acknowledged without rerunning chase or awarding medals");
+  profile.ReadLeague();profile.ReadLeague(true);check(JsonUtility.FromJson<Envelope>(profile.ExportForQA()).league.current.chaseRounds==1,"refreshes never trigger another chase");
+  check(profile.CommitAlphabetWin("round-second",2),"another win in the same clock second accepted");check(JsonUtility.FromJson<Envelope>(profile.ExportForQA()).league.current.chaseRounds==2,"same-second second win runs its own chase");
+  profile.AddTestMedals();check(JsonUtility.FromJson<Envelope>(profile.ExportForQA()).league.current.chaseRounds==2,"test medals do not impersonate a true victory");
+  string legacy=profile.ExportForQA().Replace("\"competitionVersion\":3","\"competitionVersion\":2");var migrated=LocalProfile.ImportForQA(legacy);migrated.ConfigureLeague(provider,clock);string oldScores=Scores(JsonUtility.FromJson<Envelope>(legacy).league.current);
+  migrated.ReadLeague();var upgraded=JsonUtility.FromJson<Envelope>(migrated.ExportForQA()).league.current;
+  check(upgraded.competitionVersion==3&&oldScores==Scores(upgraded)&&upgraded.chaseRounds==2,"v2 migration keeps scores and never replays prior victories");
+  string stable=migrated.ExportForQA();migrated.ReadLeague();check(stable==migrated.ExportForQA(),"v3 migration is idempotent");
+  var resumed=LocalProfile.ImportForQA(profile.ExportForQA());resumed.ConfigureLeague(provider,clock);profile.CommitAlphabetWin("round-third",3);resumed.CommitAlphabetWin("round-third",3);
+  check(Scores(JsonUtility.FromJson<Envelope>(profile.ExportForQA()).league.current)==Scores(JsonUtility.FromJson<Envelope>(resumed.ExportForQA()).league.current),"restart preserves fractional chase progress");
+  string durable=store.Json;store.Fail=true;bool logging=Debug.unityLogger.logEnabled;Debug.unityLogger.logEnabled=false;bool accepted;try{accepted=profile.CommitAlphabetWin("round-storage-fail",4);}finally{Debug.unityLogger.logEnabled=logging;}
+  var rolledBack=JsonUtility.FromJson<Envelope>(profile.ExportForQA()).league.current;var committed=JsonUtility.FromJson<Envelope>(durable).league.current;
+  check(!accepted&&store.Json==durable&&rolledBack.chaseRounds==committed.chaseRounds&&Scores(rolledBack)==Scores(committed),"failed save rolls back both player medals and NPC chase");
+  var week=Create(79,now);LeagueEngine.Win(week,config,now,24,25,true);int finalRank=LeagueEngine.Standings(week.current,25).First(e=>e.player).rank;
+  LeagueEngine.Advance(week,now+604799,25,true);check(week.current!=null,"seven-day deadline not early");LeagueEngine.Advance(week,now+604800,25,true);check(week.current==null&&week.rewards.Single().rank==finalRank,"real seven-day deadline freezes final rank");
+  if(output!=null){Directory.CreateDirectory(output);File.WriteAllText(Path.Combine(output,"round-chase-model.json"),JsonUtility.ToJson(new Report{checks=checks,samples=samples.ToArray()},true));}
+  return "PASS: "+checks+" per-win chase / idempotency / migration checks across 12 seeds and 720 victories";
+ }
+}
+}

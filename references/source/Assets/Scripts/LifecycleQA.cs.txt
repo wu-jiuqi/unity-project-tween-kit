@@ -1,0 +1,52 @@
+using System;
+using System.Collections;
+using System.IO;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+// Real separate processes + actual PlayerPrefs.Save. Only namespaced test keys.
+public sealed class LifecycleQA:MonoBehaviour {
+ [Serializable]public class Snapshot {public string key,stage,store;public int coins,badges,unlocked,ledger;public bool passed;}
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Array.IndexOf(Environment.GetCommandLineArgs(),"--lifecycle")>=0)new GameObject("Process lifecycle QA").AddComponent<LifecycleQA>();}
+ string Arg(string name){var args=Environment.GetCommandLineArgs();int i=Array.IndexOf(args,name);return i>=0?args[i+1]:null;}
+ IEnumerator Start(){
+  string directory=Arg("--qa-out"),stage=Arg("--lifecycle"),scenario=Arg("--case");Directory.CreateDirectory(directory);
+  if(LocalProfile.PersistentTestKey==null)throw new Exception("Refusing lifecycle test without isolated persistent key");
+  yield return new WaitForSecondsRealtime(.5f);var app=FindFirstObjectByType<AppUI>();var profile=app.Profile;
+  if(stage=="verify"){
+   var before=JsonUtility.FromJson<Snapshot>(File.ReadAllText(Path.Combine(directory,"checkpoint.json")));
+   int expected=scenario=="before"?1580:scenario=="complete"?1620:1600;
+   bool pass=before.passed&&profile.StorageHealthy&&profile.Coins==expected&&profile.Coins==before.coins&&profile.Badges==(scenario=="before"?0:1)&&profile.UnlockedLevel==(scenario=="before"?0:1)&&profile.CommittedTransactionCount==(scenario=="before"?0:scenario=="complete"?2:1);
+   if(scenario!="before")pass&=!profile.CommitBase(before.key,0);
+   int coins=profile.Coins;LocalMockServices.ResolveAd(profile,before.key,MockOutcome.Cancelled);LocalMockServices.ResolveAd(profile,before.key,MockOutcome.Failed);pass&=profile.Coins==coins;
+   if(scenario=="complete")pass&=LocalMockServices.ResolveAd(profile,before.key,MockOutcome.Completed)==MockOutcome.Completed&&profile.Coins==coins;
+   yield return Capture(Path.Combine(directory,"restart.png"));Write(directory,"verified.json",profile,before.key,pass);Application.Quit(pass?0:4);yield break;
+  }
+  if(profile.Coins!=1580||profile.CommittedTransactionCount!=0)throw new Exception("Lifecycle test key is not fresh");
+  app.QAStartLevel(0);yield return app.QAWaitForLevel();yield return new WaitForSecondsRealtime(.8f);
+  float deadline=Time.realtimeSinceStartup+80;
+  while(app.Session.IsPlaying&&Time.realtimeSinceStartup<deadline){if(app.Session.PendingBurstBalls==0&&app.Session.Shots>0){BrickBody lowest=null;foreach(var brick in FindObjectsByType<BrickBody>(FindObjectsSortMode.None))if(brick.Alive&&(lowest==null||brick.transform.position.y<lowest.transform.position.y))lowest=brick;if(lowest!=null)app.QADragAim(((Vector2)lowest.transform.position-app.Session.LauncherPosition).normalized);}yield return new WaitForSecondsRealtime(.7f);}
+  if(app.Session.RemainingTargets!=0)throw new Exception("Lifecycle scenario did not naturally win");
+  while(!app.RewardReady)yield return null;string key=app.QAResultKey;
+  if(scenario!="before"){
+   if(scenario=="cancel"||scenario=="fail"||scenario=="no-callback"||scenario=="complete"){
+    Find("Button x2 Coins").onClick.Invoke();
+    if(scenario=="cancel")Find("Button Cancel").onClick.Invoke();
+    if(scenario=="fail")Find("Button Fail").onClick.Invoke();
+    if(scenario=="complete"){var button=Find("Button Complete  +20");button.onClick.Invoke();button.onClick.Invoke();}
+   }else app.CollectReward();
+   if(scenario=="flight")yield return new WaitForSecondsRealtime(.7f);
+   if(scenario=="settled")yield return new WaitForSecondsRealtime(2);
+  }
+  int expectedCoins=scenario=="before"?1580:scenario=="complete"?1620:1600;
+  bool valid=profile.StorageHealthy&&profile.Coins==expectedCoins&&profile.Badges==(scenario=="before"?0:1)&&profile.CommittedTransactionCount==(scenario=="before"?0:scenario=="complete"?2:1);
+  yield return Capture(Path.Combine(directory,"checkpoint.png"));Write(directory,"checkpoint.json",profile,key,valid);
+  if(!valid){Debug.LogError("Lifecycle checkpoint failed expected wallet/storage-health assertions");Application.Quit(5);yield break;}
+  // Host terminates this process after the checkpoint; no graceful quit callback.
+  while(true)yield return new WaitForSecondsRealtime(.25f);
+ }
+ static Button Find(string name){foreach(var b in FindObjectsByType<Button>(FindObjectsSortMode.None))if(b.name==name)return b;throw new Exception("Lifecycle button missing: "+name);}
+ static void Write(string directory,string file,LocalProfile p,string key,bool pass){File.WriteAllText(Path.Combine(directory,file),JsonUtility.ToJson(new Snapshot{key=key,stage=file,store=LocalProfile.PersistentTestKey,coins=p.Coins,badges=p.Badges,unlocked=p.UnlockedLevel,ledger=p.CommittedTransactionCount,passed=pass},true));}
+ static IEnumerator Capture(string path){yield return new WaitForEndOfFrame();var target=new RenderTexture(Screen.width,Screen.height,24);var image=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,target,image);File.WriteAllBytes(path,image.EncodeToPNG());target.Release();Destroy(target);Destroy(image);}
+}
+}

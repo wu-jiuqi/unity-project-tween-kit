@@ -1,0 +1,49 @@
+using System.Linq;
+using UnityEngine;
+using TMPro;
+
+namespace BounceGarden {
+// Presentation reads state only. No damage or objective completion occurs here.
+public sealed class FusionPieceView:MonoBehaviour {
+ GameSession owner;FusionRuntimePiece piece;TMP_Text title,state;SpriteRenderer iceRing,plate,bondRing;string lastTitle,lastState;int lastSize;
+ public void Initialize(GameSession session,FusionRuntimePiece runtime){
+  owner=session;piece=runtime;
+  var root=new GameObject("Fusion mechanism label").transform;root.SetParent(transform,false);
+  bool tool=piece.Tool!=null;
+  bool ownPlate=piece.Definition.size>1||new[]{"cookie","lemon","strawberry","snowdrift","cocoa"}.Contains(piece.Definition.kind);
+  if(ownPlate){plate=WorldArt.Draw(root,"Mechanism footprint","brick",Vector2.zero,Vector2.one,FaceColor(piece.Definition.kind),85);if(piece.Brick!=null)piece.Brick.Face.enabled=false;}
+  title=WorldArt.Text(root,"Mechanism",Name(piece.Definition.kind),new Vector2(0,tool?-.16f:.19f),.07f,new Color(.17f,.23f,.28f),92);title.fontSize=tool?2.2f:2.1f;
+  state=WorldArt.Text(root,"State","",new Vector2(0,-.20f),.07f,new Color(.25f,.21f,.15f),93);state.fontSize=2.0f;
+  iceRing=WorldArt.Draw(root,"Ice protection","ring",Vector2.zero,Vector2.one*(piece.Definition.size*.82f),new Color(.25f,.9f,1,.85f),90);
+  bondRing=WorldArt.Draw(root,"Linked target","ring",Vector2.zero,Vector2.one*.74f,new Color(.73f,.38f,1,.95f),91);bondRing.enabled=false;
+  if(piece.Definition.kind!="normal"||piece.Definition.hp==1)foreach(var text in GetComponentsInChildren<TMP_Text>(true))if(text.name=="HP"||text.name=="NumberShadow")text.enabled=false;
+  var goal=FusionRules.GoalKind(piece.Definition);if(goal=="fish"||goal=="toy")ChainCollectionArt.Loot(root,goal=="fish"?1:2,new Vector2(0,0),.36f,89);
+  if(piece.Definition.kind=="line_h"||piece.Definition.kind=="line_v"){
+   bool horizontal=piece.Definition.kind=="line_h";WorldArt.Draw(root,"Line orientation","brick",new Vector2(0,.13f),horizontal?new Vector2(.58f,.07f):new Vector2(.07f,.58f),new Color(1,.74f,.18f),94);
+  }
+  Refresh();
+ }
+ static Color FaceColor(string kind){switch(kind){case "chest":return new Color(.97f,.76f,.43f);case "basket":return new Color(.76f,.64f,.43f);case "cookie":return new Color(.94f,.67f,.36f);case "lemon":return new Color(1,.89f,.35f);case "strawberry":return new Color(1,.54f,.62f);case "cocoa":return new Color(.65f,.4f,.25f);default:return new Color(.83f,.95f,1);}}
+ static void Resize(SpriteRenderer renderer,float size){if(renderer==null)return;var bounds=renderer.sprite.bounds.size;renderer.transform.localScale=new Vector3(size/bounds.x,size/bounds.y,1);}
+ public static string Name(string kind){switch(kind){case "normal":return "";case "fish":return "鱼";case "toy":return "玩具";case "jelly":return "果冻";case "armor":return "护甲";case "ice":return "冰封";case "stone":return "固定石";case "chest":return "目标箱";case "basket":return "出货篮";case "cookie":return "饼干链";case "lemon":return "柠檬";case "strawberry":return "草莓";case "snowball":return "雪球";case "snowdrift":return "雪堆";case "cocoa":return "可可";case "line_h":return "横线";case "line_v":return "竖线";case "cross":return "十字";case "bomb":return "炸弹";case "link":return "链接";case "soda":return "汽水";default:return kind;}}
+ void LateUpdate(){if(owner!=null&&!owner.IsPaused)Refresh();}
+ void Refresh(){
+  if(piece==null||title==null)return;string kind=piece.Definition.kind;
+  string caption=kind=="rear"?"顶部弱点":Name(kind);string value="";
+  if(!piece.Enabled)value="等待充能";
+  else if(piece.Ice>0)value="冰 ×"+piece.Ice;
+  else if(piece.Brick!=null&&piece.Brick.ShellIntact)value="甲";
+  else if(kind=="basket")value=piece.Stock+"份 · "+piece.Progress+"/"+piece.Definition.hitsPerItem;
+  else if(kind=="strawberry")value=piece.ClearedNeighbors.Count<piece.Definition.ripenNeeds?piece.ClearedNeighbors.Count+"/"+piece.Definition.ripenNeeds:"成熟";
+  else if(kind=="snowball"||kind=="snowdrift")value=piece.Layers+"层";
+  else if(kind=="chest")value="耐久 "+piece.Brick.CurrentHealth+" · 内含 "+piece.Definition.contents.Length;
+  else if(kind=="rear")value="从上方 ↓";
+  else if(kind=="soda")value=piece.Definition.direction=="left"?"←":piece.Definition.direction=="right"?"→":piece.Definition.direction=="down"?"↓":"↑";
+  else if(kind!="normal"&&piece.Brick!=null&&piece.Brick.CurrentHealth>1)value="耐久 "+piece.Brick.CurrentHealth;
+  if(lastTitle!=caption){title.text=caption;lastTitle=caption;}if(lastState!=value){state.text=value;lastState=value;}
+  if(lastSize!=piece.Definition.size){lastSize=piece.Definition.size;Resize(plate,lastSize*CollectionLevels.Pitch-.06f);Resize(iceRing,lastSize*CollectionLevels.Pitch);}
+  iceRing.enabled=piece.Ice>0||piece.Brick!=null&&piece.Brick.ShellIntact;iceRing.color=piece.Ice>0?new Color(.25f,.9f,1,.85f):new Color(1,.76f,.2f,.9f);
+  bondRing.enabled=owner.FusionBonded(piece);title.color=piece.Enabled?(kind=="cocoa"?Color.white:new Color(.17f,.23f,.28f)):new Color(.5f,.5f,.5f);if(kind=="cocoa")state.color=Color.white;
+ }
+}
+}

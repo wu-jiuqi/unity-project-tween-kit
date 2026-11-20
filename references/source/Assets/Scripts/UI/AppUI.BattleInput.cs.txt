@@ -1,0 +1,45 @@
+using System.Runtime.InteropServices;
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ bool nativeTouchReady;
+ readonly float[] nativeTouches=new float[256*4];
+ public int BattleTouchStarts {get;private set;}
+ public int BattleTouchMoves {get;private set;}
+ public int BattleTouchEnds {get;private set;}
+ public int BattleAcceptedShots {get;private set;}
+ public string BattleInputStatus {get;private set;}="idle";
+ public bool NativeTouchReady=>nativeTouchReady;
+#if UNITY_WEBGL && !UNITY_EDITOR
+ [DllImport("__Internal")]static extern int BounceTouchInit();
+ [DllImport("__Internal")]static extern int BounceTouchRead([Out]float[] events,int capacity);
+#endif
+ void InitializeBattleInput(){
+#if UNITY_WEBGL && !UNITY_EDITOR
+  nativeTouchReady=BounceTouchInit()!=0;
+#endif
+ }
+ bool BattleInputAllowed=>playing&&!busy&&modal==null&&results==null&&Session.IsPlaying&&!Session.IsPaused;
+ bool DrainNativeBattleInput(){
+  if(!nativeTouchReady)return false;
+#if UNITY_WEBGL && !UNITY_EDITOR
+  int count=BounceTouchRead(nativeTouches,nativeTouches.Length/4);
+  for(int i=0;i<count;i++){int at=i*4;ProcessBattleTouch((int)nativeTouches[at],(int)nativeTouches[at+1],new Vector2(nativeTouches[at+2]*Screen.width,nativeTouches[at+3]*Screen.height));}
+#endif
+  if(!BattleInputAllowed&&aiming)CancelAim();
+  return true;
+ }
+ // Consume every boundary in order, including an entire fast drag received
+ // between two rendered frames. Other fingers cannot release this gesture.
+ void ProcessBattleTouch(int id,int phase,Vector2 position){
+  if(phase==0)BattleTouchStarts++;else if(phase==1)BattleTouchMoves++;else if(phase==2)BattleTouchEnds++;
+  if(phase==4){CancelAim();BattleInputStatus="hidden/reset";return;}
+  if(!BattleInputAllowed){if(aiming)CancelAim();BattleInputStatus="paused/ui";return;}
+  if(phase==0){BeginAim(position,id);return;}
+  if(!aiming||id!=pointerId)return;
+  if(phase==3){CancelAim();BattleInputStatus="cancelled";return;}
+  UpdateAim(position);
+  if(phase==2)EndAim(position);
+ }
+}
+}

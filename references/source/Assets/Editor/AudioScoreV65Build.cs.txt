@@ -1,0 +1,9 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class AudioScoreV65Build {
+ public static void Windows(){AssetDatabase.Refresh();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);Debug.Log(BounceGarden.LocalProfile.RunSelfTests());Debug.Log(BounceGarden.LeagueSelfTests.RunAll());string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/AudioScore-v65/Windows/BounceGarden.exe"));Directory.CreateDirectory(Path.GetDirectoryName(path));var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("AUDIO_SCORE_V65_BUILD "+r.summary.result+" errors="+r.summary.totalErrors+" warnings="+r.summary.totalWarnings);if(r.summary.result!=BuildResult.Succeeded)throw new Exception("Audio score build failed");}
+}

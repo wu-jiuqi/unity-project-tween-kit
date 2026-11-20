@@ -1,0 +1,69 @@
+using System;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+using BounceGarden;
+public static class LeagueCalendarBuild {
+ sealed class Clock:ILeagueClock {public long now;public long UtcSeconds=>now;}
+ sealed class Storage:IProfileStorage {public string json;public bool fail;public bool Exists=>json!=null;public string Read()=>json;public void Write(string value){if(fail)throw new IOException("Expected league save failure fixture");json=value;}}
+ [Serializable] sealed class Envelope {public LeagueState league;}
+ static int checks;
+ static void Check(bool valid,string label){checks++;if(!valid)throw new Exception("League calendar: "+label);}
+ static LeagueState State(LocalProfile p)=>JsonUtility.FromJson<Envelope>(p.ExportForQA()).league;
+ public static void Validate(){
+  checks=0;var c=new ResourceLeagueConfigProvider().Load();Check(c.calendarSeasons,"calendar config enabled");
+  long nov1=LeagueEngine.CalendarAnchor,nov8=nov1+7*86400L;
+  Check(LeagueEngine.CalendarStart(nov8-1)==nov1,"Nov 7 final second");Check(LeagueEngine.CalendarStart(nov8)==nov8,"Nov 8 exact boundary");
+  var clock=new Clock{now=nov1+3600};var p=new LocalProfile();p.ConfigureLeague(new JsonLeagueConfigProvider(()=>JsonUtility.ToJson(c)),clock);p.EnsureAlphabetRoute();
+  Check(p.ReadLeague()==null,"league locked before level 10");
+  for(int i=0;i<9;i++)Check(p.CommitAlphabetWin("unlock-"+i,i,0),"early campaign win "+i);
+  Check(p.ReadLeague()==null,"still locked after level 9");Check(p.CommitAlphabetWin("unlock-9",9,0),"tenth victory saved");
+  var first=p.ReadLeague();Check(first.player.medals==1,"tenth victory gives first season medal");Check(first.remaining==nov8-clock.now,"fixed deadline");
+  Check(!p.LeagueMatchSeen(first.periodId),"entry pending outside ranking");var state=State(p);Check(state.current.rivals.Select(r=>r.name).Distinct().Count()==20,"unique nickname roster");
+  string roster=string.Join(",",state.current.rivals.Select(r=>r.name));
+  Check(p.CommitAlphabetWin("unlock-9",9,0)&&p.ReadLeague().player.medals==1,"duplicate callback ignored");
+  for(int i=0;i<4;i++)Check(p.CommitAlphabetWin("replay-"+i,i,0),"replay win "+i);
+  Check(p.ReadLeague().player.medals==4,"three daily replay cap");Check(p.CommitAlphabetWin("repeat-same",0,0)&&p.ReadLeague().player.medals==4,"same-level daily limit");
+  Check(State(p).current.chaseRounds==4,"only eligible medals advance opponents");
+  Check(p.CompleteLeagueMatch(first.periodId),"entry acknowledgement saved");
+  var restored=LocalProfile.ImportForQA(p.ExportForQA());restored.ConfigureLeague(new JsonLeagueConfigProvider(()=>JsonUtility.ToJson(c)),clock);
+  Check(restored.LeagueMatchSeen(first.periodId),"entry does not replay after reload");Check(string.Join(",",State(restored).current.rivals.Select(r=>r.name))==roster,"roster stable across reload");
+  clock.now=nov8;var second=restored.ReadLeague(true);Check(second.periodId!=first.periodId,"login rotates season without win");Check(second.reward!=null&&second.reward.eligible,"previous result ready on login");Check(second.player.medals==0,"season medals reset, lifetime preserved");Check(restored.Badges==p.Badges,"lifetime medals preserved");
+  Check(!restored.LeagueMatchSeen(second.periodId),"new season entry pending");Check(!State(restored).current.rivals.Any(r=>roster.Split(',').Contains(r.name)),"recent names avoided");
+  int coins=restored.Coins;Check(restored.ClaimLeagueReward(first.periodId),"previous reward claim");Check(restored.Coins>coins&&!restored.ClaimLeagueReward(first.periodId),"claim is once only");
+  clock.now=nov1+15*86400;var third=restored.ReadLeague(true);Check(State(restored).current.startsAt==nov1+14*86400,"late login joins current week");Check(third.reward==null,"unplayed season has no eligible reward");
+  Check(State(restored).rewards.Count==2,"no synthetic skipped seasons");
+  for(int seed=0;seed<20;seed++){
+   var s=new LeagueState();LeagueEngine.Open(s,c,nov1,100);Check(s.current.rivals.Length==20,"roster size");
+   var initial=s.current.rivals.Select(r=>r.name).ToArray();int before=100;
+   for(int win=0;win<60;win++){LeagueEngine.Win(s,c,nov1+win,before,before+1,true);before++;LeagueEngine.Validate(s);}
+   var board=LeagueEngine.Standings(s.current,before);Check(board.First(e=>e.player).medals==60,"60 season medals");Check(board.First(e=>e.player).rank==1,"continuous wins can lead");Check(s.current.rivals.All(r=>initial.Contains(r.name)),"identities stable over wins");
+  }
+  var legacy=LeagueConfig.Clone(c);legacy.calendarSeasons=false;var old=new LeagueState();LeagueEngine.Open(old,legacy,nov1+3600,50);
+  string legacyId=old.current.id;long legacyEnd=old.current.endsAt;string oldNames=string.Join(",",old.current.rivals.Select(r=>r.name));
+  LeagueEngine.PrepareActive(old,c,nov1+7200,50);Check(old.current.id==legacyId&&old.current.endsAt==legacyEnd&&!old.current.config.calendarSeasons,"existing rolling season preserved");
+  Check(string.Join(",",old.current.rivals.Select(r=>r.name))==oldNames,"legacy identities preserved");LeagueEngine.Advance(old,legacyEnd,50,false);LeagueEngine.Open(old,c,legacyEnd,50);Check(old.current.config.calendarSeasons,"calendar begins after legacy season");
+  var storage=new Storage{json=p.ExportForQA()};string diskBefore=storage.json;clock.now=nov1+3600;var failing=LocalProfile.Load(storage);failing.ConfigureLeague(new JsonLeagueConfigProvider(()=>JsonUtility.ToJson(c)),clock);string original=failing.ExportForQA();int originalCoins=failing.Coins,originalBadges=failing.Badges;var originalLeague=State(failing);storage.fail=true;
+  Check(!failing.CommitAlphabetWin("failed-save",10,1000),"failed reward transaction rejected");
+  Directory.CreateDirectory("../../BounceGarden/Evidence/LeagueCalendar-v1");File.WriteAllText("../../BounceGarden/Evidence/LeagueCalendar-v1/rollback-before.json",original);File.WriteAllText("../../BounceGarden/Evidence/LeagueCalendar-v1/rollback-after.json",failing.ExportForQA());File.WriteAllText("../../BounceGarden/Evidence/LeagueCalendar-v1/rollback-disk.json",storage.json);
+  var rolled=State(failing);Check(failing.Coins==originalCoins&&failing.Badges==originalBadges&&rolled.current.chaseRounds==originalLeague.current.chaseRounds&&rolled.current.rivals.Zip(originalLeague.current.rivals,(a,b)=>a.name==b.name&&a.activeMedals==b.activeMedals&&Math.Abs(a.chaseProgress-b.chaseProgress)<1e-12).All(v=>v),"player and rivals rolled back together");Check(storage.json==diskBefore,"failed write leaves durable save untouched");
+  var interrupted=LocalProfile.ImportForQA(restored.ExportForQA());interrupted.ConfigureLeague(new JsonLeagueConfigProvider(()=>JsonUtility.ToJson(c)),clock);Check(!interrupted.LeagueMatchSeen(third.periodId),"interrupted season entry remains pending after reload");
+  foreach(var key in new[]{"medal","up","down","season"})Check(LeagueMotionArt.Get(key)!=null,"generated asset "+key);
+  Directory.CreateDirectory("../../BounceGarden/Evidence/LeagueCalendar-v1");File.WriteAllText("../../BounceGarden/Evidence/LeagueCalendar-v1/model-checks.json","{\"checks\":"+checks+",\"failures\":0}");Debug.Log("LEAGUE_CALENDAR_CHECKS "+checks);
+ }
+ public static void Windows(){
+  Validate();BuildEntry.Configure();
+  if(PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone).Contains("BOUNCE_STRATEGY_PLAYTEST"))throw new Exception("Refusing strategy-test defines");
+  PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  string output=Path.GetFullPath("../../Builds/LeagueCalendar-v1/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));
+  var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=BuildTarget.StandaloneWindows64,locationPathName=output,options=BuildOptions.CompressWithLz4HC});
+  File.WriteAllText(Path.GetFullPath("../../Builds/LeagueCalendar-v1/build-summary.json"),"{\"result\":\""+r.summary.result+"\",\"errors\":"+r.summary.totalErrors+",\"warnings\":"+r.summary.totalWarnings+",\"strategyTestBuild\":false}");
+  if(r.summary.result!=BuildResult.Succeeded)throw new Exception("League calendar Windows build failed");
+ }
+}
+public sealed class LeagueCalendarImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/LeagueCalendarV1/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.npotScale=TextureImporterNPOTScale.None;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.CompressedHQ;t.wrapMode=TextureWrapMode.Clamp;}
+}

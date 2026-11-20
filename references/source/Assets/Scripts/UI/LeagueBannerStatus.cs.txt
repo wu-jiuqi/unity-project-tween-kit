@@ -1,0 +1,8 @@
+using UnityEngine;
+using TMPro;
+namespace BounceGarden {
+public sealed class LeagueBannerStatus:MonoBehaviour {
+ public TMP_Text Target;AppUI app;float next;
+ void Update(){if(Time.unscaledTime<next)return;next=Time.unscaledTime+5;if(app==null)app=GetComponentInParent<AppUI>();if(app==null||!app.HomeMotionAllowed||Target==null)return;var s=app.LeagueSource.Read();if(s==null){Target.fontSize=25;Target.text="第10关解锁";return;}Target.fontSize=27;Target.text="第"+s.player.rank+"名";}
+}
+}

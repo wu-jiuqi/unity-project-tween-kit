@@ -1,0 +1,108 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+    /// <summary>Targeted range fixtures. Controlled contacts are labelled and never included in natural runs.</summary>
+    public static class FusionSuperRangeQA {
+        public static IEnumerator Run(GameSession game, string output, Action<string, bool, string> check) {
+            try { Data(output, check); } catch (Exception e) { Assert(check, "authoring executes", false, e.ToString()); }
+            foreach (string variant in new[] { "finite3", "unlimited3", "legacy_missing9", "useful_finite3", "useful_unlimited3", "ordinary_line" }) {
+                try {
+                    if (variant.StartsWith("useful_", StringComparison.Ordinal)) Useful(game, check, variant == "useful_finite3");
+                    else if (variant == "ordinary_line") OrdinaryLine(game, check);
+                    else Collision(game, check, variant);
+                } catch (Exception e) { Assert(check, variant + " executes", false, e.ToString()); }
+                game.StopLevel(); game.BoosterProfile = null; yield return null;
+            }
+        }
+        static void Assert(Action<string, bool, string> check, string name, bool ok, string detail = "") => check("super_range_rule_fixture " + name, ok, detail);
+        static FusionLevelDefinition Board() {
+            var pieces = new List<FusionPieceDefinition>();
+            for (int r = 0; r < 9; r++) for (int c = 0; c < 9; c++)
+                pieces.Add(new FusionPieceDefinition { id = "range_" + c + "_" + r, kind = c == 0 && r == 0 ? "fish" : "normal", c = c, r = r, hp = 99 });
+            return new FusionLevelDefinition { pieces = pieces.ToArray(), refillBudget = 0, ratingRewards = false, finiteBoosters = true, superRange = 3 };
+        }
+        static FusionLevelDefinition MissingRange(FusionLevelDefinition board) {
+            var raw = EditorJson.Parse(JsonUtility.ToJson(board)); raw.Remove("superRange");
+            return JsonUtility.FromJson<FusionLevelDefinition>(raw.ToJson());
+        }
+        static FusionRuntimePiece Piece(GameSession game, int c, int r) => game.FusionPieces.Single(p => p.Definition.id == "range_" + c + "_" + r);
+        static BallBody[] Balls(GameSession game) => game.GetComponentsInChildren<BallBody>(true).Where(b => b.Active && b.SessionGeneration == game.Generation).OrderBy(b => b.Id).ToArray();
+        static void Start(GameSession game, FusionLevelDefinition definition, string label) {
+            game.StartFusionSample(definition, 12, "QA super_range_rule_fixture " + label, 11011);
+            game.enabled = false; game.QAIgnoreFocusLoss = true;
+            game.BoosterProfile = LocalProfile.CreateLevelEditorProfile(9, "stocked");
+        }
+        static void Data(string output, Action<string, bool, string> check) {
+            var board = Board();
+            Assert(check, "missing serialized field keeps legacy range 9", MissingRange(board).superRange == 9);
+            var clone = JsonUtility.FromJson<FusionLevelDefinition>(JsonUtility.ToJson(board));
+            Assert(check, "typed clone preserves range 3", clone.superRange == 3);
+            foreach (int invalid in new[] { 0, 10 }) {
+                clone.superRange = invalid;
+                Assert(check, "range " + invalid + " is rejected", FusionRules.Validate(clone, 12).Any(i => i.IsError));
+            }
+            var workspace = LevelEditorWorkspace.CreateEmpty();
+            var level = workspace.CreateFusionLevel("Alphabet", "Super range fixture", MissingRange(board), 12);
+            Assert(check, "editor loads legacy field as 9", level.FusionDefinition.superRange == 9);
+            Assert(check, "typed editor options preserves range 3", level.TrySetFusionOptions(board).Success && level.FusionDefinition.superRange == 3);
+            string path = Path.Combine(output, "super-range-fixture-project");
+            var saved = workspace.SaveWorkspace(path);
+            Assert(check, "range project saves", saved.Success, saved.Message);
+            if (saved.Success) {
+                var reopened = LevelEditorWorkspace.LoadDirectory(path);
+                Assert(check, "range 3 survives disk reload", reopened.Levels[0].FusionDefinition.superRange == 3);
+            }
+            var badJson = EditorJson.Parse(level.SnapshotJson()); badJson.Get("fusion").Set("superRange", "3");
+            Assert(check, "raw string range rejects before typed parsing", LevelEditorDocument.ValidateStage(0, badJson.ToJson()).Any(i => i.IsError));
+        }
+        static void Collision(GameSession game, Action<string, bool, string> check, string variant) {
+            var board = Board(); board.finiteBoosters = variant != "unlimited3";
+            if (variant == "legacy_missing9") board = MissingRange(board);
+            Start(game, board, variant);
+            bool selected = game.SelectStreakBooster(StreakBooster.Super), launched = game.TryShoot(Vector2.up);
+            for (int step = 0; step < 120 && !game.FusionEvents.Any(e => e.Kind == "BoosterProc"); step++) game.QAAdvanceOneStep();
+            int procs = game.FusionEvents.Count(e => e.Kind == "BoosterProc");
+            Assert(check, variant + " actual inventory and physical collision trigger one Super", selected && launched && procs == 1 && game.StreakStock(StreakBooster.Super) == 2,
+                "procs=" + procs + " balls=" + Balls(game).Length);
+            Assert(check, variant + " third-cell brick is inside range", Piece(game, 4, 5).Brick.CurrentHealth == 97);
+            bool extended = variant != "finite3";
+            Assert(check, variant + " fourth-cell vertical and horizontal boundary", Piece(game, 4, 4).Brick.CurrentHealth == (extended ? 97 : 99)
+                && Piece(game, 0, 8).Brick.CurrentHealth == (extended ? 97 : 99));
+            Assert(check, variant + " leaves fusion rules valid", string.IsNullOrEmpty(game.FusionRuleError), game.FusionRuleError);
+        }
+        static void Useful(GameSession game, Action<string, bool, string> check, bool finite) {
+            var board = Board(); board.finiteBoosters = finite; board.pieces.Single(p => p.c == 4 && p.r == 8).hp = 1;
+            Start(game, board, finite ? "finite useful boundary" : "unlimited useful boundary");
+            bool selected = game.SelectStreakBooster(StreakBooster.Super), launched = game.TryShoot(Vector2.up);
+            game.QAAdvanceOneStep(); var ball = Balls(game).FirstOrDefault();
+            Assert(check, "controlled contact has an actual selected and launched ball " + finite, selected && launched && ball != null);
+            if (ball == null) return;
+            // Remove only the three-cell cross before this synthetic contact. No physics step or gravity
+            // occurs between carving and contact; the only useful targets are exactly four cells away.
+            var remove = game.FusionPieces.Where(p => p.Alive && (p.Definition.c == 4 && p.Definition.r >= 5 && p.Definition.r <= 7
+                || p.Definition.r == 8 && p.Definition.c >= 1 && p.Definition.c <= 7 && p.Definition.c != 4)).ToArray();
+            game.FusionRunAttack("qa:range_setup", 1, () => { foreach (var p in remove) game.FusionRemove(p, false); });
+            var carrier = Piece(game, 4, 8);
+            game.HitFusionBallAndPower(carrier.Brick, ball, carrier.Position);
+            int procs = game.FusionEvents.Count(e => e.Kind == "BoosterProc");
+            Assert(check, "range useful detection matches actual damage " + finite,
+                procs == (finite ? 0 : 1) && Piece(game, 4, 4).Brick.CurrentHealth == (finite ? 99 : 97)
+                && Piece(game, 0, 8).Brick.CurrentHealth == (finite ? 99 : 97), "procs=" + procs);
+            if (finite) Assert(check, "no useful target within 3 preserves the charge", game.FusionBallCharges(ball) == 1 && ball.StreakPower == StreakBooster.Super);
+        }
+        static void OrdinaryLine(GameSession game, Action<string, bool, string> check) {
+            var board = Board(); var line = board.pieces.Single(p => p.c == 4 && p.r == 8); line.kind = "line_v"; line.hp = 1;
+            Start(game, board, "ordinary line unchanged"); var runtime = Piece(game, 4, 8);
+            game.FusionRunAttack("qa:range_line", 1, () => game.FusionHit(runtime, 1, Vector2.up, runtime.Position, true));
+            for (int step = 0; step < 20; step++) game.QAAdvanceOneStep();
+            var far = Piece(game, 4, 0);
+            Assert(check, "ordinary line still reaches beyond finite Super 3", (!far.Alive || far.Brick.CurrentHealth < 99)
+                && game.FusionEvents.Any(e => e.Kind == "ToolActivated"), "farAlive=" + far.Alive + " farHp=" + far.Brick.CurrentHealth);
+        }
+    }
+}

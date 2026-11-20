@@ -1,0 +1,10 @@
+using System;
+using UnityEngine;
+public static class CombatFeedback79PlatformValidation {
+ public static void Run(){
+  if(BounceGarden.GameVersion.Name!="0.1.79")throw new Exception("Unexpected development baseline");
+  if(Resources.Load<Shader>("YarnTrail79")==null||Resources.Load<Texture2D>("Art/CombatFeedback79/jelly_particles")==null||Resources.Load<Texture2D>("Art/CombatFeedback79/paint_splatters")==null)throw new Exception("Feedback art/shader missing");
+  Debug.Log(BounceGarden.LocalProfile.RunSelfTests());Debug.Log(BounceGarden.LeagueSelfTests.RunAll());Debug.Log(BounceGarden.LeagueActiveSelfTests.RunAll());Debug.Log(BounceGarden.LeagueRoundSelfTests.RunAll());
+  Debug.Log("COMBAT_79_PLATFORM_OK levels="+(BounceGarden.AlphabetCampaign.Count));
+ }
+}

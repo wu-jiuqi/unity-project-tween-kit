@@ -1,0 +1,49 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class StreakBallArt {
+ [Serializable]public sealed class Entry {public string key;public float fraction;}
+ [Serializable]public sealed class Data {public Entry[] entries;}
+ static readonly Dictionary<StreakBooster,Sprite[]> frames=new Dictionary<StreakBooster,Sprite[]>();
+ static readonly Dictionary<StreakBooster,Material> materials=new Dictionary<StreakBooster,Material>(),trails=new Dictionary<StreakBooster,Material>();
+ static readonly Dictionary<StreakBooster,Sprite> beams=new Dictionary<StreakBooster,Sprite>();
+ static readonly Dictionary<string,float> fractions=new Dictionary<string,float>();static bool configured;
+ public static string Key(StreakBooster k)=>k==StreakBooster.Pierce?"pierce":k==StreakBooster.Bomb?"bomb":"super";
+ static void Ensure(StreakBooster k){
+  if(frames.ContainsKey(k))return;
+  if(!configured){configured=true;var data=Resources.Load<TextAsset>("Art/StreakBoostersV62/footprints");if(data!=null)foreach(var e in JsonUtility.FromJson<Data>(data.text).entries)fractions[e.key]=e.fraction;}
+  string key=Key(k);var atlas=Resources.Load<Texture2D>("Art/StreakBoostersV62/"+key);if(atlas==null)throw new InvalidOperationException("Missing booster art "+key);
+  var sprites=new Sprite[16];float w=atlas.width/4f,h=atlas.height/4f;
+  for(int i=0;i<16;i++){sprites[i]=Sprite.Create(atlas,new Rect(i%4*w,(3-i/4)*h,w,h),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);sprites[i].name="streak62-"+key+"-"+i;}frames[k]=sprites;
+  materials[k]=new Material(WorldArt.BoardMaterial){name="Booster atlas "+key,mainTexture=atlas};
+  var strand=Resources.Load<Texture2D>("Art/StreakBoostersV62/"+key+"-trail");if(strand==null)throw new InvalidOperationException("Missing booster trail "+key);
+  trails[k]=new Material(WorldArt.BoardMaterial){name="Booster trail "+key,mainTexture=strand};
+  beams[k]=Sprite.Create(strand,new Rect(0,0,strand.width,strand.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);beams[k].name="streak62-"+key+"-beam";
+ }
+ public static Sprite Frame(StreakBooster kind,int frame){Ensure(kind);return frames[kind][Mathf.Clamp(frame,0,15)];}
+ public static Material Material(StreakBooster kind){Ensure(kind);return materials[kind];}
+ public static Material Trail(StreakBooster kind){Ensure(kind);return trails[kind];}
+ public static Sprite Beam(StreakBooster kind){Ensure(kind);return beams[kind];}
+ public static float BallScale(StreakBooster kind){Ensure(kind);float f=fractions.TryGetValue(Key(kind),out var v)?v:.75f;return FlightGeometry.Radius*2/(frames[kind][4].bounds.size.x*f);}
+ public static void ReleaseContentCache(){foreach(var sheet in frames.Values)foreach(var sprite in sheet)if(sprite!=null)UnityEngine.Object.Destroy(sprite);foreach(var sprite in beams.Values)if(sprite!=null)UnityEngine.Object.Destroy(sprite);foreach(var m in materials.Values)if(m!=null)UnityEngine.Object.Destroy(m);foreach(var m in trails.Values)if(m!=null)UnityEngine.Object.Destroy(m);frames.Clear();beams.Clear();materials.Clear();trails.Clear();}
+}
+public sealed class StreakImpactPool:MonoBehaviour {
+ struct Slot {public SpriteRenderer View;public StreakBooster Kind;public float Age,Size;public bool Active;}
+ readonly Slot[] slots=new Slot[32];GameSession owner;int cursor;
+ public int Played {get;private set;}public int ActiveCount {get;private set;}
+ public void Initialize(GameSession game){owner=game;for(int i=0;i<slots.Length;i++){var view=new GameObject("Booster impact slot "+i);view.transform.SetParent(transform,false);slots[i].View=view.AddComponent<SpriteRenderer>();slots[i].View.sortingOrder=75;view.SetActive(false);}for(int i=1;i<=3;i++)StreakBallArt.Frame((StreakBooster)i,8);}
+ public void Play(StreakBooster kind,Vector2 position,float size){
+  int at=cursor++%slots.Length;ref var slot=ref slots[at];slot.Kind=kind;slot.Age=0;slot.Size=size;slot.Active=true;slot.View.transform.position=position;slot.View.transform.rotation=Quaternion.identity;slot.View.sprite=StreakBallArt.Frame(kind,8);slot.View.sharedMaterial=StreakBallArt.Material(kind);slot.View.color=new Color(1,1,1,.85f);slot.View.transform.localScale=Vector3.one*(size/slot.View.sprite.bounds.size.x);slot.View.gameObject.SetActive(true);Played++;
+ }
+ void Update(){if(owner==null||owner.IsPaused)return;ActiveCount=0;for(int i=0;i<slots.Length;i++){ref var s=ref slots[i];if(!s.Active)continue;s.Age+=Time.deltaTime;int frame=(int)(s.Age*16);if(!owner.IsPlaying||frame>=8){s.Active=false;s.View.gameObject.SetActive(false);continue;}s.View.sprite=StreakBallArt.Frame(s.Kind,8+frame);ActiveCount++;}}
+}
+public sealed partial class GameSession {
+ StreakImpactPool streakArtFx;
+ public int StreakArtImpacts=>streakArtFx!=null?streakArtFx.Played:0;
+ void PrepareStreakArtFx(){if(streakArtFx!=null)return;var root=new GameObject("Pooled booster artwork");root.transform.SetParent(world,false);streakArtFx=root.AddComponent<StreakImpactPool>();streakArtFx.Initialize(this);}
+ public void PlayStreakImpact(StreakBooster kind,Vector2 point){if(kind==StreakBooster.Pierce&&IsPlaying&&!IsPaused)SoundService.Play("pierce_pass");if(!(IsStreakTrial||UsesShopBoosters)||!IsPlaying||IsPaused||!FeedbackProfile.Active.enabledFeedback)return;if(kind!=StreakBooster.Pierce)CombatFeel?.VisualImpact();PrepareStreakArtFx();streakArtFx.Play(kind,point,kind==StreakBooster.Pierce?.75f:kind==StreakBooster.Bomb?CollectionLevels.Pitch*3:1.4f);}
+ void RefreshLoadedStreakBall(){if(!(IsStreakTrial||UsesShopBoosters)||loadedBall==null)return;var image=loadedBall.GetComponent<SpriteRenderer>();var k=SelectedStreakBooster;image.color=Color.white;if(k==StreakBooster.None){image.sprite=YarnArt.Ball(YarnVariant);image.sharedMaterial=WorldArt.BoardMaterial;loadedBall.localScale=Vector3.one;}else{image.sprite=StreakBallArt.Frame(k,4+(int)(simulationClock*12)%4);image.sharedMaterial=StreakBallArt.Material(k);loadedBall.localScale=Vector3.one*StreakBallArt.BallScale(k);}}
+ void DrawStreakBeam(Vector2 from,Vector2 to){DrawJellyPowerBeam(1,from,to);Vector2 delta=to-from;if(delta.sqrMagnitude<.0001f)return;var root=new GameObject("Generated super light beam").transform;root.SetParent(world,false);root.position=(from+to)*.5f;root.rotation=Quaternion.Euler(0,0,Mathf.Atan2(delta.y,delta.x)*Mathf.Rad2Deg);var image=root.gameObject.AddComponent<SpriteRenderer>();image.sprite=StreakBallArt.Beam(StreakBooster.Super);image.sharedMaterial=StreakBallArt.Trail(StreakBooster.Super);image.sortingOrder=73;image.color=new Color(1,1,1,.85f);root.localScale=new Vector3(delta.magnitude/image.sprite.bounds.size.x,.17f/image.sprite.bounds.size.y,1);chainBeams.Add(new ChainBeam{View=root,Life=.20f,Duration=.20f,StartAlpha=.85f});}
+}
+}

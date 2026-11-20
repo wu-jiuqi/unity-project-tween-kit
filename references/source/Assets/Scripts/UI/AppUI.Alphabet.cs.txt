@@ -1,0 +1,43 @@
+using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public partial class AppUI {
+ AlphabetIntroductionView alphabetIntroduction;
+ public bool AlphabetIntroActive=>alphabetIntroduction!=null||interfaceTour!=null;
+ public Rect AlphabetSafeRect=>ViewSafe;
+ public Vector2Int AlphabetViewport=>MenuAvoidanceViewport;
+ void CloseAlphabetIntroduction(){CloseInterfaceTour();if(alphabetIntroduction==null)return;var view=alphabetIntroduction;alphabetIntroduction=null;view.Cancel();}
+ IEnumerator ShowAlphabetIntroductions(int generation){
+  if(Session.IsOpening){yield return ShowOpeningIntroduction(generation);yield break;}
+  foreach(var page in AlphabetCampaign.Introductions(currentLevel)){
+   if(Session.SevenSpecialActive&&(page.id==4||page.id==5||page.id==10))continue;
+   if(Profile.HasAlphabetIntro(page.id))continue;
+   bool complete=false;
+   var root=UICraft.Root(canvasRoot,"Alphabet introduction "+page.id);
+   alphabetIntroduction=root.gameObject.AddComponent<AlphabetIntroductionView>();
+   alphabetIntroduction.Begin(this,page,()=>{Profile.MarkAlphabetIntro(page.id);complete=true;});
+   while(!complete&&generation==viewGeneration&&alphabetIntroduction!=null)yield return null;
+   if(generation!=viewGeneration){CloseAlphabetIntroduction();yield break;}
+   alphabetIntroduction=null;
+  }
+
+ }
+ public void QAAdvanceAlphabetIntro(){if(!RuntimeQA.IsIsolated)return;if(interfaceTour!=null)interfaceTour.AdvanceForQA();if(alphabetIntroduction!=null)alphabetIntroduction.AdvanceForQA();}
+ public void QAShowAlphabetIntro(int id){if(!RuntimeQA.IsIsolated)return;CloseAlphabetIntroduction();Session.SetPaused(true);var root=UICraft.Root(canvasRoot,"Alphabet introduction preview "+id);alphabetIntroduction=root.gameObject.AddComponent<AlphabetIntroductionView>();alphabetIntroduction.Begin(this,AlphabetCampaign.Intro(id),()=>{alphabetIntroduction=null;});}
+ public AlphabetIntroductionView QAAlphabetIntro=>alphabetIntroduction;
+ // Historical entry points now open the continuous replayable tree.
+ void OpenAlphabetStagePage(int ignored){ShowPage("chapters");}
+ RectTransform BuildAlphabetResultActions(){
+  var root=UICraft.Root(results,"Alphabet result actions");AddScoreResult(root);bool final=currentLevel==AlphabetCampaign.Count-1;
+  UICraft.Button(root,final?(returnToTree?"全部通关 · 返回关卡":"全部通关 · 返回花园"):"继续 · 第"+(currentLevel+2)+"关",0,-736,856,172,UICraft.Green,()=>{
+   if(!baseRewardSaved){baseRewardSaved=Profile.CommitAlphabetWin(resultKey,currentLevel,Session.Score);if(!baseRewardSaved){Toast("进度保存失败，请重试。");return;}}
+   if(ShowPendingLeagueBeforeContinue())return;
+   if(final)ReturnHome();else BeginLevel(currentLevel+1);
+  },final?45:62);
+  UICraft.Button(root,returnToTree?"返回关卡":"返回花园",0,-940,500,120,UICraft.Blue,ReturnHome,36);return root;
+ }
+}
+}
+

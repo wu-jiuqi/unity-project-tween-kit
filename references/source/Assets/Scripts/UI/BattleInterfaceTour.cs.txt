@@ -1,0 +1,65 @@
+using System;
+using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ public bool HasBattleInterfaceTour=>committed.Contains("battle-interface-tour-v1");
+ public bool MarkBattleInterfaceTour()=>LeagueTransaction(()=>committed.Add("battle-interface-tour-v1"));
+}
+public partial class AppUI {
+ BattleInterfaceTour interfaceTour;
+ public BattleInterfaceTour QABattleTour=>interfaceTour;
+ IEnumerator ShowBattleInterfaceTour(int generation){
+  if(Profile.HasBattleInterfaceTour)yield break;
+  var hud=GetComponentInChildren<ChainCollectionHUD>();if(hud==null)yield break;
+  bool complete=false;CancelAim();Session.SetPaused(true);
+  interfaceTour=UICraft.Root(canvasRoot,"First battle interface tour").gameObject.AddComponent<BattleInterfaceTour>();
+  interfaceTour.Begin(this,hud,()=>{Profile.MarkBattleInterfaceTour();complete=true;});
+  while(!complete&&generation==viewGeneration&&interfaceTour!=null)yield return null;
+  if(interfaceTour!=null){Destroy(interfaceTour.gameObject);interfaceTour=null;}
+ }
+ void CloseInterfaceTour(){if(interfaceTour!=null){Destroy(interfaceTour.gameObject);interfaceTour=null;}}
+}
+public sealed class BattleInterfaceTour:MonoBehaviour {
+ AppUI app;ChainCollectionHUD hud;RectTransform root,bubble,hand;readonly Image[] dim=new Image[4];Image outline;TMP_Text heading,body,progress;Action completed;int step;float age,lastAdvance;
+ public int Step=>step;public Rect FocusRect{get;private set;}
+ public void Begin(AppUI owner,ChainCollectionHUD collection,Action done){
+  app=owner;hud=collection;completed=done;root=(RectTransform)transform;
+  var blocker=gameObject.AddComponent<Image>();blocker.color=Color.clear;blocker.raycastTarget=true;
+  var tap=gameObject.AddComponent<Button>();tap.transition=Selectable.Transition.None;tap.onClick.AddListener(Advance);
+  for(int i=0;i<4;i++){dim[i]=UICraft.Box(root,"Tour dim "+i,0,0,1,1,new Color(.08f,.1f,.06f,.7f));dim[i].sprite=null;dim[i].raycastTarget=false;}
+  outline=TutorialArt.Picture(root,"Live interface focus","target-outline",Vector2.zero,Vector2.one*150);outline.raycastTarget=false;
+  bubble=UICraft.Root(root,"Garden tour speech",0,0,850,440);
+  var plate=OnboardingArt.Draw(bubble,"Speech background",1,1,0,0,850,440);plate.type=Image.Type.Sliced;plate.preserveAspect=false;
+  heading=UICraft.Label(bubble,"",0,125,740,70,43,UICraft.Ink);body=UICraft.Label(bubble,"",0,10,730,180,36,UICraft.Ink);body.textWrappingMode=TextWrappingModes.Normal;
+  progress=UICraft.Label(bubble,"",0,-135,740,60,28,new Color(.35f,.52f,.30f));
+  hand=OnboardingArt.Draw(root,"Tour pointer",2,0,0,0,145,185).rectTransform;
+  lastAdvance=Time.unscaledTime;Place();
+ }
+ Rect RectOf(RectTransform target){var canvas=GetComponentInParent<Canvas>();var cam=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;var corners=new Vector3[4];target.GetWorldCorners(corners);Vector2 lo=Vector2.positiveInfinity,hi=Vector2.negativeInfinity;foreach(var corner in corners){RectTransformUtility.ScreenPointToLocalPointInRectangle(root,RectTransformUtility.WorldToScreenPoint(cam,corner),cam,out var p);lo=Vector2.Min(lo,p);hi=Vector2.Max(hi,p);}return Rect.MinMaxRect(lo.x-18,lo.y-18,hi.x+18,hi.y+18);}
+ Vector2 World(Vector2 p){var canvas=GetComponentInParent<Canvas>();var cam=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;RectTransformUtility.ScreenPointToLocalPointInRectangle(root,Camera.main.WorldToScreenPoint(BoardDisplay.Forward(p)),cam,out var local);return local;}
+ void Block(int i,float x,float y,float w,float h){dim[i].rectTransform.anchoredPosition=new Vector2(x,y);dim[i].rectTransform.sizeDelta=new Vector2(Mathf.Max(0,w),Mathf.Max(0,h));}
+ void Place(){
+  if(hud==null||Camera.main==null)return;Rect focus;
+  if(step==0)focus=RectOf(hud.GoalsRect);
+  else if(step==1)focus=RectOf(hud.Cards[0].ContentRect);
+  else if(step==2)focus=RectOf(hud.StepsRect);
+  else {Vector2 p=World(step==3?FindTarget():app.Session.LauncherPosition);focus=new Rect(p-Vector2.one*(step==3?65:115),Vector2.one*(step==3?130:230));}
+  var r=root.rect;focus=Rect.MinMaxRect(Mathf.Clamp(focus.xMin,r.xMin,r.xMax),Mathf.Clamp(focus.yMin,r.yMin,r.yMax),Mathf.Clamp(focus.xMax,r.xMin,r.xMax),Mathf.Clamp(focus.yMax,r.yMin,r.yMax));FocusRect=focus;
+  Block(0,(r.xMin+focus.xMin)*.5f,r.center.y,focus.xMin-r.xMin,r.height);Block(1,(focus.xMax+r.xMax)*.5f,r.center.y,r.xMax-focus.xMax,r.height);Block(2,focus.center.x,(r.yMin+focus.yMin)*.5f,focus.width,focus.yMin-r.yMin);Block(3,focus.center.x,(focus.yMax+r.yMax)*.5f,focus.width,r.yMax-focus.yMax);
+  outline.rectTransform.anchoredPosition=focus.center;outline.rectTransform.sizeDelta=focus.size+Vector2.one*10;outline.rectTransform.localScale=Vector3.one*(1+.018f*Mathf.Sin(age*5));
+  float safeTop=r.yMax-110,safeBottom=r.yMin+130;float y=focus.center.y>0?focus.yMin-280:focus.yMax+280;y=Mathf.Clamp(y,safeBottom+220,safeTop-220);
+  float width=Mathf.Min(850,r.width-70);bubble.sizeDelta=new Vector2(width,440);bubble.localScale=Vector3.one*Mathf.Min(1,width/850);bubble.anchoredPosition=new Vector2(0,y);
+  hand.anchoredPosition=new Vector2(Mathf.Clamp(focus.xMax+20,r.xMin+90,r.xMax-90),focus.yMin-80+Mathf.Sin(age*4)*10);
+  string[] titles={"这是本关的收集目标","看看图标和数字","这是剩余步数","在棋盘上找到它","准备发射！"};
+  string[] copy={"把上方的目标全部收集齐，\n就能过关。","图标告诉你要收集什么。\n数字表示还需要收集多少个。","每次发射消耗1步，\n一步会连续发出5颗球。","打碎对应的目标砖，\n收集物就会飞进上方目标区。","拖动瞄准，松手发射。\n试试利用墙壁反弹！"};
+  heading.text=titles[step];body.text=copy[step];progress.text=(step+1)+" / 5　·　"+(step==4?"点击开始":"点击继续");
+ }
+ Vector2 FindTarget(){foreach(var b in app.Session.CollectionBricks)if(b.Alive&&app.Session.IsJellyTarget(b))return b.transform.position;return Vector2.zero;}
+ public void Advance(){if(Time.unscaledTime-lastAdvance<.25f)return;lastAdvance=Time.unscaledTime;if(step<4){step++;age=0;Place();SoundService.Play("click");return;}var done=completed;completed=null;gameObject.SetActive(false);done?.Invoke();}
+ public void AdvanceForQA(){lastAdvance=-100;Advance();}
+ void Update(){age+=Time.unscaledDeltaTime;Place();}
+}
+}

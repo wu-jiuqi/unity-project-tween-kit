@@ -1,0 +1,45 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace BounceGarden {
+public sealed class CatCosmeticsQA:MonoBehaviour {
+ string dir;int checks,failures,errors,width=540,height=1170;AppUI app;Camera cam;RenderTexture target;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){var args=Environment.GetCommandLineArgs();if(Array.IndexOf(args,"--qa")>=0&&Array.IndexOf(args,"--cosmetics-qa")>=0)new GameObject("Cat cosmetics integration audit").AddComponent<CatCosmeticsQA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(Path.Combine(dir,"checks.txt"),(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();Canvas.ForceUpdateCanvases();cam.Render();var old=RenderTexture.active;RenderTexture.active=target;var image=new Texture2D(width,height,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,width,height),0,0);image.Apply();RenderTexture.active=old;File.WriteAllBytes(Path.Combine(dir,name+".png"),image.EncodeToPNG());Destroy(image);}
+ CatCosmeticPortrait Header()=>GameObject.Find("Avatar medallion").GetComponentInChildren<CatCosmeticPortrait>();
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(Path.Combine(dir,"checks.txt"),"");int index=Array.IndexOf(args,"--qa-size");if(index>=0){var size=args[index+1].Split('x');width=int.Parse(size[0]);height=int.Parse(size[1]);}
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(1);app=FindFirstObjectByType<AppUI>();cam=Camera.main;target=new RenderTexture(width,height,24);target.Create();cam.targetTexture=target;var canvas=FindFirstObjectByType<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=cam;canvas.planeDistance=1;app.QASetViewport(new Vector2Int(width,height));app.QAStaticNavigation("home");yield return new WaitForSecondsRealtime(.7f);
+  Check(CatCosmeticCatalog.Validate().StartsWith("PASS"),"20 sprites and 100 covered pair layouts load in built player");
+  Check(Header().AvatarId=="01_british_shorthair"&&Header().FrameId=="01_british_shorthair","home header uses default British pair");
+  Check(GameObject.Find("Avatar medallion/garden_frame")==null,"old header placeholder removed");yield return Capture("01-home");
+  var audit=UICraft.Root(canvas.transform,"Hidden pair audit",0,0,256,256);audit.gameObject.SetActive(false);
+  foreach(var avatar in CatCosmeticCatalog.Items)foreach(var frame in CatCosmeticCatalog.Items){
+   var pair=CatCosmeticCatalog.Create(audit,avatar.avatar.resource,frame.frame.resource,0,0,256);var a=pair.Find("Avatar").GetComponent<Image>();var f=pair.Find("Frame").GetComponent<Image>();var layout=CatCosmeticCatalog.Pair(avatar,frame);var r=a.rectTransform;
+   Check(a.sprite==CatCosmeticCatalog.Sprite(avatar.avatar.resource)&&f.sprite==CatCosmeticCatalog.Sprite(frame.frame.resource)&&!a.raycastTarget&&!f.raycastTarget&&Mathf.Abs((r.anchorMax.x-r.anchorMin.x)-layout.scale)<.00001f&&Mathf.Abs((r.anchorMax.y+r.anchorMin.y)*.5f-(.5f-layout.offsetY))<.00001f&&f.transform.GetSiblingIndex()>a.transform.GetSiblingIndex(),"runtime pair "+avatar.id+" / "+frame.id);
+  }
+  Destroy(audit.gameObject);
+  foreach(var item in CatCosmeticCatalog.Items)Check(Resources.Load<GameObject>("Art/CatCosmeticsV3/prefabs/"+item.id)!=null,"imported prefab "+item.id);
+  Check(CatCosmeticCatalog.FindAvatar("LeagueV1/reward_avatar").id=="02_ragdoll"&&CatCosmeticCatalog.FindFrame("LeagueV1/reward_frame").id=="02_ragdoll","legacy reward paths resolve to new pair");
+  Check(CatCosmeticCatalog.FindAvatar("LeagueV1/avatar_luna")!=null&&CatCosmeticCatalog.FindAvatar("avatar_mochi")!=null&&CatCosmeticCatalog.FindAvatar("LeagueV1/avatar_sunny")!=null&&CatCosmeticCatalog.FindAvatar("avatar_clover")!=null&&CatCosmeticCatalog.FindAvatar("avatar_poppy")!=null,"all five saved rival aliases resolve");
+  app.QAStaticNavigation("ranking");yield return new WaitForSecondsRealtime(.9f);var league=FindFirstObjectByType<LeagueRankingView>();
+  Check(league.RowCount==21,"all leaderboard rows present");Check(league.ListContent.GetComponentsInChildren<CatCosmeticPortrait>().Select(p=>p.AvatarId).Distinct().Count()==10,"all ten breeds present in rival roster");
+  Check(league.ListContent.GetComponentsInChildren<CatCosmeticPortrait>().All(p=>p.transform.Find("Frame")!=null),"rival and player rows include frames");yield return Capture("02-ranking");
+  app.OpenLeagueRewards();yield return new WaitForSecondsRealtime(.35f);Check(FindObjectsByType<CatCosmeticPortrait>(FindObjectsSortMode.None).Any(p=>p.AvatarId=="02_ragdoll"&&((RectTransform)p.transform).rect.width==290),"reward panel shows combined new artwork");yield return Capture("03-reward-preview");
+  var clock=new LeagueSelfTests.Clock{Now=DateTimeOffset.UtcNow.ToUnixTimeSeconds()};app.Profile.ConfigureLeague(new ResourceLeagueConfigProvider(),clock);for(int i=0;i<60;i++)app.LeagueSource.AddTestMedals();clock.Now+=8*86400L;var pending=app.LeagueSource.Read().reward;
+  Check(pending!=null,"eligible pending cosmetic reward");if(pending!=null){int coins=app.Profile.Coins;Check(app.LeagueSource.Claim(pending.periodId),"cosmetic reward still claims");Check(app.Profile.Coins==coins+pending.coins&&!app.LeagueSource.Claim(pending.periodId),"claim remains idempotent");Check(app.LeagueSource.Equip(pending.avatarId,pending.frameId),"equip owned avatar and frame");app.OpenLeagueCustomization();yield return new WaitForSecondsRealtime(.3f);yield return Capture("04-customize");
+   app.QAStaticNavigation("home");yield return new WaitForSecondsRealtime(.5f);Check(Header().AvatarId=="02_ragdoll"&&Header().FrameId=="02_ragdoll","equipped pair shown in home header");yield return Capture("05-equipped-home");
+   Check(app.LeagueSource.Equip(pending.avatarId,""),"avatar can be equipped independently");app.QAStaticNavigation("home");yield return null;Check(Header().AvatarId=="02_ragdoll"&&Header().FrameId=="01_british_shorthair","independent selection uses measured mixed pair");
+   var saved=app.Profile.ExportForQA().Replace("CatCosmeticsV3/avatars/02_ragdoll","LeagueV1/reward_avatar").Replace("CatCosmeticsV3/frames/02_ragdoll","LeagueV1/reward_frame");var old=LocalProfile.ImportForQA(saved);var root=LeaguePortrait.Create(canvas.transform,old,"",0,0,256,true);Check(root.GetComponent<CatCosmeticPortrait>().AvatarId=="02_ragdoll","old saved equipped resource renders new avatar");Destroy(root.gameObject);
+  }
+  app.QAStaticNavigation("home");app.QAStartLevel(6);yield return app.QAWaitForLevel();yield return new WaitForSecondsRealtime(.3f);var hud=GameObject.Find("Battle HUD");Check(hud.GetComponentsInChildren<CatCosmeticPortrait>().Any(p=>p.AvatarId=="02_ragdoll"),"battle HUD uses equipped portrait");yield return Capture("06-battle");
+  File.AppendAllText(Path.Combine(dir,"checks.txt"),$"RESULT checks={checks} failed={failures} errors={errors}\n");Application.Quit(failures+errors==0?0:1);
+ }
+}
+}

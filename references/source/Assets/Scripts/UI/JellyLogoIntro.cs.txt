@@ -1,0 +1,28 @@
+using System.Collections;using UnityEngine;using UnityEngine.UI;using DG.Tweening;using TMPro;using System.Collections.Generic;
+namespace BounceGarden {
+public sealed class JellyLogoIntro:MonoBehaviour {
+ public const float HoldDuration=6.8f,FadeDuration=.4f;
+ RectTransform logo;TMP_Text quote;Sequence reveal;readonly List<JellyGlyph> glyphs=new List<JellyGlyph>();
+ public void Begin(){logo=PastelLogo.Create(transform,0,190,850,370);
+ quote=UICraft.Label(transform,"玩上五分钟，\n快乐一整天。",0,-190,900,160,48,UICraft.Ink);quote.ForceMeshUpdate();int characters=quote.textInfo.characterCount;quote.maxVisibleCharacters=0;
+ int index=0;foreach(Transform item in logo){var glyph=item.gameObject.AddComponent<JellyGlyph>();glyphs.Add(glyph);glyph.Begin(index++);}StartCoroutine(ReleaseAfterLanding());
+ reveal=DOTween.Sequence().SetUpdate(true);reveal.AppendInterval(2.05f);float visible=0;reveal.Append(DOTween.To(()=>visible,v=>{visible=v;quote.maxVisibleCharacters=Mathf.FloorToInt(v);},characters,characters*.035f).SetEase(Ease.Linear));
+ }
+ IEnumerator ReleaseAfterLanding(){while(glyphs.Exists(g=>!g.DropComplete))yield return null;float release=Time.unscaledTime;foreach(var glyph in glyphs)glyph.ReleaseJelly(release);}
+ void OnDestroy(){reveal?.Kill();}
+}
+public sealed class JellyGlyph:BaseMeshEffect {
+ RectTransform rect;Vector2 rest;Sequence motion;float deformation,started,jellyStarted=-1,landingPitch=1;
+ CanvasGroup visibility;public bool DropStarted{get;private set;}
+ public bool DropComplete{get;private set;}public bool InSustainedPhase{get;private set;}
+ public void ReleaseJelly(float release){jellyStarted=release;}
+ // Hand-keyed impact poses at 30 fps, layered over the position tween.
+ static readonly Vector3[] Poses={new Vector3(1.32f,.65f,-7),new Vector3(1.39f,.61f,-4),new Vector3(1.26f,.73f,4),new Vector3(.87f,1.22f,6),new Vector3(.82f,1.27f,3),new Vector3(.94f,1.12f,-3),new Vector3(1.12f,.87f,-4),new Vector3(1.15f,.85f,-1),new Vector3(.95f,1.07f,2),new Vector3(.97f,1.04f,1),new Vector3(1.04f,.96f,-1),new Vector3(1.02f,.98f,0),Vector3.one};
+ public void Begin(int index){landingPitch=.94f+(index%4)*.035f;started=Time.unscaledTime;rect=(RectTransform)transform;rest=rect.anchoredPosition;rect.anchoredPosition=new Vector2(rest.x+(index%2==0?-22:22),1170f-((RectTransform)rect.parent).anchoredPosition.y+rect.rect.height+80);visibility=gameObject.AddComponent<CanvasGroup>();visibility.alpha=0;rect.localRotation=Quaternion.Euler(0,0,index%2==0?-13:12);rect.localScale=new Vector3(.87f,1.14f,1);
+ motion=DOTween.Sequence().SetUpdate(true);motion.AppendInterval(.12f+index*.105f);motion.AppendCallback(()=>{DropStarted=true;visibility.alpha=1;});motion.Append(DOTween.To(()=>rect.anchoredPosition,v=>rect.anchoredPosition=v,rest,.5f).SetEase(Ease.InCubic));motion.Join(rect.DOLocalRotate(Vector3.zero,.5f));motion.AppendCallback(()=>StartCoroutine(Impact()));
+ }
+ IEnumerator Impact(){SoundService.Play("jelly_land",landingPitch);for(int frame=0;frame<Poses.Length;frame++){var pose=Poses[frame];rect.localScale=new Vector3(pose.x,pose.y,1);rect.localRotation=Quaternion.Euler(0,0,frame==Poses.Length-1?0:pose.z);deformation=frame==Poses.Length-1?0:Mathf.Sin(frame*1.2f)*(1-frame/(float)Poses.Length);graphic.SetVerticesDirty();yield return new WaitForSecondsRealtime(1f/30f);}DropComplete=true;while(jellyStarted<0)yield return null;InSustainedPhase=true;while(Time.unscaledTime-started<JellyLogoIntro.HoldDuration){float t=Time.unscaledTime-jellyStarted;float remaining=JellyLogoIntro.HoldDuration-(Time.unscaledTime-started);float envelope=Mathf.Exp(-.42f*t)*Mathf.Clamp01(remaining/.65f);float wave=Mathf.Sin(t*11.5f);rect.localScale=new Vector3(1+wave*.17f*envelope,1-wave*.14f*envelope,1);rect.anchoredPosition=rest+new Vector2(0,Mathf.Abs(Mathf.Sin(t*5.75f))*21*envelope);rect.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*8)*3.8f*envelope);deformation=Mathf.Sin(Mathf.Floor(t*30)/30*11.5f)*.42f*envelope;graphic.SetVerticesDirty();yield return null;}rect.anchoredPosition=rest;rect.localScale=Vector3.one;rect.localRotation=Quaternion.identity;deformation=0;graphic.SetVerticesDirty();}
+ public override void ModifyMesh(VertexHelper mesh){if(!IsActive()||Mathf.Abs(deformation)<.001f)return;UIVertex vertex=default(UIVertex);var bounds=rect.rect;for(int i=0;i<mesh.currentVertCount;i++){mesh.PopulateUIVertex(ref vertex,i);float y=Mathf.InverseLerp(bounds.yMin,bounds.yMax,vertex.position.y);vertex.position.x+=(y-.5f)*bounds.width*.065f*deformation;vertex.position.y+=Mathf.Abs(vertex.position.x/bounds.width)*bounds.height*.04f*deformation;mesh.SetUIVertex(vertex,i);}}
+ protected override void OnDisable(){motion?.Kill();StopAllCoroutines();base.OnDisable();}
+}
+}

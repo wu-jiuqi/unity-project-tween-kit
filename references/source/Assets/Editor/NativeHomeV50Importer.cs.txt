@@ -1,0 +1,5 @@
+using UnityEditor;
+using UnityEngine;
+public sealed class NativeHomeV50Importer:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/NativeV50/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Single;t.mipmapEnabled=false;t.alphaIsTransparency=false;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=4096;t.textureCompression=TextureImporterCompression.Uncompressed;}
+}

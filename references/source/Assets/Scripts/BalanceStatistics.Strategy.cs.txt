@@ -1,0 +1,44 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class BalanceStatistics {
+ PlayerStrategyRecorder strategyRecorder;
+ public bool StrategyRecordingEnabled {get;set;}=true;
+ public void StrategyInput(string kind,Vector2 direction){Guard(()=>strategyRecorder?.Input(kind,direction));}
+ void BeginStrategy(){
+  strategyRecorder=null;game.StrategyObserver=null;
+  if(History.active==null||!game.IsOpening||!StrategyRecordingEnabled)return;
+  History.active.strategyVersion=2;History.active.strategy=new StrategyRound{engineHash=PlayerStrategyReport.EngineFingerprint,platform=Application.platform.ToString(),screenWidth=Screen.width,screenHeight=Screen.height};
+  strategyRecorder=new PlayerStrategyRecorder(game,History.active.strategy);AttachStrategyObserver();
+ }
+ void AttachStrategyObserver(){var data=History.active.strategy;game.StrategyObserver=e=>{try{strategyRecorder.Observe(e);}catch(Exception ex){data.enabled=false;data.coverage="collector-fault: "+ex.GetType().Name;throw;}};}
+ void ResumeStrategy(){if(History.active?.strategyVersion==2&&strategyRecorder!=null)AttachStrategyObserver();}
+ void TickStrategy(bool active){strategyRecorder?.Tick(Time.unscaledDeltaTime,active);}
+ void FinishStrategy(string outcome){
+  if(History.active?.strategyVersion!=2)return;
+  game.StrategyEmit(new StrategyEvent{kind="round-end",detail=outcome});game.StrategyObserver=null;
+  foreach(var s in History.active.strategy.shots.Where(s=>s.returnedAt<0))s.returnState="not_observed_at_"+outcome;
+ }
+ static void TrimStrategy(BalanceHistory history){
+  int detailed=0,bytes=0;
+  foreach(var r in history.rounds.AsEnumerable().Reverse())if(r.strategyVersion==2&&r.strategy!=null&&r.strategy.detailRetained){
+   int size=Encoding.UTF8.GetByteCount(JsonUtility.ToJson(r.strategy));
+   if(++detailed>20||(bytes+=size)>16*1024*1024){r.strategy.shots.Clear();r.strategy.events.Clear();r.strategy.specialUses.Clear();r.strategy.detailRetained=false;}
+  }
+ }
+ void AutomaticStrategyReport(){
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR
+  if(RuntimeQA.IsIsolated)return;
+  Guard(()=>{Directory.CreateDirectory(DirectoryPath);File.WriteAllText(Path.Combine(DirectoryPath,"latest-strategy-report.html"),PlayerStrategyReport.Html(History),new UTF8Encoding(false));});
+#endif
+ }
+ void ExportStrategyFiles(string folder){
+  File.WriteAllText(Path.Combine(folder,"strategy-shots.csv"),PlayerStrategyReport.ShotsCsv(History),new UTF8Encoding(true));
+  File.WriteAllText(Path.Combine(folder,"strategy-report.html"),PlayerStrategyReport.Html(History),new UTF8Encoding(false));
+  File.WriteAllText(Path.Combine(folder,"calibration.json"),PlayerStrategyReport.Calibration(History),new UTF8Encoding(false));
+ }
+}
+}

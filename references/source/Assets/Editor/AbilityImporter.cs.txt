@@ -1,0 +1,5 @@
+using UnityEditor;
+using UnityEngine;
+public sealed class AbilityImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/AbilityV27/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.alphaSource=TextureImporterAlphaSource.FromInput;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.isReadable=false;t.sRGBTexture=true;t.npotScale=TextureImporterNPOTScale.None;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.Uncompressed;}
+}

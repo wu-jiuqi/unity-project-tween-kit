@@ -1,0 +1,30 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.UIFloat",
+    "settings": [
+        {
+            "field": "amplitude",
+            "type": "System.Single",
+            "value": 12.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "speed",
+            "type": "System.Single",
+            "value": 1.399999976158142,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "phase",
+            "type": "System.Single",
+            "value": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    ]
+}

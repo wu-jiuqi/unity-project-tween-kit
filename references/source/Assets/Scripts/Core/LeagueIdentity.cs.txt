@@ -1,0 +1,19 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+namespace BounceGarden {
+public static class LeagueIdentity {
+ static readonly string[] Curated="糯米,晚风,桃桃,半杯奶茶,今天也种花,薄荷团子,午后小橘,月光花园,一只路过的猫,花还没浇,等风来的阿禾,四叶草,暖阳,小花,竹子,奶糖,泡芙,可可,芝麻,团子,薄荷,布丁,奶油,星星,月牙,豆包,花卷,露娜,小满,阿禾,山茶,白桃,小麦,柚子,栗子,小葵,松果,晴天,小雨,云朵,茶茶,橘子汽水,一颗软糖,猫在窗边,花园散步,慢慢开花,阳台有风,周末种花,偷闲喝茶,奶茶半糖,抱着小猫,向阳生长,早起浇花,今天晴朗,小猫打盹,春日来信,听风的猫,爱吃草莓,花间小憩,小熊饼干".Split(',');
+ static readonly string[] Prefix="薄荷,白桃,草莓,柠檬,蜜桃,桂花,抹茶,蜂蜜,云朵,月光,晨露,晚风,橘子,樱桃,青柚,奶油,香草,南瓜,山茶,暖阳".Split(',');
+ static readonly string[] Suffix="团子,布丁,小猫,花园,泡芙,奶糖,小屋,曲奇,软糖,茶茶".Split(',');
+ public static string[] CreateNames(Random rng,int count,string[] recent){
+  var blocked=new HashSet<string>(recent??new string[0],StringComparer.Ordinal);
+  var full=Curated.Where(n=>!blocked.Contains(n)).OrderBy(_=>rng.Next()).ToList();
+  var combo=Prefix.SelectMany(a=>Suffix.Select(b=>a+b)).Where(n=>!blocked.Contains(n)).OrderBy(_=>rng.Next()).ToList();
+  var result=new HashSet<string>(StringComparer.Ordinal);var names=new List<string>();
+  for(int i=0;i<count;i++){var pool=i%4==3?combo:full;if(pool.Count==0)pool=combo;
+   while(pool.Count>0){string n=pool[0];pool.RemoveAt(0);if(result.Add(n)){names.Add(n);break;}}}
+  if(names.Count!=count)throw new InvalidOperationException("League nickname pool exhausted");return names.ToArray();
+ }
+}
+}

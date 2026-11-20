@@ -1,0 +1,113 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+[Serializable] public sealed class OpeningGoal {public string kind,color;public int count,cookies;public OpeningTarget[] targets;}
+[Serializable] public sealed class OpeningTarget {public string kind,color;public int count;}
+[Serializable] public sealed class OpeningPiece {public string kind,color,appearance;public int c,r,layers,size,capacity,charge,hp;}
+[Serializable] public sealed class OpeningHealth {public int ordinaryHp=1,refillHp=1;}
+[Serializable] public sealed class OpeningHpOverride {public int c,r,hp;}
+[Serializable] public sealed class OpeningStage {public OpeningHealth health;public OpeningHpOverride[] hpOverrides;public int id,moves;public string name,focus,entry,lesson;public string[] rows;public OpeningGoal goal;public OpeningPiece[] pieces;}
+[Serializable] public sealed class OpeningData {public int version;public OpeningStage[] levels;}
+public static class OpeningCampaign {
+ static OpeningData data;
+ public const int Count=45;
+ public static OpeningTarget[] Targets(OpeningStage s){if(s.goal.kind=="multi")return s.goal.targets??Array.Empty<OpeningTarget>();var list=new List<OpeningTarget>();if(s.goal.kind=="ordinary_color")list.Add(new OpeningTarget{kind="ordinary_color",color=s.goal.color,count=s.goal.count});else{if(s.goal.count>0)list.Add(new OpeningTarget{kind="yarn",count=s.goal.count});if(s.goal.cookies>0)list.Add(new OpeningTarget{kind="cookie",count=s.goal.cookies});}return list.ToArray();}
+ public static bool Contains(int index)=>index>=0&&index<Count;
+ public static OpeningData Data {get {if(data==null){var asset=Resources.Load<TextAsset>("Opening/levels");if(asset==null)throw new InvalidOperationException("Missing opening campaign");data=JsonUtility.FromJson<OpeningData>(asset.text);if(data.levels==null||data.levels.Length!=Count)throw new InvalidOperationException("Invalid opening campaign");}return data;}}
+ public static OpeningStage Stage(int index)=>Data.levels[index];
+ public static int Color(string code)=>code=="P"?0:code=="Y"?1:code=="M"?2:code=="B"?3:code=="L"?4:throw new InvalidOperationException("Unknown five-colour code "+code);
+ public static AlphabetStage Metadata(int index){var s=Stage(index);return new AlphabetStage{letter=(index+1).ToString(),name=s.name,lesson=s.focus,moves=s.moves,pressure=index<4?1:1.3f,glyph=Enumerable.Repeat("00000",7).ToArray(),cells=Array.Empty<AlphabetCell>(),chests=Array.Empty<AlphabetChest>()};}
+ public static bool Allows(int index,int kind)=>Contains(index)&&SevenSpecialRules.IsSpecial(kind);
+ public static int ToolKind(string kind){switch(kind){case "bomb":return SevenSpecialRules.Bomb;case "horizontal":return SevenSpecialRules.Horizontal;case "vertical":return SevenSpecialRules.Vertical;case "cross":return SevenSpecialRules.Cross;case "rainbow":return SevenSpecialRules.Rainbow;default:throw new InvalidOperationException("Unknown opening special "+kind);}}
+ public static void LoadBalanceData(string json){if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Balance data requires isolation");var previous=data;try{data=JsonUtility.FromJson<OpeningData>(json);if(data?.levels==null||data.levels.Length!=Count)throw new InvalidOperationException("Need 45 stages");Validate();}catch{data=previous;throw;}}
+ public static void ValidateHealth(OpeningStage s){
+  if(s.health!=null&&(s.health.ordinaryHp<1||s.health.ordinaryHp>99||s.health.refillHp<1||s.health.refillHp>99))throw new InvalidOperationException("Opening HP must be 1-99");
+  var cells=new HashSet<int>();foreach(var p in s.hpOverrides??Array.Empty<OpeningHpOverride>()){if(p.c<0||p.c>8||p.r<0||p.r>8||p.hp<1||p.hp>99||!cells.Add(p.r*9+p.c)||s.rows[p.r][p.c]=='.'||s.pieces.Any(v=>v.kind!="ingot"&&p.c>=v.c&&p.c<v.c+(v.kind=="cookie_box"?2:1)&&p.r>=v.r&&p.r<v.r+(v.kind=="cookie_box"?2:1)))throw new InvalidOperationException("Invalid ordinary HP override");}
+ }
+ public static int InitialHp(OpeningStage s,int c,int r){var p=s.hpOverrides?.FirstOrDefault(v=>v.c==c&&v.r==r);return p?.hp??s.health?.ordinaryHp??1;}
+ public static int Validate(){
+  int checks=0;for(int i=0;i<Count;i++){
+   var s=Stage(i);if(s.id!=i+1||s.moves<=0||s.rows.Length!=9||s.rows.Any(r=>r.Length!=9||r.Any(c=>"PYMBL.".IndexOf(c)<0)))throw new InvalidOperationException("Opening grid "+i);
+   ValidateHealth(s);var positions=new HashSet<int>();foreach(var p in s.pieces){
+    int size=p.kind=="cookie_box"?2:1;
+    if(p.c<0||p.c+size>9||p.r<0||p.r+size>9)throw new InvalidOperationException("Opening piece bounds");
+    for(int r=p.r;r<p.r+size;r++)for(int c=p.c;c<p.c+size;c++)if(s.rows[r][c]=='.'||!positions.Add(r*9+c))throw new InvalidOperationException("Opening overlap");
+    if(p.kind=="yarn"){if(p.layers<1||p.layers>3)throw new InvalidOperationException("Yarn layers");}
+    else if(p.kind=="cookie_box"){if(p.size!=2||p.capacity<1||p.capacity>8)throw new InvalidOperationException("Cookie box size or capacity");}
+    else if(p.kind=="lucky_cat"){if(p.charge!=0)throw new InvalidOperationException("Cat starts charged");}
+    else if(p.kind=="ingot"){if(s.rows[p.r][p.c]!='Y')throw new InvalidOperationException("Ingot palette");}
+    else if(p.kind=="copper_coin"){if(i<30||p.hp<1||p.hp>OpeningCopperArt.MaxHealth)throw new InvalidOperationException("Copper HP or group");}
+    else if(!Allows(i,ToolKind(p.kind)))throw new InvalidOperationException("Opening special");checks++;
+   }
+   var goals=Targets(s);if(goals.Length==0)throw new InvalidOperationException("Missing goals");var keys=new HashSet<string>();foreach(var t in goals){if(t.count<=0||!keys.Add(t.kind+"/"+t.color))throw new InvalidOperationException("Invalid goal count or duplicate");if(t.kind=="ordinary_color")Color(t.color);else if(t.kind!="yarn"&&t.kind!="cookie"&&t.kind!="ingot"&&t.kind!="copper_coin")ToolKind(t.kind);}checks++;
+  }return checks;
+ }
+}
+
+public sealed partial class GameSession {
+ bool openingDraftSuppressed;
+ public bool IsOpening=>IsAlphabet&&!IsTutorial&&!IsStreakTrial&&!FusionActive&&!openingDraftSuppressed&&OpeningCampaign.Contains(LevelIndex);
+ public bool OpeningHasYarn=>IsOpening&&OpeningCampaign.Targets(OpeningStage).Any(t=>t.kind=="yarn");
+ public OpeningStage OpeningStage=>IsOpening?OpeningCampaign.Stage(LevelIndex):null;
+ int openingSupplySerial;long openingEliminationSerial,openingEliminationBatch;
+ readonly Dictionary<long,int> openingEliminationStrength=new Dictionary<long,int>();
+ readonly Dictionary<int,OpeningYarnView> openingYarn=new Dictionary<int,OpeningYarnView>();
+ readonly List<OpeningYarnEffect> openingYarnEffects=new List<OpeningYarnEffect>();
+ public int OpeningYarnLayersRemoved {get;private set;}
+ public int OpeningYarnPending=>openingYarnEffects.Count(v=>v!=null&&v.Pending);
+ void ClearOpening(){ClearOpeningTargets();ClearOpeningThird();ClearOpeningCopper();openingDraftSuppressed=false;openingYarn.Clear();openingCookies.Clear();openingYarnEffects.Clear();openingEliminationStrength.Clear();openingSupplySerial=0;openingEliminationSerial=openingEliminationBatch=0;OpeningYarnLayersRemoved=OpeningCookiesReleased=0;}
+ void TickOpeningYarn(float dt){if(IsPaused)return;TickOpeningCopper(dt);foreach(var box in openingCookies.Values)if(box!=null&&box.Brick.Alive)box.Tick(dt);foreach(var view in openingYarn.Values)if(view!=null&&view.Brick.Alive)view.Tick(dt);for(int i=openingYarnEffects.Count-1;i>=0;i--){var effect=openingYarnEffects[i];if(effect==null){openingYarnEffects.RemoveAt(i);continue;}effect.Tick(dt);if(!effect.Pending)openingYarnEffects.RemoveAt(i);}}
+ void InitializeOpeningGrid(){var steps=InitializeOpeningGridSteps(false);while(steps.MoveNext()){} }
+ System.Collections.IEnumerator InitializeOpeningGridSteps(bool incremental){
+  var s=OpeningStage;InitializeOpeningTargets();InitializeOpeningThird();
+  var occupiedByBoxes=new HashSet<int>();foreach(var box in s.pieces.Where(p=>p.kind=="cookie_box")){SpawnOpeningCookieBox(box);for(int y=box.r;y<box.r+2;y++)for(int x=box.c;x<box.c+2;x++)occupiedByBoxes.Add(y*9+x);}
+  for(int r=0;r<9;r++){if(incremental)yield return null;for(int c=0;c<9;c++){char code=s.rows[r][c];if(code=='.')continue;var p=s.pieces.FirstOrDefault(v=>v.c==c&&v.r==r);
+   if(occupiedByBoxes.Contains(r*9+c))continue;
+   if(p!=null&&p.kind=="copper_coin"){SpawnOpeningCopper(p);continue;}
+   if(p!=null&&p.kind=="lucky_cat"){SpawnOpeningCat(p);continue;}
+   if(p!=null&&p.kind!="yarn"&&p.kind!="ingot"){var tool=SpawnChainTool(OpeningCampaign.ToolKind(p.kind),ChainGridRules.Center(c,r),OpeningCampaign.Color(code.ToString()));tool.Ingot=p.appearance=="ingot";continue;}
+   CreateBrick(new BrickSpawn{position=ChainGridRules.Center(c,r),size=Vector2.one*.76f,hp=p==null||p.kind=="ingot"?OpeningCampaign.InitialHp(s,c,r):1,colorIndex=p!=null?0:OpeningCampaign.Color(code.ToString()),referenceCol=c,referenceRow=r,juiceGroup=0,reveal=p!=null?"opening-yarn":"opening-N",kind=BrickKind.Normal},0);
+   if(p!=null&&p.kind=="ingot"){OpeningSetIngot(CollectionBricks.Last());continue;}
+   if(p!=null){var brick=CollectionBricks.Last();var view=brick.gameObject.AddComponent<OpeningYarnView>();view.Initialize(this,brick,p.layers);openingYarn[brick.Id]=view;}
+  }}
+  ChainMessage=s.name+" · "+s.focus;PlanChainRow();
+ }
+ void OpeningPrepareSpawn(BrickSpawn d){if(!IsOpening)return;if(string.IsNullOrEmpty(d.reveal)&&d.kind==BrickKind.Normal&&d.juiceGroup==0){d.reveal="opening-N";d.hp=OpeningStage.health?.refillHp??1;d.colorIndex=(openingSupplySerial++*3+LevelIndex)%5;}}
+ void OpeningTrackTarget(BrickBody brick){if(!IsOpening||brick.Definition.reveal!="opening-N")return;foreach(var label in brick.GetComponentsInChildren<TMPro.TMP_Text>())label.gameObject.SetActive(brick.Definition.hp>1);}
+ public bool OpeningYarnBrick(BrickBody brick)=>brick!=null&&brick.Definition.reveal=="opening-yarn";
+ bool OpeningBlockYarn(BrickBody brick){if(!IsOpening||!OpeningYarnBrick(brick))return false;if(openingYarn.TryGetValue(brick.Id,out var view))view.Bounce();ChainBlocks++;ChainMessage="消除毛线团上下左右的砖块";changed=true;return true;}
+ void OpeningRemoved(BrickBody brick,Vector2? originalPosition=null,bool collect=true){
+  if(!IsOpening||OpeningCopperBrick(brick)||OpeningYarnBrick(brick)||OpeningCookieBrick(brick)||OpeningCatBrick(brick))return;
+  if(collect){OpeningCreditBrick(brick);if(OpeningIngotBrick(brick))OpeningPlayRing(originalPosition??(Vector2)brick.transform.position);}
+  OpeningEliminatedAt(originalPosition??brick.GetComponent<Rigidbody2D>().position);
+ }
+ int OpeningAttackStrength=>openingEliminationStrength.TryGetValue(openingEliminationBatch,out int strength)?strength:1;
+ long OpeningAttackId=>openingEliminationBatch!=0?openingEliminationBatch:++openingEliminationSerial;
+ bool OpeningHitYarn(BrickBody brick,int strength=1){
+  if(!IsOpening||brick==null||!brick.Alive||!OpeningYarnBrick(brick))return false;
+  if(openingYarn.TryGetValue(brick.Id,out var view))OpeningApplyYarn(view,OpeningAttackId,Mathf.Max(strength,OpeningAttackStrength));
+  return true;
+ }
+ void OpeningApplyYarn(OpeningYarnView view,long batch,int strength){
+  if(view==null||!view.Brick.Alive)return;int before=view.Layers;
+  if(!view.RemoveLayer(batch,strength))return;
+  StrategyEmit(new StrategyEvent{kind="layer",target=StrategyBrickId(view.Brick),targetKind="yarn",amount=before-view.Layers});OpeningYarnLayersRemoved+=before-view.Layers;if(view.Layers==0)OpeningCollectYarn(view);changed=true;
+ }
+ void OpeningEliminatedAt(Vector2 position){
+  if(!IsOpening)return;long batch=OpeningAttackId;int strength=OpeningAttackStrength;OpeningCopperAdjacent(position);OpeningCookieAdjacent(position,batch,strength);OpeningCatAdjacent(position,batch);
+  foreach(var view in openingYarn.Values.ToArray())if(view!=null&&view.Brick.Alive){var delta=view.Brick.GetComponent<Rigidbody2D>().position-position;float pitch=CollectionLevels.Pitch,tolerance=pitch*.13f;bool adjacent=Mathf.Abs(Mathf.Abs(delta.x)-pitch)<tolerance&&Mathf.Abs(delta.y)<tolerance||Mathf.Abs(Mathf.Abs(delta.y)-pitch)<tolerance&&Mathf.Abs(delta.x)<tolerance;if(adjacent)OpeningApplyYarn(view,batch,strength);}
+ }
+ void OpeningCollectYarn(OpeningYarnView view){
+  var brick=view.Brick;rules.DamageTarget(brick.Id,int.MaxValue,out _);Vector2 p=brick.GetComponent<Rigidbody2D>().position;
+  openingYarnEffects.Add(OpeningYarnEffect.Play(this,world,p,true,view.LayerRemaining));brick.Remove();BreakCount++;AddScore(ScoreRules.Break);ScheduleChainGravity();changed=true;
+ }
+ internal void OpeningYarnArrived(Vector2 position){if(IsOpening)OpeningCollect("yarn",position);}
+ internal void OpeningPlayLayerLoss(Vector2 p,int fromLayers=2,int toLayers=1,float delay=0,Transform follow=null){for(int layer=fromLayers;layer>Mathf.Max(1,toLayers);layer--){var effect=OpeningYarnEffect.Play(this,world,p,false,delay,layer);effect.Follow(follow);openingYarnEffects.Add(effect);delay+=OpeningYarnEffect.LayerDuration;}}
+ public Sprite OpeningGoalSprite(int jelly,int food=0)=>jelly>=0?SevenSpecialArt.OrdinaryIcon(jelly):food==1?SecondGroupArt.Sprite("fish-biscuit"):OpeningYarnArt.Icon;
+ long BeginOpeningElimination(int strength=1){long before=openingEliminationBatch;if(IsOpening){openingEliminationBatch=++openingEliminationSerial;openingEliminationStrength[openingEliminationBatch]=strength;}return before;}
+ void EndOpeningElimination(long before){if(openingEliminationBatch!=before)openingEliminationStrength.Remove(openingEliminationBatch);openingEliminationBatch=before;}
+}
+}

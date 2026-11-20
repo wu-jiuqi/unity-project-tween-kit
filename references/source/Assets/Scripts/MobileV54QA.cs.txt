@@ -1,0 +1,19 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class MobileV54QA:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--mobile-v54-qa"))new GameObject("Mobile hot-path allocation audit").AddComponent<MobileV54QA>();}
+ [Serializable]sealed class Result {public int ticks;public bool allocationCounterSupported;public long allocatedBytes;public double bytesPerTick,milliseconds;public int failures,errors;public string scope="Windows idle collection timing; allocation fields -1 when counter probe fails; not phone FPS";}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();string dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);int errors=0;Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(1);var app=FindFirstObjectByType<AppUI>();app.QAStartLevel(0);yield return app.QAWaitForLevel();for(int i=0;i<18;i++){app.QAAdvanceAlphabetIntro();yield return new WaitForSecondsRealtime(.1f);}var game=app.Session;game.QAIgnoreFocusLoss=true;game.SetPaused(false);game.enabled=false;
+  var tick=(Action<float>)Delegate.CreateDelegate(typeof(Action<float>),game,typeof(GameSession).GetMethod("TickChainCollection",BindingFlags.Instance|BindingFlags.NonPublic));
+  for(int i=0;i<200;i++)tick(1f/60);int shots=game.Shots;var watch=new System.Diagnostics.Stopwatch();long before=GC.GetAllocatedBytesForCurrentThread();watch.Start();const int ticks=2000;for(int i=0;i<ticks;i++)tick(1f/60);watch.Stop();long bytes=GC.GetAllocatedBytesForCurrentThread()-before;
+  long probeStart=GC.GetAllocatedBytesForCurrentThread();var probe=new byte[4096];bool supported=GC.GetAllocatedBytesForCurrentThread()>probeStart;GC.KeepAlive(probe);
+  int failures=0;if(supported&&bytes>ticks*32)failures++;if(game.Shots!=shots||!game.ChainGridValid()||!Mathf.Approximately(Time.fixedDeltaTime,1f/60))failures++;
+  var result=new Result{ticks=ticks,allocationCounterSupported=supported,allocatedBytes=supported?bytes:-1,bytesPerTick=supported?bytes/(double)ticks:-1,milliseconds=watch.Elapsed.TotalMilliseconds,failures=failures,errors=errors};File.WriteAllText(dir+"/result.json",JsonUtility.ToJson(result,true));game.enabled=true;Application.Quit(failures+errors==0?0:1);
+ }
+}
+}

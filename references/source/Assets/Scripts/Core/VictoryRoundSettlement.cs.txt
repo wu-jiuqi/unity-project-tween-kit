@@ -1,0 +1,62 @@
+using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public bool VictorySettlementActive{get;private set;}
+ public bool VictorySpecialsReleased{get;private set;}
+ readonly Dictionary<int,int> victoryDeferredGroups=new Dictionary<int,int>();readonly Queue<int> victoryDeferredTools=new Queue<int>();int victoryDeferredSupply;
+ readonly Queue<int> victoryUnplacedRewards=new Queue<int>();
+ public int VictoryUnplacedRewards=>victoryUnplacedRewards.Count;
+ public int VictoryDeferredGroups=>victoryDeferredGroups.Count;
+ void ClearVictoryDeferred(){FinishVictoryPlayback();victoryDeferredGroups.Clear();victoryDeferredTools.Clear();victoryUnplacedRewards.Clear();victoryDeferredSupply=0;}
+ void DeferVictoryGroup(ChainLiveBurst group){if(!victoryDeferredGroups.ContainsKey(group.Id))victoryDeferredGroups.Add(group.Id,group.Tier);}
+ void PreserveVictorySupply(){if(IsTutorial||IsStreakTrial)return;victoryDeferredSupply+=refillRemaining;foreach(int kind in chainReplacementRewards)victoryDeferredTools.Enqueue(kind);}
+ public int VictoryGroupsClosed{get;private set;}public int VictorySpecialsTriggered{get;private set;}
+ public bool VictoryRoundReady=>ChainGridReady&&!RefillPendingSettlement&&chainReplacementRewards.Count==0&&!ChainEffectsPending&&!SevenAnimationsPending;
+ public bool VictoryEffectsReady=>victoryUnplacedRewards.Count==0&&!ChainEffectsPending&&!SevenAnimationsPending&&!OpeningCatBusy;
+ public string VictorySettlementStatus=>"level="+(LevelIndex+1)+" paused="+IsPaused+" clock="+simulationClock+" ready="+VictoryRoundReady+" released="+VictorySpecialsReleased+" replacements="+chainReplacementRewards.Count+" refill="+refillRemaining+" protected="+CollectionBricks.Count(b=>b.Alive&&RefillProtected(b))+" motions="+chainMotions.Count+" dirty="+chainGravityDirty+" waiting="+sevenWaiting.Count+" barrier="+sevenRefillBarrier+" awaitRefill="+sevenAwaitRefill+" presentation="+sevenPresentationPending+" depth="+sevenEffectDepth+" until="+sevenFxUntil+" suction="+SevenSuctionFx.Alive(this)+" specialFx="+SevenSpecialFx.Alive(this)+" ingotFx="+IngotSpecialFx.Alive(this)+" jelly="+(fx!=null?fx.JellyActiveCount:0)+" loot="+chainLoot.Count+" beams="+chainBeams.Count+" minis="+ChainMinis.Count+" yarn="+OpeningYarnPending+" cookie="+OpeningCookiePending+" cat="+OpeningThirdPending+" copper="+OpeningCopperPending+" routes="+string.Join(";",chainMotions.Take(3).Select(m=>m.View==null?"destroyed":m.View.name+":"+ChainPiecePosition(m.View.GetComponent<ChainGridPiece>())+"->"+m.To));
+ void ReleaseVictoryWaitingFlowers(){
+  sevenRefillBarrier=sevenAwaitRefill=false;
+  foreach(var tool in sevenWaiting){tool.Waiting=false;tool.ReadyAt=0;tool.View?.GetComponent<SevenSpecialIdle>()?.Resume();}
+  sevenWaiting.Clear();SetRefillBallFreeze(false);
+ }
+ public void BeginVictoryRound(){
+  if(IsPlaying||!rules.Won||VictorySettlementActive)return;
+  VictoryPlaybackPending=true;VictoryPlaybackSpeed=1;victoryClearScoreFrom=Score;VictorySettlementActive=true;VictorySpecialsReleased=false;rules.VictoryDamageEnabled=true;IsPaused=false;queuedShot=null;ClearBufferedChainShot();
+  ReleaseVictoryWaitingFlowers();
+  foreach(var ball in allBalls)if(ball!=null)ball.Deactivate();active.Clear();ReturnReserved();rules.ClearVictoryBalls();
+  refillRemaining+=victoryDeferredSupply;victoryDeferredSupply=0;refillNext=simulationClock;
+  foreach(var group in chainBursts.Values.ToArray()){chainBursts.Remove(group.Id);VictoryGroupsClosed++;QueueChainLiveReward(CampaignChainRewards(group.Tier));RefillAfterVolley(group.Id);}
+  foreach(var group in victoryDeferredGroups){VictoryGroupsClosed++;QueueChainLiveReward(CampaignChainRewards(group.Value));RefillAfterVolley(group.Key);}victoryDeferredGroups.Clear();
+  while(victoryDeferredTools.Count>0)chainReplacementRewards.Enqueue(victoryDeferredTools.Dequeue());TryChainReplacementRewards();
+  if(ChainOccupiedCells()==0&&!RefillPendingSettlement)BeginOrdinaryRefill();
+ }
+ public void TickVictoryBoard(float dt){
+  if(!VictorySettlementActive||VictoryBoardSwept)return;simulationClock+=dt;
+  // A pre-victory double-flower windup can finish AFTER BeginVictoryRound,
+  // reserving more flowers. Ordinary waiting casts are suspended until the
+  // victory board is ready, so transfer those flowers to the victory pass once
+  // that in-flight cast has finished. Keeping the queue here deadlocks readiness.
+  if(!VictorySpecialsReleased&&sevenPresentationPending==0&&SevenSuctionFx.Alive(this)==0&&simulationClock>=sevenFxUntil)ReleaseVictoryWaitingFlowers();
+  TickChainCollection(dt);if(VictorySpecialsReleased)ReleaseUnplacedVictoryRewards();if(changed){changed=false;StateChanged?.Invoke();}
+ }
+ public void TriggerVictorySpecials(){
+  if(!VictorySettlementActive)return;
+  VictorySpecialsReleased=true;sevenRefillBarrier=sevenAwaitRefill=false;
+  foreach(var tool in ChainTools.ToArray()){if(tool.Consumed||tool.View==null||tool.View.GetComponent<ChainTileVisibility>()?.Hidden==true)continue;tool.ReadyAt=0;if(tool.Waiting){tool.Waiting=false;sevenWaiting.Remove(tool);}int before=ChainActivationCount;ActivateSevenSpecial(tool,true);VictorySpecialsTriggered+=ChainActivationCount-before;}
+  ReleaseUnplacedVictoryRewards();
+ }
+ void ReleaseUnplacedVictoryRewards(){
+  // Preserve every earned rating reward without inserting an overlapping grid
+  // piece. Its portrait winds up and applies the normal standalone cast once.
+  int serial=0;while(victoryUnplacedRewards.Count>0){
+   int kind=victoryUnplacedRewards.Dequeue(),color=NextSevenColor();Vector2 p=ChainGridRules.Center(2+(serial++%3)*2,4);
+   ChainActivationCount++;ChainKindActivations[kind-1]++;VictorySpecialsTriggered++;AddScore(ScoreRules.Damage);
+   PresentSevenCast(kind,color,p,0,color,p);
+  }
+ }
+ public void RefillVictoryEmptyBoard(){if(VictorySettlementActive&&ChainOccupiedCells()==0&&!RefillPendingSettlement)BeginOrdinaryRefill();}
+ public void LockVictoryDamage(){VictoryClearScore=Mathf.Max(0,Score-victoryClearScoreFrom);rules.VictoryDamageEnabled=false;}
+}
+}

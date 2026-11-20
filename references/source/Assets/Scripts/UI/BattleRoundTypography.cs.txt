@@ -1,0 +1,9 @@
+using TMPro;
+using UnityEngine;
+namespace BounceGarden {
+public static class BattleRoundTypography {
+ static TMP_FontAsset font;
+ public static TMP_FontAsset Font {get{if(font==null){var source=Resources.Load<Font>("Fonts/MaokenZhuyuanTi");if(source==null)throw new System.InvalidOperationException("Missing rounded battle UI font");font=TMP_FontAsset.CreateFontAsset(source,72,9,UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,1024,1024);font.name="Maoken Zhuyuan Ti Battle SDF";font.atlasPopulationMode=AtlasPopulationMode.Dynamic;font.isMultiAtlasTexturesEnabled=true;font.fallbackFontAssetTable=new System.Collections.Generic.List<TMP_FontAsset>{GameTypography.Font};font.TryAddCharacters("0123456789剩余步数穿透毛线球爆炸超级光本关道具不可用左右滑动赠锁第解关分数教学,");}return font;}}
+ public static void Style(TMP_Text label,bool numeric){label.font=Font;label.fontSharedMaterial=Font.material;label.characterSpacing=numeric?1.2f:0;label.fontStyle=numeric?FontStyles.Bold:FontStyles.Normal;if(numeric){label.outlineWidth=.055f;label.outlineColor=new Color32(255,250,232,255);}}
+}
+}

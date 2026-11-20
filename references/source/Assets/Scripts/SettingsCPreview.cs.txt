@@ -1,0 +1,16 @@
+using System;using System.Linq;using System.Reflection;using System.Collections;using UnityEngine;
+namespace BounceGarden {
+// Optional memory-only review entry. Normal campaign entry and saves are unaffected.
+public sealed class SettingsCPreview:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(RuntimeQA.IsIsolated&&Environment.GetCommandLineArgs().Contains("--settings-c-preview"))new GameObject("C settings page preview").AddComponent<SettingsCPreview>();}
+ IEnumerator Start(){
+  yield return new WaitForSecondsRealtime(3);var app=FindFirstObjectByType<AppUI>();var args=Environment.GetCommandLineArgs();int arg=Array.IndexOf(args,"--settings-c-preview");string page=arg+1<args.Length?args[arg+1]:"settings";app.QANavigate("home");
+  if(page=="pause"||page=="restart"||page=="home"){
+   app.QAStartLevel(20);yield return app.QAWaitForLevel();app.Session.QAIgnoreFocusLoss=true;float until=Time.realtimeSinceStartup+30;
+   while(Time.realtimeSinceStartup<until){app.QAAdvanceAlphabetIntro();app.QABattleTour?.AdvanceForQA();app.QAAdvanceBoosterGuide();if(app.QAGoalEntrance==null&&!app.AlphabetIntroActive&&!app.Session.IsPaused)break;yield return null;}
+  }
+  var flags=BindingFlags.Instance|BindingFlags.NonPublic;string method=page=="help"?"OpenPlayerHelp71":page=="about"?"OpenPlayerAbout71":page=="audio"?"OpenAudioSettings":page=="pause"?"Pause":page=="restart"||page=="home"?"ConfirmLeaveRound71":"Settings";
+  typeof(AppUI).GetMethod(method,flags).Invoke(app,method=="ConfirmLeaveRound71"?new object[]{page=="restart"}:null);
+ }
+}
+}

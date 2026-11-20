@@ -1,0 +1,51 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    // Traverse the actual segment through the 9x9 grid, including cells between
+    // sparse pointer events. Coordinates are measured in cells, not pixels.
+    internal static class LevelEditorStrokePath
+    {
+        internal static List<Vector2Int> Cells(Vector2 from, Vector2 to)
+        {
+            var result = new List<Vector2Int>();
+            if (!Finite(from.x) || !Finite(from.y) || !Finite(to.x) || !Finite(to.y)) return result;
+            Vector2 delta = to - from; float enter = 0, exit = 1;
+            if (!Clip(-delta.x, from.x, ref enter, ref exit) || !Clip(delta.x, 9 - from.x, ref enter, ref exit)
+                || !Clip(-delta.y, from.y, ref enter, ref exit) || !Clip(delta.y, 9 - from.y, ref enter, ref exit)) return result;
+            Vector2 start = from + delta * enter, end = from + delta * exit;
+            // The right/bottom edge belongs to no outside cell.
+            if (start.x >= 9 && end.x >= 9 || start.y >= 9 && end.y >= 9) return result;
+            start = new Vector2(Mathf.Clamp(start.x, 0, 8.99999f), Mathf.Clamp(start.y, 0, 8.99999f));
+            end = new Vector2(Mathf.Clamp(end.x, 0, 8.99999f), Mathf.Clamp(end.y, 0, 8.99999f));
+            int x = Mathf.FloorToInt(start.x), y = Mathf.FloorToInt(start.y);
+            int endX = Mathf.FloorToInt(end.x), endY = Mathf.FloorToInt(end.y);
+            delta = end - start;
+            int sx = delta.x > 0 ? 1 : delta.x < 0 ? -1 : 0, sy = delta.y > 0 ? 1 : delta.y < 0 ? -1 : 0;
+            float tx = sx == 0 ? float.PositiveInfinity : ((sx > 0 ? x + 1 : x) - start.x) / delta.x;
+            float ty = sy == 0 ? float.PositiveInfinity : ((sy > 0 ? y + 1 : y) - start.y) / delta.y;
+            float dx = sx == 0 ? float.PositiveInfinity : 1 / Mathf.Abs(delta.x);
+            float dy = sy == 0 ? float.PositiveInfinity : 1 / Mathf.Abs(delta.y);
+            for (int count = 0; count < 20 && x >= 0 && x < 9 && y >= 0 && y < 9; count++)
+            {
+                result.Add(new Vector2Int(x, y));
+                if (x == endX && y == endY) break;
+                if (Mathf.Abs(tx - ty) < .000001f) { x += sx; y += sy; tx += dx; ty += dy; }
+                else if (tx < ty) { x += sx; tx += dx; }
+                else { y += sy; ty += dy; }
+            }
+            return result;
+        }
+
+        static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+        static bool Clip(float p, float q, ref float enter, ref float exit)
+        {
+            if (p == 0) return q >= 0;
+            float t = q / p;
+            if (p < 0) { if (t > exit) return false; if (t > enter) enter = t; }
+            else { if (t < enter) return false; if (t < exit) exit = t; }
+            return true;
+        }
+    }
+}

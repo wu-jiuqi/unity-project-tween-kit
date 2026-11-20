@@ -1,0 +1,4 @@
+using UnityEditor;using UnityEngine;
+public sealed class GardenV70Importer:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/GardenV70/")&&!assetPath.StartsWith("Assets/Resources/Art/JourneyV69/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.npotScale=TextureImporterNPOTScale.None;t.mipmapEnabled=false;t.alphaIsTransparency=true;t.wrapMode=TextureWrapMode.Clamp;t.textureCompression=TextureImporterCompression.Uncompressed;t.maxTextureSize=4096;}
+}

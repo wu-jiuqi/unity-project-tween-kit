@@ -1,0 +1,18 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+// Shared procedural silhouettes keep art and physical outlines in agreement.
+public static class PixelPieceArt {
+ static readonly Dictionary<int,Sprite> sprites=new Dictionary<int,Sprite>();
+ public static Vector2[] Points(int shape,Vector2 size){var p=new List<Vector2>();if(shape==4){p.Add(new Vector2(-.46f,-.45f));p.Add(new Vector2(.46f,0));p.Add(new Vector2(-.46f,.45f));}
+ else if(shape==3){p.Add(new Vector2(-.46f,-.45f));p.Add(new Vector2(.46f,-.45f));p.Add(new Vector2(0,.48f));}
+ else if(shape==2){for(int i=0;i<16;i++){float a=i*Mathf.PI*2/16;p.Add(new Vector2(Mathf.Cos(a)*.48f,Mathf.Sin(a)*.43f*(.6f+.4f*Mathf.Abs(Mathf.Sin(a)))));}}
+ else if(shape==1){for(int i=0;i<20;i++){float a=i*Mathf.PI*2/20;p.Add(new Vector2(Mathf.Cos(a)*.47f,Mathf.Sin(a)*.47f));}}
+ else{for(int i=0;i<4;i++)for(int k=0;k<5;k++){float a=(i*90+k*22.5f)*Mathf.Deg2Rad;Vector2 c=new Vector2(i==0||i==3?.33f:-.33f,i<2?.33f:-.33f);p.Add(c+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*.14f);}}
+ for(int i=0;i<p.Count;i++)p[i]=Vector2.Scale(p[i],size);return p.ToArray();}
+ static bool Inside(Vector2 p,Vector2[] points){bool inside=false;for(int i=0,j=points.Length-1;i<points.Length;j=i++){var a=points[i];var b=points[j];if((a.y>p.y)!=(b.y>p.y)&&p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)inside=!inside;}return inside;}
+ public static Sprite Sprite(int shape){if(sprites.TryGetValue(shape,out var s))return s;var texture=new Texture2D(128,128,TextureFormat.RGBA32,false);texture.filterMode=FilterMode.Bilinear;var outline=Points(shape,Vector2.one);
+ for(int y=0;y<128;y++)for(int x=0;x<128;x++){Vector2 p=new Vector2((x+.5f)/128-.5f,(y+.5f)/128-.5f);bool hit=Inside(p,outline);float rim=Inside(p/ .88f,outline)?1:.72f;float shine=Mathf.Exp(-((p.x+.19f)*(p.x+.19f)*100+(p.y-.23f)*(p.y-.23f)*220));float light=Mathf.Clamp01((.63f+p.y*.28f)*rim+shine*.38f);texture.SetPixel(x,y,new Color(light*.8f,light,1,hit?1:0));}
+ texture.Apply();s=UnityEngine.Sprite.Create(texture,new Rect(0,0,128,128),Vector2.one*.5f,128);sprites[shape]=s;return s;}
+}
+}

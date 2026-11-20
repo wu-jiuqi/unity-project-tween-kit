@@ -1,0 +1,19 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class FlightBuild {
+ public static void Windows(){Build(BuildTarget.StandaloneWindows64);}
+ public static void Android(){Build(BuildTarget.Android);}
+ static void Build(BuildTarget target){
+  BuildEntry.Configure();BuildEntry.Rules();Debug.Log("PROFILE_TESTS "+BounceGarden.LocalProfile.RunSelfTests());
+  PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+  PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  string path=Environment.GetEnvironmentVariable("BOUNCE_FLIGHT_OUTPUT");if(string.IsNullOrEmpty(path))throw new Exception("BOUNCE_FLIGHT_OUTPUT required");
+  Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=target,locationPathName=path,options=BuildOptions.CompressWithLz4HC,extraScriptingDefines=new[]{"BOUNCE_TEST_TOOLS"}});
+  string result="FLIGHT_V15_BUILD "+r.summary.result+" errors="+r.summary.totalErrors+" warnings="+r.summary.totalWarnings;
+  File.WriteAllText(path+".build.txt",result);Debug.Log(result);if(r.summary.result!=BuildResult.Succeeded)throw new Exception(result);
+ }
+}

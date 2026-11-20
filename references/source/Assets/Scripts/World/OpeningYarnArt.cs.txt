@@ -1,0 +1,46 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden {
+[Serializable] public sealed class YarnFrameSpec {public float x,y,w,h,px,py,bodyWidth,bodyHeight;}
+[Serializable] public sealed class YarnClipSpec {public string key;public int sourceWidth,sourceHeight;public YarnFrameSpec[] frames;}
+[Serializable] public sealed class YarnAnimationData {public YarnClipSpec[] clips;}
+public static class OpeningYarnArt {
+ static readonly Dictionary<string,Sprite[]> sprites=new Dictionary<string,Sprite[]>();
+ static YarnAnimationData data;static Material material;static Sprite icon;
+ public static Material Material {get {if(material==null){var shader=Resources.Load<Shader>("OpeningYarn");if(shader==null)throw new InvalidOperationException("Missing yarn alpha shader");material=new Material(shader);}return material;}}
+ static YarnClipSpec Clip(string key){if(data==null)data=JsonUtility.FromJson<YarnAnimationData>(Resources.Load<TextAsset>("Art/YarnObstacleV3/animation-layout").text);foreach(var clip in data.clips)if(clip.key==key)return clip;throw new InvalidOperationException("Missing yarn animation "+key);}
+ public static YarnFrameSpec Spec(string key,int frame)=>Clip(key).frames[Mathf.Clamp(frame,0,Clip(key).frames.Length-1)];
+ public static Sprite Frame(string key,int frame){if(!sprites.TryGetValue(key,out var frames)){var texture=Resources.Load<Texture2D>("Art/YarnObstacleV3/"+key);if(texture==null)throw new InvalidOperationException("Missing yarn image "+key);var clip=Clip(key);var specs=clip.frames;frames=new Sprite[specs.Length];for(int i=0;i<frames.Length;i++){var s=specs[i];float sx=texture.width/(float)clip.sourceWidth,sy=texture.height/(float)clip.sourceHeight;frames[i]=Sprite.Create(texture,new Rect(s.x*sx,s.y*sy,s.w*sx,s.h*sy),new Vector2(s.px,s.py),100*sx,0,SpriteMeshType.FullRect);frames[i].name=key+"-"+i;}sprites[key]=frames;}return frames[Mathf.Clamp(frame,0,frames.Length-1)];}
+ public static string RestKey(int layers)=>layers>=3?"yarn-obstacle-l3":layers==2?"yarn-obstacle-l2":"yarn-obstacle-l1";
+ public static Sprite Rest(int layers)=>Frame(RestKey(layers),0);
+ public static Vector3 Fit(string key,int frame,float width=CollectionLevels.Pitch,float height=CollectionLevels.Pitch){var s=Spec(key,frame);return new Vector3(width/(s.bodyWidth/100f),height/(s.bodyHeight/100f),1);}
+ public static Sprite Icon {get{if(icon==null){var s=Rest(1);icon=Sprite.Create(s.texture,s.rect,Vector2.one*.5f,s.pixelsPerUnit,0,SpriteMeshType.FullRect);}return icon;}}
+ public static SpriteRenderer Draw(Transform parent,string name,int layers,int order=62){var view=new GameObject(name).AddComponent<SpriteRenderer>();view.transform.SetParent(parent,false);view.sprite=Rest(layers);view.sharedMaterial=Material;view.sortingOrder=order;view.transform.localPosition=Vector2.down*(CollectionLevels.Pitch*.5f);view.transform.localScale=Fit(RestKey(layers),0);return view;}
+}
+
+[DefaultExecutionOrder(200)]
+public sealed class OpeningYarnView:MonoBehaviour {
+ GameSession game;SpriteRenderer image;float bounceAge=10,layerAge=10,layerWait=OpeningYarnEffect.LayerDuration;Vector3 rest;readonly HashSet<long> hits=new HashSet<long>();
+ public BrickBody Brick {get;private set;}public int Layers {get;private set;}
+ public int BounceCount {get;private set;}
+ public float LayerRemaining=>Mathf.Max(0,layerWait-layerAge);
+ public void Initialize(GameSession owner,BrickBody brick,int layers){game=owner;Brick=brick;Layers=layers;brick.Face.enabled=false;foreach(var label in brick.GetComponentsInChildren<TMPro.TMP_Text>())label.gameObject.SetActive(false);image=OpeningYarnArt.Draw(transform,layers>1?"Double yarn · purple X wrap":"Single cream yarn",layers);rest=image.transform.localScale;}
+ public void Bounce(){BounceCount++;bounceAge=0;SoundService.Play("blocked");}
+ public bool RemoveLayer(long batch,int strength=1){if(Layers==0||!hits.Add(batch))return false;int before=Layers;Layers-=Mathf.Clamp(strength,1,Layers);if(before>=2){float pending=LayerRemaining;game.OpeningPlayLayerLoss(Brick.GetComponent<Rigidbody2D>().position,before,Layers,pending,transform);layerWait=pending+(before-Mathf.Max(1,Layers))*OpeningYarnEffect.LayerDuration;layerAge=0;image.enabled=false;}return true;}
+ public void Tick(float dt){if(game==null||game.IsPaused)return;bounceAge+=dt;layerAge+=dt;if(Layers>0&&LayerRemaining<=0){image.enabled=true;image.sprite=OpeningYarnArt.Rest(Layers);rest=OpeningYarnArt.Fit(OpeningYarnArt.RestKey(Layers),0);}float t=Mathf.Clamp01(bounceAge/.22f),impact=Mathf.Sin(t*Mathf.PI)*.13f;image.transform.localScale=Vector3.Scale(rest,new Vector3(1+impact,1-impact*.8f,1));}
+ void LateUpdate(){if(Brick!=null)Brick.Face.enabled=false;}
+}
+
+public sealed class OpeningYarnEffect:MonoBehaviour {
+ public const float LayerDuration=.68f,UnravelDuration=.64f;
+ System.Action strategyArrival;GameSession game;int generation;SpriteRenderer image;string key;float age;bool collect,credited,sounded;
+ public bool Pending {get;private set;}public int VisibleFrame {get;private set;}Transform followedBody;
+ public void Follow(Transform target){followedBody=target;}
+ void LateUpdate(){if(followedBody!=null)transform.position=followedBody.position+Vector3.down*(CollectionLevels.Pitch*.5f);}
+ public static OpeningYarnEffect Play(GameSession owner,Transform parent,Vector2 position,bool collection,float delay=0,int fromLayers=2){var effect=new GameObject(collection?"Yarn unravel 16 frames":"Purple outer wrap release 16 frames").AddComponent<OpeningYarnEffect>();effect.transform.SetParent(parent,false);effect.transform.position=position+Vector2.down*(CollectionLevels.Pitch*.5f);effect.game=owner;effect.generation=owner.Generation;effect.collect=collection;effect.strategyArrival=owner.StrategyWrap(()=>owner.OpeningYarnArrived((Vector2)effect.transform.position+Vector2.up*(CollectionLevels.Pitch*.5f)));effect.key=collection?"yarn-unravel":fromLayers>=3?"yarn-layer-loss-l3":"yarn-layer-loss";effect.age=-delay;effect.Pending=true;effect.image=new GameObject("Registered painted frame").AddComponent<SpriteRenderer>();effect.image.transform.SetParent(effect.transform,false);effect.image.sharedMaterial=OpeningYarnArt.Material;effect.image.sortingOrder=73;effect.image.enabled=delay<=0;effect.Render();return effect;}
+ void Render(){float duration=collect?UnravelDuration:LayerDuration;VisibleFrame=Mathf.Clamp(Mathf.FloorToInt(age/duration*16),0,15);image.sprite=OpeningYarnArt.Frame(key,VisibleFrame);float pop=collect?1:1+Mathf.Sin(Mathf.Clamp01(age/.18f)*Mathf.PI)*.035f;image.transform.localScale=OpeningYarnArt.Fit(key,VisibleFrame)*pop;}
+ public void Tick(float dt){if(game==null||generation!=game.Generation){Pending=false;Destroy(gameObject);return;}if(game.IsPaused||!Pending)return;age+=dt;if(age<0)return;if(!sounded){sounded=true;SoundService.Play(collect?"yarn_final_unravel":"yarn_layer_remove");}image.enabled=true;Render();if(age<(collect?UnravelDuration:LayerDuration))return;Pending=false;if(collect&&!credited){credited=true;strategyArrival();}Destroy(gameObject);}
+}
+}

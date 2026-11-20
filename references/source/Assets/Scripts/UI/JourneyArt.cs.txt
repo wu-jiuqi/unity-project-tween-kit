@@ -1,0 +1,19 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public static class JourneyArt {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ public static Sprite Get(string key){string path=key=="lock"?"Art/ShopV31/lock":"Art/JourneyV69/"+key;if(cache.TryGetValue(path,out var s))return s;var t=Resources.Load<Texture2D>(path);if(t==null)throw new System.Exception("Missing journey art "+path);return cache[path]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);}
+ public static Sprite GetNativeHome(int chapter){string key="native-home-"+chapter;if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/NativeV50/background-"+(chapter==0?"alphabet":"picnic"));return cache[key]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);}
+ public static Sprite Lock=>Get("booster-lock");
+ public static void ReplacePanel(RectTransform root,string key){foreach(Transform child in root)child.gameObject.SetActive(false);var image=root.GetComponent<Image>();image.sprite=Get(key);image.type=UnityEngine.UI.Image.Type.Simple;image.preserveAspect=false;image.color=Color.white;}
+ public static Image Image(Transform p,string key,float x,float y,float w,float h){var i=UICraft.Box(p,key,x,y,w,h,Color.white);i.sprite=Get(key);i.type=UnityEngine.UI.Image.Type.Simple;i.preserveAspect=true;i.raycastTarget=false;return i;}
+}
+public sealed class ChapterTransitionPreview:MonoBehaviour {
+ RectTransform oldCard,newCard;CanvasGroup oldGroup,newGroup;TMPro.TMP_Text title,note;float age;int next;bool playing=true;
+ public void Build(int from,int to){next=to;var r=(RectTransform)transform;r.anchorMin=Vector2.zero;r.anchorMax=Vector2.one;r.sizeDelta=Vector2.zero;UICraft.Box(transform,"温暖手帐背景",0,0,3000,3500,new Color(1,.97f,.88f),false,true);oldCard=UICraft.Root(transform,"离开的花园",0,0,960,600);JourneyArt.Image(oldCard,"chapter-"+(from+1),0,0,960,600);oldGroup=oldCard.gameObject.AddComponent<CanvasGroup>();newCard=UICraft.Root(transform,"下一座花园",1100,0,960,600);JourneyArt.Image(newCard,"chapter-"+(to+1),0,0,960,600);newGroup=newCard.gameObject.AddComponent<CanvasGroup>();title=UICraft.Label(transform,"",0,600,1000,150,70,UICraft.Ink);note=UICraft.Label(transform,"",0,-560,980,100,38,UICraft.Ink);UICraft.Button(transform,"重播",-210,-870,330,110,UICraft.Green,()=>{age=0;playing=true;},40);UICraft.Button(transform,"返回花园",210,-870,330,110,UICraft.Blue,()=>Destroy(gameObject),40);Sample(0);}
+ public void Sample(float seconds){float t=Mathf.Clamp01((seconds-.65f)/1.35f);float q=t*t*(3-2*t);oldCard.anchoredPosition=new Vector2(-1050*q,Mathf.Sin(q*Mathf.PI)*50);oldCard.localRotation=Quaternion.Euler(0,0,-q*7);oldGroup.alpha=1-q;newCard.anchoredPosition=new Vector2(1050*(1-q),Mathf.Sin(q*Mathf.PI)*50);newCard.localRotation=Quaternion.Euler(0,0,(1-q)*7);newGroup.alpha=q;newCard.localScale=Vector3.one*Mathf.Lerp(.88f,1,q);title.text=t<.45f?"这一座花园，完成啦！":"第"+(next+1)+"章 · "+ChapterSceneArt.Title(next);note.text=t<.45f?"收好回忆，继续出发":"新的花园，等你来探索";}
+ void Update(){if(playing){age+=Time.unscaledDeltaTime;Sample(age);if(age>=3.2f)playing=false;}}
+}
+}

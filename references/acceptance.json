@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "releaseState": "preview-partial-coverage",
+  "fullAcceptancePassed": false,
+  "sourceProject": "BounceGarden/BounceGarden",
+  "workingVersion": "0.4.0",
+  "deliveredGalleryEntries": 19,
+  "stageStatus": {
+    "1": "source scan and partial semantic inventory complete; current-route audit incomplete",
+    "2": "representative extraction and runnable gallery available; validation records govern passing state",
+    "3": "remaining candidate extraction and host recipe work pending",
+    "4": "19-entry gallery implemented; full catalogue gallery coverage pending",
+    "5": "independent import tested per evidence; human five-minute onboarding trial not performed",
+    "6": "four preview artifacts; final full-coverage release not approved as complete"
+  },
+  "remainingWork": [
+    "Review every requires-route-review entry against current pages, 45-level campaign, conditional events and serialized/dynamic resource entry points.",
+    "Resolve remaining ambiguous invocation sites and resource strings; distinguish inactive old mechanics, business timing and mixed physics/presentation methods.",
+    "Extract remaining active families as components, composed prefabs or complete host recipes, with matching gallery demonstrations and lifecycle tests.",
+    "Confirm per-asset redistribution evidence for project artwork, delivery audio and font derivation chains.",
+    "Run recipient onboarding and full original-scene trigger coverage; bind final packages and all evidence to the final tested build."
+  ],
+  "runtimeChecks": {
+    "passed": 83,
+    "failed": 0,
+    "errors": 0
+  },
+  "independentImport": {
+    "result": "passed",
+    "scripts": 43,
+    "prefabs": 7,
+    "missingScripts": 0,
+    "errors": []
+  },
+  "sourceReviewCounts": {
+    "editor-tool": 1,
+    "test-fixture": 115,
+    "non-animation": 15,
+    "requires-route-review": 101,
+    "source-route-reviewed": 20,
+    "inactive-preview": 1,
+    "legacy-route-disabled": 1,
+    "mixed-physics-presentation-review": 4
+  }
+}

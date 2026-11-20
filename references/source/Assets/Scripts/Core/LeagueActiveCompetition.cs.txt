@@ -1,0 +1,82 @@
+using System;
+using System.Linq;
+namespace BounceGarden {
+public static partial class LeagueEngine {
+ public const int ActiveCompetitionVersion=3;
+ static double ChasePhase(LeaguePeriod p,LeagueRival r)=>.25+((uint)(p.seed^(r.tieOrder+1)*1103515245)%1000)/2000d;
+ public static void EnableActive(LeaguePeriod p,float historicalSeconds){
+  p.config.activeCompetition=true;p.competitionVersion=ActiveCompetitionVersion;p.activeElapsed=0;
+  p.config.roundSeconds=Math.Max(45,p.config.roundSeconds);
+  p.config.medalSeconds=Math.Max(90,Math.Min(900,historicalSeconds>0?historicalSeconds:240));
+  var rng=new Random(p.seed);var ranked=Standings(p,p.startMedals);int own=ranked.First(e=>e.player).rank;
+  foreach(var r in p.rivals){
+   r.initialMedals=r.Medals(p.elapsed);r.events=new double[0];r.activeMedals=0;
+   int rank=ranked.First(e=>e.id==r.id).rank;bool close=rank==own-1||rank==own+1||rank==5;
+   double rate=close?.7+rng.NextDouble()*.2:.15+rng.NextDouble()*.4;
+   r.gainInterval=p.config.medalSeconds/rate;r.nextGainAt=r.gainInterval*(.65+rng.NextDouble()*.7);r.shieldUntil=0;r.chaseProgress=ChasePhase(p,r);
+  }
+ }
+ public static void PrepareActive(LeagueState state,LeagueConfig settings,long now,int medals){
+  var p=state.current;if(p==null||!settings.activeCompetition||p.competitionVersion>=ActiveCompetitionVersion)return;
+  if(p.competitionVersion>=1){
+   // A new trigger must never replay historical wins or change already saved scores.
+   foreach(var r in p.rivals)r.chaseProgress=ChasePhase(p,r);
+   p.competitionVersion=ActiveCompetitionVersion;return;
+  }
+  // Keep the saved roster, scores, reward definition and deadline; discard only future legacy growth.
+  p.startMedals=medals;p.config.roundSeconds=settings.roundSeconds;p.config.medalSeconds=settings.medalSeconds;
+  EnableActive(p,state.medalSeconds);p.lastObserved=Math.Max(now,p.lastObserved);p.roundStartRank=Standings(p,medals).First(e=>e.player).rank;
+ }
+ public static void Return(LeaguePeriod p,long now){
+  long away=p.awayAt>0?p.awayAt:p.lastObserved;if(now<=away)return;
+  long day=(now+8*3600)/86400;
+  if(p.graceDay!=day){p.graceDay=day;p.graceUses=0;}
+  if(now-away>=1800&&p.graceUses<2){p.returnRounds=2;p.graceUses++;}
+  p.awayAt=0;
+ }
+ public static void ActiveTick(LeaguePeriod p,double seconds,int medals){
+  if(p==null||!p.config.activeCompetition||seconds<=0)return;
+  seconds=Math.Min(10,seconds);p.totalActiveSeconds+=seconds;p.roundActiveSeconds+=seconds;
+  // Activity is telemetry only. Rival medals are committed once with a real victory.
+ }
+ static void ChaseAfterWin(LeaguePeriod p,int before,int after){
+  var previous=Standings(p,before);int oldRank=previous.First(e=>e.player).rank;
+  var ranked=Standings(p,after);int own=ranked.First(e=>e.player).rank;
+  bool gentle=p.returnRounds>0||p.lossRounds>0;
+  p.chaseRounds++;p.lastChaseRivals=0;p.lastChaseMedals=0;
+  foreach(var entry in ranked.Where(e=>!e.player).OrderBy(e=>Math.Abs(e.rank-own)).ThenBy(e=>e.tieOrder)){
+   var r=p.rivals.First(v=>v.id==entry.id);double strength=1-r.tieOrder/(double)Math.Max(1,p.config.rivalCount);
+   double rate=p.config.calendarSeasons?r.chaseRate:entry.rank==own+1?1.25:entry.rank==own+2?1.05+strength*.15:entry.rank==own-1||entry.rank==5?.65+strength*.15:.2+strength*.45;
+   if(p.config.calendarSeasons){int phase=(p.chaseRounds+r.tieOrder)%5;rate=phase==0?rate*2:phase==1?0:rate;}
+   r.chaseProgress+=rate;int gain=Math.Min(2,(int)Math.Floor(r.chaseProgress+1e-9));r.chaseProgress=Math.Max(0,r.chaseProgress-gain);
+   if(gentle)gain=Math.Min(1,gain);
+   // Keep a newly earned promotion for this result, including the stable tie order.
+   bool passed=previous.First(e=>e.id==r.id).rank<oldRank&&entry.rank>own;
+   if(passed)gain=Math.Min(gain,Math.Max(0,ranked.First(e=>e.player).medals-1-entry.medals));
+   gain=Math.Min(gain,int.MaxValue-entry.medals);int added=0;
+   for(int i=0;i<gain;i++){
+    r.activeMedals++;
+    if(Standings(p,after).First(e=>e.player).rank>own+1){r.activeMedals--;break;}
+    added++;
+   }
+   if(added>0){p.lastChaseRivals++;p.lastChaseMedals+=added;}
+   // Growth blocked by protection is discarded, never banked for a later burst.
+  }
+ }
+ public static void FinishRound(LeaguePeriod p,bool won,int before,int after){
+  if(!p.config.activeCompetition)return;
+  if(won){
+   ChaseAfterWin(p,before,after);
+   p.lossStreak=0;p.lossRounds=0;
+  }else{p.lossStreak++;if(p.lossRounds>0)p.lossRounds--;else if(p.lossStreak==2)p.lossRounds=2;}
+  if(p.returnRounds>0)p.returnRounds--;
+  p.roundActiveSeconds=0;p.roundStartRank=Standings(p,after).First(e=>e.player).rank;
+ }
+ public static string Pressure(LeagueSnapshot s){
+  if(s.next==null){var second=s.entries.FirstOrDefault(e=>e.rank==2);return second==null?"暂列第一":s.player.medals>second.medals?"暂列第一 · 领先第2名"+(s.player.medals-second.medals)+"枚奖章":"暂列第一 · 对手已追平奖章";}
+  var behind=s.entries.FirstOrDefault(e=>e.rank==s.player.rank+1);
+  if(behind!=null&&s.player.medals-behind.medals<=1)return behind.name+"紧随其后 · "+(s.player.medals-behind.medals==0?"奖章已追平":"仅落后1枚奖章");
+  return "再获"+((long)s.next.medals-s.player.medals+1)+"枚奖章，即可超过"+s.next.name;
+ }
+}
+}

@@ -1,0 +1,21 @@
+using System;
+using System.IO;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public sealed class SharedSourceValidation76:IPreprocessBuildWithReport {
+ [Serializable]sealed class Manifest {public string canonical;public Entry[] entries,adapters;}
+ [Serializable]sealed class Entry {public string path,source;}
+ public int callbackOrder=>-10000;
+ public void OnPreprocessBuild(BuildReport report){Validate();}
+ public static void Validate(){
+  string taskRoot=Directory.Exists(Path.GetFullPath("../../BounceGarden/BounceGarden"))?Path.GetFullPath("../.."):Path.GetFullPath("..");
+  // Locate the workspace through a stable marker, independently of project depth.
+  var directory=new DirectoryInfo(Application.dataPath);while(directory!=null&&!File.Exists(Path.Combine(directory.FullName,"version.json")))directory=directory.Parent;
+  if(directory==null)throw new BuildFailedException("Cannot locate canonical shared sources.");taskRoot=directory.FullName;
+  var manifest=JsonUtility.FromJson<Manifest>(File.ReadAllText("Assets/Editor/SharedSource76.json"));bool wechat=File.Exists("Assets/Scripts/WeChatContent.cs");
+  foreach(var entry in manifest.entries){string expected=File.ReadAllText(Path.Combine(taskRoot,manifest.canonical,entry.path));if(wechat)expected=expected.Replace("Resources.Load<","WeChatContent.Load<").Replace("PlayerPrefs.","WeChatPrefs.");string actual=File.ReadAllText("Assets/"+entry.path);if(actual.Replace("\r\n","\n")!=expected.Replace("\r\n","\n"))throw new BuildFailedException("Shared source is stale or overwritten: "+entry.path+". Run Tools/sync_shared_v76.py.");}
+  if(wechat){foreach(var entry in manifest.adapters){if(File.ReadAllText(Path.Combine(taskRoot,entry.source)).Replace("\r\n","\n")!=File.ReadAllText("Assets/"+entry.path).Replace("\r\n","\n"))throw new BuildFailedException("WeChat platform adapter overwritten: "+entry.path);}string adapter=File.ReadAllText("Assets/Scripts/WeChatContentAdapter.cs");if(!adapter.Contains("GameContent.Level=WeChatContent.PrepareLevel")||!adapter.Contains("GameContent.Page=")||!File.ReadAllText("Assets/Scripts/Bootstrap.cs").Contains("WeChatContentAdapter.Install()"))throw new BuildFailedException("WeChat resource adapter missing.");}
+  Debug.Log("SHARED_V76_OK files="+manifest.entries.Length+" wechat="+wechat);
+ }
+}

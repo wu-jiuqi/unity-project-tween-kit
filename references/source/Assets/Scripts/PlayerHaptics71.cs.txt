@@ -1,0 +1,50 @@
+using System;using UnityEngine;
+namespace BounceGarden {
+public static class PlayerHaptics71 {
+ public enum Strength { Medium, Heavy }
+ public const float LongDuration=.4f;
+ static bool isolatedEnabled=true;static float longUntil=-1;static int longRequest;public static Action<Strength,Action<bool>> MobilePulse;
+ public static bool Enabled {get=>RuntimeQA.IsIsolated?isolatedEnabled:PlayerPrefs.GetInt("settings.haptics.v71",1)!=0;set{if(RuntimeQA.IsIsolated)isolatedEnabled=value;else{PlayerPrefs.SetInt("settings.haptics.v71",value?1:0);PlayerPrefs.Save();}}}
+ public static void Pulse(Strength strength=Strength.Medium){if(RuntimeQA.IsIsolated&&MobilePulse==null)return;TryPulse(strength,null);}
+ public static void TryPulse(Strength strength,Action<bool> completed){
+  // One long impact owns the motor for 400ms. Dense contacts must not shorten
+  // it or keep restarting it; ordinary contacts outside that window stay immediate.
+  if(!Enabled||Time.unscaledTime<longUntil){completed?.Invoke(false);return;}
+  int request=++longRequest;
+  if(strength==Strength.Heavy)longUntil=Time.unscaledTime+LongDuration;
+  Action<bool> finish=ok=>{if(!ok&&request==longRequest)longUntil=-1;completed?.Invoke(ok);};
+  try{
+   if(MobilePulse!=null){MobilePulse(strength,finish);return;}
+   if(RuntimeQA.IsIsolated){finish(false);return;}
+   #if UNITY_ANDROID && !UNITY_EDITOR
+   bool ok=AndroidPulse(strength);finish(ok);
+   #elif UNITY_IOS && !UNITY_EDITOR
+   bool ok=BounceImpactHaptic(strength==Strength.Heavy?1:0);finish(ok);
+   #else
+   finish(false);
+   #endif
+  }catch(Exception){finish(false);}
+ }
+ #if UNITY_ANDROID && !UNITY_EDITOR
+ static bool AndroidPulse(Strength strength){
+  using(var unity=new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+  using(var activity=unity.GetStatic<AndroidJavaObject>("currentActivity"))
+  using(var vibrator=activity.Call<AndroidJavaObject>("getSystemService","vibrator")){
+   if(vibrator==null||!vibrator.Call<bool>("hasVibrator"))return false;
+   using(var version=new AndroidJavaClass("android.os.Build$VERSION")){
+    if(version.GetStatic<int>("SDK_INT")>=26){
+     using(var effectClass=new AndroidJavaClass("android.os.VibrationEffect"))
+     using(var effect=effectClass.CallStatic<AndroidJavaObject>("createOneShot",strength==Strength.Heavy?400L:15L,strength==Strength.Heavy?255:128))vibrator.Call("vibrate",effect);
+    }else vibrator.Call("vibrate",strength==Strength.Heavy?400L:15L);
+   }
+   return true;
+  }
+ }
+ #endif
+ #if UNITY_IOS && !UNITY_EDITOR
+ [System.Runtime.InteropServices.DllImport("__Internal")]
+ [return:System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.I1)]
+ static extern bool BounceImpactHaptic(int heavy);
+ #endif
+}
+}

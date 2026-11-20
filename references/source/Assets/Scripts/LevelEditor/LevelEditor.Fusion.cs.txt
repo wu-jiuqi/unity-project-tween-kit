@@ -1,0 +1,295 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    public sealed partial class LevelEditorDocument
+    {
+        internal LevelEditorLevel AppendFusion(string name, FusionLevelDefinition definition, int moves)
+        {
+            if (string.IsNullOrWhiteSpace(name) || name.Trim().Length > 100) throw new ArgumentException("名称需为1–100个字符。");
+            if (definition == null) throw new ArgumentNullException(nameof(definition));
+            if (moves < 1 || moves > 999) throw new ArgumentException("步数需为1–999。");
+            var stage = EditorJson.Object(); stage.Set("authoringSchema", "bouncebusters-level-authoring-v2");
+            stage.Set("rulesProfile", "fusion_v1"); stage.Set("name", name.Trim()); stage.Set("moves", moves); stage.Set("volleyCount", 5);
+            if (Chapter != "Alphabet") stage.Set("id", 1);
+            stage.Set("fusion", EditorJson.Parse(JsonUtility.ToJson(definition)));
+            var level = new LevelEditorLevel(this, 0, stage.ToJson(4, true)); levels.Add(level); IsAuthoring = true; return level;
+        }
+    }
+
+    public sealed partial class LevelEditorWorkspace
+    {
+        public LevelEditorLevel CreateFusionLevel(string chapter, string name, FusionLevelDefinition definition = null, int moves = 20)
+        {
+            var document = documents.FirstOrDefault(d => d.Chapter == chapter);
+            if (document == null) throw new ArgumentException("未知主题：" + chapter);
+            FinishEdits();
+            var level = document.AppendFusion(name, definition ?? new FusionLevelDefinition { pieces = Array.Empty<FusionPieceDefinition>(), milestones = Array.Empty<FusionMilestoneDefinition>() }, moves);
+            authored = true; RebuildLevels(true); return level;
+        }
+    }
+
+    public sealed partial class LevelEditorLevel
+    {
+        public string RulesProfile => root.Text("rulesProfile", "legacy");
+        public bool IsFusion => RulesProfile == "fusion_v1";
+        public FusionLevelDefinition FusionDefinition
+        {
+            get
+            {
+                if (!IsFusion) return null;
+                var value = root.Get("fusion");
+                if (value == null || value.Kind != EditorJson.Type.Object) throw new FormatException("融合关卡缺少有效 fusion 配置。");
+                return JsonUtility.FromJson<FusionLevelDefinition>(value.ToJson());
+            }
+        }
+        public IReadOnlyList<FusionGoalDefinition> FusionGoals
+        {
+            get { return IsFusion ? FusionRules.Goals(FusionDefinition).AsReadOnly() : new List<FusionGoalDefinition>().AsReadOnly(); }
+        }
+        public FusionPieceDefinition GetFusionPiece(string objectId)
+        {
+            if (!IsFusion) return null;
+            return JsonUtility.FromJson<FusionPieceDefinition>(Find(objectId).Node.ToJson());
+        }
+        LevelEditorPiece FusionPiece(EditorJson node)
+        {
+            string kind = node.Text("kind");
+            return new LevelEditorPiece
+            {
+                Id = ids[node], LegacyId = node.Text("id"), Kind = kind, Col = node.Int("c"), Row = node.Int("r"), Size = node.Int("size", 1),
+                Hp = node.Int("hp", 1), Armor = node.Bool("armor") || kind == "armor", Ice = node.Int("ice"), Layers = node.Int("layers", 2),
+                Direction = node.Text("direction", "up"), InitialCount = node.Int("stock", 2), HitsPerItem = node.Int("hitsPerItem", 3),
+                HitsPerRing = node.Int("hitsPerRing", 2), RipenNeeds = node.Int("ripenNeeds", 2), Contents = Array.Empty<int>(), Mode = "plain",
+                IsTarget = !string.IsNullOrEmpty(node.Text("goal")) || new[] { "fish", "toy", "jelly", "lemon", "strawberry", "basket" }.Contains(kind),
+                FixedTerrain = kind == "stone" || kind == "gate"
+            };
+        }
+        LevelEditorGoals ComputeFusionGoals()
+        {
+            var goals = new LevelEditorGoals();
+            try
+            {
+                foreach (var item in FusionRules.Goals(FusionDefinition))
+                {
+                    if (item.kind == "fish" || item.kind == "F") goals.F++;
+                    else if (item.kind == "toy" || item.kind == "T" || item.kind == "strawberry") goals.T++;
+                    else goals.J++;
+                }
+            }
+            catch { /* Invalid drafts remain editable; ValidateFusion reports the exact failure. */ }
+            return goals;
+        }
+        EditorJson FusionPieces() => root.EnsureObject("fusion").EnsureArray("pieces");
+        static string NewObjectId() => "o_" + Guid.NewGuid().ToString("N");
+        static EditorJson FusionNode(FusionPieceDefinition value) => EditorJson.Parse(JsonUtility.ToJson(value));
+        void InsertFusionPiece(FusionPieceDefinition value)
+        {
+            if (string.IsNullOrWhiteSpace(value.id)) value.id = NewObjectId();
+            var node = FusionNode(value); FusionPieces().Items.Add(node); ids[node] = value.id;
+        }
+        OperationResult TryFillFusionEmpty()
+        {
+            return Edit(() =>
+            {
+                for (int row = 0; row < 9; row++) for (int col = 0; col < 9; col++)
+                    if (PieceAt(col, row) == null) InsertFusionPiece(FusionRules.DefaultPiece("normal", col, row));
+            });
+        }
+        OperationResult TryClearFusion()
+        {
+            return Edit(() => { root.EnsureObject("fusion").Set("pieces", EditorJson.Array()); root.EnsureObject("fusion").Set("milestones", EditorJson.Array()); ids.Clear(); });
+        }
+        OperationResult TryPlaceFusion(string kind, int col, int row, int size)
+        {
+            string created = null;
+            return Edit(() =>
+            {
+                if (!FusionRules.Kinds.Contains(kind)) throw new ArgumentException("当前融合规则不支持：" + kind);
+                var value = FusionRules.DefaultPiece(kind, col, row);
+                if (size != 1) value.size = size;
+                Bounds(col, row, value.size);
+                var overlapping = Handles().Where(h => Overlap(Piece(h), col, row, value.size)).ToArray();
+                foreach (var h in overlapping)
+                {
+                    var old = Piece(h);
+                    if (old.Col < col || old.Row < row || old.Col + old.Size > col + value.size || old.Row + old.Size > row + value.size)
+                        throw new InvalidOperationException("不能只覆盖大块的一部分；请先移除该大块。");
+                }
+                foreach (var h in overlapping) { h.Array.Items.Remove(h.Node); ids.Remove(h.Node); }
+                value.id = NewObjectId(); EnsureContentIds(value); InsertFusionPiece(value); created = value.id;
+            }, () => created);
+        }
+        static void EnsureContentIds(FusionPieceDefinition piece)
+        {
+            if (piece.contents == null) return;
+            foreach (var item in piece.contents) if (item != null && string.IsNullOrWhiteSpace(item.id)) item.id = "u_" + Guid.NewGuid().ToString("N");
+        }
+        OperationResult TryCloneFusionAt(string sourceId, int col, int row)
+        {
+            string created = null;
+            return Edit(() =>
+            {
+                var source = Find(sourceId); var original = Piece(source); Bounds(col, row, original.Size);
+                var overlap = Handles().Where(h => Overlap(Piece(h), col, row, original.Size)).ToArray();
+                foreach (var h in overlap)
+                {
+                    var other = Piece(h);
+                    if (other.Col < col || other.Row < row || other.Col + other.Size > col + original.Size || other.Row + other.Size > row + original.Size)
+                        throw new InvalidOperationException("复制不能只覆盖大块的一部分。");
+                }
+                var clone = EditorJson.Parse(source.Node.ToJson()); created = NewObjectId();
+                clone.Set("id", created); clone.Set("c", col); clone.Set("r", row);
+                var contents = clone.Get("contents");
+                if (contents != null && contents.Kind == EditorJson.Type.Array) foreach (var item in contents.Items) if (item.Kind == EditorJson.Type.Object) item.Set("id", "u_" + Guid.NewGuid().ToString("N"));
+                var links = clone.Get("links");
+                if (links != null && links.Kind == EditorJson.Type.Array) for (int i = 0; i < links.Items.Count; i++) if (links.Items[i].Kind == EditorJson.Type.String && links.Items[i].Scalar == source.Node.Text("id")) links.Items[i] = EditorJson.Value(created);
+                foreach (var h in overlap) { h.Array.Items.Remove(h.Node); ids.Remove(h.Node); }
+                FusionPieces().Items.Add(clone); ids[clone] = created;
+            }, () => created);
+        }
+        public OperationResult TryUpdateFusionPiece(string objectId, FusionPieceDefinition change)
+        {
+            if (!IsFusion) return OperationResult.Fail("当前关卡不是融合规则。");
+            return Edit(() =>
+            {
+                if (change == null) throw new ArgumentNullException(nameof(change));
+                var source = Find(objectId); var old = Piece(source);
+                if (change.id != source.Node.Text("id")) throw new ArgumentException("对象身份不能在属性编辑中改变。");
+                if (change.kind != old.Kind) throw new ArgumentException("更换类型请使用画笔，原有对象身份及关联保持明确。");
+                Bounds(change.c, change.r, change.size);
+                if (Handles().Any(h => h.Node != source.Node && Overlap(Piece(h), change.c, change.r, change.size))) throw new ArgumentException("目标位置已被其他砖占用。");
+                if (change.armor && change.ice > 0) throw new ArgumentException("护甲与冰不能同时存在。");
+                EnsureContentIds(change); MergeKnownFields(source.Node, FusionNode(change));
+            }, () => objectId);
+        }
+        OperationResult TryUpdateFusionLegacyEdit(string id, LevelEditorPieceEdit edit)
+        {
+            if (edit == null) return OperationResult.Fail("属性修改不能为空。");
+            try
+            {
+                var value = GetFusionPiece(id);
+                if (edit.Kind != null) value.kind = edit.Kind;
+                if (edit.Col.HasValue) value.c = edit.Col.Value; if (edit.Row.HasValue) value.r = edit.Row.Value;
+                if (edit.Size.HasValue) value.size = edit.Size.Value; if (edit.Hp.HasValue) value.hp = edit.Hp.Value;
+                if (edit.Armor.HasValue) value.armor = edit.Armor.Value; if (edit.Ice.HasValue) value.ice = edit.Ice.Value;
+                if (edit.Layers.HasValue) value.layers = edit.Layers.Value; if (edit.HitsPerRing.HasValue) value.hitsPerRing = edit.HitsPerRing.Value;
+                if (edit.RipenNeeds.HasValue) value.ripenNeeds = edit.RipenNeeds.Value; if (edit.InitialCount.HasValue) value.stock = edit.InitialCount.Value;
+                if (edit.HitsPerItem.HasValue) value.hitsPerItem = edit.HitsPerItem.Value; if (edit.Direction != null) value.direction = edit.Direction;
+                return TryUpdateFusionPiece(id, value);
+            }
+            catch (Exception ex) { return OperationResult.Fail(ex.Message); }
+        }
+        public OperationResult TrySetFusionOptions(FusionLevelDefinition options)
+        {
+            if (!IsFusion) return OperationResult.Fail("当前关卡不是融合规则。");
+            return Edit(() =>
+            {
+                if (options == null) throw new ArgumentNullException(nameof(options));
+                var patch = EditorJson.Parse(JsonUtility.ToJson(options)); patch.Remove("pieces");
+                MergeKnownFields(root.EnsureObject("fusion"), patch);
+            });
+        }
+        public OperationResult TrySetFusionLinks(string objectId, IEnumerable<string> targets)
+        {
+            if (!IsFusion) return OperationResult.Fail("当前关卡不是融合规则。");
+            return Edit(() =>
+            {
+                var source = Find(objectId); var array = EditorJson.Array();
+                foreach (string target in (targets ?? Array.Empty<string>()).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).Distinct()) array.Items.Add(EditorJson.Value(target));
+                source.Node.Set("links", array);
+            }, () => objectId);
+        }
+        // Updating known fields never drops extensions owned by a future tool. Arrays of
+        // objects preserve per-entry extensions by stable identity, not array position.
+        static void MergeKnownFields(EditorJson target, EditorJson patch)
+        {
+            foreach (var field in patch.Properties)
+            {
+                var old = target.Get(field.Key); var value = field.Value;
+                if (old != null && old.Kind == EditorJson.Type.Object && value.Kind == EditorJson.Type.Object) MergeKnownFields(old, value);
+                else if (old != null && old.Kind == EditorJson.Type.Array && value.Kind == EditorJson.Type.Array)
+                {
+                    var next = EditorJson.Array();
+                    for (int entryIndex = 0; entryIndex < value.Items.Count; entryIndex++)
+                    {
+                        var entry = value.Items[entryIndex];
+                        var match = entry.Kind == EditorJson.Type.Object && !string.IsNullOrEmpty(entry.Text("id")) ? old.Items.FirstOrDefault(n => n.Kind == EditorJson.Type.Object && n.Text("id") == entry.Text("id")) : null;
+                        // Older valid content can use owner:index identity until its first
+                        // edit. Preserve that entry's extensions while materializing an ID.
+                        if (match == null && entry.Kind == EditorJson.Type.Object && entryIndex < old.Items.Count && old.Items[entryIndex].Kind == EditorJson.Type.Object && string.IsNullOrEmpty(old.Items[entryIndex].Text("id"))) match = old.Items[entryIndex];
+                        if (match != null) { MergeKnownFields(match, entry); next.Items.Add(match); } else next.Items.Add(entry);
+                    }
+                    target.Set(field.Key, next);
+                }
+                else target.Set(field.Key, value);
+            }
+        }
+        IReadOnlyList<ValidationIssue> ValidateFusion()
+        {
+            var result = new List<ValidationIssue>();
+            Action<string, string, bool> add = (message, objectId, isError) => result.Add(new ValidationIssue { Code = "FUSION", Message = message, PieceId = objectId, LevelNumber = Number, Severity = isError ? ValidationSeverity.Error : ValidationSeverity.Warning });
+            if (!IntegerField(root, "moves") || Moves < 1 || Moves > 999) add("步数必须为1–999的整数。", null, true);
+            if (root.Has("volleyCount") && (!IntegerField(root, "volleyCount") || root.Int("volleyCount") != 5)) add("每组必须发射5球。", null, true);
+            var config = root.Get("fusion");
+            if (config == null || config.Kind != EditorJson.Type.Object) { add("缺少有效融合配置。", null, true); return result.AsReadOnly(); }
+            CheckFusionTypes(config, add);
+            try { foreach (var issue in FusionRules.Validate(FusionDefinition, Moves, true)) add(issue.Message, issue.ObjectId, issue.IsError); }
+            catch (Exception ex) { add("融合配置无法解析：" + ex.Message, null, true); }
+            return result.AsReadOnly();
+        }
+        static void CheckFusionTypes(EditorJson config, Action<string, string, bool> add)
+        {
+            Action<EditorJson, string, string[], string[], string[]> fields = (node, id, ints, bools, strings) =>
+            {
+                foreach (string key in ints) if (node.Has(key) && !IntegerField(node, key)) add(key + "必须是JSON整数。", id, true);
+                foreach (string key in bools) if (node.Has(key) && node.Get(key).Kind != EditorJson.Type.Boolean) add(key + "必须是JSON布尔值。", id, true);
+                foreach (string key in strings) if (node.Has(key) && node.Get(key).Kind != EditorJson.Type.String) add(key + "必须是JSON字符串。", id, true);
+            };
+            Action<EditorJson, string, string> stringArray = (node, key, id) =>
+            {
+                if (!node.Has(key)) return; var array = node.Get(key);
+                if (array.Kind != EditorJson.Type.Array || array.Items.Any(n => n.Kind != EditorJson.Type.String)) add(key + "必须是字符串数组。", id, true);
+            };
+            fields(config, null, new[] { "schemaVersion", "ruleVersion", "ratingRewardBudget", "piercePerBall", "bombPerBall", "superPerBall", "superRange", "refillHp", "refillBudget" }, new[] { "ratingRewards", "finiteBoosters" }, new[] { "physicsPolicy" });
+            stringArray(config, "requiredMechanisms", null); stringArray(config, "introducedMechanisms", null);
+            var pieces = config.Get("pieces");
+            if (pieces == null || pieces.Kind != EditorJson.Type.Array) { add("pieces必须是对象数组。", null, true); return; }
+            foreach (var p in pieces.Items)
+            {
+                if (p.Kind != EditorJson.Type.Object) { add("pieces数组不能包含非对象内容。", null, true); continue; }
+                string id = p.Text("id");
+                fields(p, id, new[] { "c", "r", "size", "hp", "ice", "threshold", "initialCharge", "stock", "hitsPerItem", "bonusServings", "ripenNeeds", "layers", "hitsPerRing", "range", "damage", "batchSize" }, new[] { "armor", "autoActivate" }, new[] { "id", "kind", "goal", "direction", "group", "network", "activationMode", "condition" });
+                foreach (string key in new[] { "id", "kind", "c", "r" }) if (!p.Has(key)) add("对象缺少字段：" + key, id, true);
+                stringArray(p, "links", id); stringArray(p, "rewardSequence", id); stringArray(p, "eligibleGoals", id);
+                foreach (string key in new[] { "spawnCells", "fallbackCells" })
+                {
+                    var array = p.Get(key); if (array == null || array.Kind == EditorJson.Type.Null) continue;
+                    if (array.Kind != EditorJson.Type.Array) add(key + "必须是坐标对象数组。", id, true);
+                    else foreach (var cell in array.Items)
+                        if (cell.Kind != EditorJson.Type.Object || cell.Properties.Any(field => !IntegerField(cell, field.Key))) add(key + "内坐标必须为整数对象。", id, true);
+                }
+                var contents = p.Get("contents");
+                if (contents != null && contents.Kind != EditorJson.Type.Null)
+                {
+                    if (contents.Kind != EditorJson.Type.Array) add("contents必须是对象数组。", id, true);
+                    else foreach (var item in contents.Items)
+                        if (item.Kind != EditorJson.Type.Object) add("容器产物必须是对象。", id, true);
+                        else fields(item, id, new[] { "hp" }, Array.Empty<string>(), new[] { "id", "kind", "goal" });
+                }
+            }
+            var milestones = config.Get("milestones");
+            if (milestones != null && milestones.Kind != EditorJson.Type.Null)
+            {
+                if (milestones.Kind != EditorJson.Type.Array) add("milestones必须是对象数组。", null, true);
+                else foreach (var m in milestones.Items)
+                    if (m.Kind != EditorJson.Type.Object) add("里程碑必须是对象。", null, true);
+                    else { fields(m, null, new[] { "threshold", "count" }, Array.Empty<string>(), new[] { "id", "kind" }); stringArray(m, "links", null); }
+            }
+        }
+    }
+}

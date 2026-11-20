@@ -1,0 +1,28 @@
+using UnityEngine;
+namespace BounceGarden {
+public sealed class BoardSurface:MonoBehaviour {
+ public BoardSpace Space{get;private set;}public static bool Enabled=true;
+ Material material;GameObject debugRoot;public bool DebugVisible=>debugRoot!=null&&debugRoot.activeSelf;
+ public void Initialize(BoardSpace space,bool renderLegacy=true){Space=space;if(!Enabled||!renderLegacy)return;
+  var filter=gameObject.AddComponent<MeshFilter>();var mesh=new Mesh();float x=10.8f*.5f,y=23.4f*.5f;
+  mesh.vertices=new[]{new Vector3(-x,-y),new Vector3(x,-y),new Vector3(x,y),new Vector3(-x,y)};mesh.triangles=new[]{0,1,2,0,2,3};mesh.RecalculateBounds();filter.sharedMesh=mesh;
+  var renderer=gameObject.AddComponent<MeshRenderer>();renderer.sortingOrder=-29;
+  material=new Material(Resources.Load<Shader>("BoardGrass"));material.mainTexture=Resources.Load<Texture2D>("Art/Round5/grass_uniform_albedo");material.SetTexture("_Backdrop",ProductionArt.Get("game_background").texture);
+  material.SetVector("_Board",new Vector4(space.Origin.x,space.Origin.y,space.U.x,space.V.y));material.SetFloat("_Phase",space.Phase);renderer.sharedMaterial=material;
+ }
+ void Update(){if(Input.GetKeyDown(KeyCode.F8))SetDebug(!DebugVisible);}
+ public void QAParity(bool show){if(material!=null)material.SetFloat("_DebugParity",show?1:0);}
+ public void SetDebug(bool show){if(debugRoot==null&&show){debugRoot=new GameObject("Board overlay F8: cyan logic / green grass / yellow footprint / pink anchor");debugRoot.transform.SetParent(transform,false);
+  for(int c=0;c<=Space.Columns;c++)Line(Space.Origin+c*Space.U,Space.Origin+c*Space.U+Space.Rows*Space.V,Color.cyan,.008f);
+  for(int r=0;r<=Space.Rows;r++)Line(Space.Origin+r*Space.V,Space.Origin+r*Space.V+Space.Columns*Space.U,Color.cyan,.008f);
+  foreach(var b in FindObjectsByType<BrickBody>(FindObjectsSortMode.None)){if(b.Definition.shutter)continue;Vector2 center=b.GroundAnchor;float h=Space.CellWidth*.5f;
+   Vector2 a=center+new Vector2(-h,Space.CellHeight*.5f),z=center+new Vector2(h,-Space.CellHeight*.5f);Rect(a,z,Color.yellow);
+   WorldArt.Draw(debugRoot.transform,"Footprint anchor","circle",center,Vector2.one*.06f,Color.magenta,3003);
+  }
+  for(int r=0;r<Space.Rows;r++)for(int c=0;c<Space.Columns;c++){var p=Space.CellToLocal(c,r);WorldArt.Draw(debugRoot.transform,"Grass parity center","circle",p+new Vector2(.06f,.06f),Vector2.one*.025f,Color.green,3003);}
+ }if(debugRoot!=null)debugRoot.SetActive(show);}
+ void Rect(Vector2 a,Vector2 z,Color color){Line(a,new Vector2(z.x,a.y),color,.009f);Line(new Vector2(z.x,a.y),z,color,.009f);Line(z,new Vector2(a.x,z.y),color,.009f);Line(new Vector2(a.x,z.y),a,color,.009f);}
+ void Line(Vector2 a,Vector2 b,Color color,float width){var rt=WorldArt.Draw(debugRoot.transform,"Grid debug","circle",(a+b)*.5f,new Vector2((b-a).magnitude,width),color,3002);rt.transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(b.y-a.y,b.x-a.x)*Mathf.Rad2Deg);}
+ void OnDestroy(){if(material!=null)Destroy(material);var f=GetComponent<MeshFilter>();if(f!=null&&f.sharedMesh!=null)Destroy(f.sharedMesh);}
+}
+}

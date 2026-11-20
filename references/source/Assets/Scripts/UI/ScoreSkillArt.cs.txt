@@ -1,0 +1,11 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public static class ScoreSkillArt {
+ static readonly Dictionary<string,Sprite> sprites=new Dictionary<string,Sprite>();
+ public static Sprite Get(string folder,string key){string path="Art/"+folder+"/"+key;if(!sprites.TryGetValue(path,out var s)){s=Resources.Load<Sprite>(path);if(s==null)throw new System.InvalidOperationException("Missing score/skill artwork "+path);sprites[path]=s;}return s;}
+ public static Sprite Booster(StreakBooster kind)=>GardenArt70.Get(GardenArt70.OrbKey(kind));
+ public static Image Image(Transform parent,string name,string folder,string key,float x,float y,float width,float height,bool sliced=false){var image=UICraft.Box(parent,name,x,y,width,height,Color.white);image.sprite=Get(folder,key);image.raycastTarget=false;if(sliced)image.pixelsPerUnitMultiplier=3.2f;image.type=sliced?UnityEngine.UI.Image.Type.Sliced:UnityEngine.UI.Image.Type.Simple;image.preserveAspect=!sliced;return image;}
+}
+}

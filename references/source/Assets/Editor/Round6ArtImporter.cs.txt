@@ -1,0 +1,46 @@
+using UnityEditor;using UnityEngine;using System.IO;
+public sealed class Round6ArtImporter:AssetPostprocessor { void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/Round6/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Multiple;t.spritePixelsPerUnit=100;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.Uncompressed;t.filterMode=FilterMode.Bilinear;t.wrapMode=TextureWrapMode.Clamp;var settings=new TextureImporterSettings();t.ReadTextureSettings(settings);settings.spriteMeshType=SpriteMeshType.FullRect;t.SetTextureSettings(settings);switch(Path.GetFileName(assetPath)){
+case "topbar_reference_matched_atlas_r6.png":
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="avatar_frame_magenta",rect=new Rect(53,438,533,518),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="heart_red",rect=new Rect(633,502,403,353),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="coin_gold_star",rect=new Rect(1079,470,421,435),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="resource_plate_cream",rect=new Rect(50,83,728,248),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(80,54,80,54)},
+new SpriteMetaData{name="plus_green",rect=new Rect(826,72,270,277),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="settings_gold_round",rect=new Rect(1155,40,341,353),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "bottom_nav_panel_states_raw.png":
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="nav_panel_normal",rect=new Rect(71,328,636,354),pivot=new Vector2(0.5f,0.0f),alignment=9,border=new Vector4(26,16,26,46)},
+new SpriteMetaData{name="nav_panel_selected",rect=new Rect(831,328,636,354),pivot=new Vector2(0.5f,0.0f),alignment=9,border=new Vector4(26,16,26,46)},
+};
+#pragma warning restore 0618
+break;
+case "bottom_nav_icons_raw.png":
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="nav_icon_shop",rect=new Rect(24,256,472,512),pivot=new Vector2(0.5f,0.06445f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="nav_icon_home",rect=new Rect(512,256,512,512),pivot=new Vector2(0.5f,0.07031f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="nav_icon_ranking",rect=new Rect(1072,256,440,512),pivot=new Vector2(0.5f,0.06445f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "vfx_feedback_atlas_rgba.png":
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="impact_star",rect=new Rect(13,526,369,381),pivot=new Vector2(0.498645f,0.493438f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="shockwave_ring",rect=new Rect(385,530,381,375),pivot=new Vector2(0.501312f,0.498667f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="soft_glow",rect=new Rect(773,542,357,351),pivot=new Vector2(0.498599f,0.48433f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="short_streak",rect=new Rect(1152,648,381,118),pivot=new Vector2(0.866142f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="four_point_spark",rect=new Rect(95,108,199,298),pivot=new Vector2(0.502513f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="debris_blue",rect=new Rect(424,125,285,274),pivot=new Vector2(0.498246f,0.49635f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="debris_orange",rect=new Rect(809,125,283,275),pivot=new Vector2(0.508834f,0.498182f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="debris_neutral",rect=new Rect(1193,125,282,276),pivot=new Vector2(0.5f,0.496377f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+}}}

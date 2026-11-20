@@ -1,0 +1,32 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ // A target is an authored brick identity, not a position that may later refill.
+ readonly Dictionary<int,int> jellyTargets=new Dictionary<int,int>();
+ public readonly int[] JellyGoal=new int[8],JellyCollected=new int[8];
+ public System.Func<int,Vector2> JellyLootDestination {get;set;}
+ public bool JellyCollectionComplete {get{for(int c=0;c<JellyGoal.Length;c++)if(JellyCollected[c]<JellyGoal[c])return false;return true;}}
+ public bool IsJellyTarget(BrickBody brick)=>brick!=null&&jellyTargets.ContainsKey(brick.Id);
+ public IEnumerable<int> ActiveJellyColors=>Enumerable.Range(0,JellyGoal.Length).Where(c=>JellyGoal[c]>0);
+ void ClearJellyCollection(){jellyTargets.Clear();System.Array.Clear(JellyGoal,0,JellyGoal.Length);System.Array.Clear(JellyCollected,0,JellyCollected.Length);JellyLootDestination=null;}
+ void RegisterJellyTarget(BrickBody brick,int color){jellyTargets.Add(brick.Id,color);JellyGoal[color]++;if(SevenSpecialActive){brick.Definition.colorIndex=IsTutorial?1:3;brick.ApplySevenFace();}}
+ void ReleaseJellyCollection(BrickBody brick){
+  if(!jellyTargets.TryGetValue(brick.Id,out int color))return;jellyTargets.Remove(brick.Id);
+  var root=new GameObject("Collectible "+(IsOpening?SevenSpecialArt.ColorName(color):JellyCollectionArt.Name(color))+" jelly").transform;root.SetParent(world,false);root.position=brick.transform.position;root.localScale=Vector3.one*.55f;
+  var sprite=IsTutorial?SevenSpecialArt.OrdinaryIcon(1):IsOpening?OpeningGoalSprite(color):JellyCollectionArt.Sprite(color);var rendered=ChainVisualArt.Draw(root,"Jelly collectible",sprite,1f/Mathf.Max(.01f,sprite.bounds.size.x),75);
+  chainLoot.Add(new ChainLoot{Kind=0,JellyColor=color,Start=brick.transform.position,View=root});
+ }
+ void CollectJelly(int color){if(JellyCollected[color]<JellyGoal[color]&&JellyCollected[color]+1>=JellyGoal[color])SoundService.Play("goal_complete");JellyCollected[color]=Mathf.Min(JellyGoal[color],JellyCollected[color]+1);changed=true;}
+}
+public static class JellyCollectionArt {
+ static readonly int[] Palettes={0,6,2,3,4,5,8,7};
+ static readonly string[] Names={"WHITE","BLUE","PINK","GREEN","YELLOW","PURPLE","ORANGE","BROWN"};
+ static readonly Sprite[] icons=new Sprite[8];
+ public static Sprite Sprite(int color){color=Mathf.Clamp(color,0,7);if(icons[color]!=null)return icons[color];var source=MainlineArt.Frames(Palettes[color])[0];var rect=source.rect;float padding=rect.width*(60f/256f);return icons[color]=UnityEngine.Sprite.Create(source.texture,new Rect(rect.x+padding,rect.y+padding,rect.width-padding*2,rect.height-padding*2),Vector2.one*.5f,source.pixelsPerUnit,0,SpriteMeshType.FullRect);}
+ public static string Name(int color)=>Names[Mathf.Clamp(color,0,7)];
+ public static Color Color(int color)=>MainlineArt.Palette[Palettes[Mathf.Clamp(color,0,7)]];
+}
+}
+

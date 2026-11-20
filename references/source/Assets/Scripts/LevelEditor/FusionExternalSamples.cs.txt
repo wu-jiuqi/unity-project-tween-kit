@@ -1,0 +1,68 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+    [Serializable] public sealed class FusionExternalSamplePack {
+        public int schemaVersion = 1;
+        public FusionSampleDefinition[] samples = Array.Empty<FusionSampleDefinition>();
+        public string[] superSampleIds = Array.Empty<string>();
+    }
+
+    /// <summary>Strict external experiment input; does not alter built-in samples or regression fixtures.</summary>
+    public static class FusionExternalSamples {
+        public static FusionExternalSamplePack Load(string path) {
+            path = Path.GetFullPath(path);
+            if (!File.Exists(path)) throw new FileNotFoundException("外部样板文件不存在。", path);
+            if (new FileInfo(path).Length > 16 * 1024 * 1024) throw new ArgumentException("外部样板文件超过16MB。请分批探索。");
+            string text = File.ReadAllText(path, Encoding.UTF8);
+            var root = EditorJson.Parse(text);
+            if (root.Kind != EditorJson.Type.Object || !Integer(root, "schemaVersion") || root.Int("schemaVersion") != 1)
+                throw new ArgumentException("外部样板schemaVersion必须为整数1。");
+            var array = root.Get("samples");
+            if (array == null || array.Kind != EditorJson.Type.Array || array.Items.Count < 1 || array.Items.Count > 64)
+                throw new ArgumentException("samples须为包含1–64关的数组。");
+            var pack = new FusionExternalSamplePack();
+            var samples = new System.Collections.Generic.List<FusionSampleDefinition>();
+            var ids = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+            foreach (var node in array.Items) {
+                if (node.Kind != EditorJson.Type.Object) throw new ArgumentException("samples中的每一项须为对象。");
+                string id = Text(node, "id"), name = Text(node, "name"), focus = Text(node, "focus", false);
+                if (id.Length < 1 || id.Length > 64 || !id.All(c => c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-' || c == '_') || !ids.Add(id))
+                    throw new ArgumentException("样板ID须唯一、1–64位，仅使用字母、数字、横线或下划线：" + id);
+                if (string.IsNullOrWhiteSpace(name) || name.Length > 100) throw new ArgumentException(id + " 名称须为1–100字符。");
+                if (!Integer(node, "moves")) throw new ArgumentException(id + " moves须为JSON整数。");
+                var definition = node.Get("definition");
+                if (definition == null || definition.Kind != EditorJson.Type.Object) throw new ArgumentException(id + " 缺少definition对象。");
+                // Validate original JSON types before JsonUtility can coerce or omit malformed fields.
+                var stage = EditorJson.Object(); stage.Set("authoringSchema", "bouncebusters-level-authoring-v2");
+                stage.Set("rulesProfile", "fusion_v1"); stage.Set("name", name); stage.Set("moves", node.Int("moves")); stage.Set("volleyCount", 5); stage.Set("fusion", definition);
+                var errors = LevelEditorDocument.ValidateStage(0, stage.ToJson()).Where(i => i.IsError).ToArray();
+                if (errors.Length > 0) throw new ArgumentException(id + ": " + string.Join(" | ", errors.Select(i => i.Message)));
+                samples.Add(new FusionSampleDefinition { id = id, name = name, focus = focus, moves = node.Int("moves"),
+                    definition = JsonUtility.FromJson<FusionLevelDefinition>(definition.ToJson()) });
+            }
+            var supers = root.Get("superSampleIds");
+            if (supers != null) {
+                if (supers.Kind != EditorJson.Type.Array || supers.Items.Any(n => n.Kind != EditorJson.Type.String))
+                    throw new ArgumentException("superSampleIds须为字符串数组；空数组表示只探索裸关。");
+                pack.superSampleIds = supers.Items.Select(n => n.Scalar).ToArray();
+                if (pack.superSampleIds.Distinct(StringComparer.Ordinal).Count() != pack.superSampleIds.Length || pack.superSampleIds.Any(id => !ids.Contains(id)))
+                    throw new ArgumentException("superSampleIds不能重复且必须引用本文件中的样板ID。");
+            }
+            pack.samples = samples.ToArray(); return pack;
+        }
+        static bool Integer(EditorJson node, string key) {
+            var value = node.Get(key); int parsed;
+            return value != null && value.Kind == EditorJson.Type.Number && int.TryParse(value.Scalar, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out parsed);
+        }
+        static string Text(EditorJson node, string key, bool required = true) {
+            var value = node.Get(key);
+            if (value == null && !required) return "";
+            if (value == null || value.Kind != EditorJson.Type.String) throw new ArgumentException(key + "须为JSON字符串。");
+            return value.Scalar;
+        }
+    }
+}

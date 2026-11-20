@@ -1,0 +1,144 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace BounceGarden {
+// Local, bounded and independent of profile transactions and level authoring.
+public sealed partial class BalanceStatistics:MonoBehaviour {
+ public const int HistoryLimit=512,LaunchLimit=256;
+ const string StorageKey="BounceGarden.BalanceStatistics.v1";
+ public BalanceHistory History {get;private set;}=new BalanceHistory();
+ public string LastError {get;private set;}="";
+ public string LastExportDirectory {get;private set;}="";
+ public static string DirectoryPath=>Path.Combine(Application.persistentDataPath,"PlaytestBalance");
+ AppUI app; GameSession game; BalanceRound lastLoss; BalanceLaunch launch;
+ int generation,lastHits,lastBreaks,lastSpecials,lastCombos,lastStock,initialGenerated; float lastLaunchTime,nextSave;
+ float saveRetryAt;
+ bool initialized,focused=true,backgrounded,dirty,testWriter; Action<string> writer;
+ public void Initialize(AppUI owner){
+  app=owner;game=owner.Session;initialized=true;writer=Write;
+  if(!RuntimeQA.IsIsolated)Guard(()=>Restore(Read()));
+ }
+ public void Guard(Action work){try{work();}catch(Exception e){LastError=e.GetType().Name+": "+e.Message;Debug.LogWarning("Balance statistics: "+LastError);}}
+ static string Read(){
+#if UNITY_WEBGL && !UNITY_EDITOR
+  return PlayerPrefs.GetString(StorageKey,"");
+#else
+  string file=Path.Combine(DirectoryPath,"history.json");
+  if(File.Exists(file))try{var json=File.ReadAllText(file);Validate(json);return json;}catch{if(!File.Exists(file+".bak"))throw;}
+  return File.Exists(file+".bak")?File.ReadAllText(file+".bak"):"";
+#endif
+ }
+ static BalanceHistory Validate(string json){var data=JsonUtility.FromJson<BalanceHistory>(json);if(data==null||data.schema!=1||data.rounds==null||data.rounds.Any(r=>r==null||string.IsNullOrEmpty(r.id)||r.goals==null||r.launches==null))throw new InvalidDataException("Invalid balance history");return data;}
+ internal void Restore(string json){
+  if(string.IsNullOrEmpty(json))return;
+  var data=Validate(json);
+  // Unity's inline class serialization can turn a null active field into an empty instance.
+  if(data.active!=null&&string.IsNullOrEmpty(data.active.id))data.active=null;
+  if(data.active!=null){if(data.active.strategyVersion==2&&data.active.strategy!=null)foreach(var shot in data.active.strategy.shots.Where(s=>s.returnedAt<0))shot.returnState="not_observed_at_interrupted";data.active.outcome="interrupted";data.active.endedUtc=DateTime.UtcNow.ToString("o");foreach(var shot in data.active.launches)if(string.IsNullOrEmpty(shot.endReason))shot.endReason="interrupted";data.rounds.RemoveAll(r=>r.id==data.active.id);data.rounds.Add(data.active);data.active=null;}
+  if(data.attempts==null)data.attempts=new System.Collections.Generic.List<BalanceAttempt>();
+  Trim(data);History=data;dirty=true;
+ }
+ static void Trim(BalanceHistory data){while(data.rounds.Count>HistoryLimit){data.rounds.RemoveAt(0);data.droppedRounds++;}}
+ static void Write(string json){
+#if UNITY_WEBGL && !UNITY_EDITOR
+  PlayerPrefs.SetString(StorageKey,json);PlayerPrefs.Save();
+#else
+  Directory.CreateDirectory(DirectoryPath);string path=Path.Combine(DirectoryPath,"history.json"),temp=path+".tmp";
+  File.WriteAllText(temp,json,new UTF8Encoding(false));
+  if(File.Exists(path))File.Replace(temp,path,path+".bak");else File.Move(temp,path);
+#endif
+ }
+ public static string Configuration(GameSession session){
+  // Includes authored opening goals/pieces which are not fully represented by fitted LevelData.
+  return "balance-v1\n"+GameVersion.Name+"\n"+ScoreRules.Damage+"/"+ScoreRules.Break+"/"+ScoreRules.Objective+"/"+ScoreRules.SpareShot+"/"+ScoreRules.Cap+"\n"+JsonUtility.ToJson(session.CurrentLevel)+"\n"+(session.IsOpening?JsonUtility.ToJson(session.OpeningStage):"")+"\n"+JsonUtility.ToJson(Goals(session));
+ }
+ // JsonUtility requires a wrapper for top-level arrays.
+ [Serializable] sealed class GoalSet {public BalanceGoal[] goals;}
+ static GoalSet Goals(GameSession session)=>new GoalSet{goals=ReadGoals(session).Select(g=>new BalanceGoal{kind=g.kind,color=g.color,required=g.required}).ToArray()};
+ static BalanceGoal[] ReadGoals(GameSession s){
+  if(s.IsOpening)return s.OpeningTargets.Select((t,i)=>new BalanceGoal{kind=t.kind,color=t.color,required=t.count,collected=i<s.OpeningCollected.Length?s.OpeningCollected[i]:0}).ToArray();
+  if(s.IsCollection)return s.CollectionGoal.Select((n,i)=>new BalanceGoal{kind=i==0?"collection_1":"collection_2",required=n,collected=s.Collected[i]}).Concat(s.JellyGoal.Select((n,i)=>new BalanceGoal{kind="jelly",color=i.ToString(),required=n,collected=s.JellyCollected[i]})).Where(t=>t.required>0).ToArray();
+  return new[]{new BalanceGoal{kind="remaining_targets",required=s.CurrentLevel.bricks.Length,collected=Math.Max(0,s.CurrentLevel.bricks.Length-s.RemainingTargets)}};
+ }
+ int GoalCount()=>ReadGoals(game).Sum(t=>Math.Min(t.required,t.collected));
+ int Stock()=>app.Profile.BoosterStock(StreakBooster.Pierce)+app.Profile.BoosterStock(StreakBooster.Bomb)+app.Profile.BoosterStock(StreakBooster.Super);
+ int Specials()=>game.ChainTools.Count(t=>!t.Consumed&&SevenSpecialRules.IsSpecial(t.Kind));
+ public void Begin(){Guard(()=>{
+  if(!initialized||game.IsTutorial||game.IsStreakTrial)return;
+  Finish("restarted");lastLoss=null;generation=game.Generation;launch=null;
+  string config=Configuration(game),hash=BalanceReport.Hash(config);int level=game.LevelIndex+1;
+  var previous=History.rounds.Where(r=>r.level==level).ToArray();
+  var tally=History.attempts.FirstOrDefault(t=>t.level==level&&t.configHash==hash);
+  if(tally==null){tally=new BalanceAttempt{level=level,configHash=hash,count=previous.Where(r=>r.configHash==hash).Select(r=>r.configAttempt).DefaultIfEmpty(0).Max()};History.attempts.Add(tally);}tally.count++;
+  History.active=new BalanceRound{id=Guid.NewGuid().ToString("N"),startedUtc=DateTime.UtcNow.ToString("o"),version=GameVersion.Name,configJson=config,configHash=hash,level=level,attempt=Math.Max(previous.Select(r=>r.attempt).DefaultIfEmpty(0).Max()+1,History.attempts.Where(t=>t.level==level).Sum(t=>t.count)),configAttempt=tally.count,initialShots=game.Shots,remainingShots=game.Shots,initialSpecials=Specials(),streakTier=game.UsesShopBoosters?app.Profile.CampaignStreakTier:0,outcome="in_progress"};
+  BeginStrategy();initialGenerated=game.ChainGeneratedCount;lastStock=Stock();Capture();dirty=true;nextSave=Time.unscaledTime;
+ });}
+ public void Volley(StreakBooster booster){Guard(()=>{
+  var r=History.active;if(r==null)return;
+  CloseLaunch("next_launch");Capture();r.usedShots++;
+  if(booster!=StreakBooster.None)r.boostedVolleys++;
+  int stock=Stock();r.consumedBoosters+=Math.Max(0,lastStock-stock);lastStock=stock;
+  lastHits=game.HitCount;lastBreaks=game.BreakCount;lastSpecials=game.ChainActivationCount;lastCombos=game.SevenCombos;lastLaunchTime=r.activeSeconds;
+  if(r.launches.Count<LaunchLimit){launch=new BalanceLaunch{number=r.usedShots,scoreBefore=game.Score,goalsBefore=GoalCount(),remainingShots=game.Shots,booster=booster.ToString(),overlapsPrevious=game.ActiveBalls>1};r.launches.Add(launch);}else r.omittedLaunches++;
+  dirty=true;
+ });}
+ void Capture(){
+  var r=History.active;if(r==null)return;
+  r.remainingShots=game.Shots;r.score=game.Score;r.damageScore=game.DamageScore;r.breakScore=game.BreakScore;r.objectiveScore=game.ObjectiveScore;r.completionBonus=game.CreditedCompletionBonus;
+  r.otherScore=r.score-r.damageScore-r.breakScore-r.objectiveScore-r.completionBonus;
+  r.victoryClearScore=game.VictoryClearScore;r.playScore=Math.Max(0,r.score-r.completionBonus-r.victoryClearScore);r.hasSettlementBreakdown=true;
+  r.goals=ReadGoals(game);r.hits=game.HitCount;r.breaks=game.BreakCount;r.generatedSpecials=Math.Max(0,game.ChainGeneratedCount-initialGenerated);r.activatedSpecials=game.ChainActivationCount;r.remainingSpecials=Specials();r.combos=game.SevenCombos;
+  SampleLaunch();
+ }
+ void SampleLaunch(){if(launch==null||History.active==null)return;launch.scoreAfter=game.Score-game.CreditedCompletionBonus;launch.goalsAfter=GoalCount();launch.remainingShots=game.Shots;launch.hits=game.HitCount-lastHits;launch.breaks=game.BreakCount-lastBreaks;launch.specials=game.ChainActivationCount-lastSpecials;launch.combos=game.SevenCombos-lastCombos;launch.activeSeconds=History.active.activeSeconds-lastLaunchTime;}
+ void CloseLaunch(string reason){if(launch==null)return;SampleLaunch();launch.endReason=reason;launch=null;}
+ public void Finish(string outcome){Guard(()=>{
+  var r=History.active;if(r==null)return;
+  if(game!=null&&game.Generation==generation){Capture();CloseLaunch(outcome);}else if(launch!=null){launch.endReason="session_replaced";launch=null;}
+  FinishStrategy(outcome);r.outcome=outcome;r.endedUtc=DateTime.UtcNow.ToString("o");History.rounds.Add(r);History.active=null;Trim(History);lastLoss=outcome=="loss"?r:null;dirty=true;Save();AutomaticStrategyReport();
+ });}
+ void Update(){Guard(()=>{
+  if(!initialized||game==null)return;
+  if(History.active==null&&lastLoss!=null&&game.Generation==generation&&game.IsPlaying){
+   var r=lastLoss;History.rounds.Remove(r);r.continues++;r.continuedShots+=Math.Max(0,game.Shots-r.remainingShots);r.outcome="in_progress";r.endedUtc=null;History.active=r;ResumeStrategy();lastLoss=null;dirty=true;
+  }
+  if(History.active!=null){
+   if(game.Generation!=generation){Finish("interrupted");return;}
+   bool active=game.IsPlaying&&!game.IsPaused&&focused&&!backgrounded;TickStrategy(active);if(active)History.active.activeSeconds+=Time.unscaledDeltaTime;
+   bool settled=game.ActiveBalls==0&&game.PendingBurstBalls==0&&(!game.IsChainCollection||!game.ChainEffectsPending&&game.CollectionReady);
+   if(launch!=null&&settled){CloseLaunch("settled");Capture();dirty=true;}
+   if(Time.unscaledTime>=nextSave){Capture();dirty=true;Save();nextSave=Time.unscaledTime+15;}
+  }else if(dirty)Save();
+ });}
+ public void Save(){
+  if(Time.unscaledTime<saveRetryAt)return;
+  bool attempted=false,succeeded=false;
+  Guard(()=>{if(RuntimeQA.IsIsolated&&!testWriter||!dirty||writer==null)return;attempted=true;TrimStrategy(History);writer(JsonUtility.ToJson(History));dirty=false;succeeded=true;});
+  if(attempted&&!succeeded)saveRetryAt=Time.unscaledTime+5;
+ }
+ public string ExportJson(){CaptureIfCurrent();return BalanceReport.Json(History);}
+ void CaptureIfCurrent(){Guard(()=>{if(game!=null&&game.Generation==generation)Capture();});}
+ public bool Export(out string destination){
+  string result="";bool success=false;Guard(()=>{
+   CaptureIfCurrent();
+#if UNITY_WEBGL && !UNITY_EDITOR
+   throw new NotSupportedException("此平台尚未接入文件分享，请使用电脑试玩版导出统计。");
+#else
+   string dir=Path.Combine(DirectoryPath,"Exports",DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));Directory.CreateDirectory(dir);
+   File.WriteAllText(Path.Combine(dir,"rounds.json"),BalanceReport.Json(History),new UTF8Encoding(false));
+   File.WriteAllText(Path.Combine(dir,"rounds.csv"),BalanceReport.RoundsCsv(History.rounds),new UTF8Encoding(true));
+   File.WriteAllText(Path.Combine(dir,"levels.csv"),BalanceReport.SummaryCsv(History.rounds),new UTF8Encoding(true));
+   ExportStrategyFiles(dir);LastExportDirectory=result=dir;success=true;
+#endif
+  });destination=result;return success;
+ }
+ void Checkpoint(){CaptureIfCurrent();dirty=true;Save();}
+ void OnApplicationFocus(bool value){focused=value;if(!value)Checkpoint();}
+ void OnApplicationPause(bool value){backgrounded=value;if(value)Checkpoint();}
+ void OnApplicationQuit(){Finish("interrupted");}
+ internal void SetWriterForTest(Action<string> value){if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Test writer requires isolated QA");writer=value;testWriter=true;dirty=true;saveRetryAt=0;}
+}
+}

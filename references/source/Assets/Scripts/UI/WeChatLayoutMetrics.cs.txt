@@ -1,0 +1,42 @@
+using UnityEngine;
+namespace BounceGarden {
+// Window-space logical pixels from WX; convert once to Unity's bottom-left pixels.
+// The full cream backdrop remains outside this content safe rectangle.
+public static class WeChatLayoutMetrics {
+ public static bool Enabled {get;private set;}
+ public static int Revision {get;private set;}
+ static float width,height;static Rect safe,menu;static bool validMenu;
+ public static void Set(float w,float h,Rect windowSafe,Rect capsule){
+  if(w<=0||h<=0||float.IsNaN(w)||float.IsNaN(h))return;
+  var nextSafe=windowSafe.width>0&&windowSafe.height>0?windowSafe:new Rect(0,0,w,h);
+  if(Enabled&&width==w&&height==h&&safe==nextSafe&&menu==capsule)return;
+  Enabled=true;width=w;height=h;safe=nextSafe;
+  menu=capsule;validMenu=capsule.width>0&&capsule.height>0&&capsule.xMin>=0&&capsule.yMin>=0&&capsule.xMax<=w&&capsule.yMax<=h;
+  Revision++;
+ }
+ public static void EnableFallback(){Enabled=true;Revision++;}
+ public static void Reset(){Enabled=false;width=height=0;safe=menu=Rect.zero;validMenu=false;Revision++;}
+ public static float LogicalPixelScale(Vector2Int pixels)=>pixels.x/(width>0?width:390f);
+ // WX uses logical pixels with a top-left origin; Unity uses render pixels
+ // with a bottom-left origin. Scale each axis independently (SDK DPR can vary).
+ public static Rect ContentSafeArea(Rect nativeSafe,Vector2Int pixels){
+  if(!Enabled||width<=0||height<=0||pixels.x<=0||pixels.y<=0)return nativeSafe;
+  float sx=pixels.x/width,sy=pixels.y/height;
+  var wxSafe=Rect.MinMaxRect(Mathf.Clamp(safe.xMin,0,width)*sx,Mathf.Clamp(height-safe.yMax,0,height)*sy,
+   Mathf.Clamp(safe.xMax,0,width)*sx,Mathf.Clamp(height-safe.yMin,0,height)*sy);
+  var intersection=Rect.MinMaxRect(Mathf.Max(nativeSafe.xMin,wxSafe.xMin),Mathf.Max(nativeSafe.yMin,wxSafe.yMin),
+   Mathf.Min(nativeSafe.xMax,wxSafe.xMax),Mathf.Min(nativeSafe.yMax,wxSafe.yMax));
+  return intersection.width>0&&intersection.height>0?intersection:nativeSafe;
+ }
+ public static bool TryGetBlockedRect(Vector2Int pixels,out Rect blocked){
+  blocked=Rect.zero;if(!Enabled)return false;
+  float w=width>0?width:390,h=height>0?height:844;
+  var capsule=validMenu?menu:new Rect(w-104,Mathf.Max(44,safe.yMin+8),96,32);
+  float sx=pixels.x/w,sy=pixels.y/h;
+  blocked=Rect.MinMaxRect((capsule.xMin-8)*sx,(h-capsule.yMax-8)*sy,(capsule.xMax+8)*sx,(h-capsule.yMin+8)*sy);
+  return true;
+ }
+ // Compatibility for older QA callers; capsule never changes the content viewport.
+ public static Rect Fit(Rect nativeSafe,Vector2Int pixels)=>nativeSafe;
+}
+}

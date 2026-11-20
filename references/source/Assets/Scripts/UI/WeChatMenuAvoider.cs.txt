@@ -1,0 +1,24 @@
+using UnityEngine;
+namespace BounceGarden {
+// Keep the control below the full system band. Board/camera geometry stays native.
+public sealed class WeChatMenuAvoider:MonoBehaviour {
+ public bool FullSystemBand=true;
+ RectTransform rect;Vector2 origin;readonly Vector3[] corners=new Vector3[4];
+ void Awake(){rect=(RectTransform)transform;origin=rect.anchoredPosition;}
+ void LateUpdate(){
+  rect.anchoredPosition=origin;
+  var app=GetComponentInParent<AppUI>();var pixels=app!=null?app.MenuAvoidanceViewport:new Vector2Int(Screen.width,Screen.height);
+  Rect blocked;if(!WeChatLayoutMetrics.TryGetBlockedRect(pixels,out blocked))return;
+  if(FullSystemBand){blocked.xMin=0;blocked.xMax=pixels.x;}
+  var canvas=GetComponentInParent<Canvas>();var camera=canvas!=null&&canvas.renderMode!=RenderMode.ScreenSpaceOverlay?canvas.worldCamera:null;
+  rect.GetWorldCorners(corners);Vector2 lo=RectTransformUtility.WorldToScreenPoint(camera,corners[0]),hi=lo;
+  for(int i=1;i<4;i++){var p=RectTransformUtility.WorldToScreenPoint(camera,corners[i]);lo=Vector2.Min(lo,p);hi=Vector2.Max(hi,p);}
+  if(!Rect.MinMaxRect(lo.x,lo.y,hi.x,hi.y).Overlaps(blocked))return;
+  var parent=rect.parent as RectTransform;if(parent==null)return;
+  Vector2 a,b,center=(lo+hi)*.5f;
+  RectTransformUtility.ScreenPointToLocalPointInRectangle(parent,center,camera,out a);
+  RectTransformUtility.ScreenPointToLocalPointInRectangle(parent,center+Vector2.up*(blocked.yMin-hi.y-2),camera,out b);
+  rect.anchoredPosition=origin+b-a;
+ }
+}
+}

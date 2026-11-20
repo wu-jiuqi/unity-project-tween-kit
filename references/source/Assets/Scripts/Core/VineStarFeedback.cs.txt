@@ -1,0 +1,10 @@
+using System;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public event Action<Vector2,float> VineBallContact;
+ public event Action<Vector2,Vector2,float> VineFallingContact;
+ public void NotifyVineBall(Vector2 point,float speed){if(IsPlaying&&!IsPaused&&FeedbackProfile.Active.enabledFeedback)VineBallContact?.Invoke(point,speed);}
+ void NotifyVineFalling(Vector2 from,Vector2 to,float size){if(Mathf.Max(from.y,to.y)+CollectionLevels.Pitch*size*.5f>=CollectionLevels.Top+.55f&&IsPlaying&&!IsPaused&&to.y<from.y-.00001f&&FeedbackProfile.Active.enabledFeedback)VineFallingContact?.Invoke(from,to,size);}
+}
+}

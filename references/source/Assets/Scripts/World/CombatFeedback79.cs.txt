@@ -1,0 +1,121 @@
+using System;
+using UnityEngine;
+
+namespace BounceGarden {
+// Pooled paint spray and special-brick-only hitstop. Presentation never moves
+// physics bodies or reads textures back from the GPU.
+[DefaultExecutionOrder(10000)]
+public sealed class CombatFeedback79 : MonoBehaviour {
+ struct Drop { public SpriteRenderer view; public Vector2 origin,target; public Color color; public float age,life,size,travel,rotation; public int sprite; public bool flash; }
+ readonly Drop[] drops=new Drop[128];
+ readonly System.Random random=new System.Random(79012);
+ static Sprite[] sprites;
+ GameSession owner; CameraJuice cameraJuice;int rollingBreaks;float rollingUntil; int cursor,frameBreaks;
+ float pendingStop,pendingAt,pendingShake,pendingLife,nextStop,nextSlow,windowStart,windowUsed,stopLeft,stopStarted,savedScale=1;
+ bool ownsClock;
+ bool ownsSlow;float slowLeft,slowSavedScale=1;const float SpecialSlowScale=.55f;
+ SpriteRenderer boardFlash;float flashLeft;
+ public int HitStops {get;private set;}
+ public int Hits {get;private set;}
+ public int Breaks {get;private set;}
+ public int Powers {get;private set;}
+ public int Peak {get;private set;}
+ public int LandedParticles {get;private set;}
+ public float LastMinRadiusCells {get;private set;}
+ public float LastMaxRadiusCells {get;private set;}
+ public float LastStop {get;private set;}
+ public bool Frozen=>ownsClock||ownsSlow;
+ public void EmphasizeSpecial(float duration){if(owner==null||owner.IsPaused||!owner.IsPlaying||Physics2D.simulationMode==SimulationMode2D.Script)return;if(Time.unscaledTime<nextSlow)return;nextSlow=Time.unscaledTime+.5f;slowLeft=Mathf.Min(.20f,Mathf.Max(.12f,duration));}
+ public int ActiveParticles {get;private set;}
+ public int ActivePaintMarks {get{int count=0;foreach(var d in drops)if(d.view!=null&&d.view.gameObject.activeSelf&&!d.flash&&d.age>=d.travel)count++;return count;}}
+ float R(float lo,float hi)=>(float)(lo+random.NextDouble()*(hi-lo));
+ static Sprite Frame(int i) {
+  if(sprites==null){sprites=new Sprite[8];for(int sheet=0;sheet<2;sheet++){string key=sheet==0?"jelly_particles":"paint_splatters";var t=Resources.Load<Texture2D>("Art/CombatFeedback79/"+key);if(t==null)throw new InvalidOperationException("Missing generated paint atlas "+key);for(int n=0;n<4;n++){var f=Sprite.Create(t,new Rect(n%2*t.width/2,(1-n/2)*t.height/2,t.width/2,t.height/2),Vector2.one*.5f,256,0,SpriteMeshType.FullRect);f.name=(sheet==0?"liquid-flight-":"paint-splat-")+n;sprites[sheet*4+n]=f;}}}
+  return sprites[i];
+ }
+ public void Initialize(GameSession game) {
+  owner=game;cameraJuice=Camera.main.GetComponent<CameraJuice>();
+  var board=owner.Board;boardFlash=WorldArt.Draw(transform,"Soft board flash","brick",board.Origin+(board.U*board.Columns+board.V*board.Rows)*.5f,new Vector2(board.Columns*board.CellWidth,board.Rows*board.CellHeight),new Color(1,1,1,0),76);
+  var white=new MaterialPropertyBlock();white.SetFloat("_Flash",1);boardFlash.SetPropertyBlock(white);
+  for(int i=0;i<drops.Length;i++){var go=new GameObject("Pooled paint spray");go.transform.SetParent(transform,false);var v=go.AddComponent<SpriteRenderer>();v.sprite=Frame(i%4);v.sharedMaterial=WorldArt.BoardMaterial;v.sortingOrder=78;go.SetActive(false);drops[i].view=v;}
+ }
+ public void Cue(Vector2 position,string cue,Color color,Vector2 incoming) {
+  if(!FeedbackProfile.Active.enabledFeedback||owner==null||owner.IsPaused)return;
+  if(cue=="hit"){Hits++;return;}
+  if(cue!="break")return;
+  Breaks++;frameBreaks++;float cell=owner.Board.CellWidth;
+  Add(position,position,Color.white,cell*.72f,.045f,0,0,true);
+  var profile=FeedbackProfile.Active;float min=Mathf.Max(0,profile.paintMinRadius),max=Mathf.Max(min,profile.paintMaxRadius);
+  LastMinRadiusCells=float.MaxValue;LastMaxRadiusCells=0;
+  float lobe=Mathf.Atan2(incoming.y,incoming.x)+R(-1.2f,1.2f);
+  for(int i=0;i<12;i++){
+   float angle=i<8?lobe+R(-1.05f,1.05f):R(0,Mathf.PI*2);
+   float radius=Mathf.Sqrt(R(min*min,max*max));Vector2 target=position+new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*cell*radius;
+   if(Add(position,target,color,cell*(i<4?R(.75f,1.15f):R(.25f,.55f)),profile.paintLife+R(-.10f,.12f),R(.08f,.16f),4+random.Next(4),false)){LastMinRadiusCells=Mathf.Min(LastMinRadiusCells,radius);LastMaxRadiusCells=Mathf.Max(LastMaxRadiusCells,radius);}
+  }
+  float now=Time.unscaledTime;if(now>rollingUntil){rollingBreaks=0;rollingUntil=now+.22f;}
+  if(++rollingBreaks>=4){VisualImpact();rollingBreaks=0;rollingUntil=now+.22f;}
+ }
+ public void Power(Vector2 position,float duration=0f) {
+  if(!FeedbackProfile.Active.enabledFeedback||owner==null||owner.IsPaused)return;
+  Powers++;if(duration>0)RequestStop(Mathf.Min(.025f,duration));VisualImpact(true);
+ }
+ public void VisualImpact(bool special=false){var p=FeedbackProfile.Active;pendingShake=Mathf.Max(pendingShake,special?p.specialShakeHeight:p.burstShakeHeight);pendingLife=Mathf.Max(pendingLife,special?p.specialShakeDuration:p.burstShakeDuration);flashLeft=.065f;boardFlash.color=new Color(1,1,1,.08f);}
+ void RequestStop(float duration){pendingStop=Mathf.Max(pendingStop,duration);pendingAt=Time.unscaledTime;}
+ bool Add(Vector2 p,Vector2 target,Color color,float size,float life,float travel,int sprite,bool flash) {
+  int index=-1;for(int n=0;n<drops.Length;n++){int k=(cursor+n)%drops.Length;if(!drops[k].view.gameObject.activeSelf){index=k;break;}}
+  if(index<0)return false;cursor=(index+1)%drops.Length;ref var d=ref drops[index];
+  d.view.sprite=Frame(flash?0:1);d.view.transform.position=p;d.view.sortingOrder=78;d.view.enabled=true;
+  d.origin=p;d.target=target;d.color=color;d.age=0;d.life=flash?life:Mathf.Max(.2f,life);d.size=size;d.travel=travel;d.rotation=R(-180,180);d.sprite=sprite;d.flash=flash;
+  d.view.transform.rotation=Quaternion.Euler(0,0,flash?0:Mathf.Atan2(target.y-p.y,target.x-p.x)*Mathf.Rad2Deg+135);d.view.color=color;Size(ref d,flash?1:.55f,flash?1:1.8f);d.view.gameObject.SetActive(true);ActiveParticles++;Peak=Mathf.Max(Peak,ActiveParticles);return true;
+ }
+ static void Size(ref Drop d,float scaleFactor,float stretch=1) {
+  float scale=d.size*scaleFactor/(d.view.sprite.bounds.size.x*.72f),y=d.view.transform.position.y;
+  float slope=(BoardDisplay.Forward(new Vector2(0,y+.001f)).y-BoardDisplay.Forward(new Vector2(0,y)).y)/.001f;
+  d.view.transform.localScale=new Vector3(scale/stretch,scale*stretch/Mathf.Max(.2f,slope),1);
+ }
+ void Update() {
+  if(owner==null){CancelStop();return;}if(!owner.IsPlaying)CancelStop();if(owner.IsPaused){CancelStop();return;}
+  slowLeft=Mathf.Max(0,slowLeft-Time.unscaledDeltaTime);if(ownsClock){stopLeft-=Time.unscaledDeltaTime;if(stopLeft<=0)ReleaseClock();}AdvanceParticles(owner.PresentationDelta(Time.deltaTime));
+ }
+ public void AdvanceParticles(float dt) {
+  if(dt<=0||owner==null||owner.IsPaused)return;
+  flashLeft=Mathf.Max(0,flashLeft-dt);boardFlash.color=new Color(1,1,1,.08f*flashLeft/.065f);
+  for(int i=0;i<drops.Length;i++){ref var d=ref drops[i];if(!d.view.gameObject.activeSelf)continue;float before=d.age;d.age+=dt;float t=d.age/d.life;
+   if(t>=1){d.view.gameObject.SetActive(false);ActiveParticles--;continue;}
+   if(d.flash){d.view.color=new Color(1,1,1,(1-t)*.65f);Size(ref d,1+t*.25f);continue;}
+   if(d.age<d.travel){float flight=1-Mathf.Pow(1-d.age/d.travel,2);d.view.transform.position=Vector2.Lerp(d.origin,d.target,flight);d.view.color=new Color(d.color.r,d.color.g,d.color.b,.9f);Size(ref d,Mathf.Lerp(.45f,.75f,flight),1.8f);}
+   else {
+    if(before<d.travel){d.view.sprite=Frame(d.sprite);d.view.sortingOrder=38;d.view.transform.position=d.target;d.view.transform.rotation=Quaternion.Euler(0,0,d.rotation);LandedParticles++;}
+    float settle=Mathf.Clamp01((d.age-d.travel)/.10f);Size(ref d,1+.12f*Mathf.Sin(settle*Mathf.PI));float fade=Mathf.Clamp01((d.life-d.age)/.40f);d.view.color=new Color(d.color.r,d.color.g,d.color.b,.90f*fade);
+   }
+  }
+ }
+ void LateUpdate() {
+  if(owner==null||!owner.IsPlaying||owner.IsPaused){CancelStop();return;}
+  if(pendingShake>0&&FeedbackProfile.Active.screenShake&&cameraJuice!=null)cameraJuice.ImpactScreen(pendingShake,pendingLife);
+  float now=Time.unscaledTime;
+  if(now-pendingAt>.18f)pendingStop=0;
+  if(now-windowStart>=1){windowStart=now;windowUsed=0;}
+  if(Physics2D.simulationMode==SimulationMode2D.Script){pendingStop=0;ReleaseSlow();}
+  else if(!ownsClock){
+   if(pendingStop>0&&now>=nextStop){
+    ReleaseSlow();float duration=Mathf.Min(.025f,Mathf.Min(pendingStop,Mathf.Max(0,FeedbackProfile.Active.hitStopBudget-windowUsed)));
+    if(duration>.005f&&Time.timeScale>0){savedScale=Time.timeScale;Time.timeScale=0;ownsClock=true;stopStarted=now;stopLeft=duration;LastStop=duration;windowUsed+=duration;nextStop=now+.5f;HitStops++;}
+    pendingStop=0;
+   }
+   if(!ownsClock&&slowLeft>0){if(!ownsSlow){slowSavedScale=Time.timeScale;ownsSlow=true;}Time.timeScale=Mathf.Min(slowSavedScale,SpecialSlowScale);}
+   else if(!ownsClock)ReleaseSlow();
+  }
+  pendingShake=pendingLife=0;frameBreaks=0;
+ }
+
+ void ReleaseClock(){if(ownsClock){windowUsed+=Mathf.Max(0,Time.unscaledTime-stopStarted-LastStop);nextStop=Mathf.Max(nextStop,Time.unscaledTime+.5f);if(Mathf.Approximately(Time.timeScale,0))Time.timeScale=savedScale;}ownsClock=false;stopLeft=0;}
+ void ReleaseSlow(){if(ownsSlow&&Mathf.Approximately(Time.timeScale,Mathf.Min(slowSavedScale,SpecialSlowScale)))Time.timeScale=slowSavedScale;ownsSlow=false;slowLeft=0;}
+ public void CancelStop(){rollingBreaks=0;rollingUntil=0;ReleaseClock();ReleaseSlow();nextStop=nextSlow=0;pendingStop=pendingShake=pendingLife=0;frameBreaks=0;}
+ void OnApplicationPause(bool pause){if(pause)CancelStop();}
+ void OnApplicationFocus(bool focus){if(!focus)CancelStop();}
+ void OnDisable(){CancelStop();}
+ void OnDestroy(){CancelStop();}
+}
+}

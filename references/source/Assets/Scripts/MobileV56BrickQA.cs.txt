@@ -1,0 +1,30 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+// Repeat actual destruction/refill cycles and count native brick instances.
+public sealed class MobileV56BrickQA:MonoBehaviour {
+ [Serializable]public class Sample {public int level,cycles,destroyed,uniqueBrickInstances,initialBrickInstances,peakResidentBricks;public double medianPlanMs,p95PlanMs,maxStepMs;}
+ [Serializable]public class Report {public string scope="Windows repeated brick destruction/refill; native instances and CPU timings, not phone FPS";public int failures,errors;public Sample[] samples;}
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--mobile-v56-bricks"))new GameObject("Brick lifecycle benchmark").AddComponent<MobileV56BrickQA>();}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();string dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);var report=new Report();var rows=new List<Sample>();Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){report.errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(1);FindFirstObjectByType<AppUI>().QANavigate("home");SoundService.SetMuted(true);
+  var g=new GameObject("Brick lifecycle fixture").AddComponent<GameSession>();g.enabled=false;g.QAIgnoreFocusLoss=true;var previous=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;Time.timeScale=0;
+  foreach(int level in new[]{1,11,28}){
+   g.StartLevel(level);var row=new Sample{level=level+1};var ids=new HashSet<int>();var plans=new List<double>();var watch=new System.Diagnostics.Stopwatch();foreach(var b in g.GetComponentsInChildren<BrickBody>(true))ids.Add(b.GetInstanceID());row.initialBrickInstances=ids.Count;
+   for(int cycle=0;cycle<12;cycle++){
+    var victims=g.CollectionBricks.Where(b=>b.Alive&&b.Definition.kind==BrickKind.Normal&&b.Definition.colorIndex==0&&b.Definition.juiceGroup==0&&(string.IsNullOrEmpty(b.Definition.reveal)||b.Definition.reveal=="picnic-N")).OrderByDescending(b=>b.GetComponent<ChainGridPiece>().Row).Take(6).ToArray();
+    foreach(var b in victims)g.ApplyChainImpact(b,999,Vector2.up,b.transform.position,true);row.destroyed+=victims.Length;
+    int step=0;double last=g.FlowLastPlanMilliseconds;
+    do{watch.Restart();g.QAAdvanceOneStep();watch.Stop();row.maxStepMs=Math.Max(row.maxStepMs,watch.Elapsed.TotalMilliseconds);if(g.FlowLastPlanMilliseconds!=last){last=g.FlowLastPlanMilliseconds;plans.Add(last);}}while(!g.ChainGridReady&&step++<1800);
+    if(step>=1800||!g.ChainGridValid(false))report.failures++;
+    var bricks=g.GetComponentsInChildren<BrickBody>(true);foreach(var b in bricks)ids.Add(b.GetInstanceID());row.peakResidentBricks=Math.Max(row.peakResidentBricks,bricks.Length);row.cycles++;yield return null;
+   }
+   plans.Sort();if(plans.Count>0){row.medianPlanMs=plans[plans.Count/2];row.p95PlanMs=plans[(int)(plans.Count*.95)];}row.uniqueBrickInstances=ids.Count;if(row.destroyed<60)report.failures++;rows.Add(row);g.StopLevel();yield return null;
+  }
+  Time.timeScale=1;Physics2D.simulationMode=previous;report.samples=rows.ToArray();File.WriteAllText(dir+"/result.json",JsonUtility.ToJson(report,true));Application.Quit(report.failures+report.errors==0?0:1);
+ }
+}
+}

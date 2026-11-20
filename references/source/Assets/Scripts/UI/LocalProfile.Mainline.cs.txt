@@ -1,0 +1,7 @@
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ public bool HasArtwork(string id)=>committed.Contains("collection/painting/"+id);
+ public bool CommitMainlineWin(int index){var l=LevelCatalog.Get(index);if(!l.mainline)return false;string key="collection/painting/"+l.paintingId;return committed.Contains(key)||Commit(key,20,1,index+1,true);}
+ public int SeriesProgress(int series){int n=0;for(int i=series*5;i<series*5+5;i++)if(HasArtwork(MainlineCatalog.All[i].paintingId))n++;return n;}
+}
+}

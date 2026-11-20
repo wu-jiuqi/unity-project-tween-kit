@@ -1,0 +1,59 @@
+using System;using UnityEngine;using UnityEngine.UI;using UnityEngine.EventSystems;using DG.Tweening;
+namespace BounceGarden {
+// Player-driven only: no timer, autoplay, or inertial movement.
+public sealed class ActivityCarousel:MonoBehaviour,IBeginDragHandler,IDragHandler,IEndDragHandler,IPointerClickHandler,IPointerDownHandler,IPointerUpHandler,IPointerEnterHandler,IPointerExitHandler,IPointerMoveHandler {
+ const float CardWidth=440,Gap=32,ViewWidth=1000,MaxOffset=0;
+ const int VisibleCards=2;
+ RectTransform content,viewport;Image[] dots;Tween snap;Action<string> notify,route;Vector2 dragStart;float offsetStart;bool horizontal,dragged;
+ ActivityJellyMotion[] motions=new ActivityJellyMotion[VisibleCards];int hover=-1,pressed=-1;bool focused=true;AppUI app;
+ public float Offset=>-content.anchoredPosition.x;
+ public int SelectedPage{get;private set;}
+ static readonly string[] Titles={"花园联赛","喵喵小铺","每日挑战"};
+ static readonly string[] Status={"排行榜","逛逛小铺","第20关解锁"};
+ public static ActivityCarousel Create(Transform parent,Action<string> message,Action<string> navigate=null){
+ var root=UICraft.Root(parent,"Activity carousel",0,610,ViewWidth,585);var carousel=root.gameObject.AddComponent<ActivityCarousel>();carousel.notify=message;carousel.route=navigate;carousel.Build();return carousel;
+ }
+ void Build(){app=GetComponentInParent<AppUI>();viewport=(RectTransform)transform;var hit=gameObject.AddComponent<Image>();hit.color=Color.clear;hit.raycastTarget=true;gameObject.AddComponent<RectMask2D>();
+ content=UICraft.Root(transform,"Activity cards",0,0,ViewWidth,585);
+ string[] icons={"medal","trophy","trophy"};
+ Color32[] colors={new Color32(255,233,174,255),new Color32(235,214,255,255),new Color32(235,214,255,255)};
+ string[] subtitles={"轻松闯关，一起成长","道具 · 头像 · 头像框","每天都有小美好"};
+ for(int i=0;i<VisibleCards;i++){float x=-236+i*(CardWidth+Gap);var card=UICraft.Root(content,Titles[i],x,0,CardWidth,558);
+ var visual=UICraft.Root(card,"Jelly visual",0,0,CardWidth,558);
+ var panel=UICraft.Art(visual,"BannerJelly/panel",0,0,CardWidth,558);panel.preserveAspect=false;panel.color=colors[i];
+ UICraft.Label(visual,Titles[i],0,210,366,66,45,UICraft.Ink,TextAnchor.MiddleLeft);
+ UICraft.Label(visual,subtitles[i],0,150,366,52,25,UICraft.Ink,TextAnchor.MiddleLeft);
+
+ RectTransform icon;
+ if(i==1){icon=UICraft.Root(visual,"Shop portrait layers",0,-32,238,238);var item=CatCosmeticCatalog.Items[1];CatCosmeticCatalog.Create(icon,item.avatar.resource,item.frame.resource,0,0,238);}else icon=UICraft.Art(visual,"BannerJelly/"+icons[i],0,-32,238,238).rectTransform;
+ var strip=UICraft.Art(visual,"BannerJelly/panel",0,-208,378,91);strip.preserveAspect=false;strip.type=Image.Type.Sliced;strip.pixelsPerUnitMultiplier=3;strip.color=Color.Lerp(colors[i],Color.white,.22f);
+ var status=UICraft.Label(visual,Status[i],0,-208,350,78,32,UICraft.Ink);if(i==0)status.gameObject.AddComponent<LeagueBannerStatus>().Target=status;
+ motions[i]=card.gameObject.AddComponent<ActivityJellyMotion>();motions[i].Initialize(visual,icon,i,()=>focused&&(app==null||app.HomeMotionAllowed));
+ }
+ // Indicators live outside the clipped viewport, under its bottom edge.
+ var indicators=UICraft.Root(transform.parent,"Activity page indicators",0,292,100,16);indicators.gameObject.SetActive(false);dots=new Image[2];for(int i=0;i<2;i++)dots[i]=UICraft.Box(indicators,"Page "+i,(i-.5f)*28,0,12,12,UICraft.Ink,true);SetDots();
+ }
+ int Hit(PointerEventData e){if(!RectTransformUtility.RectangleContainsScreenPoint(viewport,e.position,e.enterEventCamera))return -1;RectTransformUtility.ScreenPointToLocalPointInRectangle(viewport,e.position,e.enterEventCamera,out var p);float local=p.x+Offset+480;int i=Mathf.FloorToInt(local/(CardWidth+Gap));return i>=0&&i<VisibleCards&&local-i*(CardWidth+Gap)<=CardWidth&&Mathf.Abs(p.y)<=279?i:-1;}
+ void Hover(int i){if(hover==i)return;if(hover>=0)motions[hover].SetHover(false);hover=i;if(i>=0)motions[i].SetHover(true);}
+ public void OnPointerEnter(PointerEventData e){if(e.pointerId<0)Hover(Hit(e));}
+ public void OnPointerMove(PointerEventData e){if(e.pointerId<0&&pressed<0)Hover(Hit(e));}
+ public void OnPointerExit(PointerEventData e){Hover(-1);}
+ public void OnPointerDown(PointerEventData e){if(e.button!=PointerEventData.InputButton.Left)return;dragged=false;horizontal=false;pressed=Hit(e);if(pressed>=0)motions[pressed].Press();}
+ public void OnPointerUp(PointerEventData e){if(pressed>=0)motions[pressed].Release();pressed=-1;if(e.pointerId>=0)Hover(-1);}
+
+ public void OnBeginDrag(PointerEventData e){snap?.Kill();RectTransformUtility.ScreenPointToLocalPointInRectangle(viewport,e.position,e.pressEventCamera,out dragStart);offsetStart=Offset;dragged=false;horizontal=false;}
+ public void OnDrag(PointerEventData e){RectTransformUtility.ScreenPointToLocalPointInRectangle(viewport,e.position,e.pressEventCamera,out var point);DragDelta(point-dragStart);}
+ void DragDelta(Vector2 delta){if(!dragged&&delta.magnitude>12){dragged=true;horizontal=Mathf.Abs(delta.x)>Mathf.Abs(delta.y);}if(dragged){Hover(-1);if(pressed>=0)motions[pressed].Release();pressed=-1;}if(!horizontal)return;SetOffset(Mathf.Clamp(offsetStart-delta.x,0,MaxOffset));}
+ public void OnEndDrag(PointerEventData e){OnPointerUp(e);if(horizontal)Settle(Offset>=MaxOffset*.5f?1:0);}
+ public void OnPointerClick(PointerEventData e){if(e.button!=PointerEventData.InputButton.Left||dragged||e.dragging)return;int card=Hit(e);if(card<0)return;motions[card].Celebrate();ActivateCard(card);}
+ public void ActivateCard(int card){if(card==0)route?.Invoke("ranking");else if(card==1)route?.Invoke("shop");}
+ void SetOffset(float value){content.anchoredPosition=new Vector2(-value,0);}
+ void Settle(int page){page=0;SelectedPage=page;SetDots();snap?.Kill();snap=DOTween.To(()=>Offset,SetOffset,page*MaxOffset,.25f).SetEase(Ease.OutCubic).SetUpdate(true).OnComplete(()=>{foreach(var m in motions)m.Celebrate(.65f);});}
+ void SetDots(){for(int i=0;i<dots.Length;i++)dots[i].color=i==SelectedPage?new Color32(156,120,186,255):new Color32(219,207,192,255);}
+ void OnDisable(){Hover(-1);pressed=-1;snap?.Kill();if(content!=null)SetOffset(SelectedPage*MaxOffset);}
+ void OnApplicationFocus(bool value){focused=value;if(!value){Hover(-1);pressed=-1;snap?.Kill();if(content!=null)SetOffset(SelectedPage*MaxOffset);foreach(var m in motions)if(m!=null)m.ResetPose();}}
+ void OnApplicationPause(bool paused){OnApplicationFocus(!paused);}
+ // Exercises the same local drag logic used by pointer and touch input.
+ public void QADrag(Vector2 delta){snap?.Kill();offsetStart=Offset;dragged=false;horizontal=false;DragDelta(delta);if(horizontal)Settle(Offset>=MaxOffset*.5f?1:0);}
+}
+}

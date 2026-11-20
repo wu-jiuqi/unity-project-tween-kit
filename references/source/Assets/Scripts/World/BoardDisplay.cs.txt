@@ -1,0 +1,14 @@
+using UnityEngine;
+namespace BounceGarden {
+// Rendering and input mapping only. Collider transforms and physics remain intact.
+public static class BoardDisplay {
+ static Vector4 map=new Vector4(0,1,0,0);public static Vector4 Parameters=>map;
+ public static void Set(BoardSpace board){float anchor=board.CellToLocal(0,0).y;map=new Vector4(anchor,board.CellWidth/board.CellHeight,board.Origin.y+board.Rows*board.V.y,board.Origin.y);Shader.SetGlobalVector("_BoardDisplay",map);}
+ public static void Clear(){map=new Vector4(0,1,0,0);Shader.SetGlobalVector("_BoardDisplay",map);}
+ static float Y(float y,bool inverse){float a=map.x,s=map.y,l=map.z,h=map.w;if(Mathf.Abs(s-1)<.00001f)return y;float lo=a+(l-a)*s,hi=a+(h-a)*s;if(y<=-5.9f||y>=7.5f)return y;
+  if(!inverse){if(y<l)return Mathf.LerpUnclamped(-5.9f,lo,(y+5.9f)/(l+5.9f));if(y>h)return Mathf.LerpUnclamped(hi,7.5f,(y-h)/(7.5f-h));return a+(y-a)*s;}
+  if(y<lo)return Mathf.LerpUnclamped(-5.9f,l,(y+5.9f)/(lo+5.9f));if(y>hi)return Mathf.LerpUnclamped(h,7.5f,(y-hi)/(7.5f-hi));return a+(y-a)/s;
+ }
+ public static Vector2 Forward(Vector2 p)=>new Vector2(p.x,Y(p.y,false));public static Vector2 Inverse(Vector2 p)=>new Vector2(p.x,Y(p.y,true));
+}
+}

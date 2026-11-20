@@ -1,0 +1,14 @@
+using System;using System.IO;using UnityEditor;using UnityEditor.Build;using UnityEditor.Build.Reporting;using UnityEngine;
+public static class JellyJourney80Build {
+ public static void Windows(){SharedSourceValidation76.Validate();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);var output=Path.GetFullPath("../../Builds/JellyJourney-v80-r2/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=output,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("JELLY_JOURNEY80_BUILD "+r.summary.result+" errors="+r.summary.totalErrors+" warnings="+r.summary.totalWarnings);if(r.summary.result!=BuildResult.Succeeded)throw new Exception("Jelly journey build failed");}
+ public static void Validate(){SharedSourceValidation76.Validate();foreach(var k in Keys)if(BounceGarden.JellyJourneyArt80.Get(k)==null)throw new Exception(k);Debug.Log("JELLY_JOURNEY80_PLATFORM_OK sprites="+Keys.Length+" levels="+BounceGarden.AlphabetCampaign.Count);}
+ public static readonly string[] Keys={"backdrop-sky","route-curve","route-strip","route-material","node-pink","node-blue","node-lilac","node-mint","node-current","node-locked-mint","node-locked-lilac","node-mint-pressed","node-current-pressed","island-left","island-right","island-current","foliage-daisy","flowers-lilac","jelly-cluster","cat-guide","bubble-cluster","current-halo","pill-title","button-play","button-play-pressed","button-play-disabled","tag-current","pill-currency","panel-header","panel-footer","pill-tooltip","button-back","button-locate","icon-coin","badge-lock","star-filled","star-empty","sparkle-cluster","cloud-soft"};
+}
+public sealed class JellyJourney80Importer:AssetPostprocessor {
+ public override int GetPostprocessOrder()=>31000;
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/JellyJourneyV1/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Single;t.npotScale=TextureImporterNPOTScale.None;t.mipmapEnabled=false;t.alphaIsTransparency=true;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=4096;t.isReadable=false;
+ #if UNITY_WEBGL
+ var p=t.GetPlatformTextureSettings("WebGL");p.overridden=true;p.name="WebGL";p.maxTextureSize=4096;p.format=TextureImporterFormat.ETC2_RGBA8;p.textureCompression=TextureImporterCompression.Compressed;p.crunchedCompression=false;t.SetPlatformTextureSettings(p);
+ #endif
+ }
+}

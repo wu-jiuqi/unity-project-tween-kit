@@ -1,0 +1,129 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+namespace BounceGarden {
+public sealed class VictoryQA : MonoBehaviour {
+    string directory;
+    int checks, failures, errors, width, height;
+    AppUI app;
+    Camera camera;
+    RenderTexture target;
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void Boot() { if (Array.IndexOf(Environment.GetCommandLineArgs(), "--victory-qa") >= 0) new GameObject("Victory audit").AddComponent<VictoryQA>(); }
+    void Check(bool ok, string label) { checks++; if (!ok) failures++; File.AppendAllText(Path.Combine(directory, "checks.txt"), (ok ? "PASS " : "FAIL ") + label + "\n"); }
+    void Call(string method, params object[] args) { typeof(AppUI).GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic).Invoke(app, args); }
+    T Field<T>(string name) { return (T)typeof(AppUI).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(app); }
+    Button ButtonNamed(string name) { foreach (var b in FindObjectsByType<Button>(FindObjectsSortMode.None)) if (b.name == name) return b; return null; }
+    VictoryPresentation Victory => FindFirstObjectByType<VictoryPresentation>();
+    void Win() {
+        app.Session.SetPaused(true); Call("OnOutcome", true);
+        // The shipped canvas is ScreenSpaceOverlay and ignores gameplay letterboxing.
+        // Match that full viewport while using a camera canvas for offscreen captures.
+        camera.rect = new Rect(0, 0, 1, 1); camera.aspect = (float)width / height;
+        app.QASetViewport(new Vector2Int(width, height)); Canvas.ForceUpdateCanvases();
+    }
+    void Click(Button button) { if (button == null) return; ExecuteEvents.Execute(button.gameObject, new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left, pointerId = 0 }, ExecuteEvents.pointerClickHandler); }
+    IEnumerator Level(int index) { app.QAStartLevel(index); yield return app.QAWaitForLevel(); yield return new WaitForSecondsRealtime(.2f); }
+    IEnumerator Capture(string name) {
+        yield return new WaitForEndOfFrame(); Canvas.ForceUpdateCanvases(); camera.Render();
+        var old = RenderTexture.active; RenderTexture.active = target;
+        var image = new Texture2D(width, height, TextureFormat.RGB24, false);
+        image.ReadPixels(new Rect(0, 0, width, height), 0, 0); image.Apply(); RenderTexture.active = old;
+        File.WriteAllBytes(Path.Combine(directory, name + ".png"), image.EncodeToPNG()); Destroy(image);
+    }
+    void ButtonBounds() {
+        var root = Victory.transform.Find("Result actions");
+        foreach (var button in root.GetComponentsInChildren<Button>()) {
+            var corners = new Vector3[4]; ((RectTransform)button.transform).GetWorldCorners(corners);
+            bool inside = true; foreach (var c in corners) { var p = camera.WorldToScreenPoint(c); inside &= p.x >= -1 && p.x <= width + 1 && p.y >= -1 && p.y <= height + 1; }
+            Check(inside, "button remains inside viewport: " + button.name);
+            var pointer = new PointerEventData(EventSystem.current) { position = camera.WorldToScreenPoint(button.transform.position), pointerId = 0 };
+            var hits = new List<RaycastResult>(); EventSystem.current.RaycastAll(pointer, hits);
+            Check(hits.Count > 0 && hits[0].gameObject == button.gameObject, "actual UI raycast reaches button: " + button.name);
+        }
+    }
+    IEnumerator Start() {
+        var args = Environment.GetCommandLineArgs(); directory = args[Array.IndexOf(args, "--qa-out") + 1]; Directory.CreateDirectory(directory);
+        Application.logMessageReceived += (message, stack, type) => { if (type == LogType.Error || type == LogType.Exception) { errors++; File.AppendAllText(Path.Combine(directory, "errors.txt"), message + "\n" + stack + "\n"); } };
+        var size = args[Array.IndexOf(args, "--qa-viewport") + 1].Split('x'); width = int.Parse(size[0]); height = int.Parse(size[1]);
+        yield return new WaitForSecondsRealtime(1);
+        app = FindFirstObjectByType<AppUI>(); camera = Camera.main;
+        target = new RenderTexture(width, height, 24); target.Create(); camera.targetTexture = target; camera.aspect = (float)width / height;
+        var canvas = FindFirstObjectByType<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceCamera; canvas.worldCamera = camera; canvas.planeDistance = 1;
+        app.QASetViewport(new Vector2Int(width, height)); app.QANavigate("home"); yield return null;
+        Check(RuntimeQA.IsIsolated, "player profile and feedback use isolated test storage");
+        Check(LocalProfile.RunSelfTests().StartsWith("PASS"), "reward ledger self-tests pass");
+        yield return Level(0); int coins = app.Profile.Coins, badges = app.Profile.Badges;
+        Win(); yield return null;
+        Check(Victory != null && !Victory.Ready, "victory enters with actions gated");
+        var cat = Victory.CharacterRoot.GetComponentInChildren<Image>();
+        Check(cat != null && cat.sprite != null && !cat.raycastTarget, "cat sequence is visible and cannot intercept input");
+        var catCorners = new Vector3[4]; cat.rectTransform.GetWorldCorners(catCorners);
+        var rewardCorners = new Vector3[4]; ((RectTransform)Victory.transform.Find("Victory rewards")).GetWorldCorners(rewardCorners);
+        Check(catCorners[0].y > rewardCorners[1].y, "entire cat canvas stays above reward card");
+        var subtitle = Victory.GetComponentInChildren<TMP_Text>();
+        var subtitleCorners = new Vector3[4]; subtitle.rectTransform.GetWorldCorners(subtitleCorners);
+        Check(catCorners[1].y < subtitleCorners[0].y, "jump apex stays below subtitle");
+        float age = 0; var durations = new[] { .30f,.10f,.10f,.18f,.08f,.08f,.08f,.12f,.10f,.08f,.08f,.08f,.10f,.10f,.14f,.20f };
+        for (int i = 0; i < durations.Length; i++) {
+            Check(VictoryCatAnimation.FrameAt(age + durations[i] / 2) == i && VictoryCatAnimation.Get(i) != null, "approved cat frame and duration " + i);
+            age += durations[i];
+        }
+        app.CollectReward(); Check(app.Profile.Coins == coins, "early collection cannot grant rewards");
+        foreach (float time in new[] { .2f, .7f, 1.1f, 1.95f, 2.3f }) {
+            while (Victory.Elapsed < time) yield return null;
+            yield return Capture("victory-" + time.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        }
+        Check(Victory.Ready && app.RewardReady, "buttons become usable after their entrance completes");
+        Check(Victory.CatFrame == 15, "cat holds final seated frame after landing");
+        Check(app.Profile.Coins == coins && app.Profile.Badges == badges, "animation never automatically grants rewards");
+        int letters = 0; foreach (Transform child in Victory.transform) if (child.name.StartsWith("Victory letter ")) letters++;
+        Check(letters == 14, "all 14 title letter instances are separate jelly images");
+        var halo = Victory.transform.Find("Victory light clip/Victory halo").GetComponent<Image>();
+        var haloSprite = halo.sprite; var haloRotation = halo.rectTransform.localRotation;
+        yield return new WaitForSecondsRealtime(.24f);
+        Check(halo.sprite != haloSprite || halo.rectTransform.localRotation != haloRotation, "sunburst keeps rotating after the intro");
+        Check(!Field<RectTransform>("hudRoot").gameObject.activeSelf, "battle controls and aim hint are hidden during victory");
+        ButtonBounds(); app.QASetSafeArea(new Rect(0, 55, width, height - 110)); yield return null; ButtonBounds(); yield return Capture("safe-area"); app.QASetSafeArea(null);
+        Click(ButtonNamed("Button ")); app.CollectReward(); yield return null;
+        Check(app.CurrentPage == "home" && app.Profile.Coins == coins + 20 && app.Profile.Badges == badges + 1, "Home commits exactly one base reward and returns home");
+        yield return Level(0); Win();
+        Check(Victory.CatFrame == 0, "new victory restarts cat from prone pose");
+        Time.timeScale = 0; yield return new WaitForSecondsRealtime(.9f);
+        Check(Victory.CatFrame > 3, "cat sequence advances while gameplay time is paused");
+        Time.timeScale = 1; Victory.Finish(); yield return null;
+        Check(Victory.CatFrame == 15, "skip intro settles cat immediately");
+        var next = Victory.transform.Find("Result actions").GetComponentsInChildren<Button>()[0]; Click(next); yield return app.QAWaitForLevel();
+        Check(Field<int>("currentLevel") == 1 && app.Profile.Coins == coins + 40, "Next saves base reward once and starts the actual next level");
+        Check(Field<RectTransform>("hudRoot").gameObject.activeSelf, "battle HUD is restored for the next level");
+        Win(); Victory.Finish(); yield return null; int beforeAd = app.Profile.Coins;
+        Click(ButtonNamed("Button x2 Coins")); yield return null;
+        Check(app.Profile.Coins == beforeAd + 20, "video entry saves base reward once");
+        Click(ButtonNamed("Button Cancel")); yield return null;
+        Check(app.Profile.Coins == beforeAd + 20 && Victory.Ready, "cancelling video retains base reward and usable actions");
+        Click(ButtonNamed("Button x2 Coins")); yield return null; Click(ButtonNamed("Button Complete  +20")); yield return null;
+        Check(app.Profile.Coins == beforeAd + 40, "completed local video adds only the extra 20 coins");
+        Click(ButtonNamed("Button x2 Coins")); yield return null;
+        Check(app.Profile.Coins == beforeAd + 40, "duplicate video entry grants nothing");
+        app.CollectReward(); yield return null;
+        yield return Level(0); Win(); yield return new WaitForSecondsRealtime(.2f); int interruptedCoins = app.Profile.Coins, interruptedLedger = app.Profile.CommittedTransactionCount;
+        app.QANavigate("home"); yield return null;
+        Check(Victory == null && app.Profile.Coins == interruptedCoins && app.Profile.CommittedTransactionCount == interruptedLedger, "interrupting intro destroys effects without granting rewards");
+        yield return Level(0); FeedbackProfile.Active.enabledFeedback = false; Win(); yield return new WaitForSecondsRealtime(.1f);
+        Check(Victory.Ready, "disabled feedback immediately exposes usable actions");
+        Check(Victory.CatFrame == 15, "disabled feedback shows the final seated cat");
+        halo = Victory.transform.Find("Victory light clip/Victory halo").GetComponent<Image>(); haloSprite = halo.sprite; haloRotation = halo.rectTransform.localRotation;
+        yield return new WaitForSecondsRealtime(.25f); Check(halo.sprite == haloSprite && halo.rectTransform.localRotation == haloRotation, "disabled feedback stops idle motion");
+        yield return Capture("feedback-disabled"); FeedbackProfile.Active.enabledFeedback = true; app.QANavigate("home"); yield return null;
+        string result = "RESULT checks=" + checks + " failed=" + failures + " errors=" + errors;
+        File.AppendAllText(Path.Combine(directory, "checks.txt"), result + "\n"); Debug.Log(result); Application.Quit(failures == 0 && errors == 0 ? 0 : 1);
+    }
+}
+}

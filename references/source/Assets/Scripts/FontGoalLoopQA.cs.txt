@@ -1,0 +1,45 @@
+using System;using System.Collections;using System.IO;using System.Linq;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class FontGoalLoopQA:MonoBehaviour {
+ string dir;int checks,failures,errors;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--font-goal-loop-qa"))new GameObject("Font goal loop QA").AddComponent<FontGoalLoopQA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var image=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,image);File.WriteAllBytes(dir+"/"+name+".png",image.EncodeToPNG());Destroy(image);rt.Release();Destroy(rt);}
+ IEnumerator WaitPlaying(){float end=Time.realtimeSinceStartup+20;while(Time.realtimeSinceStartup<end){app.QAAdvanceAlphabetIntro();app.QABattleTour?.AdvanceForQA();app.QAAdvanceBoosterGuide();if(!app.Session.IsPaused&&!app.AlphabetIntroActive&&app.QAGoalEntrance==null)yield break;yield return null;}}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.targetFrameRate=60;QualitySettings.vSyncCount=0;
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();app.QANavigate("home");Check(!PlayerStrategyTestBuild.Enabled&&new ResourceLeagueConfigProvider().Load().calendarSeasons,"normal calendar league build with strategy-test disabled");Check(Application.productName=="Bounce Garden","normal profile identity preserved");Check(GameVersion.Name=="0.4.0"&&GameVersion.Code==400&&Application.version=="0.4.0","runtime version 0.4.0 and code 400");yield return Capture("00-home-font");
+  Check(UICraft.Font!=null&&UICraft.Font.name=="MaokenZhuyuanTi","supplied TTF is the shared source");
+  Check(GameTypography.Font.sourceFontFile==UICraft.Font&&GameTypography.HeadingFont.sourceFontFile==UICraft.Font&&BattleRoundTypography.Font.sourceFontFile==UICraft.Font,"body heading and battle numbers use supplied font");
+  foreach(int level in new[]{0,17,30}){
+   app.QAStartLevel(level);yield return app.QAWaitForLevel();app.Session.QAIgnoreFocusLoss=true;
+   float until=Time.realtimeSinceStartup+10;while(app.QAGoalEntrance==null&&Time.realtimeSinceStartup<until)yield return null;
+   var entrance=app.QAGoalEntrance;Check(entrance!=null,"goal entrance present level "+level);if(entrance==null)continue;
+   while(entrance!=null&&entrance.Elapsed<.55f)yield return null;
+   var hud=app.GetComponentInChildren<ChainCollectionHUD>();var cards=hud.GoalsRect;int shots=app.Session.Shots;var counts=hud.Cards.Select(c=>c.NumberRect.GetComponent<TMPro.TMP_Text>().text).ToArray();
+   Check(cards.parent==entrance.transform&&cards.anchoredPosition.magnitude<1&&cards.localScale.x>1,"real targets enlarged at center level "+level);
+   Check(app.Session.IsPaused,"input paused during goal emphasis level "+level);yield return Capture("goal-center-"+level);
+   while(entrance!=null&&entrance.Elapsed<1.8f)yield return null;yield return Capture("goal-flight-"+level);
+   while(app.QAGoalEntrance!=null)yield return null;
+   Check(cards.parent==hud.transform&&Mathf.Abs(cards.anchoredPosition.y-1000)<4,"real targets restored to header level "+level);
+   Check(app.Session.Shots==shots&&counts.SequenceEqual(hud.Cards.Select(c=>c.NumberRect.GetComponent<TMPro.TMP_Text>().text)),"entrance changes no counts or steps level "+level);
+   yield return WaitPlaying();Check(!app.Session.IsPaused,"normal play resumes after onboarding level "+level);yield return Capture("goal-header-"+level);
+  }
+  foreach(int index in new[]{0,4,5,10,17,20,30}){
+   app.QAGardenLesson(index);yield return new WaitForSecondsRealtime(.15f);var demo=FindFirstObjectByType<OpeningRuleDemo>();var target=demo.transform.Find("Goal").GetComponent<Image>();var flight=demo.GetComponent<LessonCollectionFlight>();
+   Check(flight!=null,"paired demo and collection actors page "+index);
+   bool wrapped=false;float last=0;float end=Time.realtimeSinceStartup+5.2f;int wraps=0;
+   var ageField=typeof(OpeningRuleDemo).GetField("age",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
+   var flightAge=typeof(LessonCollectionFlight).GetField("age",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
+   while(Time.realtimeSinceStartup<end){float age=(float)ageField.GetValue(demo);if(age<last){wraps++;wrapped=true;Check(target.color.a>.9f,"target returns at cycle start page "+index);Check(Mathf.Abs(age-(float)flightAge.GetValue(flight))<.12f,"collection and mechanism loop together page "+index);}last=age;yield return null;}
+   Check(wrapped&&wraps>=2,"page loops more than once "+index);yield return Capture("loop-page-"+index);app.QAAdvanceAlphabetIntro();yield return new WaitForSecondsRealtime(.25f);
+  }
+  app.QAStartLevel(4);yield return app.QAWaitForLevel();while(app.QAGoalEntrance==null)yield return null;
+  app.QANavigate("home");yield return null;yield return null;Check(FindFirstObjectByType<CollectionGoalEntrance>()==null,"leaving during emphasis removes overlay");
+  Check(app.CurrentPage=="home"&&!app.Session.IsPlaying,"leaving emphasis safely restores menu");
+  app.QANavigate("home");typeof(AppUI).GetMethod("Settings",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(app,null);yield return new WaitForSecondsRealtime(.3f);Check(!app.GetComponentsInChildren<Button>().Any(b=>b.name=="试玩统计"),"normal settings exclude playtest statistics");yield return Capture("settings-actual-new-font");
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

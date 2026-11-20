@@ -1,0 +1,54 @@
+using System;
+
+namespace BounceGarden
+{
+    // Intentionally outside the shared mobile source manifest. GameSession's
+    // partial hooks compile away when this standalone editor integration is absent.
+    public sealed partial class GameSession
+    {
+        internal LevelEditing.LevelEditorDraftSnapshot EditorDraft { get; private set; }
+        LevelEditing.LevelEditorDraftSnapshot pendingDraft;
+
+        internal void StartEditorDraft(LevelEditing.LevelEditorDraftSnapshot draft)
+        {
+            if (!RuntimeQA.IsIsolated) throw new InvalidOperationException("Draft playtest requires an isolated process.");
+            if (draft == null) throw new ArgumentNullException(nameof(draft));
+            pendingDraft = draft;
+            try { StartSession(draft.Index, false, -1); }
+            finally { pendingDraft = null; }
+        }
+
+        partial void OverrideEditorLevel(ref LevelData level)
+        {
+            EditorDraft = pendingDraft;
+            ConfigureFusionLevel(pendingFusionDefinition ?? EditorDraft?.Fusion, pendingFusionDefinition != null ? pendingFusionSeed : EditorDraft != null ? EditorDraft.RandomSeed : 0);
+            if (FusionActive)
+            {
+                level = AlphabetCampaign.Get(0);
+                level.initialShots = pendingFusionDefinition != null ? pendingFusionMoves : EditorDraft.Metadata.moves;
+                level.label = pendingFusionDefinition != null ? pendingFusionLabel : EditorDraft.DisplayName;
+                level.note = EditorDraft != null ? EditorDraft.Metadata.lesson : "连锁、入口与目标收集";
+                return;
+            }
+            if (EditorDraft != null)
+            {
+                level = AlphabetCampaign.Get(LevelIndex, this);
+                if (!string.IsNullOrEmpty(EditorDraft.EditorLevelId))
+                    level.label = string.IsNullOrWhiteSpace(EditorDraft.DisplayName) ? "自建关卡 " + (EditorDraft.AuthoringIndex + 1) : EditorDraft.DisplayName;
+            }
+        }
+
+        partial void OnEditorSessionStarted()
+        {
+            openingDraftSuppressed=EditorDraft!=null;
+            if (EditorDraft != null) chainRewardRandom = new Random(unchecked(EditorDraft.RandomSeed + LevelIndex * 397));
+        }
+
+        partial void OnEditorSessionStopped()
+        {
+            // StartSession stops the old world before consuming pendingDraft.
+            // Clearing the pending value here would silently lose the new draft.
+            EditorDraft = null;
+        }
+    }
+}

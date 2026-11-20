@@ -1,0 +1,15 @@
+using System;
+using System.Collections;
+using TMPro;
+using UnityEngine;
+namespace BounceGarden {
+// Enabled only by an explicit test artifact resource. The final build can turn
+// it off through data without changing the Wasm code used for function traces.
+public sealed class MobileFrameStats:MonoBehaviour {
+ [Serializable]sealed class Options {public bool enabled;}
+ readonly float[] frames=new float[240],ordered=new float[240];int count,cursor,intervalFrames,lastPhysicsStep;float elapsed,total,worst;TMP_Text label;GameSession game;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){var config=Resources.Load<TextAsset>("MobileDiagnostics");if(config==null||!JsonUtility.FromJson<Options>(config.text).enabled)return;var node=new GameObject("Mobile frame diagnostics");DontDestroyOnLoad(node);node.AddComponent<MobileFrameStats>();}
+ IEnumerator Start(){yield return null;game=FindFirstObjectByType<AppUI>()?.Session;var canvas=gameObject.AddComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=32000;var text=new GameObject("Measured frame timing",typeof(RectTransform)).AddComponent<TextMeshProUGUI>();text.transform.SetParent(transform,false);text.font=GameTypography.Font;text.fontSize=14;text.color=new Color(.18f,.15f,.13f,1);text.raycastTarget=false;text.alignment=TextAlignmentOptions.BottomLeft;var rect=text.rectTransform;rect.anchorMin=Vector2.zero;rect.anchorMax=new Vector2(1,0);rect.pivot=Vector2.zero;rect.anchoredPosition=new Vector2(8,Mathf.Max(8,Screen.safeArea.yMin));rect.sizeDelta=new Vector2(-16,80);label=text;}
+ void Update(){if(label==null)return;if(app==null)app=FindFirstObjectByType<AppUI>();if(game==null)game=app?.Session;float dt=Time.unscaledDeltaTime;if(dt<=0)return;frames[cursor++]=dt;cursor%=frames.Length;count=Mathf.Min(count+1,frames.Length);intervalFrames++;elapsed+=dt;total+=dt;worst=Mathf.Max(worst,dt);if(elapsed<1)return;Array.Copy(frames,ordered,count);Array.Sort(ordered,0,count);float p95=ordered[Mathf.Clamp(Mathf.CeilToInt(count*.95f)-1,0,count-1)]*1000;float p99=ordered[Mathf.Clamp(Mathf.CeilToInt(count*.99f)-1,0,count-1)]*1000;int step=game!=null?game.PhysicsStep:0;float hz=Mathf.Max(0,step-lastPhysicsStep)/elapsed;lastPhysicsStep=step;label.text=$"v{GameVersion.Name} {intervalFrames/elapsed:F1} FPS p95 {p95:F0}ms p99 {p99:F0}ms max {worst*1000:F0}ms\nPhysics {hz:F0}Hz balls {game?.ActiveBalls??0} pending {game?.PendingBurstBalls??0} queued {(game!=null&&game.ChainLaunchQueued?1:0)} {Screen.width}x{Screen.height}\nTouch {(app!=null&&app.NativeTouchReady?"wx":"unity")} {app?.BattleTouchStarts??0}/{app?.BattleTouchMoves??0}/{app?.BattleTouchEnds??0} shot {app?.BattleAcceptedShots??0} {app?.BattleInputStatus}";if(total>=10){Debug.Log("BOUNCE_FRAME_STATS "+label.text);total=0;}elapsed=0;intervalFrames=0;worst=0;}
+}
+}

@@ -1,0 +1,71 @@
+using System;
+using System.Collections;
+using System.IO;
+using UnityEngine;
+
+namespace BounceGarden {
+// Runs against the built player, real colliders and real physics, with a memory-only profile.
+public sealed class FlightV22QA:MonoBehaviour {
+ string dir;int checks,failed,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){var a=Environment.GetCommandLineArgs();if(Array.IndexOf(a,"--flight-v22-qa")>=0&&Array.IndexOf(a,"--qa")>=0)new GameObject("Flight V22 regression").AddComponent<FlightV22QA>();}
+ void Check(bool ok,string name){checks++;if(!ok)failed++;File.AppendAllText(Path.Combine(dir,"checks.txt"),(ok?"PASS ":"FAIL ")+name+"\n");}
+ void Log(string message,string stack,LogType type){if(type==LogType.Error||type==LogType.Exception||type==LogType.Assert){errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),message+"\n"+stack+"\n");}}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(Path.Combine(dir,"checks.txt"),"V22 real player physics and recall regression\n");Application.logMessageReceived+=Log;
+  yield return new WaitForSecondsRealtime(1);var app=FindFirstObjectByType<AppUI>();Check(RuntimeQA.IsIsolated&&app!=null,"isolated application");
+  app.QAStartLevel(0);yield return app.QAWaitForLevel();yield return new WaitForSecondsRealtime(.8f);
+  var game=app.Session;var mode=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;
+  int ten=Mathf.RoundToInt(FlightGeometry.RecallDelay/Time.fixedDeltaTime);
+  for(int level=0;level<6;level++){
+   game.StartLevel(level);yield return new WaitForSecondsRealtime(.8f);
+   var bricks=FindObjectsByType<BrickBody>(FindObjectsSortMode.None);
+   bool aligned=true;foreach(var brick in bricks){var box=brick.GetComponent<BoxCollider2D>();if(!brick.Definition.shutter)aligned&=Vector2.Distance(box.size,new Vector2(game.Board.CellWidth,game.Board.CellHeight))<.0001f;}
+   Check(aligned,"all visible brick footprints match colliders L"+level);
+   Check(!game.RecallAvailable,"empty board hides recall L"+level);
+   Check(game.TryShoot(Vector2.up),"shot accepted L"+level);game.QAAdvanceOneStep();
+   var ball=FindFirstObjectByType<BallBody>();
+   Check(Mathf.Abs(ball.GetComponent<CircleCollider2D>().radius-FlightGeometry.Radius)<.0001f,"ball collider matches visible radius L"+level);
+   Check(Mathf.Abs(ball.GetComponentInChildren<SpriteRenderer>().sprite.bounds.size.x*.875f-FlightGeometry.Radius*2)<.0001f,"visible yarn size retained L"+level);
+   // A grazing shot through the old visual-only margin must now hit the real brick.
+   // Pick a central target so the test launch cannot start behind a side wall.
+   BrickBody target=bricks[0];foreach(var brick in bricks)if(Mathf.Abs(brick.transform.position.x)<Mathf.Abs(target.transform.position.x))target=brick;
+   foreach(var brick in bricks)brick.GetComponent<Collider2D>().enabled=brick==target;
+   var bounds=target.GetComponent<Collider2D>().bounds;
+   float y=bounds.max.y-.015f;ball.Initialize(ball.Id,game.Generation,new Vector2(bounds.min.x-.7f,y),Vector2.right,0);
+   Physics2D.SyncTransforms();int hits=game.HitCount;
+   for(int step=0;step<8&&game.HitCount==hits;step++)game.QAAdvanceOneStep();
+   Check(game.HitCount>hits,"grazing visible brick edge damages target L"+level);
+   Check(Mathf.Abs(ball.Body.linearVelocity.magnitude-game.CurrentLevel.ballSpeed)<.002f,"edge contact retains fixed speed L"+level);
+   // Remove targets from this fixture, then keep the volley bouncing horizontally.
+   foreach(var brick in bricks)if(brick!=null)brick.GetComponent<Collider2D>().enabled=false;
+   for(int step=0;step<40;step++){
+    foreach(var b in FindObjectsByType<BallBody>(FindObjectsSortMode.None))if(b.Active)b.Initialize(b.Id,game.Generation,new Vector2((b.Id%5-2)*.65f,-4),Vector2.right,0);
+    game.QAAdvanceOneStep();
+   }
+   var active=FindObjectsByType<BallBody>(FindObjectsSortMode.None);ball=active[0];
+   // Opposing equal-speed balls exercise energy transfer, including head-on stops.
+   if(active.Length>1){active[0].Initialize(active[0].Id,game.Generation,new Vector2(-.5f,-4),Vector2.right,0);active[1].Initialize(active[1].Id,game.Generation,new Vector2(.5f,-4),Vector2.left,0);}
+   float maxError=0;for(int step=0;step<80;step++){game.QAAdvanceOneStep();foreach(var b in active)if(b.Active)maxError=Mathf.Max(maxError,Mathf.Abs(b.Body.linearVelocity.magnitude-game.CurrentLevel.ballSpeed));}
+   Check(maxError<.002f,"wall and ball collisions keep constant speed L"+level+" error="+maxError);
+   ball.Body.linearVelocity=Vector2.zero;ball.QATick();Check(Mathf.Abs(ball.Body.linearVelocity.magnitude-game.CurrentLevel.ballSpeed)<.002f,"zero solver velocity recovers L"+level);
+   ball.Body.linearVelocity*=3;ball.QATick();Check(Mathf.Abs(ball.Body.linearVelocity.magnitude-game.CurrentLevel.ballSpeed)<.002f,"excess energy normalizes L"+level);
+   // A successful damage operation starts a fresh global ten-second window.
+   BrickBody durable=null;foreach(var brick in bricks)if(brick!=null&&brick.Alive){durable=brick;break;}
+   hits=game.HitCount;game.HitBrick(durable,ball,durable.transform.position);Check(game.HitCount==hits+1&&!game.RecallAvailable,"actual damage resets recall L"+level);
+   for(int step=0;step<ten-1;step++)game.QAAdvanceOneStep();Check(!game.RecallAvailable,"9.98 seconds hides recall L"+level);
+   game.SetPaused(true);for(int step=0;step<50;step++)game.QAAdvanceOneStep();Check(!game.RecallAvailable,"pause excludes time from recall L"+level);game.SetPaused(false);
+   game.QAAdvanceOneStep();Check(game.RecallAvailable,"exactly ten seconds offers recall while moving L"+level);
+   var oldCount=game.ActiveBalls;game.SetPaused(true);game.RecallBalls();Check(game.ActiveBalls==oldCount,"paused recall cannot remove balls L"+level);game.SetPaused(false);
+   foreach(var brick in bricks)if(brick!=null&&brick.Alive){durable=brick;break;}
+   hits=game.HitCount;game.HitBrick(durable,ball,durable.transform.position);Check(game.HitCount==hits+1&&!game.RecallAvailable,"damage hides already visible recall L"+level);
+   // Wait another full window after the second damage event.
+   for(int step=0;step<ten;step++)game.QAAdvanceOneStep();Check(game.RecallAvailable,"new full window offers recall again L"+level);
+   int lost=game.LostCount;game.RecallBalls();Check(game.ActiveBalls==0&&game.LostCount==lost+oldCount&&!game.RecallAvailable,"recall returns every active ball and hides button L"+level);
+   Check(game.TryShoot(Vector2.up),"new volley accepted L"+level);game.QAAdvanceOneStep();Check(!game.RecallAvailable,"new volley starts fresh timer L"+level);
+   game.StopLevel();Check(!game.RecallAvailable,"level exit clears recall L"+level);yield return null;
+  }
+  Physics2D.simulationMode=mode;
+  File.AppendAllText(Path.Combine(dir,"checks.txt"),"RESULT checks="+checks+" failed="+failed+" errors="+errors+"\n");Application.logMessageReceived-=Log;Application.Quit(failed==0&&errors==0?0:4);
+ }
+}
+}

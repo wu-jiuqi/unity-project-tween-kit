@@ -1,0 +1,67 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using DG.Tweening;
+
+namespace BounceGarden {
+// This component deliberately has no drag handler: ScrollRect owns all map drags.
+public sealed class JellyLevelMotion80:MonoBehaviour,IPointerDownHandler,IPointerUpHandler,IPointerExitHandler {
+ public JellyJourney80 Owner;public RectTransform Body,Island,Cat,Tag,Halo,Bubbles;public bool IsControl;
+ int index=-999;bool current,locked,held,focused=true,paused,wasAllowed;float enter=1,press,kickAt=-100,phase;Tween entryTween,pressTween;
+ public Vector2 BodyScale=>Body==null?Vector2.one:(Vector2)Body.localScale;
+ public bool Held=>held;
+ public bool TweenAlive=>(entryTween!=null&&entryTween.IsActive())||(pressTween!=null&&pressTween.IsActive());
+ bool Allowed=>focused&&!paused&&Owner!=null&&Owner.MotionAllowed;
+ float Clock=>Owner!=null?Owner.MotionClock:Time.unscaledTime;
+ public void Configure(int value,bool active,bool unavailable){if(index==value&&current==active&&locked==unavailable)return;index=value;current=active;locked=unavailable;phase=value*1.731f;Kill();held=false;press=0;kickAt=-100;enter=1;wasAllowed=false;ResetPose();}
+ void Entrance(){entryTween?.Kill();enter=.3f;entryTween=DOTween.To(()=>enter,v=>enter=v,1,.7f).SetDelay(IsControl?0:Mathf.Repeat(index,4)*.055f).SetEase(Ease.OutElastic,.95f,.26f).SetUpdate(true).SetTarget(this);}
+ public void OnPointerDown(PointerEventData e){if(!Allowed||locked||e.button!=PointerEventData.InputButton.Left)return;held=true;pressTween?.Kill();pressTween=DOTween.To(()=>press,v=>press=v,1,.11f).SetEase(Ease.OutQuad).SetUpdate(true).SetTarget(this);}
+ public void OnPointerUp(PointerEventData e){Release();}
+ public void OnPointerExit(PointerEventData e){if(held)Release();}
+ public void Release(){if(!held)return;held=false;kickAt=Clock;pressTween?.Kill();pressTween=DOTween.To(()=>press,v=>press=v,0,.8f).SetEase(Ease.OutElastic,1.25f,.21f).SetUpdate(true).SetTarget(this);}
+ public void Pulse(){kickAt=Clock;}
+ public void ApplyAuditPose(float clock,float compression,float releaseAge){press=compression;enter=1;kickAt=clock-releaseAge;Apply(clock,true);}
+ public void RestoreAuditPose(){press=0;kickAt=-100;ResetPose();}
+ void LateUpdate(){bool allowed=Allowed;if(!allowed){if(wasAllowed){Kill();held=false;press=0;ResetPose();}wasAllowed=false;return;}if(!wasAllowed){wasAllowed=true;Entrance();}if(Owner.AuditActive){ApplyAuditPose(Clock,Owner.AuditPress,Owner.AuditReleaseAge);return;}Apply(Clock,false);}
+ void Apply(float time,bool audit){if(Body==null)return;float age=time-kickAt;float rebound=age>=0&&age<1.4f?Mathf.Sin(age*23)*Mathf.Exp(-age*4.3f):0;float idle=Mathf.Sin(time*2.55f+phase)*(current?.09f:.048f);float drift=Mathf.Sin(time*1.65f+phase);float tug=Owner!=null?Owner.DragPull:0;
+  float sx=1+idle+press*.25f-rebound*.21f,sy=1-idle-press*.33f+rebound*.30f;
+  sx*=Mathf.LerpUnclamped(.46f,1,enter);sy*=Mathf.LerpUnclamped(1.38f,1,enter);
+  if(IsControl){sx=Mathf.Clamp(sx,.97f,1.04f);sy=Mathf.Clamp(1-press*.13f+rebound*.12f,.84f,1.08f);}else{sx=Mathf.Clamp(sx,.70f,1.31f);sy=Mathf.Clamp(sy,.65f,1.34f);}
+  Body.localScale=new Vector3(sx,sy,1);float sway=IsControl?0:Owner.Sway(index);Body.anchoredPosition=new Vector2(sway,IsControl?0:drift*7+rebound*15-press*9);Body.localRotation=Quaternion.Euler(0,0,IsControl?0:drift*2.6f-tug*5+rebound*6);
+  if(Island!=null){Island.localScale=new Vector3(1+drift*.035f+press*.10f-rebound*.075f,1-drift*.075f-press*.12f+rebound*.13f,1);Island.anchoredPosition=new Vector2(sway,-Mathf.Sin(time*1.65f+phase-.6f)*13+rebound*18);Island.localRotation=Quaternion.Euler(0,0,drift*2-tug*3+rebound*4);}
+  if(Cat!=null&&Cat.gameObject.activeSelf){Cat.localScale=new Vector3(1-drift*.035f,1+drift*.055f,1);Cat.localRotation=Quaternion.Euler(0,0,drift*4+rebound*7);Cat.anchoredPosition=new Vector2(154+sway,-15+Mathf.Abs(drift)*9+Mathf.Max(0,rebound)*20);}
+  if(Tag!=null&&Tag.gameObject.activeSelf){Tag.anchoredPosition=new Vector2(sway,Mathf.Max(188,120*sy+Body.anchoredPosition.y+54));Tag.localScale=Vector3.one*(1+Mathf.Sin(time*2.8f+phase)*.035f);}
+  if(Bubbles!=null&&Bubbles.gameObject.activeSelf){Bubbles.anchoredPosition=new Vector2(-155+Mathf.Sin(time*.9f+phase)*11,25+Mathf.Sin(time*1.2f+phase)*19);Bubbles.localScale=Vector3.one*(1+Mathf.Sin(time*1.4f+phase)*.10f);}
+  if(Halo!=null&&Halo.gameObject.activeSelf){Halo.localScale=new Vector3(sx*1.07f,sy*1.07f,1);Halo.anchoredPosition=Body.anchoredPosition;Halo.localRotation=Body.localRotation;}
+ }
+ void ResetPose(){if(Body!=null){Body.localScale=Vector3.one;Body.anchoredPosition=Vector2.zero;Body.localRotation=Quaternion.identity;}if(Island!=null){Island.localScale=Vector3.one;Island.anchoredPosition=Vector2.zero;Island.localRotation=Quaternion.identity;}if(Cat!=null){Cat.localScale=Vector3.one;Cat.localRotation=Quaternion.identity;Cat.anchoredPosition=new Vector2(154,-15);}if(Tag!=null){Tag.anchoredPosition=new Vector2(0,188);Tag.localScale=Vector3.one;}if(Halo!=null){Halo.localScale=Vector3.one;Halo.anchoredPosition=Vector2.zero;Halo.localRotation=Quaternion.identity;}}
+ void Kill(){entryTween?.Kill();pressTween?.Kill();entryTween=pressTween=null;}
+ void OnDisable(){Kill();wasAllowed=held=false;press=0;ResetPose();}
+ void OnDestroy(){Kill();}
+ void OnApplicationFocus(bool value){focused=value;if(!value){Kill();held=false;press=0;wasAllowed=false;ResetPose();}}
+ void OnApplicationPause(bool value){paused=value;if(value){Kill();held=false;press=0;wasAllowed=false;ResetPose();}}
+}
+
+public sealed class JellyMapDrag80:MonoBehaviour,IBeginDragHandler,IDragHandler,IEndDragHandler {
+ public JellyJourney80 Owner;
+ public void OnBeginDrag(PointerEventData e){Owner?.BeginJellyDrag();}
+ public void OnDrag(PointerEventData e){Owner?.PullJelly(e.delta.y);}
+ public void OnEndDrag(PointerEventData e){Owner?.EndJellyDrag();}
+ void OnDisable(){Owner?.EndJellyDrag();}
+}
+
+// A single visible-range mesh samples one cross-section; there are no PNG joins.
+[RequireComponent(typeof(CanvasRenderer))]
+public sealed class JellyRouteRibbon80:MaskableGraphic {
+ JellyJourney80 owner;Sprite textureSprite;int first,last;public int VertexCount{get;private set;}public int VisibleLegCount=>last-first;
+ public override Texture mainTexture=>textureSprite!=null?textureSprite.texture:Texture2D.whiteTexture;
+ protected override void OnEnable(){if(textureSprite==null)textureSprite=JellyJourneyArt80.Get("route-material");base.OnEnable();SetMaterialDirty();}
+ public void Configure(JellyJourney80 map,int min,int max){owner=map;if(textureSprite==null)textureSprite=JellyJourneyArt80.Get("route-material");first=Mathf.Max(-1,min-1);last=Mathf.Min(map.LevelCount,max+1);raycastTarget=false;SetMaterialDirty();SetVerticesDirty();}
+ public void RefreshMotion(){SetVerticesDirty();}
+ protected override void OnPopulateMesh(VertexHelper vh){vh.Clear();VertexCount=0;if(owner==null||textureSprite==null)return;Rect uv=textureSprite.textureRect;float tw=textureSprite.texture.width,th=textureSprite.texture.height;float u0=uv.xMin/tw,u1=uv.xMax/tw,v=(uv.y+uv.height*.5f)/th;const int samples=36;int row=0;
+  for(int leg=first;leg<last;leg++){Vector2 a=owner.RoutePoint(leg),d=owner.RoutePoint(leg+1);float dy=d.y-a.y;Vector2 b=a+Vector2.up*(dy*.46f),c=d-Vector2.up*(dy*.46f);for(int j=0;j<=samples;j++){if(leg>first&&j==0)continue;float t=j/(float)samples,s=1-t;Vector2 p=s*s*s*a+3*s*s*t*b+3*s*t*t*c+t*t*t*d;Vector2 tangent=3*s*s*(b-a)+6*s*t*(c-b)+3*t*t*(d-c);var normal=new Vector2(tangent.y,-tangent.x).normalized;float width=72*(1+Mathf.Sin(owner.MotionClock*2.3f+p.y*.008f)*.055f+Mathf.Abs(owner.DragPull)*.12f);var left=p-normal*width*.5f;var right=p+normal*width*.5f;vh.AddVert(left,color,new Vector2(u0,v));vh.AddVert(right,color,new Vector2(u1,v));if(row>0){int k=row*2;vh.AddTriangle(k-2,k-1,k);vh.AddTriangle(k,k-1,k+1);}row++;}}
+  VertexCount=row*2;
+ }
+}
+}

@@ -1,0 +1,69 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
+namespace BounceGarden {
+// Deterministic physics integration checks, including tools and hidden supply.
+public sealed class RefillV63QA:MonoBehaviour {
+ const BindingFlags Hidden=BindingFlags.Instance|BindingFlags.NonPublic;
+ string dir;GameSession g;int checks,failures,errors;bool overlap;
+ readonly List<ChainGridPiece> bodies=new List<ChainGridPiece>(96);
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--refill-v63-qa"))new GameObject("Refill traffic integration QA").AddComponent<RefillV63QA>();}
+ object Call(string method,params object[] args)=>typeof(GameSession).GetMethod(method,Hidden).Invoke(g,args);
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerable<ChainGridPiece> Pieces()=>g.CollectionBricks.Where(b=>b.Alive).Select(b=>b.GetComponent<ChainGridPiece>()).Concat(g.ChainTools.Select(t=>t.View.GetComponent<ChainGridPiece>()));
+ static Vector2 Position(ChainGridPiece p){var rb=p.GetComponent<Rigidbody2D>();return rb!=null?rb.position:(Vector2)p.transform.position;}
+ bool Overlap(){bodies.Clear();bodies.AddRange(Pieces());for(int i=0;i<bodies.Count;i++)for(int j=i+1;j<bodies.Count;j++){var a=bodies[i];var b=bodies[j];var d=Position(a)-Position(b);float half=CollectionLevels.Pitch*(a.Size+b.Size)*.5f-.061f;if(Mathf.Abs(d.x)<half&&Mathf.Abs(d.y)<half){if(!overlap)File.AppendAllText(dir+"/overlaps.txt",$"level={g.LevelIndex+1} tick={g.PhysicsStep} a={a.Col},{a.Row} pos={a.transform.position} b={b.Col},{b.Row} pos={b.transform.position}\n");return true;}}return false;}
+ void Step(int count=1){for(int i=0;i<count;i++){g.QAAdvanceOneStep();overlap|=Overlap();}}
+ void Settle(string label){int n=0;while(!g.ChainGridReady&&g.IsPlaying&&n++<1800)Step();Check(n<1800&&g.ChainGridReady&&g.ChainGridValid(false),label+" settles");Check(!overlap,label+" keeps every brick/tool/supply rectangle separate");}
+ BrickBody Cell(int c,int r)=>g.CollectionBricks.First(b=>b.Alive&&b.GetComponent<ChainGridPiece>().Col==c&&b.GetComponent<ChainGridPiece>().Row==r);
+ void Remove(BrickBody b){g.ApplyChainImpact(b,999,Vector2.down,b.GetComponent<Rigidbody2D>().position,true);}
+ void Plain(){g.StartLevel(1);foreach(var b in g.CollectionBricks.Where(b=>b.Alive).ToArray())b.Remove();foreach(var t in g.ChainTools)Destroy(t.View.gameObject);g.ChainTools.Clear();g.ChainBonds.Clear();Call("ClearPicnic");Call("ClearChainGravity");for(int r=0;r<9;r++)for(int c=0;c<9;c++)Call("SpawnChainCell",c,r,0,2,BrickKind.Normal,false);Call("BeginBoardFlowGravity");overlap=false;}
+ Dictionary<ChainGridPiece,object> Routes(){var result=new Dictionary<ChainGridPiece,object>();foreach(var route in (IEnumerable)typeof(GameSession).GetField("chainMotions",Hidden).GetValue(g)){var view=(Transform)route.GetType().GetField("View").GetValue(route);result[view.GetComponent<ChainGridPiece>()]=route;}return result;}
+ static bool ReferenceCollision(Vector2 from,Vector2 to,float duration,float departure,Vector2 q,Vector2 v,float begin,float end,float half){
+  float a=Mathf.Max(departure,begin),b=Mathf.Min(departure+duration,end);if(b<=a)return false;var u=(to-from)/duration;var p=from+u*(a-departure)-q-v*(a-begin);var d=(u-v)*(b-a);float lo=0,hi=1;
+  for(int axis=0;axis<2;axis++){if(Mathf.Abs(d[axis])<.000001f){if(Mathf.Abs(p[axis])>=half)return false;}else{float x=(-half-p[axis])/d[axis],y=(half-p[axis])/d[axis];lo=Mathf.Max(lo,Mathf.Min(x,y));hi=Mathf.Min(hi,Mathf.Max(x,y));if(lo>=hi)return false;}}return true;
+ }
+ void TrafficProjection(){
+  var random=new System.Random(6304);bool valid=true;int compared=0;Func<float> scalar=()=>((float)random.NextDouble()-.5f)*8;Func<Vector2> point=()=>new Vector2(scalar(),scalar());
+  for(int i=0;i<2000;i++){var from=point();var to=point();float duration=.1f+(float)random.NextDouble()*2;var q=point();var velocity=i%3==0?Vector2.zero:point();float start=(float)random.NextDouble()*2,end=i%4==0?float.PositiveInfinity:start+.1f+(float)random.NextDouble()*3;float half=.4f+(float)random.NextDouble();
+   var args=new object[]{from,to,duration,q,velocity,start,end,half,null};bool has=(bool)Call("FlowForbiddenStart",args);var interval=(Vector2)args[8];
+   for(int j=0;j<10;j++){float departure=(float)random.NextDouble()*5;if(has&&(Mathf.Abs(departure-interval.x)<.001f||Mathf.Abs(departure-interval.y)<.001f))continue;bool actual=ReferenceCollision(from,to,duration,departure,q,velocity,start,end,half);valid&=actual==(has&&departure>interval.x&&departure<interval.y);compared++;}
+  }Check(valid&&compared>19000,"analytic reservations agree with independent relative-sweep reference for 19000+ departures");
+ }
+ int OnBoard()=>Pieces().Count(p=>Position(p).y<=CollectionLevels.Top+CollectionLevels.Pitch*.3f);
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(1);FindFirstObjectByType<AppUI>().QANavigate("home");SoundService.SetMuted(true);g=new GameObject("Flow traffic fixture").AddComponent<GameSession>();g.enabled=false;g.QAIgnoreFocusLoss=true;var old=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;Time.timeScale=0;
+  TrafficProjection();Plain();Remove(Cell(0,8));Step(3);var left=Routes();var versions=left.Keys.ToDictionary(p=>p,p=>p.MotionVersion);Remove(Cell(8,8));Step();var after=Routes();
+  Check(g.FlowPlanColumns==1,"independent right-column removal plans exactly one column");Check(left.Count>0&&left.All(p=>after.TryGetValue(p.Key,out var route)&&ReferenceEquals(route,p.Value)&&p.Key.MotionVersion==versions[p.Key]),"remote in-flight routes keep their identity and version");Settle("independent column removal");
+  int revision=g.FlowPlanRevision,refills=g.ChainRefills;Call("ScheduleChainGravity");Step();Check(g.FlowPlanRevision==revision&&g.ChainRefills==refills&&g.FlowSkippedPlans>0,"duplicate dirty event cannot replan or duplicate supply");
+  Plain();foreach(var b in g.CollectionBricks.Where(b=>b.Alive&&b.GetComponent<ChainGridPiece>().Row>=2).ToArray())Remove(b);Step();
+  Check(OnBoard()==18,"large clear retains a short intentional opening before new supply enters");
+  int visibleAtHalf=0,visibleAtOne=0;for(int i=1;i<=Mathf.CeilToInt(1.8f/Time.fixedDeltaTime);i++){Step();if(i==Mathf.RoundToInt(.5f/Time.fixedDeltaTime))visibleAtHalf=OnBoard();if(i==Mathf.RoundToInt(1f/Time.fixedDeltaTime))visibleAtOne=OnBoard();}
+  File.WriteAllText(dir+"/mass-clear.json",$"{{\"removed\":63,\"remainingImmediately\":18,\"visibleAtHalfSecond\":{visibleAtHalf},\"visibleAtOneSecond\":{visibleAtOne},\"visibleAt1_8Seconds\":{OnBoard()}}}");
+  Check(visibleAtHalf>=27,"63-cell clear restores at least one supply row within about half a second");Check(visibleAtOne>=54,"63-cell clear restores at least two thirds within about one second");Settle("63-cell clear");Check(g.ChainOccupiedCells()==81,"large clear reserves exactly 81 final cells");
+  Plain();foreach(var b in g.CollectionBricks.Where(b=>b.Alive).ToArray())Remove(b);Step();Check(OnBoard()==0,"complete clear initially exposes the authored strategy window");Step(Mathf.CeilToInt(.4f/Time.fixedDeltaTime));Check(OnBoard()>=9,"complete clear returns at least a row within about 0.4 seconds");Settle("81-cell clear");Check(OnBoard()==81,"complete clear returns a full board without duplicate supply");
+  Plain();for(int c=0;c<9;c++){Cell(c,4).Remove();Call("SpawnChainCell",c,4,0,1,BrickKind.Stone,false);}Call("BeginBoardFlowGravity");Remove(Cell(4,8));Step();Settle("sealed cavity");Check(g.ChainOccupiedCells()==80,"sealed cavity stays empty instead of spawning through its roof");revision=g.FlowPlanRevision;Step(120);Check(g.FlowPlanRevision==revision,"sealed cavity does not retry on idle frames");
+  // Repeated interrupted routes on all authored boards. Destroy ordinary
+  // cells only so collection victory cannot bypass the settling assertions.
+  for(int level=0;level<52;level++){
+   g.StartLevel(level);overlap=false;bool valid=true;var stones=g.CollectionBricks.Where(b=>b.Alive&&b.Definition.kind==BrickKind.Stone).ToDictionary(b=>b,b=>b.GetComponent<Rigidbody2D>().position);
+   for(int burst=0;burst<4;burst++){
+    var victims=g.CollectionBricks.Where(b=>b.Alive&&b.Definition.kind==BrickKind.Normal&&b.Definition.juiceGroup==0&&!g.IsJellyTarget(b)&&!ChainPowerRules.IsNest(b.Definition)).OrderByDescending(b=>b.GetComponent<ChainGridPiece>().Row).ThenBy(b=>(b.Id+burst*7)%17).Take(7).ToArray();
+    foreach(var b in victims)Remove(b);Step(5+burst);valid&=g.ChainGridValid(false);
+   }
+   Check(valid,"unique target occupancy after interrupted plans Level "+(level+1));
+   var positions=Pieces().ToDictionary(p=>p,p=>Position(p));g.SetPaused(true);Step(8);Check(positions.All(p=>Vector2.Distance(p.Value,Position(p.Key))<.001f),"pause freezes all flow bodies Level "+(level+1));g.SetPaused(false);
+   Settle("interrupted refill Level "+(level+1));Check(stones.All(p=>p.Key.Alive&&Vector2.Distance(p.Value,p.Key.GetComponent<Rigidbody2D>().position)<.001f),"stones remain fixed Level "+(level+1));yield return null;
+  }
+  // A new session invalidates the previous draft, paths and pool lifetimes.
+  Plain();Remove(Cell(0,8));Step(2);g.StartLevel(28);Step(2);Check(g.FlowPlanRevision==0&&g.ChainGridValid(false),"switching levels cancels old routes and reservations");
+  g.StopLevel();Destroy(g.gameObject);Time.timeScale=1;Physics2D.simulationMode=old;Check(errors==0,"zero runtime errors");File.WriteAllText(dir+"/result.json",$"{{\"checks\":{checks},\"failures\":{failures},\"errors\":{errors}}}");Application.Quit(failures+errors==0?0:1);
+ }
+}
+}

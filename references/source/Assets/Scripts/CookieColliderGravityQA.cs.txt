@@ -1,0 +1,73 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public OpeningYarnView QASupportYarn(int c,int r,int layers){
+  CreateBrick(new BrickSpawn{position=ChainGridRules.Center(c,r),size=Vector2.one*.76f,hp=1,colorIndex=0,referenceCol=c,referenceRow=r,reveal="opening-yarn",kind=BrickKind.Normal},0);
+  var b=CollectionBricks.Last();var v=b.gameObject.AddComponent<OpeningYarnView>();v.Initialize(this,b,layers);openingYarn[b.Id]=v;return v;
+ }
+ public OpeningYarnEffect[] QASupportEffects()=>openingYarnEffects.Where(e=>e!=null&&e.Pending).ToArray();
+}
+public sealed class CookieColliderGravityQA:MonoBehaviour {
+ GameSession g;AppUI app;string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--cookie-collider-qa"))new GameObject("Cookie collider and support-removal QA").AddComponent<CookieColliderGravityQA>();}
+ void Check(bool ok,string text){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+text+"\n");}
+ void Reset(){g.StartLevel(10);g.enabled=false;g.QAIgnoreFocusLoss=true;g.SetPaused(false);g.QASevenClear();g.CollectionGoal[0]=g.CollectionGoal[1]=999;}
+ void Tick(int count){for(int i=0;i<count;i++)g.QASevenTick(.02f);}
+ void Floor(int row){for(int r=row;r<9;r++)for(int c=0;c<9;c++)g.QAOpeningSpawn(c,r,0);}
+ void Break(BrickBody b){g.ApplyChainImpact(b,1,Vector2.up,b.transform.position,true);}
+ void CastEdges(OpeningCookieBoxView box){
+  var collider=box.Brick.GetComponent<BoxCollider2D>();Physics2D.SyncTransforms();Vector2 center=collider.bounds.center;float pitch=CollectionLevels.Pitch,radius=.03f;
+  foreach(var direction in new[]{Vector2.right,Vector2.left,Vector2.up,Vector2.down})foreach(float offset in new[]{-.70f,0,.70f}){
+   Vector2 tangent=new Vector2(-direction.y,direction.x);Vector2 origin=center-direction*(2*pitch)+tangent*(offset*pitch);
+   var hit=Physics2D.CircleCast(origin,radius,direction,3*pitch,1<<8);
+   Check(hit.collider==collider&&Mathf.Abs(hit.distance-(pitch-radius))<.006f,"ball sweep reaches full outer edge "+direction+" at "+offset);
+  }
+  foreach(var direction in new[]{new Vector2(1,1).normalized,new Vector2(1,-1).normalized,new Vector2(-1,1).normalized,new Vector2(-1,-1).normalized}){
+   var hit=Physics2D.CircleCast(center-direction*(pitch*Mathf.Sqrt(2)+pitch),radius,direction,3*pitch,1<<8);
+   Check(hit.collider==collider,"diagonal corner blocks ball "+direction);
+  }
+ }
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();g=app.Session;Physics2D.simulationMode=SimulationMode2D.Script;
+  for(int level=10;level<20;level++){
+   g.StartLevel(level);g.enabled=false;g.QAIgnoreFocusLoss=true;g.SetPaused(false);Physics2D.SyncTransforms();
+   foreach(var box in g.QASecondBoxes()){
+    var collider=box.Brick.GetComponent<BoxCollider2D>();
+    Check(Vector2.Distance(collider.size,CookieBoxArtView.CollisionSize)<.00001f,"authored level "+(level+1)+" collider covers complete four cells");
+    Check(box.Brick.GetComponentsInChildren<Collider2D>().Length==1&&box.Brick.GetComponent<ChainGridPiece>().Size==2,"one rigid collider and grid owner "+(level+1));
+   }
+  }
+  Reset();var isolated=g.QASecondBox();var cb=isolated.Brick.GetComponent<BoxCollider2D>();var normal=g.QAOpeningSpawn(0,0,0).GetComponent<BoxCollider2D>();
+  Check(Vector2.Distance(cb.size,normal.size*2)<.00001f,"cookie bounds equal two ordinary cells on each axis");
+  Physics2D.SyncTransforms();Vector2 anchor=cb.bounds.center;float p=CollectionLevels.Pitch;
+  foreach(float x in new[]{-.75f,-.5f,0,.5f,.75f})foreach(float y in new[]{-.75f,-.5f,0,.5f,.75f})Check(cb.OverlapPoint(anchor+new Vector2(x,y)*p),"four quadrants and central seams are solid "+x+","+y);
+  foreach(var d in new[]{Vector2.left,Vector2.right,Vector2.up,Vector2.down})Check(!cb.OverlapPoint(anchor+d*(p+.01f)),"collider stops at outer four-cell boundary "+d);
+  CastEdges(isolated);Vector2 size=cb.size,position=isolated.Brick.GetComponent<Rigidbody2D>().position;isolated.Collect(0,90001,1);isolated.Tick(.08f);Physics2D.SyncTransforms();
+  Check(isolated.VisualHeight>.1f&&cb.size==size&&isolated.Brick.GetComponent<Rigidbody2D>().position==position,"whole-box hop leaves complete collision boundary stationary");CastEdges(isolated);
+  for(int count=0;count<=8;count++){isolated.GetComponentInChildren<CookieBoxArtView>().SetState(count);Check(cb.size==size,"sprite count "+count+" never changes collider dimensions");}
+  foreach(int layers in new[]{2,3}){
+   Reset();Floor(5);var plain=g.QAOpeningSpawn(2,3,0);var yarn=g.QASupportYarn(4,3,layers);var supportPlain=g.QAOpeningSpawn(2,4,0);var supportYarn=g.QAOpeningSpawn(4,4,0);
+   Vector2 plainStart=plain.GetComponent<Rigidbody2D>().position,yarnStart=yarn.Brick.GetComponent<Rigidbody2D>().position;Break(supportPlain);Break(supportYarn);Tick(10);yield return new WaitForEndOfFrame();
+   Vector2 plainNow=plain.GetComponent<Rigidbody2D>().position,yarnNow=yarn.Brick.GetComponent<Rigidbody2D>().position;
+   Check(yarn.Brick.Alive&&yarn.Layers==layers-1,"support elimination peels one layer without collecting remaining yarn "+layers);
+   Check(plainNow.y<plainStart.y-.1f&&yarnNow.y<yarnStart.y-.1f,"normal and yarn start dropping after support removal "+layers);
+   Check(Mathf.Abs(plainNow.y-yarnNow.y)<.015f&&yarn.Brick.GetComponent<ChainGridPiece>().Row==4,"yarn fills the same one-row gap as ordinary brick "+layers);
+   var effect=g.QASupportEffects().FirstOrDefault();Check(effect!=null&&Vector3.Distance(effect.transform.position,yarn.Brick.transform.position+Vector3.down*(p*.5f))<.01f,"visible peel animation follows falling yarn "+layers);
+   Tick(50);Check(g.ChainGridValid(false),"yarn and floor settle without overlap "+layers);
+  }
+  Reset();Floor(5);var whole=g.QASecondBox(3,2);var left=g.QAOpeningSpawn(3,4,0);var right=g.QAOpeningSpawn(4,4,0);Vector2 start=whole.Brick.GetComponent<Rigidbody2D>().position;Break(left);Tick(10);
+  Check(Vector2.Distance(whole.Brick.GetComponent<Rigidbody2D>().position,start)<.002f,"one remaining supporting column prevents overlap of whole 2x2 box");
+  Break(right);Tick(10);yield return new WaitForEndOfFrame();
+  Check(whole.Brick.Alive&&whole.Brick.GetComponent<ChainGridPiece>().Row==3&&Mathf.Abs(whole.Brick.GetComponent<Rigidbody2D>().position.y-(start.y-p))<.015f,"box drops one row as a unit when both supporting cells are cleared");
+  Check(whole.Remaining==6&&whole.Brick.GetComponent<BoxCollider2D>().size==CookieBoxArtView.CollisionSize,"support clears collect two biscuits without altering full collision size");
+  Tick(70);Check(g.ChainGridValid(false),"four-cell box settles into gap without overlap or splitting");
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+",\"colliderSide\":"+(2*p).ToString(System.Globalization.CultureInfo.InvariantCulture)+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

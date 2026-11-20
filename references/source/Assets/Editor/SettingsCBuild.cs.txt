@@ -1,0 +1,17 @@
+using System;using System.IO;using UnityEditor;using UnityEditor.Build;using UnityEditor.Build.Reporting;using UnityEngine;using BounceGarden;
+public static class SettingsCBuild {
+ public static void Windows(){
+  BuildEntry.Configure();if(GameVersion.Name!="0.4.0"||GameVersion.Code!=400)throw new Exception("Expected 0.4.0");
+  if(PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone).Contains("BOUNCE_STRATEGY_PLAYTEST"))throw new Exception("Normal league build required");
+  var config=new ResourceLeagueConfigProvider().Load();config.Validate();if(!config.calendarSeasons)throw new Exception("League calendar base missing");
+  string output=Path.GetFullPath("../../Builds/SettingsC-v0.4.0-r2/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));
+  foreach(var key in new[]{"panel_cream","button_peach_normal","button_peach_pressed","button_cream_normal","toggle_track_on","toggle_track_off","toggle_knob","illustration_home","help_boosters"})if(CSettingsArt.Get(key)==null)throw new Exception("C asset missing: "+key);
+  PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=BuildTarget.StandaloneWindows64,locationPathName=output,options=BuildOptions.CompressWithLz4HC});
+  File.WriteAllText(Path.GetFullPath("../../Builds/SettingsC-v0.4.0-r2/build-summary.json"),"{\"result\":\""+result.summary.result+"\",\"errors\":"+result.summary.totalErrors+",\"warnings\":"+result.summary.totalWarnings+",\"version\":\"0.4.0\",\"strategyTestBuild\":false,\"settingsUIIntegrated\":true}");
+  if(result.summary.result!=BuildResult.Succeeded)throw new Exception("C settings build failed");
+ }
+}
+public sealed class SettingsCImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/SettingsC/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.isReadable=false;t.npotScale=TextureImporterNPOTScale.None;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.CompressedHQ;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;}
+}

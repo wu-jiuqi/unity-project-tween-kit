@@ -1,0 +1,48 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ readonly Dictionary<int,OpeningCopperView> openingCopper=new Dictionary<int,OpeningCopperView>();
+ readonly List<OpeningCopperEffect> openingCopperEffects=new List<OpeningCopperEffect>();
+ public int OpeningCopperPending=>openingCopperEffects.Count(e=>e!=null&&e.Pending);
+ public bool OpeningCopperBrick(BrickBody b)=>b!=null&&b.Definition.reveal=="opening-copper";
+ void ClearOpeningCopper(){openingCopper.Clear();openingCopperEffects.Clear();}
+ void SpawnOpeningCopper(OpeningPiece p){
+  CreateBrick(new BrickSpawn{position=ChainGridRules.Center(p.c,p.r),size=Vector2.one*.76f,hp=p.hp,colorIndex=1,referenceCol=p.c,referenceRow=p.r,juiceGroup=0,reveal="opening-copper",kind=BrickKind.Normal},0);
+  var b=CollectionBricks.Last();var view=b.gameObject.AddComponent<OpeningCopperView>();view.Initialize(this,b);openingCopper[b.Id]=view;
+ }
+ void TickOpeningCopper(float dt){
+  if(IsPaused||dt<=0)return;
+  foreach(var view in openingCopper.Values)if(view!=null&&view.Brick.Alive)view.Tick(dt);
+  for(int i=openingCopperEffects.Count-1;i>=0;i--){var effect=openingCopperEffects[i];if(effect!=null)effect.Tick(dt);if(effect==null||!effect.Pending)openingCopperEffects.RemoveAt(i);}
+ }
+ bool OpeningDamageCopper(BrickBody b,int damage,bool area=false){
+  if(!IsOpening||!OpeningCopperBrick(b)||!b.Alive||RefillProtected(b)||damage<=0)return false;
+  if(!openingCopper.TryGetValue(b.Id,out var view))return false;
+  // Range attacks share the same attack ID; repeated overlaps must not multiply damage.
+  if(area&&!view.RegisterAttack(OpeningAttackId))return false;
+  int before=rules.Health(b.Id);if(!rules.DamageTarget(b.Id,damage,out bool destroyed))return false;
+  StrategyEmit(new StrategyEvent{kind="damage",target=StrategyBrickId(b),targetKind="copper_coin",amount=Mathf.Min(before,damage)});HitCount++;noDamageTime=0;changed=true;AddScore(ScoreRules.Damage*Mathf.Min(before,damage));
+  if(destroyed){OpeningRetireCopper(view);return true;}
+  b.Damage(rules.Health(b.Id));view.Hit(before,area?Vector2.up:feedbackIncoming);SoundService.Play("copper_hit");CombatFeel?.VisualImpact();return false;
+ }
+ void OpeningCopperAdjacent(Vector2 p){
+  float pitch=CollectionLevels.Pitch,t=pitch*.13f;
+  foreach(var view in openingCopper.Values.ToArray())if(view!=null&&view.Brick.Alive&&!RefillProtected(view.Brick)){
+   var delta=view.Brick.GetComponent<Rigidbody2D>().position-p;
+   bool adjacent=Mathf.Abs(Mathf.Abs(delta.x)-pitch)<t&&Mathf.Abs(delta.y)<t||Mathf.Abs(Mathf.Abs(delta.y)-pitch)<t&&Mathf.Abs(delta.x)<t;
+   // Adjacency overrides HP even if a range hit already touched this coin in this attack.
+   if(adjacent){rules.DamageTarget(view.Brick.Id,int.MaxValue,out bool removed);if(removed)OpeningRetireCopper(view);}
+  }
+ }
+ void OpeningRetireCopper(OpeningCopperView view){
+  if(!view.Brick.Alive)return;
+  var p=view.Brick.GetComponent<Rigidbody2D>().position;
+  openingCopperEffects.Add(OpeningCopperEffect.Play(this,world,p,true));
+  StrategyEmit(new StrategyEvent{kind="break",target=StrategyBrickId(view.Brick),targetKind="copper_coin",amount=1});view.Brick.Remove();BreakCount++;AddScore(ScoreRules.Break);ScheduleChainGravity();SoundService.Play("copper_collect");changed=true;
+ }
+ internal void OpeningCopperHitFx(Vector2 p){openingCopperEffects.Add(OpeningCopperEffect.Play(this,world,p,false));}
+ internal void OpeningCopperArrived(Vector2 p){OpeningCollect("copper_coin",p);}
+}
+}

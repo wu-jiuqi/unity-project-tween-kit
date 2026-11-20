@@ -1,0 +1,8 @@
+using System;using System.Collections;using System.Linq;using UnityEngine;
+namespace BounceGarden {
+// Explicit optional preview; memory-only profiles keep the normal league save untouched.
+public sealed class LeagueFontPreview:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(RuntimeQA.IsIsolated&&Environment.GetCommandLineArgs().Contains("--league-font-preview"))new GameObject("League font animation preview").AddComponent<LeagueFontPreview>();}
+ IEnumerator Start(){yield return new WaitForSecondsRealtime(3);var args=Environment.GetCommandLineArgs();int i=Array.IndexOf(args,"--preview-level"),level=17;if(i>=0&&i+1<args.Length)int.TryParse(args[i+1],out level);FindFirstObjectByType<AppUI>().QAStartMainlineWithOnboarding(Mathf.Clamp(level,0,44));}
+}
+}

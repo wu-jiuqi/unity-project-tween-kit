@@ -1,0 +1,38 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.NumberRoll",
+    "settings": [
+        {
+            "field": "Duration",
+            "type": "System.Single",
+            "value": 0.20000000298023225,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "Delay",
+            "type": "System.Single",
+            "value": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "From",
+            "type": "System.Int32",
+            "value": 100.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "To",
+            "type": "System.Int32",
+            "value": 180.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    ]
+}

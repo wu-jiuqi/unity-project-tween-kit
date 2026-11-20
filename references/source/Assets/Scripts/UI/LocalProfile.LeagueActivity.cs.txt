@@ -1,0 +1,22 @@
+using System;
+using System.Linq;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ public void TickLeague(double seconds){
+  if(!LeagueUnlocked||seconds<=0||!LeagueSettings.activeCompetition)return;long now=LeagueClock.UtcSeconds;
+  LeagueTransaction(()=>{
+   LeagueEngine.PrepareActive(league,LeagueSettings,now,Badges);
+   var p=league.current;
+   if(p!=null){double valid=Math.Min(seconds,Math.Max(0,p.endsAt-(now-(long)Math.Ceiling(seconds))));LeagueEngine.ActiveTick(p,valid,Badges);}
+   LeagueEngine.Advance(league,now,Badges,false);LeagueEngine.Open(league,LeagueSettings,now,Badges);
+  },false);
+ }
+ public void SuspendLeague(){if(league.current!=null)LeagueTransaction(()=>league.current.awayAt=LeagueClock.UtcSeconds,false);}
+ public void BeginLeagueRound(){ReadLeague();if(league.current==null||!league.current.config.activeCompetition)return;LeagueTransaction(()=>{league.current.roundActiveSeconds=0;league.current.roundStartRank=LeagueEngine.Standings(league.current,Badges).First(e=>e.player).rank;},false);}
+ public void LeagueLoss(){if(league.current!=null&&league.current.config.activeCompetition)LeagueTransaction(()=>LeagueEngine.FinishRound(league.current,false,Badges,Badges));}
+ public bool LeagueMatchSeen(string id)=>league.current==null||league.current.id!=id||league.current.matchSeen;
+ public bool CompleteLeagueMatch(string id){if(league.current==null||league.current.id!=id)return false;return LeagueTransaction(()=>league.current.matchSeen=true,false);}
+ public int LeagueReturnRounds=>league.current?.returnRounds??0;
+ public string LeagueChaseSummary=>league.current!=null&&league.current.lastChaseRivals>0?league.current.lastChaseRivals+"位对手已追赶":"本关联赛已更新";
+}
+}

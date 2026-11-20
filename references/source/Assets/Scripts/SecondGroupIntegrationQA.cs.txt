@@ -1,0 +1,61 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public OpeningCookieBoxView[] QASecondBoxes()=>openingCookies.Values.Where(b=>b!=null&&b.Brick.Alive).ToArray();
+ public OpeningCookieBoxView QASecondBox(int c=3,int r=3){SpawnOpeningCookieBox(new OpeningPiece{c=c,r=r,size=2,capacity=8,kind="cookie_box"});return QASecondBoxes().Last();}
+ public OpeningYarnView QASecondYarn(int layers){var b=QASevenBrick(4,4,1);b.Definition.reveal="opening-yarn";var v=b.gameObject.AddComponent<OpeningYarnView>();v.Initialize(this,b,layers);openingYarn[b.Id]=v;return v;}
+ public void QASecondArea(int kind,int c=0,int r=3,int strength=1,bool full=false,bool twice=false){long old=BeginOpeningElimination(strength);try{SevenArea(ChainGridRules.Center(c,r),kind,10,strength,full);if(twice)SevenArea(ChainGridRules.Center(c,r),kind,10,strength,full);}finally{EndOpeningElimination(old);}}
+ public void QASecondCell(int c,int r){long old=BeginOpeningElimination();try{SevenVisitArea(ChainGridRules.Center(c,r),(p,half)=>Vector2.Distance(p,ChainGridRules.Center(c,r))<.05f,10,1);}finally{EndOpeningElimination(old);}}
+}
+public sealed class SecondGroupIntegrationQA:MonoBehaviour {
+ GameSession g;AppUI app;string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){var a=Environment.GetCommandLineArgs();if(a.Contains("--second-group-qa"))new GameObject("Second group integration QA").AddComponent<SecondGroupIntegrationQA>();else if(a.Contains("--second-group-preview"))new GameObject("Second group isolated preview").AddComponent<SecondGroupPreview>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ void Reset(){g.StartLevel(10);g.enabled=false;g.QAIgnoreFocusLoss=true;g.SetPaused(false);g.QASevenClear();g.CollectionGoal[0]=g.CollectionGoal[1]=999;}
+ void Tick(int n){for(int i=0;i<n;i++)g.QASevenTick(.02f);}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var image=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,image);File.WriteAllBytes(dir+"/"+name+".png",image.EncodeToPNG());Destroy(image);rt.Release();Destroy(rt);}
+ IEnumerator Level(int index){app.QAStartLevel(index);yield return app.QAWaitForLevel();for(int n=0;n<80;n++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.015f);if(n>8&&!app.AlphabetIntroActive&&!app.Session.IsPaused)break;}g=app.Session;g.enabled=false;g.QAIgnoreFocusLoss=true;g.SetPaused(false);}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();g=app.Session;Physics2D.simulationMode=SimulationMode2D.Script;
+  Check(OpeningCampaign.Count==20&&OpeningCampaign.Validate()>0,"all twenty exact user layouts validate");
+  for(int i=0;i<20;i++){
+   g.StartLevel(i);g.enabled=false;g.QAIgnoreFocusLoss=true;g.SetPaused(false);var s=OpeningCampaign.Stage(i);
+   Check(g.IsOpening&&g.ChainGridValid(false)&&g.Shots==s.moves,"layout, positions and authored moves "+(i+1));
+   Check(g.ChainOccupiedCells()==s.rows.Sum(row=>row.Count(c=>c!='.')),"exact occupied cells "+(i+1));
+   Check(g.QASecondBoxes().Length==s.pieces.Count(p=>p.kind=="cookie_box"),"one entity per box "+(i+1));
+   if(s.goal.kind=="mechanisms")Check(g.CollectionGoal[0]==s.goal.count&&g.CollectionGoal[1]==s.goal.cookies,"two independent exact collection goals "+(i+1));
+   foreach(var box in g.QASecondBoxes())Check(box.Brick.GetComponent<ChainGridPiece>().Size==2&&box.Brick.GetComponentsInChildren<Collider2D>().Length==1&&box.Remaining==8,"rigid 2x2 box, one collider, eight biscuits "+(i+1));
+   Check(g.QAOpeningYarns().Sum(y=>y.Layers)==s.pieces.Where(p=>p.kind=="yarn").Sum(p=>p.layers),"authored yarn layers "+(i+1));
+  }
+  Reset();var box1=g.QASecondBox();var pos=box1.Brick.GetComponent<Rigidbody2D>().position;g.ApplyChainImpact(box1.Brick,99,Vector2.up,pos,true);Check(box1.Remaining==8&&box1.CollectionHops==0,"direct ball neither collects nor launches box");
+  var near=g.QAOpeningSpawn(2,3,1);g.ApplyChainImpact(near,1,Vector2.up,near.transform.position,true);Check(box1.Remaining==7&&g.Collected[1]==0,"one adjacent elimination releases one delayed collectible");box1.Tick(.07f);Check(box1.VisualHeight>.1f&&box1.Brick.GetComponent<Rigidbody2D>().position==pos,"visible whole-box hop without physical motion");float height=box1.VisualHeight;g.SetPaused(true);box1.Tick(.1f);Check(box1.VisualHeight==height,"paused hop freezes");g.SetPaused(false);box1.Tick(.4f);Check(box1.VisualHeight==0,"hop returns exactly to rest");
+  Reset();box1=g.QASecondBox();g.QASecondArea(6);Check(box1.Remaining==6,"horizontal laser crosses two box cells");g.QASecondArea(6);Check(box1.Remaining==4,"independent laser can collect again");
+  Reset();box1=g.QASecondBox();g.QASecondArea(5,3,0);Check(box1.Remaining==6,"vertical laser crosses two cells");
+  Reset();box1=g.QASecondBox();g.QASecondArea(6,0,3,1,false,true);Check(box1.Remaining==6,"same attack cell deduplication");
+  Reset();box1=g.QASecondBox();g.QASecondCell(3,3);Check(box1.Remaining==7,"one precise covered cell equals one biscuit");
+  Reset();box1=g.QASecondBox();g.QASecondArea(2,3,3);Check(box1.Remaining==4,"bomb covers four cells, four biscuits");
+  Reset();box1=g.QASecondBox();near=g.QAOpeningSpawn(2,3,1);var top=g.QAOpeningSpawn(3,2,1);g.QAOpeningBatch(new[]{near,top});Check(box1.Remaining==7,"same cell adjacent eliminations deduplicate within one attack");
+  Reset();box1=g.QASecondBox();near=g.QAOpeningSpawn(2,2,1);g.SevenHit(near);Check(box1.Remaining==8,"diagonal elimination does not open box");near=g.QAEffectsBrick(2,3,30,1);g.SevenHit(near);Check(near.Alive&&near.CurrentHealth==20&&box1.Remaining==8,"nonlethal adjacent damage does not collect");
+  Reset();box1=g.QASecondBox();g.QASecondArea(3,0,0,2,true);Check(box1.Remaining==0&&box1.Brick.Alive&&g.OpeningCookiesReleased==8,"double flower consumes at most stock and lets final hop finish");Tick(100);Check(!box1.Brick.Alive&&g.Collected[1]==8&&g.OpeningCookiePending==0,"empty whole box retires and all eight flights settle");
+  Reset();box1=g.QASecondBox();g.QASecondArea(6);Reset();Tick(100);Check(g.Collected[1]==0&&g.OpeningCookiePending==0,"restart clears pending cookie collections and hops");
+  Reset();var yarn=g.QASecondYarn(3);g.ApplyChainImpact(yarn.Brick,99,Vector2.up,yarn.Brick.transform.position,true);Check(yarn.Layers==3,"direct ball cannot remove third yarn layer");g.QASecondArea(6,0,4);Check(yarn.Layers==2,"third yarn loses teal layer once");g.QASecondArea(6,0,4);Check(yarn.Layers==1,"second independent attack loses purple layer");g.QASecondArea(6,0,4);Check(!yarn.Brick.Alive&&g.Collected[0]==0,"third hit starts final unravel without early credit");Tick(160);Check(g.Collected[0]==1&&g.OpeningYarnPending==0,"ordered peel animations and unravel credit once");
+  Reset();yarn=g.QASecondYarn(3);g.QASecondArea(3,0,0,2,true);Check(yarn.Layers==1&&g.Collected[0]==0,"double flower removes two of three layers without collecting");
+  Reset();box1=g.QASecondBox(3,1);Tick(220);Check(g.ChainGridValid(false)&&box1.Brick.Alive&&box1.Brick.GetComponent<ChainGridPiece>().Size==2,"gravity and refill retain one non-overlapping 2x2 box");
+  Reset();g.CollectionGoal[0]=0;g.CollectionGoal[1]=8;box1=g.QASecondBox();g.QASecondArea(3,0,0,2,true);Tick(220);g.QASevenOutcome();Tick(100);Check(g.CollectionWon&&g.QASevenOutcome(),"cookie-only goal completes through hop, loot and victory settlement");
+  Reset();g.CollectionGoal[0]=1;g.CollectionGoal[1]=8;box1=g.QASecondBox(1,1);yarn=g.QASecondYarn(3);g.QASecondArea(3,0,0,2,true);g.QASecondArea(3,0,0,1,true);Tick(220);g.QASevenOutcome();Tick(100);Check(g.Collected[0]==1&&g.Collected[1]==8&&g.QASevenOutcome(),"mixed yarn and cookie goals settle without waiting for more supply");
+  foreach(int index in new[]{10,17,19}){yield return Level(index);yield return Capture("level-"+(index+1));Check(app.GetComponentsInChildren<ChainTaskCard>().All(c=>c.JellyColor>=0||c.FoodIndex!=1||c.Icon!=null),"live collection HUD exists "+(index+1));}
+  yield return Level(10);box1=g.QASecondBoxes().First();pos=box1.Brick.GetComponent<Rigidbody2D>().position;near=g.CollectionBricks.FirstOrDefault(b=>b.Alive&&!g.OpeningCookieBrick(b)&&!g.OpeningYarnBrick(b)&&Vector2.Distance(b.transform.position,box1.Cell(2))<.9f);
+  if(near!=null){g.ApplyChainImpact(near,99,Vector2.up,near.transform.position,true);box1.Tick(.08f);yield return Capture("cookie-hop");Check(box1.VisualHeight>.1f&&box1.Brick.GetComponent<Rigidbody2D>().position==pos,"actual authored box visibly hops at stable grid anchor");}
+  var shake=Camera.main.GetComponent<CameraJuice>();shake.ResetImpact();g.CombatFeel.Power(Vector2.zero);yield return new WaitForEndOfFrame();float pixels=shake.WorldOffset.magnitude*Camera.main.pixelHeight/(Camera.main.orthographicSize*2);Check(pixels>=Camera.main.pixelHeight*.007&&pixels<=Camera.main.pixelHeight*.012,"enhanced special shake measured in screen pixels");yield return Capture("special-shake");g.CombatFeel.CancelStop();yield return new WaitForSecondsRealtime(.4f);Check(shake.WorldOffset.magnitude<.0001f&&!shake.Active,"shake settles with no residual camera displacement");
+  for(int i=0;i<4;i++){g.CombatFeel.Cue(Vector2.zero,"break",Color.yellow,Vector2.up);yield return null;}yield return new WaitForEndOfFrame();Check(shake.Active,"rapid breaks across different frames trigger burst shake");g.SetPaused(true);yield return null;Check(!shake.Active,"pause resets enhanced shake");
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+",\"specialShakePixels\":"+pixels.ToString(System.Globalization.CultureInfo.InvariantCulture)+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+public sealed class SecondGroupPreview:MonoBehaviour {IEnumerator Start(){yield return new WaitForSecondsRealtime(3);var a=Environment.GetCommandLineArgs();int id=int.Parse(a[Array.IndexOf(a,"--second-group-preview")+1]);var app=FindFirstObjectByType<AppUI>();app.QAStartLevel(id-1);yield return app.QAWaitForLevel();app.Session.QAIgnoreFocusLoss=true;}}
+}

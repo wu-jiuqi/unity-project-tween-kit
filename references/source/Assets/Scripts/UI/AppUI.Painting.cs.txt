@@ -1,0 +1,20 @@
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ bool mainlineReplay;
+ PaintingCollectionPresentation paintCollection;
+ public bool IsCollectingPainting=>paintCollection!=null;
+ void ClearPaintingCollection(){if(paintCollection==null)return;var go=paintCollection.gameObject;paintCollection=null;go.SetActive(false);Destroy(go);}
+ void BeginPaintingCollection(){SoundService.Play("painting_collect");
+  if(Session.IsMainline)albumPage=(Session.LevelIndex-20)/5+1;
+  CancelAim();RemoveModal(false);hudRoot.gameObject.SetActive(false);int generation=viewGeneration;
+  bool saved=Session.IsMainline?Profile.HasArtwork(Session.CurrentLevel.paintingId):Profile.CollectFoxPainting();var root=UICraft.Root(canvasRoot,"Painting collection full screen");paintCollection=root.gameObject.AddComponent<PaintingCollectionPresentation>();
+  paintCollection.Configure(Session.IsMainline?Session.CurrentLevel.paintingId:null);
+  paintCollection.Begin(saved,()=>{if(generation!=viewGeneration||!playing)return;ClearPaintingCollection();ShowResult(true);if(!saved)Toast("作品保存失败，请重试。");});
+ }
+ int albumPage;
+ public void OpenPaintingAlbum(){OpenAlphabetStagePage(0);}
+ public void OpenAlbumPage(int page){OpenAlphabetStagePage(page);}
+ public void OpenArtwork(int index){OpenAlphabetStagePage(index/10);}
+}
+}

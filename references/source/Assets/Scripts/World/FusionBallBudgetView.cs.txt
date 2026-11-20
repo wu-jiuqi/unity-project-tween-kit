@@ -1,0 +1,19 @@
+using UnityEngine;
+
+namespace BounceGarden {
+// Small pips travel with a powered ball and disappear when it returns to normal.
+public sealed class FusionBallBudgetView:MonoBehaviour {
+ GameSession owner;BallBody ball;readonly SpriteRenderer[] pips=new SpriteRenderer[10];
+ public void Initialize(GameSession session,BallBody body){
+  owner=session;ball=body;
+  if(pips[0]!=null)return;
+  for(int i=0;i<pips.Length;i++)pips[i]=WorldArt.Draw(transform,"Power charge "+(i+1),"circle",Vector2.zero,Vector2.one*.045f,Color.white,97);
+  Refresh();
+ }
+ void LateUpdate(){Refresh();}
+ void Refresh(){
+  int charges=owner!=null&&ball!=null&&ball.Active?owner.FusionBallCharges(ball):0;
+  for(int i=0;i<pips.Length;i++){if(pips[i]==null)continue;pips[i].enabled=i<charges;if(i>=charges)continue;float angle=(90+(i-(charges-1)*.5f)*24)*Mathf.Deg2Rad;pips[i].transform.localPosition=new Vector3(Mathf.Cos(angle)*.23f,Mathf.Sin(angle)*.23f,0);pips[i].color=StreakTrials.Color(ball.StreakPower);}
+ }
+}
+}

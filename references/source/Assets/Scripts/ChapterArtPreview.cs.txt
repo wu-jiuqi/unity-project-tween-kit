@@ -1,0 +1,9 @@
+using System;
+using System.Collections;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class ChapterArtPreview:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(RuntimeQA.IsIsolated&&Array.IndexOf(Environment.GetCommandLineArgs(),"--chapter-preview")>=0)new GameObject("Isolated chapter art preview").AddComponent<ChapterArtPreview>();}
+ IEnumerator Start(){yield return new WaitForSecondsRealtime(1);var app=FindFirstObjectByType<AppUI>();var args=Environment.GetCommandLineArgs();int n=Array.IndexOf(args,"--chapter-preview");int progress=n+1<args.Length&&args[n+1]=="picnic"?34:0;for(int i=0;i<progress;i++)app.Profile.CommitAlphabetWin("chapter-art-preview-"+i,i);app.QARefreshChapterHome();Debug.Log("CHAPTER_ART_PREVIEW memoryOnly=true currentLevel="+(progress+1));}
+}
+}

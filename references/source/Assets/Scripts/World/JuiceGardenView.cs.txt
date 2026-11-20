@@ -1,0 +1,93 @@
+using System.Collections.Generic;
+using DG.Tweening;
+using UnityEngine;
+
+namespace BounceGarden {
+public static class JuiceArt {
+ static readonly Dictionary<string,Sprite[,]> sheets=new Dictionary<string,Sprite[,]>();
+ public static Sprite Frame(string key,int row,int frame){
+  if(!sheets.TryGetValue(key,out var sprites)){
+   var t=Resources.Load<Texture2D>("Art/JuiceGardens/"+key);if(t==null)throw new System.InvalidOperationException("Missing juice atlas "+key);
+   sprites=new Sprite[4,6];float w=t.width/6f,h=t.height/4f;
+   for(int r=0;r<4;r++)for(int c=0;c<6;c++){sprites[r,c]=Sprite.Create(t,new Rect(c*w,(3-r)*h,w,h),Vector2.one*.5f,256,0,SpriteMeshType.FullRect);sprites[r,c].name="juice_"+key+"_"+r+"_"+c;}
+   sheets.Add(key,sprites);
+  }return sprites[row,Mathf.Clamp(frame,0,5)];
+ }
+}
+public sealed class JuiceGardenView:MonoBehaviour {
+ public static readonly Color Mint=new Color(.49f,.94f,.81f),Gold=new Color(1,.76f,.36f),Coral=new Color(1,.57f,.58f),Lilac=new Color(.79f,.67f,1);
+ GameSession owner;int generation,cursor;float age,stopLeft,nextStop,pawAge=1;
+ public bool Frozen=>stopLeft>0;
+ public int EffectsPlayed {get;private set;}
+ public int HitStops {get;private set;}
+ public float AnimationClock=>age;
+ public int ActiveEffects {get{int n=0;foreach(var e in effects)if(e.active)n++;return n;}}
+ sealed class Effect {public SpriteRenderer sprite;public float age,size,duration;public int row;public bool active;}
+ readonly Effect[] effects=new Effect[80];
+ readonly Dictionary<BallBody,SpriteRenderer> halos=new Dictionary<BallBody,SpriteRenderer>();
+ readonly Dictionary<BallBody,Vector2> stopped=new Dictionary<BallBody,Vector2>();
+ readonly Dictionary<BrickBody,SpriteRenderer> bows=new Dictionary<BrickBody,SpriteRenderer>();
+ sealed class Thread {public BrickBody a,b;public SpriteRenderer line;}
+ readonly List<Thread> threads=new List<Thread>();
+ readonly List<Tween> tweens=new List<Tween>();
+ readonly List<GameObject> transient=new List<GameObject>();
+ SpriteRenderer paw,strip;Vector3 pawRest;Tween pawTween;bool wasPaused;
+ SpriteRenderer Sprite(string name,Sprite s,Vector2 p,float size,int order){var go=new GameObject(name);go.transform.SetParent(transform,false);go.transform.localPosition=p;var r=go.AddComponent<SpriteRenderer>();r.sprite=s;r.sharedMaterial=WorldArt.BoardMaterial;r.sortingOrder=owner!=null&&owner.IsMainline&&order==47?43:order;r.transform.localScale=Vector3.one*size;return r;}
+ public void Initialize(GameSession game){
+  owner=game;generation=game.Generation;
+  // Prewarm effect views once. Every generated frame is a cached immutable sprite.
+  for(int i=0;i<effects.Length;i++){var s=Sprite("Pooled juice sequence",JuiceArt.Frame("effects",0,0),Vector2.zero,1,47);s.gameObject.SetActive(false);effects[i]=new Effect{sprite=s};}
+  if(owner.Mechanic==JuiceMechanic.Zipper){
+   foreach(var b in owner.juiceBricks){var bow=Sprite("Thread start bow",JuiceArt.Frame("actors",3,0),b.transform.position,.48f,42);bows.Add(b,bow);
+    foreach(var next in owner.juiceBricks)if(next.Definition.juiceGroup==b.Definition.juiceGroup&&next.Definition.juiceOrder==b.Definition.juiceOrder+1){var line=WorldArt.Draw(transform,"Visible coral yarn route","brick",Vector2.zero,Vector2.one,new Color(1,.57f,.58f,.8f),41);Connect(line,b.transform.position,next.transform.position,.055f);threads.Add(new Thread{a=b,b=next,line=line});break;}}
+  }
+  if(owner.Mechanic==JuiceMechanic.Return){
+   strip=WorldArt.Draw(transform,"Paw return strip 3.2 wide","brick",new Vector2(0,FlightGeometry.ReturnY+.03f),new Vector2(3.2f,.18f),Mint,24);
+   paw=Sprite("Animated cream kitten paw",JuiceArt.Frame("actors",0,0),new Vector2(1.12f,FlightGeometry.ReturnY+.12f),.95f,50);pawRest=paw.transform.localPosition;
+  }
+ }
+ public void TrackBall(BallBody b){if(halos.ContainsKey(b))return;var halo=Sprite("Yarn power halo",WorldArt.Sprite("ring"),b.transform.position,.65f,25);halo.gameObject.SetActive(false);halos.Add(b,halo);}
+ static void Connect(SpriteRenderer r,Vector2 a,Vector2 b,float width){r.transform.position=(a+b)*.5f;r.transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(b.y-a.y,b.x-a.x)*Mathf.Rad2Deg);r.transform.localScale=new Vector3(Vector2.Distance(a,b)/r.sprite.bounds.size.x,width/r.sprite.bounds.size.y,1);}
+ public void Burst(Vector2 p,int row,float size){
+  if(!FeedbackProfile.Active.enabledFeedback)return;
+  Effect e=null;for(int i=0;i<effects.Length;i++){int k=(cursor+i)%effects.Length;if(!effects[k].active){e=effects[k];cursor=(k+1)%effects.Length;break;}}if(e==null)e=effects[cursor++%effects.Length];
+  e.age=0;e.row=row;e.size=size;e.duration=row==4?.42f:.38f;e.active=true;e.sprite.sprite=JuiceArt.Frame(row>=4?"actors":"effects",row==4?1:row==5?3:row,0);e.sprite.transform.position=p;e.sprite.transform.rotation=Quaternion.Euler(0,0,Random.Range(-12,12));e.sprite.color=Color.white;e.sprite.transform.localScale=Vector3.one*size;e.sprite.gameObject.SetActive(true);EffectsPlayed++;
+ }
+ public void Impact(Vector2 p,int row,float size,float stop){
+  Burst(p,row,size);if(!FeedbackProfile.Active.enabledFeedback)return;
+  if(owner.CombatFeel!=null){owner.CombatFeel.VisualImpact();return;}
+  var camera=Camera.main.GetComponent<CameraJuice>();if(camera!=null&&FeedbackProfile.Active.screenShake)camera.Impact();
+  if(Time.unscaledTime>=nextStop&&!owner.IsPaused&&owner.IsPlaying){nextStop=Time.unscaledTime+.28f;stopLeft=Mathf.Min(.06f,stop);HitStops++;stopped.Clear();foreach(var pair in halos){var b=pair.Key;if(b!=null&&b.Active){stopped[b]=b.Body.linearVelocity;b.Body.simulated=false;}}}
+ }
+ public void Tether(Vector2 from,Vector2 to,Color color){
+  var r=WorldArt.Draw(transform,"Charge energy thread","brick",Vector2.zero,Vector2.one,color,43);Connect(r,from,to,.065f);transient.Add(r.gameObject);
+  var t=DOTween.To(()=>r.color.a,a=>r.color=new Color(color.r,color.g,color.b,a),0,.24f).SetEase(Ease.OutQuad).OnComplete(()=>{if(r!=null)Destroy(r.gameObject);});tweens.Add(t);
+ }
+ public void Callout(Vector2 p,string text,Color color){
+  var label=WorldArt.Text(transform,"Juice pop caption",text,p,.065f,color,61);transient.Add(label.gameObject);label.transform.localScale=Vector3.one*.65f;
+  var seq=DOTween.Sequence().Append(label.transform.DOScale(1,.15f).SetEase(Ease.OutBack)).Join(label.transform.DOMoveY(p.y+.55f,.7f).SetEase(Ease.OutQuad)).Insert(.38f,DOTween.To(()=>label.color.a,a=>label.color=new Color(color.r,color.g,color.b,a),0,.32f)).OnComplete(()=>{if(label!=null)Destroy(label.gameObject);});tweens.Add(seq);
+ }
+ public void PawFlick(){
+  pawAge=0;if(paw==null)return;pawTween?.Kill();paw.transform.localPosition=pawRest;
+  pawTween=DOTween.Sequence().Append(paw.transform.DOLocalMoveY(pawRest.y+.28f,.07f).SetEase(Ease.OutQuad)).Append(paw.transform.DOLocalMoveY(pawRest.y,.30f).SetEase(Ease.OutElastic));tweens.Add(pawTween);
+ }
+ void Unfreeze(){foreach(var pair in stopped){var b=pair.Key;if(b!=null&&b.Active&&b.SessionGeneration==generation){b.Body.linearVelocity=pair.Value;b.Body.simulated=owner!=null&&owner.IsPlaying&&!owner.IsPaused;}}stopped.Clear();stopLeft=0;}
+ void Update(){
+  if(owner==null||owner.Generation!=generation)return;
+  if(owner.IsPaused!=wasPaused){wasPaused=owner.IsPaused;foreach(var t in tweens)if(t!=null&&t.IsActive()){if(wasPaused)t.Pause();else t.Play();}}
+  if(owner.IsPaused)return;
+  if(Frozen){stopLeft-=Time.unscaledDeltaTime;if(stopLeft<=0)Unfreeze();}
+  if(!owner.IsPlaying){if(stopped.Count>0)Unfreeze();foreach(var h in halos.Values)h.gameObject.SetActive(false);return;}
+  if(Frozen)return;age+=Time.deltaTime;pawAge+=Time.deltaTime;
+  for(int i=tweens.Count-1;i>=0;i--)if(tweens[i]==null||!tweens[i].IsActive())tweens.RemoveAt(i);
+  transient.RemoveAll(g=>g==null);
+  foreach(var e in effects){if(!e.active)continue;e.age+=Time.deltaTime;float t=e.age/e.duration;if(t>=1){e.active=false;e.sprite.gameObject.SetActive(false);continue;}e.sprite.sprite=JuiceArt.Frame(e.row>=4?"actors":"effects",e.row==4?1:e.row==5?3:e.row,Mathf.Min(5,(int)(t*6)));float scale=e.size*(.78f+.22f*Mathf.Sin(Mathf.Min(1,t*2)*Mathf.PI*.5f));e.sprite.transform.localScale=Vector3.one*scale;e.sprite.color=new Color(1,1,1,t>.82f?(1-t)/.18f:1);}
+  foreach(var pair in halos){var b=pair.Key;var r=pair.Value;if(b==null)continue;int power=owner.Mechanic==JuiceMechanic.Heat?(b.HeatHits>=8?2:b.HeatHits>=4?1:0):owner.Mechanic==JuiceMechanic.Bank?b.BankCharge:0;r.gameObject.SetActive(b.Active&&power>0);if(power>0&&b.Active){r.transform.position=b.transform.position;r.transform.localScale=Vector3.one*(.55f+power*.10f+Mathf.Sin(age*12)*.035f);r.color=(owner.Mechanic==JuiceMechanic.Bank?Mint:Gold)*new Color(1,1,1,.55f);r.transform.rotation=Quaternion.Euler(0,0,age*90);}}
+  foreach(var pair in bows){var b=pair.Key;var r=pair.Value;bool head=owner.IsZipperHead(b);r.gameObject.SetActive(head);if(head){r.transform.position=b.transform.position+new Vector3(0,-.12f,0);r.transform.localScale=Vector3.one*(.41f+Mathf.Sin(age*5)*.035f);r.sprite=JuiceArt.Frame("actors",3,(int)(age*5)%3);}}
+  foreach(var thread in threads)thread.line.gameObject.SetActive(thread.a.Alive&&thread.b.Alive);
+  if(owner.Mechanic==JuiceMechanic.Sandwich)foreach(var b in owner.juiceBricks){if(!b.Alive)continue;int frame=(b.Definition.juiceGroup%2)*3+Mathf.Clamp(b.DamageStage,0,2);b.Face.sprite=JuiceArt.Frame("actors",2,frame);b.Face.sharedMaterial=WorldArt.BoardMaterial;b.Face.color=owner.IsSoft(b)?Color.Lerp(Color.white,Gold,.35f+.15f*Mathf.Sin(age*9)):Color.white;b.Face.transform.localScale=Vector3.one*(owner.Board.CellWidth/.75f);}
+  if(paw!=null){bool ready=owner.PawReady;strip.color=ready?Color.Lerp(Mint,Color.white,.2f+.2f*Mathf.Sin(age*6)):new Color(.65f,.65f,.72f,.4f);paw.sprite=JuiceArt.Frame("actors",0,pawAge<.48f?Mathf.Min(5,(int)(pawAge/.08f)):0);paw.color=ready||pawAge<.5f?Color.white:new Color(.8f,.8f,.85f,.65f);}
+ }
+ void OnDestroy(){foreach(var t in tweens)if(t!=null&&t.IsActive())t.Kill();if(stopped.Count>0)Unfreeze();}
+}
+}

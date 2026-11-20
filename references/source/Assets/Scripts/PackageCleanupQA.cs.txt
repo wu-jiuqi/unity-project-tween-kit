@@ -1,0 +1,31 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class PackageCleanupQA:MonoBehaviour {
+ string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(RuntimeQA.IsIsolated&&Environment.GetCommandLineArgs().Contains("--cleanup-qa"))new GameObject("Package cleanup regression").AddComponent<PackageCleanupQA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);var app=FindFirstObjectByType<AppUI>();var g=app.Session;g.QAIgnoreFocusLoss=true;
+  Check(LevelCatalog.Count==45&&AlphabetCampaign.Count==45,"campaign ends at 45");
+  for(int level=0;level<45;level++){
+   g.StartLevel(level);Check(g.IsOpening,"new opening route "+(level+1));Check(g.Shots==OpeningCampaign.Stage(level).moves,"authored moves "+(level+1));Check(g.ChainGridValid(false),"non-overlapping grid "+(level+1));Check(g.ChainOccupiedCells()==OpeningCampaign.Stage(level).rows.Sum(row=>row.Count(c=>c!='.')),"authored occupied cells "+(level+1));Check(g.OpeningTargets.Length>0,"collection targets "+(level+1));
+   if(level%5==0)yield return null;
+  }
+  g.StartLevel(77);Check(g.LevelIndex==44&&g.IsOpening,"old out-of-range entry is bounded to final new level");
+  app.QANavigate("home");yield return null;
+  typeof(AppUI).GetMethod("Settings",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(app,null);yield return new WaitForSecondsRealtime(.3f);
+  Check(!app.GetComponentsInChildren<Button>().Any(b=>b.isActiveAndEnabled&&b.name=="试玩统计"),"statistics entry is hidden");
+  Check(app.Metrics!=null&&app.Metrics.Balance!=null,"statistics collection remains attached");
+  Check(typeof(AppUI).GetMethod("OpenBalanceStatistics",BindingFlags.NonPublic|BindingFlags.Instance)!=null,"statistics interface retained");
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures+errors==0?0:3);
+ }
+}
+}

@@ -1,0 +1,17 @@
+using UnityEngine;
+namespace BounceGarden {
+public static class AbilityArt {
+ static Sprite[,] balls,fx;
+ static readonly Sprite[] bricks=new Sprite[6];
+ public static readonly string[] Names={"HEAVY","NEEDLE","BLOOM","SPLIT"};
+ static Sprite[,] Sheet(string key,float ppu){var t=Resources.Load<Texture2D>("Art/AbilityV27/"+key);if(t==null)throw new System.InvalidOperationException("Ability atlas missing: "+key);var s=new Sprite[4,6];int w=t.width/6,h=t.height/4;for(int r=0;r<4;r++)for(int c=0;c<6;c++){s[r,c]=Sprite.Create(t,new Rect(c*w,(3-r)*h,w,h),Vector2.one*.5f,ppu,0,SpriteMeshType.FullRect);s[r,c].name=key+"_"+r+"_"+c;}return s;}
+ public static Sprite Ball(BallAbility type,int frame){if(balls==null)balls=Sheet("balls",180f/(FlightGeometry.Radius*2*YarnArt.BallVisualScale));return balls[(int)type,Mathf.Clamp(frame,0,5)];}
+ public static Sprite Effect(int row,int frame){if(fx==null)fx=Sheet("effects",256);return fx[row,Mathf.Clamp(frame,0,5)];}
+ public static Sprite Brick(BrickKind kind){int i=(int)kind;if(bricks[i]!=null)return bricks[i];var t=Resources.Load<Texture2D>("Art/AbilityV27/"+kind.ToString().ToLowerInvariant());if(t==null)throw new System.InvalidOperationException("Brick art missing: "+kind);return bricks[i]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);}
+}
+public sealed class AbilityFrameFx:MonoBehaviour {
+ GameSession owner;SpriteRenderer image;float clock;int row;
+ public void Initialize(GameSession session,int effect,float size,bool wide){owner=session;row=effect;image=gameObject.AddComponent<SpriteRenderer>();image.sharedMaterial=WorldArt.BoardMaterial;image.sortingOrder=48;image.sprite=AbilityArt.Effect(row,0);transform.localScale=new Vector3(size,wide?size/3:size,1);}
+ void Update(){if(owner==null||!owner.IsPlaying){Destroy(gameObject);return;}if(owner.IsPaused)return;clock+=Time.deltaTime;int f=Mathf.FloorToInt(clock*14);if(f>=6){Destroy(gameObject);return;}image.sprite=AbilityArt.Effect(row,f);}
+}
+}

@@ -1,0 +1,184 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+
+namespace BounceGarden.LevelEditing
+{
+    // A deliberately small ordered DOM. Unknown fields and numeric lexemes survive
+    // edits; source spans let the document replace only the edited level objects.
+    internal sealed class EditorJson
+    {
+        internal enum Type { Object, Array, String, Number, Boolean, Null }
+        internal Type Kind;
+        internal string Scalar;
+        internal readonly List<KeyValuePair<string, EditorJson>> Properties = new List<KeyValuePair<string, EditorJson>>();
+        internal readonly List<EditorJson> Items = new List<EditorJson>();
+        internal int Start, End;
+        internal static EditorJson Object() { return new EditorJson { Kind = Type.Object }; }
+        internal static EditorJson Array() { return new EditorJson { Kind = Type.Array }; }
+        internal static EditorJson Value(string value) { return value == null ? new EditorJson { Kind = Type.Null } : new EditorJson { Kind = Type.String, Scalar = value }; }
+        internal static EditorJson Value(int value) { return new EditorJson { Kind = Type.Number, Scalar = value.ToString(CultureInfo.InvariantCulture) }; }
+        internal static EditorJson Value(bool value) { return new EditorJson { Kind = Type.Boolean, Scalar = value ? "true" : "false" }; }
+        internal EditorJson Get(string key)
+        {
+            foreach (var pair in Properties) if (pair.Key == key) return pair.Value;
+            return null;
+        }
+        internal bool Has(string key) { return Get(key) != null; }
+        internal void Set(string key, EditorJson value)
+        {
+            if (Kind != Type.Object) throw new FormatException("Expected a JSON object.");
+            for (int i = 0; i < Properties.Count; i++) if (Properties[i].Key == key) { Properties[i] = new KeyValuePair<string, EditorJson>(key, value); return; }
+            Properties.Add(new KeyValuePair<string, EditorJson>(key, value));
+        }
+        internal void Set(string key, string value) { Set(key, Value(value)); }
+        internal void Set(string key, int value) { Set(key, Value(value)); }
+        internal void Set(string key, bool value) { Set(key, Value(value)); }
+        internal void Remove(string key) { Properties.RemoveAll(p => p.Key == key); }
+        internal string Text(string key, string fallback = "") { var node = Get(key); return node != null && node.Kind == Type.String ? node.Scalar : fallback; }
+        internal int Int(string key, int fallback = 0)
+        {
+            var node = Get(key); int value;
+            return node != null && node.Kind == Type.Number && int.TryParse(node.Scalar, NumberStyles.Integer, CultureInfo.InvariantCulture, out value) ? value : fallback;
+        }
+        internal bool Bool(string key, bool fallback = false) { var node = Get(key); return node != null && node.Kind == Type.Boolean ? node.Scalar == "true" : fallback; }
+        internal EditorJson RequireArray(string key)
+        {
+            var node = Get(key);
+            if (node == null || node.Kind != Type.Array) throw new FormatException("Missing or invalid array: " + key);
+            return node;
+        }
+        internal EditorJson EnsureArray(string key)
+        {
+            var node = Get(key); if (node == null) { node = Array(); Set(key, node); }
+            if (node.Kind != Type.Array) throw new FormatException("Invalid array: " + key);
+            return node;
+        }
+        internal EditorJson EnsureObject(string key)
+        {
+            var node = Get(key); if (node == null) { node = Object(); Set(key, node); }
+            if (node.Kind != Type.Object) throw new FormatException("Invalid object: " + key);
+            return node;
+        }
+        internal string ToJson(int indent = 0, bool pretty = false)
+        {
+            var result = new StringBuilder(); Write(result, indent, pretty); return result.ToString();
+        }
+        void Write(StringBuilder result, int indent, bool pretty)
+        {
+            if (Kind == Type.String) { Quote(result, Scalar); return; }
+            if (Kind == Type.Number || Kind == Type.Boolean) { result.Append(Scalar); return; }
+            if (Kind == Type.Null) { result.Append("null"); return; }
+            bool obj = Kind == Type.Object; int count = obj ? Properties.Count : Items.Count;
+            result.Append(obj ? '{' : '[');
+            for (int i = 0; i < count; i++)
+            {
+                if (i > 0) result.Append(',');
+                if (pretty) { result.Append('\n'); result.Append(' ', indent + 2); }
+                if (obj) { Quote(result, Properties[i].Key); result.Append(pretty ? ": " : ":"); Properties[i].Value.Write(result, indent + 2, pretty); }
+                else Items[i].Write(result, indent + 2, pretty);
+            }
+            if (pretty && count > 0) { result.Append('\n'); result.Append(' ', indent); }
+            result.Append(obj ? '}' : ']');
+        }
+        static void Quote(StringBuilder output, string value)
+        {
+            output.Append('"');
+            foreach (char ch in value ?? "")
+            {
+                switch (ch)
+                {
+                    case '"': output.Append("\\\""); break;
+                    case '\\': output.Append("\\\\"); break;
+                    case '\b': output.Append("\\b"); break;
+                    case '\f': output.Append("\\f"); break;
+                    case '\n': output.Append("\\n"); break;
+                    case '\r': output.Append("\\r"); break;
+                    case '\t': output.Append("\\t"); break;
+                    default: if (ch < 32 || char.IsSurrogate(ch)) output.Append("\\u").Append(((int)ch).ToString("x4")); else output.Append(ch); break;
+                }
+            }
+            output.Append('"');
+        }
+        internal static EditorJson Parse(string json)
+        {
+            if (json == null || json.Length > 32 * 1024 * 1024) throw new FormatException("Invalid JSON size.");
+            var parser = new Parser(json); var value = parser.Read(0); parser.Space();
+            if (parser.Position != json.Length) throw new FormatException("Unexpected trailing JSON at " + parser.Position);
+            return value;
+        }
+        sealed class Parser
+        {
+            readonly string source; internal int Position;
+            internal Parser(string source) { this.source = source; }
+            internal void Space() { while (Position < source.Length && (source[Position] == ' ' || source[Position] == '\r' || source[Position] == '\n' || source[Position] == '\t')) Position++; }
+            bool Take(char value) { Space(); if (Position < source.Length && source[Position] == value) { Position++; return true; } return false; }
+            void Need(char value) { if (!Take(value)) throw new FormatException("Expected '" + value + "' at " + Position); }
+            internal EditorJson Read(int depth)
+            {
+                if (depth > 128) throw new FormatException("JSON nesting is too deep.");
+                Space(); int start = Position;
+                if (Position >= source.Length) throw new FormatException("Unexpected JSON end.");
+                char ch = source[Position]; EditorJson result;
+                if (ch == '{')
+                {
+                    Position++; result = Object();
+                    if (!Take('}')) do
+                    {
+                        Space(); string key = ReadString(); Need(':');
+                        if (result.Has(key)) throw new FormatException("Duplicate JSON property: " + key);
+                        result.Set(key, Read(depth + 1)); if (Take('}')) break; Need(',');
+                    } while (true);
+                }
+                else if (ch == '[')
+                {
+                    Position++; result = Array();
+                    if (!Take(']')) do { result.Items.Add(Read(depth + 1)); if (Take(']')) break; Need(','); } while (true);
+                }
+                else if (ch == '"') result = Value(ReadString());
+                else if (ch == 't') { Literal("true"); result = Value(true); }
+                else if (ch == 'f') { Literal("false"); result = Value(false); }
+                else if (ch == 'n') { Literal("null"); result = new EditorJson { Kind = Type.Null }; }
+                else
+                {
+                    if (ch == '-') Position++;
+                    if (Position >= source.Length) throw new FormatException("Invalid number.");
+                    if (source[Position] == '0') Position++;
+                    else { if (source[Position] < '1' || source[Position] > '9') throw new FormatException("Invalid JSON token at " + Position); Digits(); }
+                    if (Position < source.Length && source[Position] == '.') { Position++; RequiredDigits(); }
+                    if (Position < source.Length && (source[Position] == 'e' || source[Position] == 'E')) { Position++; if (Position < source.Length && (source[Position] == '+' || source[Position] == '-')) Position++; RequiredDigits(); }
+                    result = new EditorJson { Kind = Type.Number, Scalar = source.Substring(start, Position - start) };
+                }
+                result.Start = start; result.End = Position; return result;
+            }
+            void Digits() { while (Position < source.Length && source[Position] >= '0' && source[Position] <= '9') Position++; }
+            void RequiredDigits() { int start = Position; Digits(); if (Position == start) throw new FormatException("Invalid number at " + Position); }
+            void Literal(string value) { if (Position + value.Length > source.Length || source.Substring(Position, value.Length) != value) throw new FormatException("Invalid token at " + Position); Position += value.Length; }
+            string ReadString()
+            {
+                if (Position >= source.Length || source[Position++] != '"') throw new FormatException("Expected JSON string.");
+                var result = new StringBuilder();
+                while (Position < source.Length)
+                {
+                    char ch = source[Position++]; if (ch == '"') return result.ToString();
+                    if (ch < 32) throw new FormatException("Unescaped control character.");
+                    if (ch != '\\') { result.Append(ch); continue; }
+                    if (Position >= source.Length) break; ch = source[Position++];
+                    switch (ch)
+                    {
+                        case '"': case '\\': case '/': result.Append(ch); break;
+                        case 'b': result.Append('\b'); break; case 'f': result.Append('\f'); break;
+                        case 'n': result.Append('\n'); break; case 'r': result.Append('\r'); break; case 't': result.Append('\t'); break;
+                        case 'u':
+                            if (Position + 4 > source.Length) throw new FormatException("Invalid unicode escape.");
+                            int code; if (!int.TryParse(source.Substring(Position, 4), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out code)) throw new FormatException("Invalid unicode escape.");
+                            result.Append((char)code); Position += 4; break;
+                        default: throw new FormatException("Invalid string escape.");
+                    }
+                }
+                throw new FormatException("Unterminated JSON string.");
+            }
+        }
+    }
+}

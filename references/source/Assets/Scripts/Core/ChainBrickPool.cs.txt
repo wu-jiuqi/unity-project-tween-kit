@@ -1,0 +1,26 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ readonly Stack<BrickBody> chainBrickPool=new Stack<BrickBody>(96);
+ public int ChainBrickReuses {get;private set;}
+ public int ChainBrickPoolCount=>chainBrickPool.Count;
+ static bool PlainChainBrick(BrickSpawn d)=>d.kind==BrickKind.Normal&&d.colorIndex>=0&&d.colorIndex<SevenSpecialArt.ColorCount&&d.juiceGroup==0&&!d.shutter&&(string.IsNullOrEmpty(d.reveal)||d.reveal=="opening-N");
+ void ClearChainBrickPool(){chainBrickPool.Clear();ChainBrickReuses=0;}
+ void RetireDeadChainBricks(){
+  // Retire in reverse without allocating a dead-brick snapshot. Inactive bodies
+  // stay under this level's world root and are destroyed with the level.
+  for(int i=CollectionBricks.Count-1;i>=0;i--){var b=CollectionBricks[i];if(b.Alive)continue;CollectionBricks.RemoveAt(i);
+   bool bound=false;foreach(var bond in ChainBonds)if(bond.Members.Contains(b)){bound=true;break;}
+   if(PlainChainBrick(b.Definition)&&b.GetComponent<ChainGridPiece>()?.Size==1&&!IsJellyTarget(b)&&!bound)chainBrickPool.Push(b);else Destroy(b.gameObject);
+  }
+ }
+ bool TryReuseChainBrick(BrickSpawn d,int id){
+  if(!IsChainCollection||!PlainChainBrick(d)||chainBrickPool.Count==0)return false;
+  var b=chainBrickPool.Pop();b.ReusePlainChain(id,d);var grid=b.GetComponent<ChainGridPiece>();
+  grid.Col=Mathf.RoundToInt(d.position.x/CollectionLevels.Pitch+4);grid.Row=Mathf.RoundToInt((CollectionLevels.Top-d.position.y)/CollectionLevels.Pitch);grid.Size=1;grid.FallAt=-1;grid.MotionVersion++;grid.RefillProtected=false;b.GetComponent<RefillArrival80>()?.Refresh();
+  if(SevenSpecialActive){var view=b.GetComponent<SevenColourBrickView>();if(view==null)view=b.gameObject.AddComponent<SevenColourBrickView>();view.Initialize(this,b);}
+  CollectionBricks.Add(b);b.GetComponent<ChainTileVisibility>().Refresh();ChainBrickReuses++;return true;
+ }
+}
+}

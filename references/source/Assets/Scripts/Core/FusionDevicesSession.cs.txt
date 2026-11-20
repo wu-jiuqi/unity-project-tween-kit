@@ -1,0 +1,809 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden
+{
+    public sealed partial class GameSession
+    {
+        sealed class FusionDeviceState
+        {
+            public FusionRuntimePiece Piece;
+            public FusionDeviceView View;
+            public bool Spent, ReleasePending;
+            public int BatchEnd, Volley, BufferedVolley, PreviewVersion, RewardIndex, TicketSerial;
+            public string Preview = "", Committed = "";
+            public readonly HashSet<string> Removals = new HashSet<string>();
+            public readonly HashSet<string> Credits = new HashSet<string>();
+        }
+
+        sealed class FusionVineGroup
+        {
+            public string Id, Network;
+            public int Charge, Threshold;
+            public bool Spent;
+            public readonly List<FusionDeviceState> Nodes = new List<FusionDeviceState>();
+            public readonly HashSet<string> Removals = new HashSet<string>();
+        }
+
+        sealed class FusionAssistantFlight
+        {
+            public string Source, Network;
+            public int Volley, Retargets;
+            public float Age;
+            public Transform View;
+            public Vector2 Position;
+            public FusionRuntimePiece Target;
+        }
+
+        readonly Dictionary<string, FusionDeviceState> fusionDevices = new Dictionary<string, FusionDeviceState>();
+        readonly Dictionary<string, FusionVineGroup> fusionVines = new Dictionary<string, FusionVineGroup>();
+        readonly List<FusionAssistantFlight> fusionAssistants = new List<FusionAssistantFlight>();
+        readonly Dictionary<string, int> fusionAssistantReservations = new Dictionary<string, int>();
+        readonly HashSet<string> fusionClaimedMilestones = new HashSet<string>();
+        readonly HashSet<string> fusionScheduledTools = new HashSet<string>();
+        readonly HashSet<string> fusionRemovedKeys = new HashSet<string>();
+        bool[,] fusionAssistantReachability;
+        bool fusionAssistantReachabilityDirty = true;
+
+        void InitializeFusionDevices()
+        {
+            ClearFusionDevices();
+            foreach (var p in fusionPieces.Values.OrderBy(x => x.Definition.r).ThenBy(x => x.Definition.c).ThenBy(x => x.Definition.id))
+            {
+                if (!FusionRules.IsDevice(p.Definition.kind)) continue;
+                var state = new FusionDeviceState { Piece = p };
+                p.Charge = Mathf.Clamp(p.Definition.initialCharge, 0, Mathf.Max(0, p.Definition.threshold - 1));
+                p.Stock = Mathf.Max(0, p.Definition.stock);
+                if (p.Brick != null)
+                {
+                    state.View = p.Brick.gameObject.AddComponent<FusionDeviceView>();
+                    state.View.Initialize(p.Definition.kind, FusionDeviceColor(p.Definition.kind));
+                }
+                fusionDevices.Add(p.Definition.id, state);
+                if (p.Definition.kind == "vine")
+                {
+                    string groupId = string.IsNullOrEmpty(p.Definition.group) ? p.Definition.id : p.Definition.group;
+                    if (!fusionVines.TryGetValue(groupId, out var group))
+                    {
+                        group = new FusionVineGroup { Id = groupId, Network = FusionDeviceNetwork(p),
+                            Threshold = Mathf.Max(1, p.Definition.threshold), Charge = p.Charge };
+                        fusionVines.Add(groupId, group);
+                    }
+                    group.Nodes.Add(state);
+                }
+            }
+            foreach (var device in fusionDevices.Values)
+                if (device.Piece.Definition.kind == "battery" || device.Piece.Definition.kind == "reward")
+                    foreach (string id in device.Piece.Definition.links ?? Array.Empty<string>())
+                        if (fusionPieces.TryGetValue(id, out var tool) && FusionRules.IsTool(tool.Definition.kind)) tool.Enabled = false;
+            foreach (var milestone in FusionDefinition.milestones ?? Array.Empty<FusionMilestoneDefinition>())
+                if (milestone != null && milestone.kind == "activate")
+                    foreach (string id in milestone.links ?? Array.Empty<string>())
+                        if (fusionPieces.TryGetValue(id, out var tool) && FusionRules.IsTool(tool.Definition.kind)) tool.Enabled = false;
+            foreach (var state in fusionDevices.Values)
+            {
+                if (state.Piece.Definition.kind == "reward") FusionRefreshRewardPreview(state);
+                FusionRefreshDeviceView(state);
+            }
+        }
+
+        // The caller has already applied the one-stage protection gate and AttackId deduplication.
+        bool HandleFusionDeviceHit(FusionRuntimePiece p, int damage, Vector2 incoming, Vector2 contact, bool direct = false)
+        {
+            if (!fusionDevices.TryGetValue(p.Definition.id, out var state)) return false;
+            if (state.Spent || !p.Alive) return true;
+            string kind = p.Definition.kind;
+            if (kind == "gate" || kind == "battery")
+            {
+                FusionPulse(p.Position, kind == "gate" ? "先取钥匙" : "收集充能", FusionDeviceColor(kind));
+                return true;
+            }
+            if (kind == "key")
+            {
+                FusionRemove(p);
+                return true;
+            }
+            if (!FusionAcceptsMode(p, direct ? "direct" : "power")) return true;
+            FusionChargeDevice(state, null);
+            return true;
+        }
+
+        void FusionDevicesRemoved(FusionRuntimePiece removed)
+        {
+            if (!FusionActive || removed == null) return;
+            fusionAssistantReachabilityDirty = true;
+            fusionRemovedKeys.Add(removed.Definition.id);
+            // Device death does not recreate tools or output already-consumed inventory.
+            if (fusionDevices.TryGetValue(removed.Definition.id, out var oldState)) oldState.Spent = true;
+            foreach (var state in fusionDevices.Values.ToArray())
+            {
+                var p = state.Piece;
+                if (!p.Alive || state.Spent || p == removed || !FusionDeviceAdjacent(p, removed)) continue;
+                if (!FusionAcceptsMode(p, "neighbor") || FusionDeviceHasProtection(p) || FusionOwnOutput(state, removed)) continue;
+                if (!state.Removals.Add(removed.Definition.id)) continue;
+                FusionChargeDevice(state, removed.Definition.id);
+            }
+            FusionRecheckGates();
+        }
+
+        void FusionDevicesGoalCredited(string id)
+        {
+            if (!FusionActive || !fusionGoals.TryGetValue(id, out var unit)) return;
+            foreach (var state in fusionDevices.Values.ToArray())
+            {
+                var p = state.Piece;
+                if (p.Definition.kind != "battery" || !p.Alive || state.Spent || FusionOwnOutput(state, null) || FusionDeviceHasProtection(p)) continue;
+                var allowed = p.Definition.eligibleGoals ?? Array.Empty<string>();
+                if (allowed.Length > 0 && !allowed.Contains(unit.Definition.kind)) continue;
+                if (!state.Credits.Add(id)) continue;
+                p.Charge = Mathf.Min(Mathf.Max(1, p.Definition.threshold), p.Charge + 1);
+                FusionProgress(p, "BatteryCharge");
+                if (p.Charge >= p.Definition.threshold)
+                {
+                    state.Spent = true;
+                    int volley = FusionCurrentVolley;
+                    FusionRunAttack(p.Definition.id, volley, () =>
+                    {
+                        FusionProgress(p, "BatteryDischarged");
+                        FusionPulse(p.Position, "电池放电", FusionDeviceColor("battery"));
+                        FusionWakeDeviceTools(p.Definition.links, p.Definition.autoActivate, p.Definition.id, FusionDeviceNetwork(p), volley);
+                        FusionRetireCompletedDevice(state);
+                    }, FusionDeviceNetwork(p));
+                }
+                FusionRefreshDeviceView(state);
+            }
+            int credited = FusionGoalsCredited;
+            foreach (var milestone in FusionDefinition.milestones ?? Array.Empty<FusionMilestoneDefinition>())
+            {
+                if (milestone == null || credited < milestone.threshold || !fusionClaimedMilestones.Add(milestone.id)) continue;
+                FusionRecord("MilestoneClaimed", milestone.id, 1, "Pending", "Claimed");
+                // Victory is final. Rewards queued by an earlier credit also recheck before execution.
+                if (credited >= FusionGoalsTotal) continue;
+                int volley = FusionCurrentVolley;
+                if (milestone.kind == "activate")
+                    FusionWakeDeviceTools(milestone.links, true, "milestone:" + milestone.id, "milestone:" + milestone.id,
+                        volley, Mathf.Max(1, milestone.count));
+                else
+                {
+                    var origin = new Vector2(0, ReturnLineY + CollectionLevels.Pitch);
+                    FusionQueue(() => FusionSpawnAssistants(origin, Mathf.Clamp(milestone.count, 1, 3),
+                        "milestone:" + milestone.id, "milestone:" + milestone.id, volley), 0, volley, "milestone:" + milestone.id);
+                }
+            }
+            FusionRecheckGates();
+        }
+
+        void FusionChargeDevice(FusionDeviceState state, string removalId)
+        {
+            var p = state.Piece;
+            if (state.Spent || !p.Alive || FusionOwnOutput(state, null)) return;
+            if (p.Definition.kind == "vine")
+            {
+                string key = string.IsNullOrEmpty(p.Definition.group) ? p.Definition.id : p.Definition.group;
+                if (!fusionVines.TryGetValue(key, out var group) || group.Spent) return;
+                if (removalId != null && !group.Removals.Add(removalId)) return;
+                // A ray touching several group nodes is one direct external event for the shared group.
+                if (removalId == null && !group.Removals.Add("attack:" + FusionAttackId)) return;
+                group.Charge = Mathf.Min(group.Threshold, group.Charge + 1);
+                FusionProgress(p, "VineCharge");
+                foreach (var node in group.Nodes) { node.Piece.Charge = group.Charge; FusionRefreshDeviceView(node); }
+                if (group.Charge >= group.Threshold) FusionReleaseVines(group, state);
+                return;
+            }
+            if (p.Definition.kind == "gate" || p.Definition.kind == "battery" || p.Definition.kind == "key") return;
+            if (p.Definition.kind == "reward" && !string.IsNullOrEmpty(state.Committed)) return;
+            if ((p.Definition.kind == "producer" || p.Definition.kind == "cannon" || p.Definition.kind == "reward") && p.Stock <= 0)
+            { state.Spent = true; FusionRefreshDeviceView(state); return; }
+            int beforeCharge = p.Charge;
+            p.Charge = Mathf.Min(Mathf.Max(1, p.Definition.threshold), p.Charge + 1);
+            if (p.Charge == beforeCharge) return;
+            FusionProgress(p, "DeviceCharge");
+            if (p.Charge >= Mathf.Max(1, p.Definition.threshold))
+            {
+                if (p.Definition.kind == "producer" && state.ReleasePending)
+                {
+                    state.BufferedVolley = FusionCurrentVolley;
+                    FusionRefreshDeviceView(state);
+                    return;
+                }
+                state.Volley = FusionCurrentVolley;
+                switch (p.Definition.kind)
+                {
+                    case "producer":
+                        if (!state.ReleasePending)
+                        {
+                            state.ReleasePending = true;
+                            state.BatchEnd = Mathf.Min(p.Progress + Mathf.Max(1, p.Definition.batchSize), p.Definition.contents.Length);
+                            p.Charge = 0;
+                            FusionQueue(() => FusionTryReleaseBatch(state), 0, state.Volley, FusionDeviceNetwork(p));
+                        }
+                        break;
+                    case "cannon":
+                        p.Charge = 0; p.Stock--;
+                        FusionRecord("CannonAmmoConsumed", p.Definition.id, 1, (p.Stock + 1).ToString(), p.Stock.ToString());
+                        if (p.Stock == 0) state.Spent = true;
+                        FusionQueue(() => FusionFireDeviceCannon(state), 0, state.Volley, FusionDeviceNetwork(p));
+                        break;
+                    case "assistant":
+                        state.Spent = true;
+                        FusionProgress(p, "AssistantJarOpened");
+                        int count = Mathf.Max(0, p.Stock);
+                        Vector2 origin = p.Position;
+                        int volley = state.Volley;
+                        FusionRemove(p);
+                        FusionQueue(() => FusionSpawnAssistants(origin, count, p.Definition.id, FusionDeviceNetwork(p), volley),
+                            0, volley, FusionDeviceNetwork(p));
+                        break;
+                    case "reward": FusionCommitDeviceReward(state); break;
+                }
+            }
+            FusionRefreshDeviceView(state);
+        }
+
+        void FusionReleaseVines(FusionVineGroup group, FusionDeviceState trigger)
+        {
+            group.Spent = true; // Claim the whole finite group before any removal or callback can re-enter it.
+            FusionProgress(trigger.Piece, "VineGroupReleased");
+            int first = group.Nodes.IndexOf(trigger), volley = FusionCurrentVolley;
+            for (int i = 0; i < group.Nodes.Count; i++)
+            {
+                var node = group.Nodes[(first + i) % group.Nodes.Count];
+                node.Spent = true;
+                FusionRefreshDeviceView(node);
+                FusionQueue(() =>
+                {
+                    if (!node.Piece.Alive || FusionGoalsCredited >= FusionGoalsTotal) return;
+                    var p = node.Piece;
+                    Vector2 origin = p.Position;
+                    var targets = fusionPieces.Values.Where(x => x != p && x.Alive && FusionDeviceAdjacent(p, x)).ToArray();
+                    FusionRunAttack(p.Definition.id, volley, () =>
+                    {
+                        FusionRemove(p);
+                        FusionPulse(origin, "花藤接力", FusionDeviceColor("vine"));
+                        foreach (var target in targets)
+                        {
+                            if (!target.Alive) continue;
+                            Vector2 direction = target.Position - origin;
+                            if (direction.sqrMagnitude < .0001f) continue;
+                            direction.Normalize();
+                            Vector2 point = target.Position;
+                            if (target.Brick != null)
+                            {
+                                if (!ChainRayEntry(target.Brick, origin, direction, CollectionLevels.Pitch * 5,
+                                    out _, out point)) continue;
+                                if (target.Brick.Definition.kind == BrickKind.RearWeak && !ChainRearEntry(target.Brick, direction, point)) continue;
+                            }
+                            FusionHit(target, Mathf.Max(1, p.Definition.damage), direction, point);
+                            PowerLine(origin, point, FusionDeviceColor("vine"), .045f, .2f);
+                        }
+                    }, group.Network);
+                }, i * .08f, volley, group.Network);
+            }
+        }
+
+        void FusionTryReleaseBatch(FusionDeviceState state)
+        {
+            if (!state.ReleasePending || state.Spent || !state.Piece.Alive) return;
+            var cells = FusionProducerCells(state.Piece).ToList();
+            if (cells.Count < state.BatchEnd - state.Piece.Progress) return;
+            FusionRunAttack(state.Piece.Definition.id, state.Volley, () => FusionCommitProducerBatch(state, cells), FusionDeviceNetwork(state.Piece));
+        }
+
+        void FusionCommitProducerBatch(FusionDeviceState state, List<Vector2Int> available)
+        {
+            var p = state.Piece;
+            if (!state.ReleasePending || state.Spent || !p.Alive) return;
+            int remaining = state.BatchEnd - p.Progress;
+            if (available.Count < remaining) return; // Reserve the complete batch before committing any unit.
+            for (int i = 0; i < remaining; i++)
+            {
+                int index = p.Progress;
+                var source = p.Definition.contents[index];
+                var content = new FusionContentDefinition { id = FusionRules.ContentId(p.Definition, index),
+                    kind = source.kind, goal = source.goal, hp = source.hp };
+                var cell = available[i];
+                var spawned = FusionSpawnContent(content, cell.x, cell.y, FusionDeviceNetwork(p));
+                if (spawned == null) return; // Completed IDs remain committed; retries never repeat them.
+                p.Progress++;
+            }
+            state.ReleasePending = false;
+            p.Stock = Mathf.Max(0, p.Stock - 1);
+            state.Spent = p.Stock == 0 || p.Progress >= p.Definition.contents.Length;
+            FusionProgress(p, "ProducerBatchReleased");
+            FusionPulse(p.Position, state.Spent ? "补给已展开" : "一批补给", FusionDeviceColor("producer"));
+            FusionRefreshDeviceView(state);
+            FusionRetireCompletedDevice(state);
+            // At most one next threshold can be held while a batch is queued.
+            if (!state.Spent && p.Charge >= p.Definition.threshold)
+            {
+                state.ReleasePending = true;
+                state.BatchEnd = Mathf.Min(p.Progress + Mathf.Max(1, p.Definition.batchSize), p.Definition.contents.Length);
+                state.Volley = state.BufferedVolley;
+                p.Charge = 0;
+            }
+        }
+
+        IEnumerable<Vector2Int> FusionProducerCells(FusionRuntimePiece producer)
+        {
+            var definition = producer.Definition;
+            var configured = (definition.spawnCells ?? Array.Empty<Vector2Int>()).Concat(definition.fallbackCells ?? Array.Empty<Vector2Int>()).Distinct().ToList();
+            if (configured.Count == 0)
+                configured = Enumerable.Range(0, 81).Select(i => new Vector2Int(i % 9, i / 9))
+                    .OrderBy(c => Mathf.Abs(c.x - definition.c) + Mathf.Abs(c.y - definition.r)).ThenBy(c => c.y).ThenBy(c => c.x).ToList();
+            foreach (var cell in configured)
+            {
+                if (cell.x < 0 || cell.x > 8 || cell.y < 0 || cell.y > 8) continue;
+                bool usable = true;
+                Vector2 expected = ChainGridRules.Center(cell.x, cell.y);
+                if (!FusionSpawnSafe(expected, 1)) continue;
+                foreach (var p in fusionPieces.Values)
+                {
+                    if (!p.Alive) continue;
+                    var grid = p.Transform != null ? p.Transform.GetComponent<ChainGridPiece>() : null;
+                    int c = grid != null ? grid.Col : p.Definition.c, r = grid != null ? grid.Row : p.Definition.r;
+                    int size = grid != null ? grid.Size : p.Definition.size;
+                    // Both the committed grid footprint and the physical moving footprint must be safe.
+                    bool occupies = cell.x >= c && cell.x < c + size && cell.y >= r && cell.y < r + size;
+                    bool overlaps = Mathf.Abs(p.Position.x - expected.x) < CollectionLevels.Pitch * (size + 1) * .48f
+                        && Mathf.Abs(p.Position.y - expected.y) < CollectionLevels.Pitch * (size + 1) * .48f;
+                    if (!occupies && !overlaps) continue;
+                    if (p.Definition.kind != "normal" || p.GoalIds.Count > 0 || FusionDeviceHasProtection(p) || size != 1
+                        || fusionBonds.Values.Any(group => group.Contains(p))
+                        || (grid != null && (p.Position - ChainGridRules.Center(c, r)).sqrMagnitude > .0001f))
+                    { usable = false; break; }
+                }
+                if (usable) yield return cell;
+            }
+        }
+
+        void FusionFireDeviceCannon(FusionDeviceState state)
+        {
+            var source = state.Piece;
+            if (!source.Alive || FusionGoalsCredited >= FusionGoalsTotal) return;
+            Vector2 origin = source.Position, direction = FusionRules.Direction(source.Definition.direction);
+            float limit = FusionRayLimit(origin, direction, Mathf.Max(1, source.Definition.range));
+            var hits = new List<Tuple<FusionRuntimePiece, float, Vector2, bool>>();
+            foreach (var p in fusionPieces.Values.Where(p => p.Alive && p != source).ToArray())
+            {
+                if (!FusionDeviceVisible(p)) continue;
+                if (p.Brick != null)
+                {
+                    if (ChainRayEntry(p.Brick, origin, direction, limit, out float distance, out Vector2 point))
+                        hits.Add(Tuple.Create(p, distance, point, FusionDeviceRayBarrier(p, direction, point)));
+                }
+                else if (p.Tool != null)
+                {
+                    float distance = Along(p.Position, origin, direction, limit, .39f);
+                    if (!float.IsPositiveInfinity(distance)) hits.Add(Tuple.Create(p, distance, p.Position, false));
+                }
+            }
+            FusionRunAttack(source.Definition.id, state.Volley, () =>
+            {
+                FusionProgress(source, "CannonFired");
+                foreach (var hit in hits.OrderBy(h => h.Item2).ThenBy(h => h.Item1.Definition.id))
+                {
+                    FusionHit(hit.Item1, Mathf.Max(1, source.Definition.damage), direction, hit.Item3);
+                    if (hit.Item4) { limit = hit.Item2; break; }
+                }
+                PowerLine(origin, origin + direction * limit, FusionDeviceColor("cannon"), .12f, .28f);
+                FusionPulse(origin, "机关炮", FusionDeviceColor("cannon"));
+                FusionRetireCompletedDevice(state);
+            }, FusionDeviceNetwork(source));
+        }
+
+        bool FusionDeviceRayBarrier(FusionRuntimePiece p, Vector2 direction, Vector2 point)
+        {
+            string kind = p.Definition.kind;
+            return FusionBlocksRay(p) || kind == "chest" || kind == "basket"
+                || (p.Brick != null && p.Brick.Definition.kind == BrickKind.RearWeak && !ChainRearEntry(p.Brick, direction, point));
+        }
+
+        void FusionRecheckGates()
+        {
+            foreach (var state in fusionDevices.Values.Where(s => s.Piece.Definition.kind == "gate").ToArray())
+            {
+                var p = state.Piece;
+                if (state.Spent || !p.Alive) continue;
+                var ids = p.Definition.links ?? Array.Empty<string>();
+                if (ids.Length == 0) continue;
+                Func<string, bool> collected = id => fusionRemovedKeys.Contains(id)
+                    || fusionPieces.TryGetValue(id, out var key) && key.Consumed;
+                bool open = p.Definition.condition == "any" ? ids.Any(collected) : ids.All(collected);
+                if (!open) continue;
+                state.Spent = true;
+                int volley = FusionCurrentVolley;
+                FusionQueue(() =>
+                {
+                    if (!p.Alive) return;
+                    FusionRunAttack(p.Definition.id, volley, () =>
+                    {
+                        FusionPulse(p.Position, "入口打开", FusionDeviceColor("gate"));
+                        FusionProgress(p, "GateOpened");
+                        FusionRemove(p, false, false);
+                        fusionAssistantReachabilityDirty = true;
+                    }, FusionDeviceNetwork(p));
+                }, 0, volley, FusionDeviceNetwork(p));
+            }
+        }
+
+        void FusionWakeDeviceTools(IEnumerable<string> ids, bool automatic, string source, string network, int volley, int maxCount = int.MaxValue)
+        {
+            int index = 0;
+            foreach (string id in ids ?? Array.Empty<string>())
+            {
+                if (index >= maxCount) break;
+                if (!fusionPieces.TryGetValue(id, out var tool) || !tool.Alive || !FusionRules.IsTool(tool.Definition.kind)
+                    || !fusionScheduledTools.Add(id)) continue;
+                tool.Enabled = true;
+                FusionRecord("ToolEnabled", id, 1, "Dormant", "Enabled");
+                FusionPulse(tool.Position, automatic ? "工具接力" : "工具已唤醒", FusionDeviceColor("battery"));
+                if (automatic)
+                {
+                    FusionQueue(() =>
+                    {
+                        if (!tool.Alive || FusionGoalsCredited >= FusionGoalsTotal) return;
+                        FusionRunAttack(source, volley, () => FusionHit(tool, 1, Vector2.up, tool.Position), network);
+                    }, index * .08f, volley, network);
+                }
+                index++;
+            }
+        }
+
+        void FusionRefreshRewardPreview(FusionDeviceState state)
+        {
+            if (state.Spent || !string.IsNullOrEmpty(state.Committed)) return;
+            var sequence = state.Piece.Definition.rewardSequence ?? Array.Empty<string>();
+            string preview = "";
+            // Stable cyclic fallback, without a random draw at hit time.
+            for (int i = 0; i < sequence.Length; i++)
+            {
+                string candidate = sequence[(state.RewardIndex + i) % sequence.Length];
+                if (FusionRewardApplicable(state, candidate)) { preview = candidate; break; }
+            }
+            if (state.Preview != preview)
+            {
+                string before = state.Preview;
+                state.Preview = preview; state.PreviewVersion++;
+                FusionRecord("RewardPreviewChanged", state.Piece.Definition.id, state.PreviewVersion, before, preview);
+            }
+        }
+
+        bool FusionRewardApplicable(FusionDeviceState state, string reward)
+        {
+            if (FusionGoalsCredited >= FusionGoalsTotal) return false;
+            if (reward == "activate") return (state.Piece.Definition.links ?? Array.Empty<string>())
+                .Any(id => fusionPieces.TryGetValue(id, out var tool) && tool.Alive && FusionRules.IsTool(tool.Definition.kind) && !fusionScheduledTools.Contains(id));
+            if (reward == "assistant") return FusionAssistantCandidates().Any();
+            if (reward == "blast") return FusionAssistantCandidates().Any(p => FusionDeviceInSquare(p, state.Piece.Position, 1.5f));
+            return false;
+        }
+
+        void FusionCommitDeviceReward(FusionDeviceState state)
+        {
+            if (!string.IsNullOrEmpty(state.Committed) || state.Piece.Stock <= 0) return;
+            FusionRefreshRewardPreview(state);
+            if (string.IsNullOrEmpty(state.Preview)) return; // Keep the visible charge; nothing has been promised yet.
+            state.Committed = state.Preview;
+            state.TicketSerial++;
+            state.Piece.Charge = 0;
+            state.Piece.Stock--;
+            int ticket = state.TicketSerial;
+            FusionProgress(state.Piece, "RewardCommitted");
+            FusionRecord("RewardTicketCommitted", state.Piece.Definition.id + ":ticket:" + ticket, state.PreviewVersion, "Preview", state.Committed);
+            FusionPulse(state.Piece.Position, "锁定：" + FusionRewardLabel(state.Committed), FusionDeviceColor("reward"));
+            FusionQueue(() => { if (state.TicketSerial == ticket) FusionResolveDeviceReward(state); }, 0, state.Volley, FusionDeviceNetwork(state.Piece));
+        }
+
+        void FusionResolveDeviceReward(FusionDeviceState state)
+        {
+            if (string.IsNullOrEmpty(state.Committed)) return;
+            if (FusionGoalsCredited >= FusionGoalsTotal) { state.Committed = ""; state.Spent = true; return; }
+            string reward = state.Committed;
+            if (!FusionRewardApplicable(state, reward)) return; // A committed ticket never changes reward type.
+            FusionRunAttack(state.Piece.Definition.id, state.Volley, () => FusionCommitDeviceRewardOutput(state), FusionDeviceNetwork(state.Piece));
+        }
+
+        void FusionCommitDeviceRewardOutput(FusionDeviceState state)
+        {
+            string reward = state.Committed;
+            var p = state.Piece;
+            state.Committed = ""; // Claim before callbacks can re-enter this state.
+            state.RewardIndex++;
+            state.Spent = p.Stock <= 0;
+            FusionRecord("RewardTicketResolved", p.Definition.id + ":ticket:" + state.TicketSerial, 1, reward, "Consumed");
+            if (reward == "assistant") FusionSpawnAssistants(p.Position, 1, p.Definition.id, FusionDeviceNetwork(p), state.Volley);
+            else if (reward == "activate") FusionWakeDeviceTools(p.Definition.links, true, p.Definition.id, FusionDeviceNetwork(p), state.Volley, 1);
+            else
+            {
+                Vector2 origin = p.Position;
+                var targets = fusionPieces.Values.Where(x => x != p && x.Alive && FusionDeviceInSquare(x, origin, 1.5f)).ToArray();
+                foreach (var target in targets)
+                {
+                    if (target.Brick != null && target.Brick.Definition.kind == BrickKind.RearWeak) continue;
+                    FusionHit(target, Mathf.Max(1, p.Definition.damage), Vector2.zero, target.Position);
+                }
+                FusionPulse(origin, "范围助力", FusionDeviceColor("reward"));
+            }
+            FusionRefreshRewardPreview(state);
+            FusionRefreshDeviceView(state);
+            FusionRetireCompletedDevice(state);
+        }
+
+        void FusionSpawnAssistants(Vector2 origin, int count, string source, string network, int volley)
+        {
+            if (!FusionActive || FusionGoalsCredited >= FusionGoalsTotal) return;
+            for (int i = 0; i < count; i++)
+            {
+                var assistant = new FusionAssistantFlight { Source = source, Network = network, Volley = volley,
+                    Position = origin + new Vector2((i - (count - 1) * .5f) * .13f, 0) };
+                if (!FusionReserveAssistantTarget(assistant)) break;
+                var root = new GameObject("Fusion target assistant").transform;
+                root.SetParent(world, false); root.position = assistant.Position;
+                WorldArt.Draw(root, "Helper body", "circle", Vector2.zero, Vector2.one * .29f, new Color(1, .88f, .6f), 80);
+                WorldArt.Text(root, "Helper paw", "爪", Vector2.zero, .025f, new Color(.5f, .24f, .25f), 81);
+                assistant.View = root;
+                fusionAssistants.Add(assistant);
+                FusionRecord("AssistantTargetReserved", assistant.Target.Definition.id, 1, source, "Traveling");
+                PowerLine(assistant.Position, assistant.Target.Position, new Color(1, .8f, .3f, .65f), .035f, .22f);
+            }
+        }
+
+        IEnumerable<FusionRuntimePiece> FusionAssistantCandidates()
+        {
+            return fusionPieces.Values.Where(FusionAssistantEligible);
+        }
+
+        bool FusionAssistantEligible(FusionRuntimePiece p)
+        {
+            if (!p.Alive || !p.Enabled || p.Brick == null || !FusionDeviceVisible(p)
+                || p.Brick.Definition.kind == BrickKind.RearWeak || p.Definition.kind == "stone" || p.Definition.kind == "gate" || FusionUnripe(p)
+                || !FusionAssistantCanReach(p)) return false;
+            if (FusionRules.IsDevice(p.Definition.kind) && !FusionDeviceHasProtection(p)
+                && (p.Definition.kind == "battery" || !FusionAcceptsMode(p, "power")
+                || fusionDevices.TryGetValue(p.Definition.id, out var device) && device.Spent)) return false;
+            if (p.GoalIds.Any(id => fusionGoals.TryGetValue(id, out var goal) && goal.State == FusionGoalState.Active)) return true;
+            if ((p.Definition.kind == "chest" || p.Definition.kind == "basket")
+                && fusionGoals.Values.Any(g => g.Definition.ownerId == p.Definition.id && g.State != FusionGoalState.Credited)) return true;
+            return p.Definition.kind == "key" && fusionDevices.Values.Any(d => d.Piece.Definition.kind == "gate" && !d.Spent
+                && (d.Piece.Definition.links ?? Array.Empty<string>()).Contains(p.Definition.id));
+        }
+
+        bool FusionReserveAssistantTarget(FusionAssistantFlight assistant)
+        {
+            FusionReleaseAssistantReservation(assistant);
+            var target = FusionAssistantCandidates()
+                .Where(p => !FusionRules.IsDevice(p.Definition.kind) || p.Definition.id != assistant.Source && FusionDeviceNetwork(p) != assistant.Network)
+                .Where(p => !fusionAssistantReservations.TryGetValue(p.Definition.id, out int n) || n < FusionAssistantCapacity(p))
+                .OrderBy(p => FusionAssistantPriority(p))
+                .ThenBy(p => fusionAssistantReservations.TryGetValue(p.Definition.id, out int n) ? n : 0)
+                .ThenBy(p => p.Brick.CurrentHealth).ThenBy(p => p.Definition.r).ThenBy(p => p.Definition.c).ThenBy(p => p.Definition.id)
+                .FirstOrDefault();
+            if (target == null) return false;
+            assistant.Target = target;
+            fusionAssistantReservations.TryGetValue(target.Definition.id, out int count);
+            fusionAssistantReservations[target.Definition.id] = count + 1;
+            return true;
+        }
+
+        int FusionAssistantPriority(FusionRuntimePiece p)
+        {
+            if (p.GoalIds.Any(id => fusionGoals.TryGetValue(id, out var unit) && unit.State == FusionGoalState.Active))
+                return FusionDeviceHasProtection(p) ? 1 : 0;
+            return 2;
+        }
+
+        int FusionAssistantCapacity(FusionRuntimePiece p)
+        {
+            if (FusionDeviceHasProtection(p) || p.Definition.kind == "basket") return 1;
+            return Mathf.Max(1, Mathf.CeilToInt(p.Brick.CurrentHealth / 2f));
+        }
+
+        void FusionReleaseAssistantReservation(FusionAssistantFlight assistant)
+        {
+            if (assistant.Target == null) return;
+            string id = assistant.Target.Definition.id;
+            if (fusionAssistantReservations.TryGetValue(id, out int count))
+            { if (count <= 1) fusionAssistantReservations.Remove(id); else fusionAssistantReservations[id] = count - 1; }
+            assistant.Target = null;
+        }
+
+        void FusionFinishAssistant(FusionAssistantFlight assistant, bool resolve)
+        {
+            var target = assistant.Target;
+            FusionReleaseAssistantReservation(assistant);
+            fusionAssistants.Remove(assistant);
+            if (assistant.View != null) Destroy(assistant.View.gameObject);
+            if (!resolve || target == null || !FusionAssistantEligible(target) || FusionGoalsCredited >= FusionGoalsTotal) return;
+            FusionRunAttack(assistant.Source, assistant.Volley, () =>
+            {
+                FusionRecord("AssistantResolved", target.Definition.id, 1, "Traveling", "Done");
+                FusionPulse(target.Position, "猫爪助力", new Color(1, .78f, .4f));
+                FusionHit(target, 2, Vector2.zero, target.Position);
+            }, assistant.Network);
+        }
+
+        void TickFusionDevices(float dt)
+        {
+            if (!FusionActive || IsPaused || !IsPlaying) return;
+            foreach (var assistant in fusionAssistants.ToArray())
+            {
+                if (FusionGoalsCredited >= FusionGoalsTotal) { FusionFinishAssistant(assistant, false); continue; }
+                assistant.Age += Mathf.Max(0, dt);
+                bool legal = assistant.Target != null && FusionAssistantEligible(assistant.Target);
+                if (assistant.Age >= 2 || assistant.Retargets >= 3)
+                { FusionFinishAssistant(assistant, legal); continue; }
+                if (!legal)
+                {
+                    assistant.Retargets++;
+                    if (assistant.Retargets > 3 || !FusionReserveAssistantTarget(assistant))
+                    { FusionFinishAssistant(assistant, false); continue; }
+                }
+                assistant.Position = Vector2.MoveTowards(assistant.Position, assistant.Target.Position, CollectionLevels.Pitch * 12 * dt);
+                if (assistant.View != null) assistant.View.position = assistant.Position;
+                if ((assistant.Position - assistant.Target.Position).sqrMagnitude < .008f) FusionFinishAssistant(assistant, true);
+            }
+            foreach (var state in fusionDevices.Values.ToArray())
+            {
+                if (!state.Piece.Alive) continue;
+                if (state.ReleasePending) FusionTryReleaseBatch(state);
+                if (state.Piece.Definition.kind == "reward" && !state.Spent)
+                {
+                    if (!string.IsNullOrEmpty(state.Committed)) FusionResolveDeviceReward(state);
+                    else
+                    {
+                        FusionRefreshRewardPreview(state);
+                        if (state.Piece.Charge >= state.Piece.Definition.threshold) FusionCommitDeviceReward(state);
+                    }
+                }
+                FusionRefreshDeviceView(state);
+            }
+            FusionRecheckGates();
+        }
+
+        bool FusionDevicesPending => fusionAssistants.Count > 0 || fusionDevices.Values.Any(s =>
+            s.Piece.Alive && !s.Spent && ((s.ReleasePending && FusionProducerCells(s.Piece).Take(s.BatchEnd - s.Piece.Progress).Count() >= s.BatchEnd - s.Piece.Progress)
+            || (!string.IsNullOrEmpty(s.Committed) && FusionRewardApplicable(s, s.Committed))));
+
+        void ClearFusionDevices()
+        {
+            foreach (var helper in fusionAssistants) if (helper.View != null) Destroy(helper.View.gameObject);
+            fusionAssistants.Clear(); fusionAssistantReservations.Clear(); fusionDevices.Clear(); fusionVines.Clear();
+            fusionClaimedMilestones.Clear(); fusionScheduledTools.Clear(); fusionRemovedKeys.Clear();
+            fusionAssistantReachability = null; fusionAssistantReachabilityDirty = true;
+        }
+
+        void FusionRetireCompletedDevice(FusionDeviceState state)
+        {
+            var p = state.Piece;
+            if (!state.Spent || !p.Alive || state.ReleasePending || !string.IsNullOrEmpty(state.Committed)) return;
+            if (p.GoalIds.Any(id => fusionGoals.TryGetValue(id, out var goal) && goal.State == FusionGoalState.Active))
+                FusionRemove(p); // A separately authored device target is credited once, only after its finite service.
+        }
+
+        // Ordinary removable bricks are potential routes, not permanent walls. A closed gate/stone
+        // boundary still prevents a helper from selecting a goal in a sealed region behind it.
+        bool FusionAssistantCanReach(FusionRuntimePiece target)
+        {
+            if (fusionAssistantReachabilityDirty || fusionAssistantReachability == null)
+            {
+                fusionAssistantReachabilityDirty = false;
+                fusionAssistantReachability = new bool[9, 9];
+                var blocked = new bool[9, 9];
+                foreach (var p in fusionPieces.Values.Where(p => p.Alive && (p.Definition.kind == "stone" || p.Definition.kind == "gate")))
+                {
+                    var grid = p.Transform != null ? p.Transform.GetComponent<ChainGridPiece>() : null;
+                    int c = grid != null ? grid.Col : p.Definition.c, r = grid != null ? grid.Row : p.Definition.r;
+                    int size = grid != null ? grid.Size : p.Definition.size;
+                    for (int y = r; y < r + size; y++) for (int x = c; x < c + size; x++)
+                        if (x >= 0 && x < 9 && y >= 0 && y < 9) blocked[x, y] = true;
+                }
+                var queue = new Queue<Vector2Int>();
+                for (int c = 0; c < 9; c++) if (!blocked[c, 8]) { queue.Enqueue(new Vector2Int(c, 8)); fusionAssistantReachability[c, 8] = true; }
+                var neighbors = new[] { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
+                while (queue.Count > 0)
+                {
+                    var cell = queue.Dequeue();
+                    foreach (var delta in neighbors)
+                    {
+                        var next = cell + delta;
+                        if (next.x < 0 || next.x > 8 || next.y < 0 || next.y > 8 || blocked[next.x, next.y] || fusionAssistantReachability[next.x, next.y]) continue;
+                        fusionAssistantReachability[next.x, next.y] = true; queue.Enqueue(next);
+                    }
+                }
+            }
+            var targetGrid = target.Transform.GetComponent<ChainGridPiece>();
+            int col = targetGrid != null ? targetGrid.Col : target.Definition.c, row = targetGrid != null ? targetGrid.Row : target.Definition.r;
+            int targetSize = targetGrid != null ? targetGrid.Size : target.Definition.size;
+            for (int y = row; y < row + targetSize; y++) for (int x = col; x < col + targetSize; x++)
+                if (x >= 0 && x < 9 && y >= 0 && y < 9 && fusionAssistantReachability[x, y]) return true;
+            return false;
+        }
+
+        bool FusionOwnOutput(FusionDeviceState state, FusionRuntimePiece removed)
+        {
+            string network = FusionDeviceNetwork(state.Piece);
+            return FusionCurrentNetwork == network || (removed != null && removed.ProducerNetworkId == network)
+                || (state.Piece.Definition.kind == "vine" && FusionCurrentNetwork == "vine:" + state.Piece.Definition.group);
+        }
+
+        static bool FusionAcceptsMode(FusionRuntimePiece p, string mode)
+        {
+            string configured = p.Definition.activationMode;
+            if (string.IsNullOrEmpty(configured)) configured = p.Definition.kind == "cannon" ? "neighbor" : "either";
+            return configured == "either" || configured == mode || configured == "direct" && mode == "power";
+        }
+
+        static string FusionDeviceNetwork(FusionRuntimePiece p) => !string.IsNullOrEmpty(p.Definition.network)
+            ? p.Definition.network : p.Definition.kind == "vine" ? "vine:" + p.Definition.group : "device:" + p.Definition.id;
+
+        static bool FusionDeviceHasProtection(FusionRuntimePiece p) => p.Ice > 0 || p.Brick != null && p.Brick.ShellIntact;
+
+        static bool FusionDeviceVisible(FusionRuntimePiece p)
+        {
+            if (p.Transform == null) return false;
+            var visibility = p.Transform.GetComponent<ChainTileVisibility>();
+            return visibility == null || !visibility.Hidden;
+        }
+
+        static bool FusionDeviceAdjacent(FusionRuntimePiece a, FusionRuntimePiece b)
+        {
+            Vector2 delta = b.Position - a.Position;
+            float distance = CollectionLevels.Pitch * (Mathf.Max(1, a.Definition.size) + Mathf.Max(1, b.Definition.size)) * .5f;
+            float tolerance = CollectionLevels.Pitch * .16f;
+            return Mathf.Abs(Mathf.Abs(delta.x) - distance) < tolerance && Mathf.Abs(delta.y) < distance - tolerance
+                || Mathf.Abs(Mathf.Abs(delta.y) - distance) < tolerance && Mathf.Abs(delta.x) < distance - tolerance;
+        }
+
+        static bool FusionDeviceInSquare(FusionRuntimePiece p, Vector2 origin, float cells)
+        {
+            float reach = CollectionLevels.Pitch * (cells + (Mathf.Max(1, p.Definition.size) - 1) * .5f);
+            Vector2 delta = p.Position - origin;
+            return Mathf.Abs(delta.x) < reach && Mathf.Abs(delta.y) < reach;
+        }
+
+        void FusionRefreshDeviceView(FusionDeviceState state)
+        {
+            if (state.View == null) return;
+            var p = state.Piece;
+            string kind = p.Definition.kind, label;
+            if (kind == "producer") label = state.ReleasePending ? "待放置" : state.Spent ? "已展开" : p.Charge + "/" + p.Definition.threshold + "  剩" + p.Stock + "批";
+            else if (kind == "cannon") label = "弹药" + p.Stock + "  " + p.Charge + "/" + p.Definition.threshold;
+            else if (kind == "gate") label = state.Spent ? "已开" : (p.Definition.condition == "any" ? "任一" : "全部") + "钥匙";
+            else if (kind == "key") label = "击中获取";
+            else if (kind == "assistant") label = p.Charge + "/" + p.Definition.threshold + "  " + p.Stock + "爪";
+            else if (kind == "reward") label = state.Spent ? "已兑现" : !string.IsNullOrEmpty(state.Committed)
+                ? "锁定" + FusionRewardLabel(state.Committed) : string.IsNullOrEmpty(state.Preview) ? "待适用目标" : FusionRewardLabel(state.Preview) + "×" + p.Stock + " " + p.Charge + "/" + p.Definition.threshold;
+            else label = state.Spent ? "已释放" : p.Charge + "/" + p.Definition.threshold;
+            state.View.Refresh(label, p.Charge, kind == "gate" || kind == "key" ? 0 : p.Definition.threshold, p.Stock,
+                kind == "cannon" ? FusionRules.Direction(p.Definition.direction) : Vector2.zero, state.Spent);
+            state.View.SetProtection(p.Ice > 0, p.Brick != null && p.Brick.ShellIntact);
+            IEnumerable<string> ids = p.Definition.links ?? Array.Empty<string>();
+            if (kind == "vine" && fusionVines.TryGetValue(string.IsNullOrEmpty(p.Definition.group) ? p.Definition.id : p.Definition.group, out var group))
+            {
+                int index = group.Nodes.IndexOf(state);
+                ids = index >= 0 && index + 1 < group.Nodes.Count ? new[] { group.Nodes[index + 1].Piece.Definition.id } : Array.Empty<string>();
+            }
+            var destinations = ids.Where(id => fusionPieces.TryGetValue(id, out var x) && x.Alive)
+                .Select(id => fusionPieces[id].Position).ToList();
+            state.View.SetLinks(destinations, !state.Spent && p.Charge + 1 >= p.Definition.threshold);
+        }
+
+        static string FusionRewardLabel(string kind) => kind == "blast" ? "范围" : kind == "assistant" ? "猫爪" : kind == "activate" ? "工具" : "";
+        static Color FusionDeviceColor(string kind)
+        {
+            switch (kind)
+            {
+                case "producer": return new Color(.3f, .65f, .72f);
+                case "cannon": return new Color(.86f, .51f, .22f);
+                case "vine": return new Color(.32f, .65f, .34f);
+                case "battery": return new Color(.35f, .57f, .87f);
+                case "key": return new Color(.8f, .62f, .16f);
+                case "gate": return new Color(.48f, .46f, .67f);
+                case "assistant": return new Color(.82f, .47f, .61f);
+                default: return new Color(.68f, .4f, .8f);
+            }
+        }
+    }
+}

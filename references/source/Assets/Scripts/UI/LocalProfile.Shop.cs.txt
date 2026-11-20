@@ -1,0 +1,17 @@
+using System;
+using System.Linq;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ public static int CosmeticPrice(string id,bool frame){if(string.IsNullOrEmpty(id)||id==CatCosmeticCatalog.Default.id)return 0;int i=Array.FindIndex(CatCosmeticCatalog.Items,x=>x.id==id);int[] avatars={300,250,800,600,800,1000,1200,1400,1500,1600},frames={400,300,1200,600,800,600,800,1200,1500,1800};return i<0?-1:(frame?frames[i]:avatars[i]);}
+ public bool OwnsShopCosmetic(string id,bool frame){if(string.IsNullOrEmpty(id)||id==CatCosmeticCatalog.Default.id)return true;if(frame?OwnsFrame(id):OwnsAvatar(id))return true;return league.rewards.Any(r=>r.claimed&&(frame?r.frameId==id||CatCosmeticCatalog.FindFrame(r.frameResource)?.id==id:r.avatarId==id||CatCosmeticCatalog.FindAvatar(r.avatarResource)?.id==id));}
+ public bool PurchaseCosmetic(string id,bool frame){int price=CosmeticPrice(id,frame);if(price<=0||OwnsShopCosmetic(id,frame)||Coins<price)return false;return LeagueTransaction(()=>{Coins-=price;(frame?ownedFrames:ownedAvatars).Add(id);});}
+ public bool EquipShopCosmetics(string avatar,string frame){
+  string a=avatar==CatCosmeticCatalog.Default.id?"":avatar,f=frame==CatCosmeticCatalog.Default.id?"":frame;
+  if(!string.IsNullOrEmpty(a)&&!OwnsShopCosmetic(a,false)||!string.IsNullOrEmpty(f)&&!OwnsShopCosmetic(f,true))return false;
+  var ai=CatCosmeticCatalog.Items.FirstOrDefault(i=>i.id==a);var fi=CatCosmeticCatalog.Items.FirstOrDefault(i=>i.id==f);
+  var ar=league.rewards.LastOrDefault(r=>r.claimed&&r.avatarId==a);var fr=league.rewards.LastOrDefault(r=>r.claimed&&r.frameId==f);
+  if(!string.IsNullOrEmpty(a)&&ai==null&&ar==null||!string.IsNullOrEmpty(f)&&fi==null&&fr==null)return false;
+  return LeagueTransaction(()=>{if(ai!=null&&!string.IsNullOrEmpty(a)&&!ownedAvatars.Contains(a))ownedAvatars.Add(a);if(fi!=null&&!string.IsNullOrEmpty(f)&&!ownedFrames.Contains(f))ownedFrames.Add(f);EquippedAvatarId=a??"";EquippedFrameId=f??"";EquippedAvatarResource=ai?.avatar.resource??ar?.avatarResource??"";EquippedFrameResource=fi?.frame.resource??fr?.frameResource??"";});
+ }
+}
+}

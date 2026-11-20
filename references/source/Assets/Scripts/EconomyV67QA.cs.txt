@@ -1,0 +1,37 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using UnityEngine;
+using TMPro;
+namespace BounceGarden {
+public sealed class EconomyV67QA:MonoBehaviour {
+ string dir;int checks,failures,errors;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--economy-v67-qa"))new GameObject("Economy v67 QA").AddComponent<EconomyV67QA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var im=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,im);File.WriteAllBytes(dir+"/"+name+".png",im.EncodeToPNG());Destroy(im);rt.Release();Destroy(rt);}
+ IEnumerator Open(int level){app.QAStartLevel(level);yield return app.QAWaitForLevel();for(int n=0;n<90&&app.AlphabetIntroActive;n++){app.QAAdvanceAlphabetIntro();yield return new WaitForSecondsRealtime(.04f);}app.Session.QAIgnoreFocusLoss=true;app.Session.SetPaused(false);yield return new WaitForSecondsRealtime(.15f);}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(5);app=FindFirstObjectByType<AppUI>();app.QANavigate("home");
+  Check(app.Profile.Coins==400&&app.Profile.BoosterStock(StreakBooster.Super)==1,"fresh runtime uses starter wallet and tools");
+  // Controlled outcome callbacks exercise the production loss-to-retry path; these are not natural gameplay wins/losses.
+  for(int n=0;n<3;n++){yield return Open(0);app.SendMessage("OnOutcome",false);app.Session.SetPaused(true);Check(app.Profile.RescueFailures(0)==(n==2?0:n+1),"production loss callback "+n);}
+  Check(app.Profile.HasRescue(0),"three controlled losses grant rescue");yield return Open(0);
+  var g=app.Session;int stock=app.Profile.BoosterStock(StreakBooster.Pierce);Check(g.StreakStock(StreakBooster.Pierce)==stock+1,"HUD stock includes current rescue");
+  Check(FindObjectsByType<TMP_Text>(FindObjectsSortMode.None).Any(t=>t.text.Contains("本关救助")),"rescue explained in skill tray");yield return Capture("01-rescue-ready");
+  Check(g.SelectStreakBooster(StreakBooster.Pierce)&&g.SelectStreakBooster(StreakBooster.Pierce)&&app.Profile.HasRescue(0),"selection and cancellation preserve rescue");
+  g.SelectStreakBooster(StreakBooster.Pierce);Check(g.TryShoot(Vector2.up),"rescue volley requested");yield return new WaitForSecondsRealtime(.65f);
+  Check(!app.Profile.HasRescue(0)&&app.Profile.BoosterStock(StreakBooster.Pierce)==stock&&g.SpawnCount==5,"actual five-ball launch spends rescue without paid stock");
+  app.QANavigate("shop");yield return new WaitForSecondsRealtime(.3f);yield return Capture("02-shop");
+  typeof(AppUI).GetMethod("OpenEconomyGuide",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(app,null);yield return new WaitForSecondsRealtime(.3f);yield return Capture("03-economy-guide");
+  app.QANavigate("home");yield return Open(2);g=app.Session;int coins=app.Profile.Coins;
+  for(int pass=0;pass<6;pass++)foreach(var b in g.CollectionBricks.Where(b=>b.Alive&&(b.Definition.juiceGroup>0||g.IsJellyTarget(b))).ToArray())g.ApplyChainImpact(b,int.MaxValue,Vector2.up,b.transform.position,false);
+  yield return new WaitForSecondsRealtime(1.8f);int reward=ScoreRules.WinCoins(g.Score)+120;
+  Check(g.ScoreFinalized&&app.Profile.Coins==coins+reward&&app.Profile.NewPlayerMilestone(2)==0,"controlled production win grants first clear and level-three milestone");
+  int wallet=app.Profile.Coins;Check(app.Profile.CommitAlphabetWin(app.QAResultKey,2,g.Score)&&app.Profile.Coins==wallet,"repeated real result callback cannot repeat milestone");
+  yield return new WaitForSecondsRealtime(4);yield return Capture("04-milestone-result");
+  File.WriteAllText(dir+"/profile.json",app.Profile.ExportForQA());File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures+errors==0?0:3);
+ }
+}
+}

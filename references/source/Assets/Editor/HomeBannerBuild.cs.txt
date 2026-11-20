@@ -1,0 +1,21 @@
+using System;
+using UnityEngine;
+using BounceGarden;
+public static class HomeBannerBuild {
+ public static void Validate(){
+  var native=new Rect(0,0,1080,2340);var pixels=new Vector2Int(1080,2340);
+  WeChatLayoutMetrics.Reset();if(WeChatLayoutMetrics.Fit(native,pixels)!=native)throw new Exception("Native layout changed");
+  WeChatLayoutMetrics.Set(390,844,new Rect(0,44,390,766),new Rect(295,52,87,32));
+  Rect blocked;if(!WeChatLayoutMetrics.TryGetBlockedRect(pixels,out blocked))throw new Exception("Missing capsule");
+  if(Mathf.Abs(blocked.yMin-(844-92)*2340f/844)>.01f||Mathf.Abs(blocked.xMin-287*1080f/390)>.01f)throw new Exception("Capsule pixel conversion");
+  if(WeChatLayoutMetrics.Fit(native,pixels)!=native)throw new Exception("Capsule shrank native viewport");
+  int revision=WeChatLayoutMetrics.Revision;
+  WeChatLayoutMetrics.Set(390,844,new Rect(0,44,390,766),new Rect(295,52,87,32));
+  if(WeChatLayoutMetrics.Revision!=revision)throw new Exception("Identical metrics trigger relayout");
+  WeChatLayoutMetrics.Set(390,844,new Rect(0,44,390,766),Rect.zero);
+  if(!WeChatLayoutMetrics.TryGetBlockedRect(pixels,out blocked))throw new Exception("Invalid capsule lost reserve");
+  WeChatLayoutMetrics.Reset();
+  Debug.Log("HOME_BANNER_LAYOUT_MATH PASS 4");
+ }
+ public static void Windows(){Validate();NativeShopBuild.Windows();}
+}

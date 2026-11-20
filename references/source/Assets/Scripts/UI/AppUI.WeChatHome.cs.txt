@@ -1,0 +1,35 @@
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ // Move the authored home header and carousel together; never resize the page or board.
+ int pageInsetRevision=-1;RectTransform lastHomeLayout;
+ public Rect MenuSafeRect=>lastSafe;
+ float WeChatSecondaryTopReserve(){
+  Rect blocked;if(!WeChatLayoutMetrics.TryGetBlockedRect(MenuAvoidanceViewport,out blocked)||lastSafe.width<=0)return 0;
+  float unit=WeChatLayoutMetrics.LogicalPixelScale(MenuAvoidanceViewport),center=MenuAvoidanceViewport.x*.5f;
+  float left=lastSafe.xMin+58*unit,right=Mathf.Min(lastSafe.xMax-8*unit,blocked.xMin)-4*unit;
+  return 2*Mathf.Min(center-left,right-center)<156*unit?44*unit/(lastSafe.width/1080f):0;
+ }
+ float WeChatPageTopReserve(){Rect blocked;if(!WeChatLayoutMetrics.TryGetBlockedRect(MenuAvoidanceViewport,out blocked)||lastSafe.width<=0)return 0;return Mathf.Max(0,(lastSafe.yMax-blocked.yMin)/(lastSafe.width/1080f)+16);}
+ void RefreshWeChatHomeHeader(){
+  if(pageInsetRevision!=WeChatLayoutMetrics.Revision){pageInsetRevision=WeChatLayoutMetrics.Revision;foreach(var pair in pages)LayoutMenuPage(pair.Value,pair.Key);}
+  if(CurrentPage!="home"){lastHomeLayout=null;return;}if(pages.TryGetValue("home",out var page)&&page!=null&&lastHomeLayout!=page){lastHomeLayout=page;LayoutHomeHeader(page);}
+ }
+ void LayoutHomeHeader(RectTransform page){
+  float extra=(menuHeight-2340)*.5f,drop=0;Rect blocked;
+  if(WeChatLayoutMetrics.TryGetBlockedRect(MenuAvoidanceViewport,out blocked)){
+   float pixelsPerUnit=lastSafe.width/1080f;
+   if(pixelsPerUnit>0)drop=Mathf.Max(0,(lastSafe.yMax-blocked.yMin)/pixelsPerUnit-70+24);
+  }
+  float topOffset=extra-drop;
+  headerSlot.anchoredPosition=new Vector2(0,topOffset);
+  var top=page.Find("Home top content") as RectTransform;
+  if(top!=null){top.localScale=Vector3.one;top.anchoredPosition=new Vector2(0,topOffset);}
+  page.GetComponentInChildren<ChapterHomeView>()?.Layout(menuHeight,WeChatPageTopReserve());
+  var bottom=page.Find("Home bottom content") as RectTransform;
+  if(bottom!=null)bottom.anchoredPosition=new Vector2(0,-extra-200);
+  var feedback=page.Find("Home achievement feedback") as RectTransform;
+  if(feedback!=null){float upper=292+topOffset-35,lower=-640-extra;float fit=Mathf.Clamp((upper-lower)/190f,.65f,1);feedback.localScale=Vector3.one*fit;feedback.anchoredPosition=new Vector2(0,(upper+lower)*.5f+27.5f*fit);}
+ }
+}
+}

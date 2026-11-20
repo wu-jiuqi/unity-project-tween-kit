@@ -1,0 +1,108 @@
+# LeagueQA · LeagueQA
+
+状态：`test-fixture`；交付：`source-evidence-only`。
+
+源文件：`Assets/Scripts/LeagueQA.cs`
+文件 SHA-256：`1fb2b1e32a85ede763458708fd3ab5b2f612d51dd627ced5a78046b24c3040ff`
+[原始源码快照](../source/Assets/Scripts/LeagueQA.cs.txt)
+
+此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+
+## 源方法、参数与曲线
+
+### Capture · L16
+
+方法 SHA-256：`dfff0a8122b36c830ac21b28ab5c22a6fe8fbc69787e17c5af29423f3001711a`
+时间来源：本方法未直接取时；查调用者/字段
+曲线证据：查原式或下级调用
+解析符号：`BounceGarden.LeagueQA.Capture(string)`
+
+Roslyn 已解析的实际源码调用位置：
+
+- `Assets/Scripts/LeagueQA.cs:27` · `LeagueQA.Start` → `Capture("01-ranking")`
+- `Assets/Scripts/LeagueQA.cs:29` · `LeagueQA.Start` → `Capture("02-settings-test-button")`
+- `Assets/Scripts/LeagueQA.cs:33` · `LeagueQA.Start` → `Capture("03-medal-update-jelly")`
+- `Assets/Scripts/LeagueQA.cs:34` · `LeagueQA.Start` → `Capture("04-promoted")`
+- `Assets/Scripts/LeagueQA.cs:35` · `LeagueQA.Start` → `Capture("05-list-bottom")`
+- `Assets/Scripts/LeagueQA.cs:38` · `LeagueQA.Start` → `Capture("06-reward-claim")`
+- `Assets/Scripts/LeagueQA.cs:40` · `LeagueQA.Start` → `Capture("07-equipped-placeholder")`
+
+```csharp
+IEnumerator Capture(string name){yield return new WaitForEndOfFrame();Canvas.ForceUpdateCanvases();cam.Render();var old=RenderTexture.active;RenderTexture.active=target;var im=new Texture2D(width,height,TextureFormat.RGB24,false);im.ReadPixels(new Rect(0,0,width,height),0,0);im.Apply();RenderTexture.active=old;File.WriteAllBytes(Path.Combine(dir,name+".png"),im.EncodeToPNG());Destroy(im);}
+```
+
+### Start · L17
+
+方法 SHA-256：`0a75264e138244a12e181e2659fbf42294e27babb91fa1bfad4f48023d74e59e`
+时间来源：WaitForSecondsRealtime
+曲线证据：查原式或下级调用
+解析符号：`BounceGarden.LeagueQA.Start()`
+
+Unity 引擎回调；是否创建并启用组件，见 constructionSites 与场景入口。
+
+```csharp
+IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(Path.Combine(dir,"checks.txt"),"");int size=Array.IndexOf(args,"--qa-size");if(size>=0){var parts=args[size+1].Split('x');width=int.Parse(parts[0]);height=int.Parse(parts[1]);}
+  Application.logMessageReceived+=(message,stack,type)=>{if(type==LogType.Error||type==LogType.Exception){errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),message+"\n"+stack+"\n");}};
+  Check(LeagueSelfTests.RunAll().StartsWith("PASS"),"model migration and transaction suite");yield return new WaitForSecondsRealtime(1);app=FindFirstObjectByType<AppUI>();
+  cam=Camera.main;target=new RenderTexture(width,height,24);target.Create();cam.targetTexture=target;var canvas=FindFirstObjectByType<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=cam;canvas.planeDistance=1;app.QASetViewport(new Vector2Int(width,height));
+  var clock=new LeagueSelfTests.Clock{Now=DateTimeOffset.UtcNow.ToUnixTimeSeconds()};app.Profile.ConfigureLeague(new LeagueSelfTests.ConfigProvider(),clock);
+  for(int i=0;i<24;i++)app.LeagueSource.AddTestMedals();clock.Now+=8*86400L;app.LeagueSource.Read(true);
+  app.QANavigate("ranking");yield return new WaitForSecondsRealtime(1);var view=FindFirstObjectByType<LeagueRankingView>();
+  Check(view!=null&&view.RowCount==21,"21 rows bound from source");Check(view.Snapshot.player.medals==app.Profile.Badges,"display uses profile medals");Check(view.Snapshot.entries.Select(e=>e.medals).SequenceEqual(view.Snapshot.entries.Select(e=>e.medals).OrderByDescending(x=>x)),"rows sorted by actual medals");
+  var player=view.ListContent.Find("League row you") as RectTransform;Check(player!=null,"own row exists");view.FocusPlayer();var ownPos=view.Viewport.InverseTransformPoint(player.position);Check(Mathf.Abs(ownPos.y)<view.Viewport.rect.height*.5f,"locate-player action scrolls own row into visible area");
+  Check(view.Viewport.rect.height>=180,"short screen keeps scrollable list");yield return Capture("01-ranking");
+  int before=app.Profile.Badges,coins=app.Profile.Coins,level=app.Profile.UnlockedLevel;Call("Settings");yield return new WaitForSecondsRealtime(.25f);
+  var button=FindObjectsByType<Button>(FindObjectsSortMode.None).FirstOrDefault(b=>b.name.Contains("Medal (Test)"));Check(button!=null,"settings exposes medal test button");yield return Capture("02-settings-test-button");
+  button.onClick.Invoke();yield return null;Check(app.Profile.Badges==before+1&&app.Profile.Coins==coins&&app.Profile.UnlockedLevel==level,"one test click adds one medal only");
+  Call("RemoveModalForLeagueQA");
+  view.Refresh(false);yield return new WaitForSecondsRealtime(.1f);Check(view.Snapshot.player.medals==before+1,"test button immediately refreshes cached rows");
+  var jelly=player.Find("Row visual").GetComponent<LeagueJelly>();Check(jelly!=null&&jelly.Pulses>1,"medal update triggers jelly feedback");yield return Capture("03-medal-update-jelly");
+  app.AddMedalForTesting();yield return new WaitForSecondsRealtime(.7f);view.Refresh(false);Check(view.Snapshot.player.rank<8,"added medals can promote player");yield return Capture("04-promoted");
+  var scroll=view.Viewport.GetComponent<ScrollRect>();scroll.verticalNormalizedPosition=0;yield return null;Check(scroll.content.anchoredPosition.y>0,"full roster scrolls to bottom");yield return Capture("05-list-bottom");
+  app.QANavigate("home");app.QANavigate("ranking");yield return new WaitForSecondsRealtime(.7f);Check(FindFirstObjectByType<LeagueRankingView>().Snapshot.player.medals==app.Profile.Badges,"cached page refresh on re-entry");
+  string snapshotId=app.LeagueSource.Read().periodId;int oldMedals=app.Profile.Badges;clock.Now+=8*86400L;view.Refresh(true);Check(app.Profile.Badges==oldMedals&&app.LeagueSource.Read().periodId!=snapshotId,"period transition preserves cumulative medals");
+  app.OpenLeagueRewards();yield return new WaitForSecondsRealtime(.3f);yield return Capture("06-reward-claim");var pending=app.LeagueSource.Read().reward;Check(pending!=null,"pending old reward retained");
+  if(pending!=null){int oldCoins=app.Profile.Coins;Check(app.LeagueSource.Claim(pending.periodId),"claim grants once");Check(app.Profile.Coins==oldCoins+pending.coins&&app.Profile.Badges==oldMedals,"claim adds coins without medals");Check(!app.LeagueSource.Claim(pending.periodId),"claim replay rejected");Check(app.LeagueSource.Equip(pending.avatarId,pending.frameId),"placeholder avatar and frame equip");}
+  Call("RemoveModalForLeagueQA");app.QANavigate("ranking");yield return new WaitForSecondsRealtime(.7f);yield return Capture("07-equipped-placeholder");
+  // A real gameplay victory grants the original base transaction before any result action is clicked.
+  int starting=app.Profile.Badges;app.QAStartLevel(6);yield return app.QAWaitForLevel();foreach(var brick in app.Session.GetComponentsInChildren<BrickBody>().Where(b=>b.Alive&&b.Definition.kind!=BrickKind.Stone).ToArray()){for(int i=0;i<5&&brick.Alive;i++)app.Session.ApplyAbilityDamage(brick,999,true);}app.Session.DrainChains();yield return new WaitForSecondsRealtime(.6f);
+  Check(app.Profile.Badges==starting+1&&app.Profile.HasBaseReward(app.QAResultKey),"real victory persists medal before result click");
+  FindFirstObjectByType<VictoryPresentation>()?.Finish();yield return new WaitForSecondsRealtime(.5f);int earned=app.Profile.Badges;Check(app.RewardReady,"saved reward does not block ready state");app.CollectReward();yield return null;Check(app.Profile.Badges==earned&&app.CurrentPage=="home","result home button works without double grant");
+  File.AppendAllText(Path.Combine(dir,"checks.txt"),$"RESULT checks={checks} failed={failures} errors={errors}\n");Application.Quit(failures+errors==0?0:1);
+ }
+```
+
+## 对象层级和素材入口
+
+- L26：`view.ListContent.Find("League row you")`
+- L33：`player.Find("Row visual")`
+
+素材完整路径、原始 GUID 与包内映射见 [resource-map.json](../resource-map.json)。未解析的动态路径仍留在 source-map.json 的 resourceEvidence；不能猜测为已打包。
+
+## 生命周期证据
+
+本源类没有显式的停止／暂停／清理方法。检查拥有者的生命周期；尚未提取条目需要先定义宿主合同。
+
+## 源字段与依赖
+
+```csharp
+const BindingFlags Private=BindingFlags.NonPublic|BindingFlags.Instance;
+```
+```csharp
+string dir;
+```
+```csharp
+int checks,failures,errors,width=540,height=1170;
+```
+```csharp
+AppUI app;
+```
+```csharp
+RenderTexture target;
+```
+```csharp
+Camera cam;
+```
+
+业务/组件依赖保留在上述字段、泛型 Get/AddComponent 和源方法参数中。语义解析不覆盖运行时委托结果；`nameMatchedCallSites` 仅供补充检索。

@@ -1,0 +1,29 @@
+using System;using TMPro;using UnityEngine;using UnityEngine.EventSystems;
+namespace ProjectTweenKit {
+// Input stays on a fixed rectangle; only the nested artwork is pulled around.
+public sealed class EncouragementDrag:MonoBehaviour,IPointerDownHandler,IPointerUpHandler,IBeginDragHandler,IDragHandler,IEndDragHandler {
+ RectTransform visual,hit;TMP_Text title,detail;Func<bool> permitted;Vector2 start,pull,velocity;int pointer=int.MinValue;bool held,focused=true;
+ public Vector2 Pull=>pull;
+ public bool Held=>held;
+ bool Allowed=>focused&&FeedbackProfile.Active.enabledFeedback&&(permitted==null||permitted());
+ public void Initialize(RectTransform target,TMP_Text heading,TMP_Text caption,Func<bool> allowed){visual=target;hit=(RectTransform)transform;title=heading;detail=caption;permitted=allowed;}
+ public void OnPointerDown(PointerEventData e){if(!Allowed||held||e.button!=PointerEventData.InputButton.Left)return;held=true;pointer=e.pointerId;velocity=Vector2.zero;RectTransformUtility.ScreenPointToLocalPointInRectangle(hit,e.position,e.pressEventCamera,out start);}
+ public void OnBeginDrag(PointerEventData e){if(held&&pointer==e.pointerId)e.eligibleForClick=false;}
+ public void OnDrag(PointerEventData e){if(!held||pointer!=e.pointerId||!Allowed)return;RectTransformUtility.ScreenPointToLocalPointInRectangle(hit,e.position,e.pressEventCamera,out var point);Vector2 delta=point-start;
+  // Saturation keeps even off-window drags inside a bounded rubber band.
+  pull=new Vector2((float)Math.Tanh(delta.x/180f),(float)Math.Tanh(delta.y/135f));velocity=Vector2.zero;e.eligibleForClick=false;Render();}
+ public void OnPointerUp(PointerEventData e){if(pointer!=e.pointerId)return;held=false;pointer=int.MinValue;e.eligibleForClick=false;}
+ public void OnEndDrag(PointerEventData e){OnPointerUp(e);}
+ void LateUpdate(){if(visual==null)return;if(!Allowed){ResetPose();return;}if(!held){float dt=Mathf.Min(KitClock.Delta,.04f)/4;for(int i=0;i<4;i++){velocity+=(-pull*105-velocity*6.5f)*dt;pull+=velocity*dt;}if(pull.sqrMagnitude<.000001f&&velocity.sqrMagnitude<.00001f)pull=velocity=Vector2.zero;}Render();}
+ void Render(){if(visual==null)return;float x=Mathf.Clamp(pull.x,-1.1f,1.1f),y=Mathf.Clamp(pull.y,-1.1f,1.1f),ax=Mathf.Abs(x),ay=Mathf.Abs(y);
+  Vector2 position=new Vector2(x*105,y*74);float sx=1+ax*.4f-ay*.13f,sy=1+ay*.36f-ax*.19f-(held?.06f:0);
+  // Long welcome messages get the same pull, with enough width to stay readable.
+  title.ForceMeshUpdate();detail.ForceMeshUpdate();float textWidth=Mathf.Max(160,Mathf.Max(title.renderedWidth,detail.renderedWidth));float limit=(hit.rect.width-2*Mathf.Abs(position.x)-36)/(textWidth+20);
+  sx=Mathf.Min(sx,Mathf.Max(.68f,limit));visual.anchoredPosition=position;visual.localScale=new Vector3(sx,sy,1);visual.localRotation=Quaternion.Euler(0,0,-x*16+y*x*5);
+ }
+ public void ResetPose(){held=false;pointer=int.MinValue;pull=velocity=Vector2.zero;if(visual!=null){visual.anchoredPosition=Vector2.zero;visual.localScale=Vector3.one;visual.localRotation=Quaternion.identity;}}
+ void OnApplicationFocus(bool value){focused=value;if(!value)ResetPose();}
+ void OnApplicationPause(bool pause){focused=!pause;if(pause)ResetPose();}
+ void OnDisable(){ResetPose();}
+}
+}

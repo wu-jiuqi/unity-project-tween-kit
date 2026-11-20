@@ -1,0 +1,22 @@
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;
+namespace BounceGarden {
+public sealed class CampaignSettlement020QA:MonoBehaviour {
+ string dir;int checks,failures,errors;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--campaign-settlement-qa"))new GameObject("All authored campaign victory handoffs").AddComponent<CampaignSettlement020QA>();}
+ void Check(bool ok,string message){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+message+"\n");}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.targetFrameRate=60;QualitySettings.vSyncCount=0;Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();
+  int selected=Array.IndexOf(args,"--qa-level");var levels=selected<0?Enumerable.Range(0,OpeningCampaign.Count):new[]{int.Parse(args[selected+1])-1};
+  foreach(int level in levels){
+   app.QAStartLevel(level);yield return app.QAWaitForLevel();var g=app.Session;g.QAIgnoreFocusLoss=true;for(int n=0;n<120;n++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.02f);if(n>10&&!app.AlphabetIntroActive&&!g.IsPaused)break;}g.SetPaused(false);
+   Check(g.TryShoot(new Vector2(.15f,1)),"volley starts level="+(level+1));yield return new WaitForSecondsRealtime(.65f);g.TryShoot(new Vector2(-.15f,1));yield return new WaitForSecondsRealtime(.12f);
+   g.QAFinaleGoal(1,78200);float started=Time.realtimeSinceStartup;
+   while((g.IsPlaying||app.QAGoalCelebration!=null)&&Time.realtimeSinceStartup-started<4)yield return null;g.AccelerateVictoryPlayback();
+   while(app.QAVictoryPage==null&&Time.realtimeSinceStartup-started<20)yield return null;
+   bool success=app.QAVictoryPage!=null;Check(success,"complete victory reaches result level="+(level+1));Check(success&&g.ScoreFinalized&&g.Shots==0&&g.VictoryBoardSwept,"reward and terminal cleanup level="+(level+1));
+   if(!success)File.AppendAllText(dir+"/blocked.txt","phase="+(app.QAVictoryPreparation!=null?app.QAVictoryPreparation.Phase:-1)+" "+g.VictorySettlementStatus+"\n");
+   File.WriteAllText(dir+"/progress.txt","completedLevel="+(level+1)+" checks="+checks+" failures="+failures+" errors="+errors);
+  }
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

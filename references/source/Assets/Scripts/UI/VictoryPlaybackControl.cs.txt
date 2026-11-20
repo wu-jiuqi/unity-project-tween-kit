@@ -1,0 +1,11 @@
+using TMPro;using UnityEngine;using UnityEngine.EventSystems;
+namespace BounceGarden {
+public sealed class VictoryPlaybackControl:MonoBehaviour,IPointerClickHandler {
+ GameSession game;TMP_Text hint;
+ public string Hint=>hint!=null?hint.text:"";
+ public void Initialize(GameSession session){game=session;var plate=UICraft.Box(transform,"Victory speed hint backing",0,-1030,650,72,new Color(.26f,.19f,.13f,.68f));hint=UICraft.Label(plate.transform,"点击屏幕，2倍速播放结算",0,0,620,64,34,new Color(1,.96f,.83f));hint.color=new Color(1,.96f,.83f);hint.fontStyle=FontStyles.Bold;hint.raycastTarget=false;Refresh();}
+ public void OnPointerClick(PointerEventData data){if(data!=null&&data.button!=PointerEventData.InputButton.Left)return;game?.AccelerateVictoryPlayback();Refresh();}
+ void Update(){Refresh();}
+ void Refresh(){if(hint!=null)hint.text=game!=null&&game.VictoryPlaybackSpeed==2?"已开启2倍速播放":"点击屏幕，2倍速播放结算";}
+}
+}

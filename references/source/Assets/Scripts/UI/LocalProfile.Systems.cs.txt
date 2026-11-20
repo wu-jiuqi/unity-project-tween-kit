@@ -1,0 +1,18 @@
+using System;
+using System.Linq;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ int[] boosters=new[]{0,1,1,1},bestScores=new int[AlphabetCampaign.Count];
+ public long BestScoreTotal=>bestScores.Sum(v=>(long)v);
+ public int BestScore(int level)=>level>=0&&level<bestScores.Length?bestScores[level]:0;
+ public int BoosterStock(StreakBooster kind)=>(int)kind>0&&(int)kind<4?boosters[(int)kind]:0;
+ public static int BoosterPrice(StreakBooster kind)=>kind==StreakBooster.Pierce?80:kind==StreakBooster.Bomb?120:kind==StreakBooster.Super?180:-1;
+ public bool PurchaseBooster(string transaction,StreakBooster kind){int price=BoosterPrice(kind);if(!ValidKey(transaction)||price<0)return false;string key=transaction+"/tool";if(committed.Contains(key))return true;if(Coins<price||BoosterStock(kind)>=99)return false;return LeagueTransaction(()=>{Coins-=price;boosters[(int)kind]++;committed.Add(key);});}
+ public bool ConsumeBooster(StreakBooster kind){if(BoosterStock(kind)<=0)return false;return LeagueTransaction(()=>boosters[(int)kind]--);}
+ void RestoreSystems(int[] tools,int[] scores){
+  if(tools!=null&&(tools.Length!=4||tools.Any(v=>v<0||v>99)))throw new InvalidOperationException("Invalid booster inventory");
+  if(scores!=null&&(scores.Length!=52&&scores.Length!=78&&scores.Length!=AlphabetCampaign.Count||scores.Any(v=>v<0||v>ScoreRules.Cap)))throw new InvalidOperationException("Invalid score records");
+  boosters=tools==null?new int[4]:(int[])tools.Clone();bestScores=new int[AlphabetCampaign.Count];if(scores!=null)Array.Copy(scores,bestScores,Math.Min(scores.Length,bestScores.Length));
+ }
+}
+}

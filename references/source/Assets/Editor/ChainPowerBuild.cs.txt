@@ -1,0 +1,11 @@
+using UnityEditor;
+using UnityEngine;
+public static class ChainPowerBuild {
+ public static void Windows(){
+  var importer=(TextureImporter)AssetImporter.GetAtPath("Assets/Resources/Art/ContainerChainV6/cubes.png");
+  if(importer==null)throw new System.InvalidOperationException("Missing cube atlas importer");
+  importer.textureType=TextureImporterType.Default;importer.textureShape=TextureImporterShape.Texture2D;importer.npotScale=TextureImporterNPOTScale.None;importer.alphaSource=TextureImporterAlphaSource.FromInput;importer.alphaIsTransparency=true;importer.mipmapEnabled=false;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.maxTextureSize=2048;importer.SaveAndReimport();
+  for(int r=0;r<4;r++)for(int c=0;c<6;c++){var f=BounceGarden.ChainCubeArt.Frame(r,c);if(f==null||f.texture.width!=1536||f.texture.height!=1024)throw new System.InvalidOperationException("Invalid cube frame "+r+"/"+c);}
+  Debug.Log("CHAIN_CUBE_ATLAS Texture2D 1536x1024 24 frames validated");ChainVisualBuild.Windows();
+ }
+}

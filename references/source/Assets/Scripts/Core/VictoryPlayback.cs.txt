@@ -1,0 +1,11 @@
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public bool VictoryPlaybackPending{get;private set;}
+ public int VictoryPlaybackSpeed{get;private set;}=1;
+ public void AccelerateVictoryPlayback(){if(VictoryPlaybackPending&&!IsPlaying)VictoryPlaybackSpeed=2;}
+ public void FinishVictoryPlayback(){VictoryPlaybackPending=false;VictoryPlaybackSpeed=1;}
+ // Clamp before multiplying so 30 FPS still receives the full 2x step.
+ public float PresentationDelta(float ordinaryDelta)=>VictoryPlaybackPending?Mathf.Min(Time.unscaledDeltaTime,.05f)*VictoryPlaybackSpeed:ordinaryDelta;
+}
+}

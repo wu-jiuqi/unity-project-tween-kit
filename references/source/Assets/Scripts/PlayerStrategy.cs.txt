@@ -1,0 +1,140 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+[Serializable] public sealed class StrategyEvent {
+ public int sequence,group,earnedBy,amount,goal=-1,liveGroups,activeBalls,pendingBalls,request;
+ public long cause,parent,root;public int depth;
+ public string kind,target,targetKind,partner,detail,special;
+ public float seconds,operableSeconds,x,y;
+}
+[Serializable] public sealed class StrategyShot {
+ public int number,group,request,previousGroups,previousBalls,previousPending,availableSpecials;
+ public float seconds,operableSeconds,interval,operableInterval,stableWait,angle,angleChange,x,y,aimSeconds;
+ public int aimAdjustments,hits,damage,breaks,score,goals,specials,combos;
+ public string mode,predicted,predictedKind,confidence,firstHit,firstHitKind,board,returnState="in_flight";
+ public float returnedAt=-1;
+}
+[Serializable] public sealed class StrategySpecialUse {
+ public string id,kind,partner;public int group,earnedBy,damage,layers,goals,score;public float generatedAt=-1,triggeredAt;
+}
+[Serializable] public sealed class StrategyRound {
+ public int version=2,omittedEvents,omittedShots,unattributedScore,unattributedGoals,requests,rejectedRequests,bufferedRequests,maxGroups;
+ public bool enabled=true,detailRetained=true;public string rules="player-strategy-v2",scope="opening-45",coverage="unknown/system contributions reported separately";
+ public float seconds,operableSeconds;
+ public int shotCount,comparableShots,overlapCount,settledCount,settlingCount,specialTargetShots,cancelledAims;
+ public string engineHash,platform;public int screenWidth,screenHeight;
+ public List<StrategyShot> shots=new List<StrategyShot>();
+ public List<StrategyEvent> events=new List<StrategyEvent>();
+ public int omittedSpecialUses;public List<StrategySpecialUse> specialUses=new List<StrategySpecialUse>();
+}
+
+// Only this observer owns storage and aggregation; the game never depends on it.
+public sealed class PlayerStrategyRecorder {
+ public const int EventLimit=4096,ShotLimit=256;
+ readonly GameSession game;readonly StrategyRound data;
+ float stableSince=-1,aimStart=-1,lastAngle;bool aimReleased;int adjustments;Vector2 lastAim;
+ readonly Dictionary<int,Tuple<float,int>> requestedAim=new Dictionary<int,Tuple<float,int>>();
+ public PlayerStrategyRecorder(GameSession g,StrategyRound d){game=g;data=d;}
+ public void Tick(float dt,bool active){
+  if(!active)return;data.seconds+=dt;if(game.ChainCanLaunch)data.operableSeconds+=dt;
+  if(game.StrategySettled){if(stableSince<0)stableSince=data.seconds;}else stableSince=-1;
+  data.maxGroups=Math.Max(data.maxGroups,game.ChainLiveGroups);
+ }
+ public void Input(string kind,Vector2 direction){
+  if(kind=="begin"){aimReleased=false;aimStart=data.seconds;adjustments=0;lastAim=direction;}
+  if(kind=="adjust"&&Vector2.Angle(direction,lastAim)>=.5f){adjustments++;lastAim=direction;}
+  if(kind=="release"){lastAim=direction;aimReleased=true;}
+  if(kind=="cancel"&&!aimReleased&&aimStart>=0){data.cancelledAims++;Observe(new StrategyEvent{kind="aim-cancel",x=direction.x,y=direction.y});aimStart=-1;}
+
+ }
+ public void Observe(StrategyEvent e){
+  e.seconds=data.seconds;e.operableSeconds=data.operableSeconds;e.sequence=++sequence;
+  var shot=data.shots.LastOrDefault(s=>s.group==e.group);
+  if(e.kind=="request"){
+   data.requests++;if(e.detail=="rejected")data.rejectedRequests++;if(e.detail=="buffered")data.bufferedRequests++;
+   if(requestedAim.Count>=ShotLimit)requestedAim.Remove(requestedAim.Keys.First());
+   if(e.detail!="rejected")requestedAim[e.request]=Tuple.Create(aimStart<0?0:data.seconds-aimStart,adjustments);
+   aimStart=-1;
+  }
+  if(e.kind=="shot"){
+   var previous=data.shots.LastOrDefault();float angle=Mathf.Atan2(e.x,e.y)*Mathf.Rad2Deg;
+   var predicted=game.StrategyPredict(new Vector2(e.x,e.y));
+   shot=new StrategyShot{number=data.shotCount+1,group=e.group,request=e.request,seconds=data.seconds,operableSeconds=data.operableSeconds,
+    interval=previous==null?-1:data.seconds-previous.seconds,operableInterval=previous==null?-1:data.operableSeconds-previous.operableSeconds,
+    previousGroups=e.liveGroups,previousBalls=e.activeBalls,previousPending=e.pendingBalls,mode=previous==null?"initial":e.activeBalls>0||e.pendingBalls>0||e.liveGroups>0?"rapid":e.detail=="settled"?"settled":"settling",
+    stableWait=stableSince<0?-1:data.seconds-stableSince,angle=angle,angleChange=previous==null?0:Mathf.Abs(Mathf.DeltaAngle(lastAngle,angle)),x=e.x,y=e.y,
+    predicted=predicted.target,predictedKind=predicted.targetKind,confidence=predicted.detail,board=game.StrategyBoard(),availableSpecials=game.ChainTools.Count(t=>!t.Consumed&&!t.Waiting)};
+   if(requestedAim.TryGetValue(e.request,out var aim)){shot.aimSeconds=aim.Item1;shot.aimAdjustments=aim.Item2;requestedAim.Remove(e.request);}
+   lastAngle=angle;if(data.shots.Count<ShotLimit)data.shots.Add(shot);else {data.omittedShots++;shot=null;}
+   data.shotCount++;if(previous!=null){data.comparableShots++;if(e.activeBalls>0||e.pendingBalls>0||e.liveGroups>0)data.overlapCount++;else if(e.detail=="settled")data.settledCount++;else data.settlingCount++;}
+   if(predicted.targetKind.StartsWith("special/"))data.specialTargetShots++;
+  }
+  if(e.kind=="special"){
+   if(data.specialUses.Count<ShotLimit){var birth=data.events.FirstOrDefault(v=>v.kind=="generated"&&v.target==e.target);data.specialUses.Add(new StrategySpecialUse{id=e.target,kind=e.targetKind,partner=e.partner,group=e.group,earnedBy=e.earnedBy,triggeredAt=data.seconds,generatedAt=birth?.seconds??-1});}else data.omittedSpecialUses++;
+  }
+  var use=string.IsNullOrEmpty(e.special)?null:data.specialUses.LastOrDefault(v=>v.id==e.special);
+  if(use!=null){if(e.kind=="damage")use.damage+=e.amount;if(e.kind=="layer")use.layers+=e.amount;if(e.kind=="goal")use.goals+=e.amount;if(e.kind=="score")use.score+=e.amount;}
+  if(e.kind=="hit"&&shot!=null){shot.hits++;if(string.IsNullOrEmpty(shot.firstHit)){shot.firstHit=e.target;shot.firstHitKind=e.targetKind;}}
+  if(e.kind=="damage"&&shot!=null)shot.damage+=e.amount;
+  if(e.kind=="break"&&shot!=null)shot.breaks+=e.amount;
+  if(e.kind=="score"){if(shot!=null)shot.score+=e.amount;else data.unattributedScore+=e.amount;}
+  if(e.kind=="goal"){if(shot!=null)shot.goals+=e.amount;else data.unattributedGoals+=e.amount;}
+  if(e.kind=="special"&&shot!=null){shot.specials++;if(!string.IsNullOrEmpty(e.partner))shot.combos++;}
+  if(e.kind=="group-return"&&shot!=null){shot.returnedAt=data.seconds;shot.returnState="balls_returned";}
+  if(e.kind=="hit"&&shot!=null&&shot.hits>1)return; // High-frequency hits stay in counters.
+  if(data.events.Count<EventLimit)data.events.Add(e);else data.omittedEvents++;
+ }
+ int sequence;
+ public static string Mode(StrategyRound d){
+  if(d==null||d.version!=2||!d.enabled)return "未采集";
+  if(d.comparableShots<5)return "样本不足";
+  float rapid=d.overlapCount/(float)d.comparableShots,settled=d.settledCount/(float)d.comparableShots;
+  return rapid>=.6f?"连发型（探索标签）":settled>=.8f?"等待型（探索标签）":"混合型（探索标签）";
+ }
+}
+
+public sealed partial class GameSession {
+ internal Action<StrategyEvent> StrategyObserver;
+ StrategyContext strategyContext;long strategyCause;int strategyObjectSerial;int strategyRequest,strategyQueuedRequest,strategyBufferedRequest;
+ readonly Dictionary<ChainTool,int> strategyTools=new Dictionary<ChainTool,int>();
+ readonly Dictionary<ChainTool,int> strategyEarned=new Dictionary<ChainTool,int>();
+ readonly Dictionary<ChainTool,StrategyContext> strategyWaiting=new Dictionary<ChainTool,StrategyContext>();
+ readonly Queue<int> strategyRewardOrigins=new Queue<int>();
+ public bool StrategySettled=>ActiveBalls==0&&PendingBurstBalls==0&&ChainLiveGroups==0&&ChainGridReady&&!ChainEffectsPending&&!SevenAnimationsPending&&chainMotions.Count==0;
+ internal void StrategyReset(){strategyContext=null;strategyCause=0;strategyObjectSerial=0;strategyRequest=strategyQueuedRequest=strategyBufferedRequest=0;strategyTools.Clear();strategyEarned.Clear();strategyWaiting.Clear();strategyRewardOrigins.Clear();}
+ internal void StrategyEmit(StrategyEvent e){
+  if(StrategyObserver==null)return;
+  try{if(strategyContext!=null){e.group=strategyContext.Group;e.cause=strategyContext.Id;e.parent=strategyContext.Parent;e.root=strategyContext.Root;e.depth=strategyContext.Depth;e.special=strategyContext.Special;}StrategyObserver(e);}
+  catch(Exception ex){StrategyObserver=null;Debug.LogWarning("Player strategy recording disabled: "+ex.Message);}
+ }
+ internal sealed class StrategyContext:IDisposable {
+  internal string Special;internal int Group,Depth;internal long Id,Parent,Root;GameSession game;StrategyContext previous;
+  internal StrategyContext(GameSession g,int group,string kind,string target,StrategyContext origin=null){game=g;previous=g.strategyContext;var parent=origin??previous;Special=kind=="special"?target:parent?.Special;Group=group;Id=++g.strategyCause;Parent=parent?.Id??0;Root=parent?.Root??Id;Depth=parent==null?0:parent.Depth+1;g.strategyContext=this;g.StrategyEmit(new StrategyEvent{kind="cause",detail=kind,target=target});}
+  public void Dispose(){if(game==null)return;game.strategyContext=previous;game=null;}
+ }
+ sealed class StrategyEmpty:IDisposable {public void Dispose(){}public static readonly StrategyEmpty Value=new StrategyEmpty();}
+ internal IDisposable StrategyCause(string kind,int group=-1,string target="")=>StrategyObserver==null?(IDisposable)StrategyEmpty.Value:new StrategyContext(this,group<0?strategyContext?.Group??0:group,kind,target);
+ internal Action StrategyWrap(Action action){
+  if(StrategyObserver==null)return action;var origin=strategyContext;int generation=Generation;
+  return ()=>{if(StrategyObserver==null||generation!=Generation){action();return;}using(new StrategyContext(this,origin?.Group??0,"deferred","",origin))action();};
+ }
+ internal string StrategyToolId(ChainTool tool){if(!strategyTools.TryGetValue(tool,out int id)){if(strategyTools.Count>=512)foreach(var old in strategyTools.Keys.Where(t=>t.Consumed).ToArray()){strategyTools.Remove(old);strategyEarned.Remove(old);strategyWaiting.Remove(old);}
+  id=++strategyObjectSerial;strategyTools[tool]=id;}return Generation+"/T"+id;}
+ internal string StrategyBrickId(BrickBody b)=>Generation+"/B"+b.Id;
+ internal string StrategyKind(BrickBody b)=>OpeningCopperBrick(b)?"copper_coin":OpeningYarnBrick(b)?"yarn":OpeningCookieBrick(b)?"cookie_box":OpeningCatBrick(b)?"cat":OpeningIngotBrick(b)?"ingot":"ordinary/"+b.Definition.colorIndex;
+ internal void StrategyToolSpawned(ChainTool t){if(StrategyObserver==null)return;strategyEarned[t]=strategyContext?.Group??0;StrategyEmit(new StrategyEvent{kind="generated",target=StrategyToolId(t),targetKind=SevenSpecialArt.Name(t.Kind),earnedBy=strategyEarned[t]});}
+ internal IDisposable StrategyToolCause(ChainTool t){if(StrategyObserver==null)return StrategyEmpty.Value;strategyWaiting.TryGetValue(t,out var origin);return new StrategyContext(this,strategyContext?.Group??origin?.Group??0,"special",StrategyToolId(t),strategyContext??origin);}
+ internal void StrategyWait(ChainTool t){if(StrategyObserver!=null)strategyWaiting[t]=strategyContext;}
+ internal int StrategyEarned(ChainTool t)=>strategyEarned.TryGetValue(t,out int group)?group:0;
+ internal StrategyEvent StrategyPredict(Vector2 direction){
+  float nearest=float.PositiveInfinity;var result=new StrategyEvent{target="none",targetKind="unknown",detail="unknown/no-direct-target"};Vector2 origin=SpawnPosition(direction);
+  foreach(var b in CollectionBricks)if(b!=null&&b.Alive&&b.GetComponent<BoxCollider2D>()?.enabled==true&&b.GetComponent<ChainTileVisibility>()?.Hidden!=true&&ChainRayEntry(b,origin,direction,100,out float distance,out _)&&distance<nearest){nearest=distance;result.target=StrategyBrickId(b);result.targetKind=StrategyKind(b)+"/hp="+b.CurrentHealth;result.detail=ChainFalling?"low/moving-board":"medium/direct-ray-only";}
+  foreach(var t in ChainTools)if(!t.Consumed&&!t.Waiting&&t.View!=null&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true){Vector2 d=t.Position-origin;float along=Vector2.Dot(d,direction);if(along>0&&along<nearest&&Mathf.Abs(d.x*direction.y-d.y*direction.x)<.4f){nearest=along;result.target=StrategyToolId(t);result.targetKind="special/"+SevenSpecialArt.Name(t.Kind);result.detail=ChainFalling?"low/moving-board":"medium/direct-ray-only";}}
+  return result;
+ }
+ internal string StrategyBoard()=>string.Join(";",CollectionBricks.Where(b=>b!=null&&b.Alive).Select(b=>StrategyBrickId(b)+","+StrategyKind(b)+","+b.CurrentHealth+","+b.GetComponent<ChainGridPiece>()?.Col+","+b.GetComponent<ChainGridPiece>()?.Row).Concat(ChainTools.Where(t=>!t.Consumed&&t.View!=null).Select(t=>StrategyToolId(t)+",special/"+t.Kind+",1,"+t.View.GetComponent<ChainGridPiece>()?.Col+","+t.View.GetComponent<ChainGridPiece>()?.Row)));
+}
+}

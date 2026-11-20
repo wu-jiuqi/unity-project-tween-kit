@@ -1,0 +1,48 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+namespace BounceGarden
+{
+    public sealed class BossHUD : MonoBehaviour
+    {
+        GameSession owner;
+        Image fill;
+        readonly Image[] dots = new Image[3];
+        TMP_Text health, phase, hint, combo;
+        float displayedHealth;
+        int generation;
+        public void Initialize(GameSession session)
+        {
+            owner = session; generation = owner.Generation; displayedHealth = BossLevel.MaxHealth;
+            var group = gameObject.AddComponent<CanvasGroup>(); group.blocksRaycasts = false; group.interactable = false;
+            UICraft.Box(transform, "Boss health track", 0, 952, 640, 44, new Color32(111, 77, 88, 255));
+            fill = UICraft.Box(transform, "Boss health fill", 0, 952, 628, 32, new Color32(241, 138, 112, 255));
+            fill.rectTransform.pivot = new Vector2(0, .5f); fill.rectTransform.anchoredPosition = new Vector2(-314, 952);
+            health = UICraft.Label(transform, "", 0, 952, 600, 40, 26);
+            health.color = Color.white;
+            phase = UICraft.Label(transform, "", -338, 868, 190, 50, 25);
+            for (int i = 0; i < 3; i++) dots[i] = UICraft.Box(transform, "Action pip " + i, 270 + i * 44, 870, 26, 26, UICraft.Blue, true);
+            UICraft.Label(transform, "NEXT MOVE", 314, 907, 230, 32, 21);
+            hint = UICraft.Label(transform, "", 0, -965, 930, 56, 28);
+            combo = UICraft.Label(transform, "", 0, -880, 780, 70, 40);
+            Refresh();
+        }
+        void Refresh()
+        {
+            health.text = owner.BossHealth + " / " + BossLevel.MaxHealth;
+            phase.text = "PHASE " + owner.BossPhase;
+            for (int i = 0; i < dots.Length; i++) dots[i].color = i < owner.BossShotCount ? UICraft.Gold : new Color32(215, 203, 222, 255);
+            hint.text = owner.BossDefeating ? "GARDEN SAVED!" : owner.BossActing ? "Pudding King is moving..." : owner.BossShotCount >= 3 ? "Next move ready - let the balls return" : owner.BossShotCount == 2 ? "Boss moves after your next shot" : "Bank off the sides - get above the boss!";
+            combo.text = owner.BossCombo >= 3 ? "BOSS HITS x" + owner.BossCombo : "";
+        }
+        void Update()
+        {
+            if (owner == null || owner.Generation != generation || !owner.IsPlaying) { gameObject.SetActive(false); return; }
+            if (owner.IsPaused) return;
+            displayedHealth = Mathf.MoveTowards(displayedHealth, owner.BossHealth, Time.deltaTime * 65f);
+            fill.rectTransform.sizeDelta = new Vector2(628 * displayedHealth / BossLevel.MaxHealth, 32);
+            Refresh();
+        }
+    }
+}

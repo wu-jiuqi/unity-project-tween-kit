@@ -1,0 +1,58 @@
+using System;
+using System.IO;
+using System.Reflection;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+public static class BuildEntry {
+ static string Root=>Directory.GetParent(Application.dataPath).FullName;
+ static string Out=>Path.GetFullPath(Path.Combine(Root,"../Builds"));
+ public static void Configure(){
+  PlayerSettings.SplashScreen.show=false;PlayerSettings.SplashScreen.showUnityLogo=false;
+  PlayerSettings.companyName="Private Study";PlayerSettings.productName="Bounce Garden";
+  PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android,"com.study.bouncegarden");
+  PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+  PlayerSettings.defaultInterfaceOrientation=UIOrientation.Portrait;PlayerSettings.allowedAutorotateToLandscapeLeft=false;PlayerSettings.allowedAutorotateToLandscapeRight=false;
+  PlayerSettings.defaultScreenWidth=592;PlayerSettings.defaultScreenHeight=1280;PlayerSettings.resizableWindow=true;PlayerSettings.fullScreenMode=FullScreenMode.Windowed;
+  PlayerSettings.colorSpace=ColorSpace.Gamma;PlayerSettings.runInBackground=true;
+  PlayerSettings.Android.startInFullscreen=true;PlayerSettings.Android.renderOutsideSafeArea=true;
+  PlayerSettings.Android.minSdkVersion=(AndroidSdkVersions)26;PlayerSettings.Android.targetSdkVersion=(AndroidSdkVersions)34;
+  PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);
+  PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;PlayerSettings.Android.useCustomKeystore=false;
+  EditorUserBuildSettings.buildAppBundle=false;EditorUserBuildSettings.androidBuildSystem=AndroidBuildSystem.Gradle;
+  PlayerSettings.SetApiCompatibilityLevel(UnityEditor.Build.NamedBuildTarget.Android,ApiCompatibilityLevel.NET_Standard);
+  Directory.CreateDirectory("Assets/Scenes");
+  if(!File.Exists("Assets/Scenes/Main.unity")){var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);EditorSceneManager.SaveScene(scene,"Assets/Scenes/Main.unity");}
+  EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/Scenes/Main.unity",true)};
+  AssetDatabase.SaveAssets();
+ }
+ static Dictionary<PropertyInfo,object> previousExternal=new Dictionary<PropertyInfo,object>();
+ static void External(string property,string env){
+  string path=Environment.GetEnvironmentVariable(env);if(string.IsNullOrEmpty(path))return;
+  foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies()){
+   var type=assembly.GetType("UnityEditor.Android.AndroidExternalToolsSettings");if(type==null)continue;
+   var p=type.GetProperty(property,BindingFlags.Static|BindingFlags.Public);if(p!=null){previousExternal[p]=p.GetValue(null);p.SetValue(null,path);}Debug.Log("BUILD_EXTERNAL "+property+"="+path);break;
+  }
+ }
+ public static void Android(){
+  Configure();try{External("sdkRootPath","BOUNCE_ANDROID_SDK");External("ndkRootPath","BOUNCE_ANDROID_NDK");External("jdkRootPath","BOUNCE_ANDROID_JDK");
+  Build(BuildTarget.Android,Path.Combine(Out,"Android","BounceGarden-0.1.0-arm64.apk"));}
+  finally{foreach(var old in previousExternal)old.Key.SetValue(null,old.Value);previousExternal.Clear();}
+ }
+ public static void Windows(){Configure();PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);Build(BuildTarget.StandaloneWindows64,Path.Combine(Out,"Stage1Windows","BounceGarden.exe"));}
+ public static void ValidateAndWindows(){Rules();Debug.Log("PROFILE_TESTS "+BounceGarden.LocalProfile.RunSelfTests());Windows();}
+ public static void Rules(){
+  foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies()){var t=assembly.GetType("BounceGarden.RuleSelfTests");if(t==null)continue;var method=t.GetMethod("RunAll",BindingFlags.Static|BindingFlags.Public);if(method!=null){Debug.Log("RULE_TESTS "+method.Invoke(null,null));return;}}
+  throw new Exception("RuleSelfTests.RunAll missing");
+ }
+ static void Build(BuildTarget target,string path){
+  Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=target,options=BuildOptions.None});
+  var summary=r.summary;string line="BUILD_RESULT "+summary.result+" errors="+summary.totalErrors+" warnings="+summary.totalWarnings+" bytes="+summary.totalSize+" path="+path;
+  Debug.Log(line);File.WriteAllText(Path.Combine(Out,target+"-summary.txt"),line+"\n"+DateTime.UtcNow.ToString("o"));
+  if(summary.result!=BuildResult.Succeeded)throw new Exception(line);
+ }
+}
+

@@ -1,0 +1,71 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class LeagueGrowthSelfTests {
+ [Serializable] sealed class Envelope {public LeagueState league;}
+ [Serializable] public sealed class Day {public int day,medals,rival,rank;public float medalSeconds;}
+ [Serializable] public sealed class Scenario {public int seed,roundSeconds,winPercent,rounds,wins;public Day[] days;}
+ [Serializable] sealed class Report {public int checks;public Scenario[] scenarios;}
+ static LeagueState Create(int seed,long now){
+  var s=new LeagueState();LeagueEngine.Open(s,new LeagueConfig{activeCompetition=true},now,24);
+  s.current.seed=seed;LeagueEngine.EnableActive(s.current,240);return s;
+ }
+ public static string RunAll(string output=null){
+  int checks=0;Action<bool,string> check=(ok,message)=>{checks++;if(!ok)throw new Exception("League growth: "+message);};
+  long now=1900000000;var config=new LeagueConfig{activeCompetition=true};
+  var migration=Create(78,now);var p=migration.current;p.competitionVersion=1;p.activeElapsed=100;p.totalActiveSeconds=220;p.roundActiveSeconds=20;p.returnRounds=1;p.lossRounds=2;p.matchSeen=true;
+  foreach(var r in p.rivals){r.activeMedals=2;r.gainInterval=400;r.nextGainAt=300;r.shieldUntil=340;}
+  string scores=string.Join(",",p.rivals.Select(r=>r.Medals(p.elapsed)));long deadline=p.endsAt;string id=p.id;
+  LeagueEngine.PrepareActive(migration,config,now,24);
+  check(p.competitionVersion==2&&p.id==id&&p.endsAt==deadline,"v1 upgrade preserves cohort and seven-day deadline");
+  check(scores==string.Join(",",p.rivals.Select(r=>r.Medals(p.elapsed))),"upgrade awards no medals");
+  check(p.activeElapsed==100&&p.totalActiveSeconds==220&&p.roundActiveSeconds==20&&p.returnRounds==1&&p.lossRounds==2&&p.matchSeen,"upgrade preserves clocks and protection counters");
+  check(p.rivals.All(r=>Math.Abs((r.nextGainAt-p.activeElapsed)/r.gainInterval-.5)<1e-9&&r.shieldUntil==340),"upgrade preserves fractional progress and outstanding shields");
+  string upgraded=JsonUtility.ToJson(migration);LeagueEngine.PrepareActive(migration,config,now,24);check(upgraded==JsonUtility.ToJson(migration),"upgrade is idempotent");
+  var profile=new LocalProfile();var clock=new LeagueSelfTests.Clock{Now=now};profile.ConfigureLeague(new LeagueSelfTests.ConfigProvider{Value=config},clock);profile.ReadLeague();
+  string legacyProfile=profile.ExportForQA().Replace("\"competitionVersion\":2","\"competitionVersion\":1");
+  profile=LocalProfile.ImportForQA(legacyProfile);profile.ConfigureLeague(new LeagueSelfTests.ConfigProvider{Value=config},clock);profile.ReadLeague();
+  check(JsonUtility.FromJson<Envelope>(profile.ExportForQA()).league.current.competitionVersion==2,"profile upgrades an existing league without waiting for a clock tick");
+  var dynamic=Create(79,now).current;LeagueEngine.ActiveTick(dynamic,5,24);
+  var initialBehind=LeagueEngine.Standings(dynamic,24).First(e=>e.rank==LeagueEngine.Standings(dynamic,24).First(v=>v.player).rank+1);
+  var chaser=dynamic.rivals.First(r=>r.id==initialBehind.id);check(Math.Abs(chaser.gainInterval-192)<.001,"current nearest pursuer runs at 125 percent");
+  LeagueEngine.ActiveTick(dynamic,5,44);var newChaser=dynamic.rivals.OrderByDescending(r=>r.Medals(dynamic.elapsed)).ThenBy(r=>r.tieOrder).First();
+  check(Math.Abs(newChaser.gainInterval-192)<.001&&chaser.gainInterval>192,"promotion transfers pressure to the new nearest pursuer");
+  check(dynamic.rivals.All(r=>r.activeMedals==0),"retargeting never fabricates a score jump");
+  var week=Create(80,now);week.current.participated=true;string period=week.current.id;
+  LeagueEngine.Advance(week,now+604799,24,true);check(week.current.id==period&&week.rewards.Count==0,"not expired one second before seven real days");
+  LeagueEngine.Advance(week,now+604800,24,true);check(week.current==null&&week.rewards.Count==1,"expires exactly at seven real days while offline");
+  LeagueEngine.Open(week,config,now+604800,24);check(week.current.id!=period&&week.current.endsAt==now+1209600,"next period has its own fixed seven-day deadline");
+  var scenarios=new List<Scenario>();
+  foreach(int seed in Enumerable.Range(1,12))foreach(int scenario in new[]{0,1,2}){
+   int seconds=scenario==0?120:scenario==1?60:300,winPercent=scenario==0?80:scenario==1?100:40;
+   var s=Create(seed,now);int medals=24,rounds=0,wins=0;var days=new List<Day>();
+   for(int day=0;day<7;day++){
+    var current=s.current;string before=string.Join(",",current.rivals.Select(r=>r.Medals(current.elapsed)));
+    LeagueEngine.Advance(s,now+day*86400,medals,true);check(before==string.Join(",",current.rivals.Select(r=>r.Medals(current.elapsed))),"overnight scores freeze");
+    for(int round=0;round<1800/seconds;round++){
+     current.roundStartRank=LeagueEngine.Standings(current,medals).First(e=>e.player).rank;int starting=current.roundStartRank;
+     for(int t=0;t<seconds;t+=5)LeagueEngine.ActiveTick(current,5,medals);
+     check(LeagueEngine.Standings(current,medals).First(e=>e.player).rank<=starting+1,"whole-round loss including ties stays capped");
+     bool won=((rounds+1)*winPercent/100)>(rounds*winPercent/100);rounds++;
+     long at=now+day*86400+(round+1)*seconds;
+     if(won){LeagueEngine.Win(s,config,at,medals,medals+1,true);medals++;wins++;}else{LeagueEngine.FinishRound(current,false,medals,medals);LeagueEngine.Advance(s,at,medals,false);}
+     check(current.config.medalSeconds>=90&&current.config.medalSeconds<=900,"learned pace stays bounded");
+    }
+    days.Add(new Day{day=day+1,medals=medals,rival=current.rivals.Max(r=>r.Medals(current.elapsed)),rank=LeagueEngine.Standings(current,medals).First(e=>e.player).rank,medalSeconds=current.config.medalSeconds});
+   }
+   var final=days.Last();check(medals==24+wins,"only actual wins grant medals");
+   if(scenario==0){check(final.medals==108&&final.rival>=103&&final.rival<=111,"80 percent player retains a nearby challenger after seven days");check(final.rank<=4,"steady winning remains competitive");}
+   if(scenario==1)check(final.medals>final.rival,"fast uninterrupted wins can build an earned lead");
+   int finalRank=final.rank;LeagueEngine.Advance(s,now+604800,medals,true);
+   check(s.current==null&&s.rewards.Single().rank==finalRank,"weekly reward uses frozen final standings");
+   LeagueEngine.Validate(s);scenarios.Add(new Scenario{seed=seed,roundSeconds=seconds,winPercent=winPercent,rounds=rounds,wins=wins,days=days.ToArray()});
+  }
+  if(output!=null){Directory.CreateDirectory(output);File.WriteAllText(Path.Combine(output,"growth-model.json"),JsonUtility.ToJson(new Report{checks=checks,scenarios=scenarios.ToArray()},true));}
+  return "PASS: "+checks+" growth / migration / weekly-boundary checks across "+scenarios.Count+" seven-day scenarios";
+ }
+}
+}

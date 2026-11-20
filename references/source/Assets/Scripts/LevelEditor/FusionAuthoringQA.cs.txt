@@ -1,0 +1,88 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+    /// <summary>Pure authoring regressions. These checks establish configuration validity, not physical solvability.</summary>
+    public static class FusionAuthoringQA {
+        static FusionPieceDefinition Piece(string id, string kind, int c, int r) =>
+            new FusionPieceDefinition { id = id, kind = kind, c = c, r = r };
+        static FusionLevelDefinition Board(params FusionPieceDefinition[] pieces) => new FusionLevelDefinition { pieces = pieces };
+        static bool Legal(FusionLevelDefinition definition) => !FusionRules.Validate(definition, 10, false).Any(i => i.IsError);
+        static bool ErrorFor(FusionLevelDefinition definition, string id, string marker) =>
+            FusionRules.Validate(definition, 10, false).Any(i => i.IsError && i.ObjectId == id && i.Message.Contains(marker));
+
+        public static void DataChecks(Action<string, bool, string> check) {
+            Action<string, bool> test = (name, passed) => check("authoring_rule_fixture " + name, passed, "Pure FusionRules.Validate; no physics solvability claim.");
+
+            var battery = Piece("battery", "battery", 0, 0);
+            battery.threshold = 1; battery.goal = "fish"; battery.links = new[] { "tool" };
+            var tool = Piece("tool", "bomb", 1, 0);
+            var goal = Piece("goal", "toy", 2, 0);
+            var batteryBoard = Board(battery, tool);
+            test("battery cannot fund its own retirement", ErrorFor(batteryBoard, battery.id, "剩余充能门槛"));
+            batteryBoard.pieces = new[] { battery, tool, goal };
+            test("external goal can fund battery", Legal(batteryBoard));
+            battery.eligibleGoals = new[] { "fish" };
+            test("battery category filter limits available units", ErrorFor(batteryBoard, battery.id, "剩余充能门槛"));
+            battery.eligibleGoals = new[] { "toy" }; battery.threshold = 2; battery.initialCharge = 1;
+            test("battery initial charge reduces remaining budget", Legal(batteryBoard));
+            battery.initialCharge = 0;
+            test("battery insufficient external units rejected", ErrorFor(batteryBoard, battery.id, "剩余充能门槛"));
+            var chest = Piece("chest", "chest", 2, 0); chest.size = 2;
+            chest.contents = Enumerable.Range(0, 4).Select(i => new FusionContentDefinition { id = "inside" + i, kind = "fish" }).ToArray();
+            batteryBoard.pieces = new[] { battery, tool, chest }; battery.threshold = 4; battery.eligibleGoals = new[] { "fish" };
+            test("reserved contents count as future battery energy", Legal(batteryBoard));
+            battery.threshold = 5;
+            test("battery still cannot include own goal beside reserved contents", ErrorFor(batteryBoard, battery.id, "剩余充能门槛"));
+
+            var producer = Piece("producer", "producer", 4, 4);
+            producer.stock = 1; producer.batchSize = 3;
+            producer.contents = Enumerable.Range(0, 3).Select(i => new FusionContentDefinition { id = "product" + i, kind = "fish" }).ToArray();
+            var producerBoard = Board(producer);
+            test("empty producer lists use full-board fallback", Legal(producerBoard));
+            producer.spawnCells = new[] { new Vector2Int(3, 4) };
+            test("explicit producer list replaces full-board fallback", ErrorFor(producerBoard, producer.id, "可用出货位"));
+            producer.fallbackCells = new[] { new Vector2Int(3, 4), new Vector2Int(5, 4) };
+            test("producer positions deduplicate across primary and fallback", ErrorFor(producerBoard, producer.id, "可用出货位"));
+            producer.fallbackCells = new[] { new Vector2Int(5, 4), new Vector2Int(4, 3) };
+            test("three distinct explicit positions support whole batch", Legal(producerBoard));
+            var stone = Piece("stone", "stone", 5, 4);
+            producerBoard.pieces = new[] { producer, stone };
+            test("permanent stone cannot reserve producer capacity", ErrorFor(producerBoard, producer.id, "可用出货位"));
+            var gate = Piece("gate", "gate", 5, 4); gate.links = new[] { "key" };
+            var key = Piece("key", "key", 6, 4);
+            producerBoard.pieces = new[] { producer, gate, key, Piece("futureGoal", "fish", 4, 3) };
+            test("opening gate and removable goal remain potential output positions", Legal(producerBoard));
+            producer.fallbackCells = new[] { new Vector2Int(5, 4), new Vector2Int(4, 4) };
+            test("producer cannot reserve its own live cell", ErrorFor(producerBoard, producer.id, "可用出货位"));
+            producer.spawnCells = Array.Empty<Vector2Int>(); producer.fallbackCells = Array.Empty<Vector2Int>();
+            var blocked = new List<FusionPieceDefinition> { producer };
+            for (int y = 0; y < 9; y++) for (int x = 0; x < 9; x++) if (x != 4 || y != 4)
+                blocked.Add(Piece("fixed-" + x + "-" + y, "stone", x, y));
+            producerBoard.pieces = blocked.ToArray();
+            test("default output fallback also excludes permanent stone", ErrorFor(producerBoard, producer.id, "可用出货位"));
+
+            var milestone = new FusionMilestoneDefinition { id = "milestone", kind = "activate", threshold = 1, count = 1, links = new[] { "one", "two" } };
+            var milestoneBoard = Board(Piece("one", "bomb", 0, 0), Piece("two", "line_h", 1, 0), Piece("fish", "fish", 2, 0), Piece("toy", "toy", 3, 0));
+            milestoneBoard.milestones = new[] { milestone };
+            test("activation count cannot leave prelocked linked tool behind", ErrorFor(milestoneBoard, milestone.id, "唤醒里程碑"));
+            milestone.count = 2;
+            test("activation budget covers every prelocked tool", Legal(milestoneBoard));
+            milestone.links = Array.Empty<string>();
+            test("activation milestone requires linked tools", ErrorFor(milestoneBoard, milestone.id, "唤醒里程碑"));
+            milestone.kind = "assistant"; milestone.links = new[] { "one" };
+            test("assistant milestone rejects ignored tool links", ErrorFor(milestoneBoard, milestone.id, "助手里程碑"));
+            milestone.links = Array.Empty<string>();
+            test("assistant milestone without links remains legal", Legal(milestoneBoard));
+
+            var malformedChest = Piece("malformed", "chest", 0, 0); malformedChest.size = 2;
+            malformedChest.contents = new FusionContentDefinition[] { null, null, null, null };
+            bool returnedContentError = false;
+            try { returnedContentError = ErrorFor(Board(malformedChest), malformedChest.id, "产物记录为空"); }
+            catch (Exception) { /* The assertion explicitly records an exception as failure. */ }
+            test("null contents return validation errors without throwing", returnedContentError);
+        }
+    }
+}

@@ -1,0 +1,30 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class FailureBuild {
+    public static void Windows() { Build(BuildTarget.StandaloneWindows64); }
+    public static void Android() { Build(BuildTarget.Android); }
+    static void Build(BuildTarget target) {
+        foreach (var path in Directory.GetFiles("Assets/Resources/Art/FailureV25", "*.png"))
+            AssetDatabase.ImportAsset(path.Replace('\\', '/'), ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+        AssetDatabase.ImportAsset("Assets/Resources/Art/FailureCatV26/cat-atlas.png", ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+        BuildEntry.Configure(); BuildEntry.Rules();
+        Debug.Log("PROFILE_TESTS " + BounceGarden.LocalProfile.RunSelfTests());
+        PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;
+        PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+        PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
+        string output = Environment.GetEnvironmentVariable("BOUNCE_FAILURE_OUTPUT");
+        if (string.IsNullOrEmpty(output)) throw new Exception("BOUNCE_FAILURE_OUTPUT required");
+        Directory.CreateDirectory(Path.GetDirectoryName(output));
+        var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
+            scenes = new[] { "Assets/Scenes/Main.unity" }, target = target,
+            locationPathName = output, options = BuildOptions.CompressWithLz4HC,
+            extraScriptingDefines = new[] { "BOUNCE_TEST_TOOLS" }
+        });
+        string result = "FAILURE_V25_BUILD " + report.summary.result + " errors=" + report.summary.totalErrors + " warnings=" + report.summary.totalWarnings;
+        File.WriteAllText(output + ".build.txt", result); Debug.Log(result);
+        if (report.summary.result != BuildResult.Succeeded) throw new Exception(result);
+    }
+}

@@ -1,0 +1,60 @@
+using System;using System.Collections;using System.IO;using System.Linq;using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public int QAAuditSpecialVolley(int breaks){
+  if(OpeningHasYarn)CollectionGoal[0]=999;else for(int c=0;c<JellyGoal.Length;c++)if(JellyGoal[c]>0)JellyGoal[c]=999;
+  if(!TryShoot(Vector2.up))return -1;for(int i=0;i<40;i++)FixedUpdate();
+  var ball=active.Values.FirstOrDefault();if(ball==null)return -2;
+  foreach(var brick in CollectionBricks.Where(b=>b.Alive&&!OpeningYarnBrick(b)&&b.Definition.kind==BrickKind.Normal&&!ChainPowerRules.IsNest(b.Definition)).Take(breaks).ToArray())
+   for(int n=0;n<30&&brick.Alive;n++)HitChainBrick(brick,ball,brick.transform.position);
+  int tier=ChainRatingTier;foreach(var b in active.Values.ToArray())LoseBall(b,b.Body.position);return tier;
+ }
+ public void QAAuditForcedReward()=>QueueChainLiveReward(new[]{2});
+ public BrickBody QAAuditYarn(int c,int r){var b=QASevenBrick(c,r,1,0);jellyTargets.Remove(b.Id);b.Definition.reveal="opening-yarn";var view=b.gameObject.AddComponent<OpeningYarnView>();view.Initialize(this,b,2);openingYarn[b.Id]=view;return b;}
+ public void QAAuditRemoveSupport(BrickBody b){rules.DamageTarget(b.Id,int.MaxValue,out _);b.Remove();ScheduleChainGravity();}
+ public int QAAuditEligibleSpecialCells()=>CollectionBricks.Count(b=>b.Alive&&!RefillProtected(b)&&b.Definition.kind==BrickKind.Normal&&b.Definition.juiceGroup==0&&!OpeningYarnBrick(b)&&!IsJellyTarget(b)&&!ChainPowerRules.IsNest(b.Definition)&&!b.GetComponent<ChainTileVisibility>().Hidden&&!ChainBonds.Any(group=>group.Members.Contains(b)));
+}
+public sealed class SpecialGenerationAudit:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--special-generation-audit"))new GameObject("Special generation audit").AddComponent<SpecialGenerationAudit>();}
+ IEnumerator Capture(string path){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var image=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,image);File.WriteAllBytes(path,image.EncodeToPNG());Destroy(image);rt.Release();Destroy(rt);}
+ IEnumerator Start(){
+  yield return new WaitForSecondsRealtime(3);var args=Environment.GetCommandLineArgs();string dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);
+  var app=FindFirstObjectByType<AppUI>();Physics2D.simulationMode=SimulationMode2D.Script;int checks=0,failures=0,errors=0;
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Exception||t==LogType.Error){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  foreach(int index in Enumerable.Range(0,10).Concat(new[]{10,21,26,52})){
+   app.QAStartLevel(index);yield return app.QAWaitForLevel();for(int n=0;n<80;n++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.025f);if(n>15&&!app.AlphabetIntroActive&&!app.Session.IsPaused)break;}
+   var g=app.Session;g.QAIgnoreFocusLoss=true;g.SetPaused(false);g.enabled=false;int initial=g.ChainTools.Count,generated=g.ChainGeneratedCount,eligible=g.QAAuditEligibleSpecialCells();
+   if(index==4)yield return Capture(dir+"/level05-authored.png");
+   if(index<10){checks++;if(initial!=OpeningCampaign.Stage(index).pieces.Count(p=>p.kind!="yarn"))failures++;}
+   var packet=g.QASevenRewardPacket(0);int tier=g.QAAuditSpecialVolley(4);
+   string line="LEVEL="+(index+1)+" initial="+initial+" nicePacket=["+string.Join(",",packet)+"] eligibleBefore="+eligible+" tier="+tier+" newSpecials="+(g.ChainGeneratedCount-generated)+" waiting="+g.ChainPendingReplacements;
+   File.AppendAllText(dir+"/audit.txt",line+"\n");Debug.Log("SPECIAL_GENERATION_AUDIT "+line);
+   checks++;if(tier!=0||g.ChainGeneratedCount-generated!=packet.Length||g.ChainPendingReplacements!=0)failures++;
+   if(index<10){checks++;if(g.CollectionBricks.Any(b=>b.Alive&&b.Definition.reveal=="opening-N"&&b.Definition.juiceGroup!=0))failures++;}
+   if(index==4||index==5){var yarns=g.QAOpeningYarns();g.QAAuditForcedReward();checks++;if(yarns.Any(y=>!y.Brick.Alive))failures++;}
+   for(int n=0;n<180;n++)g.QASevenTick(.02f);checks++;if(!g.ChainGridReady||!g.ChainGridValid(false))failures++;
+   if(index==4)yield return Capture(dir+"/level05-after-clear.png");
+  }
+  for(int index=0;index<78;index++){
+   var g=app.Session;g.StartLevel(index);g.enabled=false;g.QAIgnoreFocusLoss=true;g.SetPaused(false);g.QASevenClear();
+   var normal=g.QASevenBrick(4,4,1,0);var tool=g.QASevenTool(2,4,3,0);var support=g.QASevenBrick(4,8,1,0);var stone=g.QASevenBrick(3,8,1,0,1,0,true);
+   var yarn=index<10?g.QAAuditYarn(4,5):null;Vector2 normalStart=normal.transform.position,toolStart=tool.Position,stoneStart=stone.transform.position;
+   g.QAAuditRemoveSupport(support);for(int n=0;n<180;n++)g.QASevenTick(.02f);
+   bool moved=normal.transform.position.y<normalStart.y-.4f&&tool.Position.y<toolStart.y-.4f;
+   bool yarnMoved=yarn==null||yarn.Alive&&yarn.transform.position.y<ChainGridRules.Center(4,5).y-.4f;
+   bool valid=g.ChainGridReady&&g.ChainGridValid(false)&&Vector2.Distance(stone.transform.position,stoneStart)<.002f;
+   checks+=3;if(!moved)failures++;if(!yarnMoved)failures++;if(!valid)failures++;
+   File.AppendAllText(dir+"/gravity.txt","LEVEL="+(index+1)+" ordinaryAndSpecialFall="+moved+" yarnFalls="+yarnMoved+" gridAndStoneValid="+valid+"\n");
+   if(index<10){
+    checks++;if(!g.RefillActive)failures++;
+    g.QARefillFinishGroup(1);int planned=g.RefillPending;
+    for(int n=0;n<600;n++)g.QASevenTick(.02f);
+    bool refill=planned>0&&g.RefillGenerated==planned&&g.RefillPending==0&&g.ChainGridReady&&g.ChainGridValid(false)&&(yarn==null||yarn.Alive);
+    checks++;if(!refill)failures++;File.AppendAllText(dir+"/gravity.txt","REFILL_LEVEL="+(index+1)+" planned="+planned+" generated="+g.RefillGenerated+" passed="+refill+"\n");
+   }
+   if(index%5==0)yield return null;
+  }
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

@@ -1,0 +1,15 @@
+using System;
+using BounceGarden;
+using UnityEngine;
+public static class SecondGroupPlatformValidation {
+ public static void Validate(){
+  int checks=OpeningCampaign.Validate();
+  foreach(string key in new[]{"yarn-obstacle-l1","yarn-obstacle-l2","yarn-obstacle-l3","yarn-layer-loss","yarn-layer-loss-l3","yarn-unravel"}){
+   var sprite=OpeningYarnArt.Frame(key,0);if(sprite==null||sprite.texture==null)throw new InvalidOperationException("Missing yarn "+key);checks++;
+  }
+  for(int i=0;i<=8;i++){if(SecondGroupArt.Sprite("box-"+i)==null)throw new InvalidOperationException("Missing cookie state "+i);checks++;}
+  if(SecondGroupArt.Sprite("box-closed")==null||SecondGroupArt.Sprite("fish-biscuit")==null)throw new InvalidOperationException("Missing box or fish");checks+=2;
+  if(FeedbackProfile.Active.specialShakeHeight<.0089f)throw new InvalidOperationException("Stale shake profile");checks++;
+  Debug.Log("SECOND_GROUP_PLATFORM_VALIDATION_OK checks="+checks);
+ }
+}

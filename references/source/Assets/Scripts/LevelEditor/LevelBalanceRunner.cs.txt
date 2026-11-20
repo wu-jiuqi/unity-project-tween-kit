@@ -1,0 +1,114 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+[Serializable] public sealed class BalanceRequest {
+ public string input,output,split="screen",policy="advanced",fireMode="all",weightsHash,weightProfile;
+ public bool recordPlayerStrategy;public int requestVersion=2;public BalanceWeights weights=new BalanceWeights();
+ public int first=1,last=45,trials=10,seed=180001,maxSteps=54000;
+}
+[Serializable] public sealed class BalanceShot {
+ public int step,used,score,activeBalls,liveGroups,availableSpecials;public float x,y,utility;public bool settled;public string reason;public int[] collected;
+}
+[Serializable] public sealed class BalanceRun {
+ public int level,trial,seed,steps,used,remaining,scoreAtOutcome,scoreWithSpareBonus,spareBonus,hits,breaks,activations;
+ public int damageScore,breakScore,objectiveScore,refills,ingotConversions;
+ public int schemaVersion=2,overlapShots,settledShots,waitSteps,maxLiveGroups;public string fireMode,weightsHash,policyVersion;
+ public string policy,split,status,error,levelHash,requestHash,diagnostics;
+ public float seconds;public OpeningTarget[] goals;public int[] collected;public BalanceShot[] shots;
+}
+// Observations use the current board only; never read a future RNG state or force a result.
+public sealed class LevelBalanceRunner:MonoBehaviour {
+ public static bool Active {get;private set;}
+ public const string PolicyVersion="advanced-fire-v4";
+ BalanceRequest request;GameSession game;bool outcome,won;int errorCount;string lastError;
+ public static string Hash(string text){using(var h=SHA256.Create())return BitConverter.ToString(h.ComputeHash(Encoding.UTF8.GetBytes(text))).Replace("-","").ToLowerInvariant();}
+ void OnLog(string message,string stack,LogType type){if(type==LogType.Error||type==LogType.Exception||type==LogType.Assert){errorCount++;lastError=message;}}
+ IEnumerator Start(){var task=Run();while(true){bool more;try{more=task.MoveNext();}catch(Exception e){Debug.LogError(e);Application.Quit(2);yield break;}if(!more)yield break;yield return task.Current;}}
+ IEnumerator Run(){
+  Active=true;BalanceClock.Active=true;Application.runInBackground=true;Application.logMessageReceived+=OnLog;
+  if(LevelEditorRuntime.HasArg("--balance-selfcheck")){int failures=OpeningBalanceChecks.Run(LevelEditorRuntime.Arg("--qa-out"));Application.Quit(failures==0?0:3);yield break;}
+  string path=LevelEditorRuntime.Arg("--balance-request");
+  try{request=JsonUtility.FromJson<BalanceRequest>(File.ReadAllText(path));
+   if(request.first<1||request.last>45||request.first>request.last||request.trials<1||request.trials>10000||request.maxSteps<600||(request.requestVersion!=2||request.policy!="advanced"||!new[]{"all","rapid","settled","hybrid"}.Contains(request.fireMode))||!new[]{"screen","validation","holdout"}.Contains(request.split))throw new ArgumentException("Invalid balance request");
+   request.weights.Validate();Directory.CreateDirectory(request.output);OpeningCampaign.LoadBalanceData(File.ReadAllText(request.input));
+  }catch(Exception e){Debug.LogError(e);Application.Quit(2);yield break;}
+  
+  Physics2D.simulationMode=SimulationMode2D.Script;Time.fixedDeltaTime=1f/60;Time.timeScale=0;
+  SoundService.SetMuted(true);AlphabetTypography.Install();
+  var modes=request.fireMode=="all"?new[]{"rapid","settled","hybrid"}:new[]{request.fireMode};
+  string requestHash=Hash(File.ReadAllText(path));
+  foreach(int level in Enumerable.Range(request.first,request.last-request.first+1))foreach(string mode in modes)for(int trial=0;trial<request.trials;trial++){
+   string resultPath=Path.Combine(request.output,$"L{level:00}-{mode}-{trial:0000}.json");
+   if(File.Exists(resultPath)){var old=JsonUtility.FromJson<BalanceRun>(File.ReadAllText(resultPath));if(old.requestHash!=requestHash)throw new InvalidOperationException("Resume request mismatch");continue;}
+   int seed=unchecked(request.seed+level*100003+trial*7919+(request.split=="screen"?0:request.split=="validation"?100000000:200000000));
+   UnityEngine.Random.InitState(seed);var root=new GameObject("Isolated balance session");
+   game=root.AddComponent<GameSession>();game.enabled=false;game.QAIgnoreFocusLoss=true;
+   game.BoosterProfile=LocalProfile.CreateLevelEditorProfile(level-1,"bare");
+   game.StartLevel(level-1);game.BalanceSeed(seed);
+   StrategyRound strategyData=null;PlayerStrategyRecorder strategyRecorder=null;
+   if(request.recordPlayerStrategy){strategyData=new StrategyRound{engineHash=PlayerStrategyReport.EngineFingerprint,platform=Application.platform.ToString()};strategyRecorder=new PlayerStrategyRecorder(game,strategyData);game.StrategyObserver=strategyRecorder.Observe;}game.SetPaused(false);game.CombatFeel?.CancelStop();
+   outcome=won=false;game.Outcome+=OnOutcome;int initialErrors=errorCount,step=0,nextCheck=0,stable=0,lastShot=-100000,lastProgress=0,waitSteps=0,maxGroups=0;var shots=new List<BalanceShot>();
+   while(!outcome&&step<request.maxSteps&&errorCount==initialErrors){
+    stable=game.BalanceFullySettled?stable+1:0;BalanceShot attempt=null;int beforeShots=game.Shots;
+    if(step>=nextCheck&&game.ChainCanLaunch){
+     float since=(step-lastShot)*Time.fixedDeltaTime;int used=game.CurrentLevel.initialShots-game.Shots;
+     bool settled=stable*Time.fixedDeltaTime>=request.weights.stableSeconds;
+     if(since+.0001f>=request.weights.interval&&(mode!="settled"||settled)){
+      // Waiting does not consume a different aiming RNG stream. The same shot
+      // index receives the same candidate angles/noise in all firing modes.
+      var aim=BalanceFirePolicy.Choose(game,request.weights,new System.Random(unchecked(seed^(used+1)*1640531527)));
+      var state=new BalanceTimingState{CanLaunch=true,Settled=settled,Groups=game.ChainLiveGroups,Moving=game.BalanceBoardMoving,Effects=game.BalanceEffectsPending,PendingRewardGroups=game.BalancePendingRewardGroups,Progress=game.BalanceGoalProgress>lastProgress,SinceShot=since,SpecialOpportunity=aim.SpecialOpportunity};
+      if(BalanceFirePolicy.ShouldFire(mode,state,request.weights,out string reason)&&game.TryShoot(aim.Direction))attempt=new BalanceShot{step=step,used=used+1,x=aim.Direction.x,y=aim.Direction.y,score=game.Score,collected=(int[])game.OpeningCollected.Clone(),activeBalls=game.ActiveBalls,liveGroups=game.ChainLiveGroups,settled=settled,reason=reason,utility=aim.Utility,availableSpecials=game.ChainTools.Count(t=>!t.Consumed&&!t.Waiting)};
+      else waitSteps+=6;
+      nextCheck=step+6;
+     }else if(mode!="rapid")waitSteps++;
+    }
+    try{strategyRecorder?.Tick(Time.fixedDeltaTime,true);game.BalanceStep();}catch(Exception e){Debug.LogError(e);}
+    if(attempt!=null&&game.Shots<beforeShots){shots.Add(attempt);lastShot=step;lastProgress=attempt.collected.Sum();}
+    maxGroups=Math.Max(maxGroups,game.ChainLiveGroups);step++;if(step%300==0)yield return null;
+   }
+   int score=game.Score;bool valid=outcome&&errorCount==initialErrors;
+   if(valid)game.FinalizeScore(won);
+   var row=new BalanceRun{level=level,trial=trial,seed=seed,policy="advanced",fireMode=mode,weightsHash=request.weightsHash,policyVersion=PolicyVersion,overlapShots=shots.Count(s=>s.liveGroups>0||s.activeBalls>0),settledShots=shots.Count(s=>s.settled),waitSteps=waitSteps,maxLiveGroups=maxGroups,split=request.split,status=errorCount>initialErrors?"error":!outcome?"timeout":won?"win":"loss",error=errorCount>initialErrors?lastError:null,
+    requestHash=requestHash,diagnostics=valid?null:game.VictorySettlementStatus+"\n"+game.QARefillStatus(),levelHash=Hash(JsonUtility.ToJson(OpeningCampaign.Stage(level-1))),steps=step,seconds=step*Time.fixedDeltaTime,
+    used=game.CurrentLevel.initialShots-game.Shots,remaining=game.Shots,scoreAtOutcome=score,scoreWithSpareBonus=game.Score,spareBonus=game.CreditedCompletionBonus,
+    damageScore=game.DamageScore,breakScore=game.BreakScore,objectiveScore=game.ObjectiveScore,hits=game.HitCount,breaks=game.BreakCount,activations=game.ChainActivationCount,
+    refills=game.ChainRefills,ingotConversions=game.OpeningIngotConversions,goals=game.OpeningTargets,collected=(int[])game.OpeningCollected.Clone(),shots=shots.ToArray()};
+   if(strategyData!=null){var history=new BalanceHistory();history.rounds.Add(new BalanceRound{id=$"batch-{level}-{mode}-{trial}",level=level,version=GameVersion.Name,configHash=row.levelHash,strategyVersion=2,strategy=strategyData,usedShots=row.used,initialShots=row.used+row.remaining,remainingShots=row.remaining,score=row.scoreAtOutcome,outcome=row.status,activeSeconds=row.seconds,configAttempt=1,goals=row.goals.Select((g,i)=>new BalanceGoal{kind=g.kind,color=g.color,required=g.count,collected=row.collected[i]}).ToArray()});File.WriteAllText(Path.Combine(request.output,$"strategy-L{level:00}-{mode}-{trial:0000}.json"),BalanceReport.Json(history));}
+   File.WriteAllText(resultPath+".tmp",JsonUtility.ToJson(row,true));File.Move(resultPath+".tmp",resultPath);
+   game.Outcome-=OnOutcome;game.StopLevel();Destroy(root);game=null;yield return null;
+   if(trial==request.trials-1)Debug.Log($"BALANCE_PROGRESS level={level} fireMode={mode} trials={request.trials}");
+   if(File.Exists(Path.Combine(request.output,"cancel.request"))){File.WriteAllText(Path.Combine(request.output,"cancelled.json"),"{\"status\":\"cancelled\"}");Application.Quit(0);yield break;}
+  }
+  File.WriteAllText(Path.Combine(request.output,"complete.json"),"{\"status\":\"complete\",\"policyVersion\":\""+PolicyVersion+"\"}");
+  Debug.Log("LEVEL_BALANCE_COMPLETE");Application.Quit(errorCount==0?0:3);
+ }
+ void OnOutcome(bool value){outcome=true;won=value;}
+ void OnDestroy(){Application.logMessageReceived-=OnLog;Active=false;}
+ public static Vector2 Choose(GameSession game,string policy,System.Random random){if(policy!="advanced")throw new ArgumentException("Only advanced aiming is supported");return BalanceFirePolicy.Choose(game,new BalanceWeights(),random).Direction;}
+
+}
+}
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public void BalanceSeed(int seed){if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Isolated test only");chainRewardRandom=new System.Random(unchecked(seed+LevelIndex*397));openingCatRandom=new System.Random(unchecked(seed+LevelIndex*7919));sevenRandom=new System.Random(unchecked(seed+LevelIndex*193));refillRandom=new System.Random(unchecked(seed+LevelIndex*104729));}
+ public void BalanceStep(){
+  if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Isolated test only");
+  // Advance gameplay-bearing presentations once per fixed step, including their callbacks.
+  TickOpeningThird(Time.fixedDeltaTime);
+  foreach(var fx in GetComponentsInChildren<SevenWindup>())if(fx.isActiveAndEnabled)fx.Advance(Time.fixedDeltaTime);
+  foreach(var fx in GetComponentsInChildren<SevenSuctionFx>())if(fx.isActiveAndEnabled)fx.Advance(Time.fixedDeltaTime);
+  foreach(var effect in GetComponentsInChildren<SevenSpecialFx>())if(effect.isActiveAndEnabled)effect.Advance(Time.fixedDeltaTime);
+  foreach(var effect in GetComponentsInChildren<IngotSpecialFx>())if(effect.isActiveAndEnabled)effect.Advance(Time.fixedDeltaTime);
+  foreach(var pool in GetComponentsInChildren<JellyPopPool>())pool.Advance(Time.fixedDeltaTime);
+  CombatFeel?.CancelStop();QAAdvanceOneStep();
+ }
+}
+}

@@ -1,0 +1,2324 @@
+[
+  {
+    "id": "assets-editor-earlycontinuousv40qa-earlycontinuousv40runner",
+    "class": "EarlyContinuousV40Runner",
+    "source": "Assets/Editor/EarlyContinuousV40QA.cs",
+    "status": "editor-tool",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/assets-editor-earlycontinuousv40qa-earlycontinuousv40runner.md"
+  },
+  {
+    "id": "alphabetphysicssurvey-alphabetphysicssurvey",
+    "class": "AlphabetPhysicsSurvey",
+    "source": "Assets/Scripts/AlphabetPhysicsSurvey.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/alphabetphysicssurvey-alphabetphysicssurvey.md"
+  },
+  {
+    "id": "balancestatistics-balancestatistics",
+    "class": "BalanceStatistics",
+    "source": "Assets/Scripts/BalanceStatistics.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/balancestatistics-balancestatistics.md"
+  },
+  {
+    "id": "balancestatistics-strategy-balancestatistics",
+    "class": "BalanceStatistics",
+    "source": "Assets/Scripts/BalanceStatistics.Strategy.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/balancestatistics-strategy-balancestatistics.md"
+  },
+  {
+    "id": "balancestatisticsqa-balancestatisticsqa",
+    "class": "BalanceStatisticsQA",
+    "source": "Assets/Scripts/BalanceStatisticsQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/balancestatisticsqa-balancestatisticsqa.md"
+  },
+  {
+    "id": "bannerjellyqa-bannerjellyqa",
+    "class": "BannerJellyQA",
+    "source": "Assets/Scripts/BannerJellyQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/bannerjellyqa-bannerjellyqa.md"
+  },
+  {
+    "id": "battlejellyqa-battlejellyqa",
+    "class": "BattleJellyQA",
+    "source": "Assets/Scripts/BattleJellyQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/battlejellyqa-battlejellyqa.md"
+  },
+  {
+    "id": "campaignsettlement020qa-campaignsettlement020qa",
+    "class": "CampaignSettlement020QA",
+    "source": "Assets/Scripts/CampaignSettlement020QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/campaignsettlement020qa-campaignsettlement020qa.md"
+  },
+  {
+    "id": "catcosmeticsqa-catcosmeticsqa",
+    "class": "CatCosmeticsQA",
+    "source": "Assets/Scripts/CatCosmeticsQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/catcosmeticsqa-catcosmeticsqa.md"
+  },
+  {
+    "id": "catflowqa-catflowqa",
+    "class": "CatFlowQA",
+    "source": "Assets/Scripts/CatFlowQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/catflowqa-catflowqa.md"
+  },
+  {
+    "id": "celebration020qa-celebration020qa",
+    "class": "Celebration020QA",
+    "source": "Assets/Scripts/Celebration020QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/celebration020qa-celebration020qa.md"
+  },
+  {
+    "id": "chaincollectionqa-chaincollectionqa",
+    "class": "ChainCollectionQA",
+    "source": "Assets/Scripts/ChainCollectionQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chaincollectionqa-chaincollectionqa.md"
+  },
+  {
+    "id": "chaindifficultyresearch-chaindifficultyresearch",
+    "class": "ChainDifficultyResearch",
+    "source": "Assets/Scripts/ChainDifficultyResearch.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chaindifficultyresearch-chaindifficultyresearch.md"
+  },
+  {
+    "id": "chaingravityqa-chaingravityqa",
+    "class": "ChainGravityQA",
+    "source": "Assets/Scripts/ChainGravityQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chaingravityqa-chaingravityqa.md"
+  },
+  {
+    "id": "chainguardqa-chainguardqa",
+    "class": "ChainGuardQA",
+    "source": "Assets/Scripts/ChainGuardQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainguardqa-chainguardqa.md"
+  },
+  {
+    "id": "chainpowerqa-chainpowerqa",
+    "class": "ChainPowerQA",
+    "source": "Assets/Scripts/ChainPowerQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainpowerqa-chainpowerqa.md"
+  },
+  {
+    "id": "chainpresentationqa-chainpresentationqa",
+    "class": "ChainPresentationQA",
+    "source": "Assets/Scripts/ChainPresentationQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainpresentationqa-chainpresentationqa.md"
+  },
+  {
+    "id": "chainratingqa-chainratingqa",
+    "class": "ChainRatingQA",
+    "source": "Assets/Scripts/ChainRatingQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainratingqa-chainratingqa.md"
+  },
+  {
+    "id": "chainrealtimeqa-chainrealtimeqa",
+    "class": "ChainRealtimeQA",
+    "source": "Assets/Scripts/ChainRealtimeQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainrealtimeqa-chainrealtimeqa.md"
+  },
+  {
+    "id": "chainrefillv39qa-chainrefillv39qa",
+    "class": "ChainRefillV39QA",
+    "source": "Assets/Scripts/ChainRefillV39QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainrefillv39qa-chainrefillv39qa.md"
+  },
+  {
+    "id": "chainvisualqa-chainvisualqa",
+    "class": "ChainVisualQA",
+    "source": "Assets/Scripts/ChainVisualQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainvisualqa-chainvisualqa.md"
+  },
+  {
+    "id": "chainvolleygravityqa-chainvolleygravityqa",
+    "class": "ChainVolleyGravityQA",
+    "source": "Assets/Scripts/ChainVolleyGravityQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chainvolleygravityqa-chainvolleygravityqa.md"
+  },
+  {
+    "id": "chapterartpreview-chapterartpreview",
+    "class": "ChapterArtPreview",
+    "source": "Assets/Scripts/ChapterArtPreview.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chapterartpreview-chapterartpreview.md"
+  },
+  {
+    "id": "chinesecheerartqa-chinesecheerartqa",
+    "class": "ChineseCheerArtQA",
+    "source": "Assets/Scripts/ChineseCheerArtQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chinesecheerartqa-chinesecheerartqa.md"
+  },
+  {
+    "id": "chinesev60outcomeqa-chinesev60outcomeqa",
+    "class": "ChineseV60OutcomeQA",
+    "source": "Assets/Scripts/ChineseV60OutcomeQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/chinesev60outcomeqa-chinesev60outcomeqa.md"
+  },
+  {
+    "id": "collectionqa-collectionqa",
+    "class": "CollectionQA",
+    "source": "Assets/Scripts/CollectionQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/collectionqa-collectionqa.md"
+  },
+  {
+    "id": "collisionhapticsqa-collisionhapticsqa",
+    "class": "CollisionHapticsQA",
+    "source": "Assets/Scripts/CollisionHapticsQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/collisionhapticsqa-collisionhapticsqa.md"
+  },
+  {
+    "id": "combatfeedback79qa-combatfeedback79qa",
+    "class": "CombatFeedback79QA",
+    "source": "Assets/Scripts/CombatFeedback79QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/combatfeedback79qa-combatfeedback79qa.md"
+  },
+  {
+    "id": "cookiecollidergravityqa-cookiecollidergravityqa",
+    "class": "CookieColliderGravityQA",
+    "source": "Assets/Scripts/CookieColliderGravityQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/cookiecollidergravityqa-cookiecollidergravityqa.md"
+  },
+  {
+    "id": "coppernumberqa-coppernumberqa",
+    "class": "CopperNumberQA",
+    "source": "Assets/Scripts/CopperNumberQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/coppernumberqa-coppernumberqa.md"
+  },
+  {
+    "id": "core-boardflowplanner-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/BoardFlowPlanner.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-boardflowplanner-gamesession.md"
+  },
+  {
+    "id": "core-bosslevel-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/BossLevel.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-bosslevel-gamesession.md"
+  },
+  {
+    "id": "core-chaincollectionsession-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/ChainCollectionSession.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-chaincollectionsession-gamesession.md"
+  },
+  {
+    "id": "core-collectionsession-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/CollectionSession.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-collectionsession-gamesession.md"
+  },
+  {
+    "id": "core-contentflow-contentloadoperation",
+    "class": "ContentLoadOperation",
+    "source": "Assets/Scripts/Core/ContentFlow.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-contentflow-contentloadoperation.md"
+  },
+  {
+    "id": "core-contentflow-gamecontent",
+    "class": "GameContent",
+    "source": "Assets/Scripts/Core/ContentFlow.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-contentflow-gamecontent.md"
+  },
+  {
+    "id": "core-flowjellysession-flowjellydeform",
+    "class": "FlowJellyDeform",
+    "source": "Assets/Scripts/Core/FlowJellySession.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-flowjellysession-flowjellydeform.md"
+  },
+  {
+    "id": "core-fusionpresentationsession-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/FusionPresentationSession.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-fusionpresentationsession-gamesession.md"
+  },
+  {
+    "id": "core-gamesession-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/GameSession.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-gamesession-gamesession.md"
+  },
+  {
+    "id": "core-mainlineplanner-mainlineplanner",
+    "class": "MainlinePlanner",
+    "source": "Assets/Scripts/Core/MainlinePlanner.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-mainlineplanner-mainlineplanner.md"
+  },
+  {
+    "id": "core-openingcampaign-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/OpeningCampaign.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-openingcampaign-gamesession.md"
+  },
+  {
+    "id": "core-openingtargets-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/OpeningTargets.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-openingtargets-gamesession.md"
+  },
+  {
+    "id": "core-openingthirdsession-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/OpeningThirdSession.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-openingthirdsession-gamesession.md"
+  },
+  {
+    "id": "core-pixeldropsession-pixeldropbody",
+    "class": "PixelDropBody",
+    "source": "Assets/Scripts/Core/PixelDropSession.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-pixeldropsession-pixeldropbody.md"
+  },
+  {
+    "id": "core-startupattempt77-startupattempt77",
+    "class": "StartupAttempt77",
+    "source": "Assets/Scripts/Core/StartupAttempt77.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-startupattempt77-startupattempt77.md"
+  },
+  {
+    "id": "core-victoryplayback-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Core/VictoryPlayback.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/core-victoryplayback-gamesession.md"
+  },
+  {
+    "id": "economyv67qa-economyv67qa",
+    "class": "EconomyV67QA",
+    "source": "Assets/Scripts/EconomyV67QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/economyv67qa-economyv67qa.md"
+  },
+  {
+    "id": "encouragementdragqa-encouragementdragqa",
+    "class": "EncouragementDragQA",
+    "source": "Assets/Scripts/EncouragementDragQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/encouragementdragqa-encouragementdragqa.md"
+  },
+  {
+    "id": "encouragementqa-encouragementqa",
+    "class": "EncouragementQA",
+    "source": "Assets/Scripts/EncouragementQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/encouragementqa-encouragementqa.md"
+  },
+  {
+    "id": "failureqa-failureqa",
+    "class": "FailureQA",
+    "source": "Assets/Scripts/FailureQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/failureqa-failureqa.md"
+  },
+  {
+    "id": "flightqa-flightqa",
+    "class": "FlightQA",
+    "source": "Assets/Scripts/FlightQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/flightqa-flightqa.md"
+  },
+  {
+    "id": "flightv22qa-flightv22qa",
+    "class": "FlightV22QA",
+    "source": "Assets/Scripts/FlightV22QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/flightv22qa-flightv22qa.md"
+  },
+  {
+    "id": "fontgoalloopqa-fontgoalloopqa",
+    "class": "FontGoalLoopQA",
+    "source": "Assets/Scripts/FontGoalLoopQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/fontgoalloopqa-fontgoalloopqa.md"
+  },
+  {
+    "id": "fourthgroupqa-fourthgroupqa",
+    "class": "FourthGroupQA",
+    "source": "Assets/Scripts/FourthGroupQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/fourthgroupqa-fourthgroupqa.md"
+  },
+  {
+    "id": "gardenbackgroundqa-gardenbackgroundqa",
+    "class": "GardenBackgroundQA",
+    "source": "Assets/Scripts/GardenBackgroundQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/gardenbackgroundqa-gardenbackgroundqa.md"
+  },
+  {
+    "id": "grouprefill82qa-grouprefill82qa",
+    "class": "GroupRefill82QA",
+    "source": "Assets/Scripts/GroupRefill82QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/grouprefill82qa-grouprefill82qa.md"
+  },
+  {
+    "id": "homebannerqa-homebannerqa",
+    "class": "HomeBannerQA",
+    "source": "Assets/Scripts/HomeBannerQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/homebannerqa-homebannerqa.md"
+  },
+  {
+    "id": "homefeedbackqa-homefeedbackqa",
+    "class": "HomeFeedbackQA",
+    "source": "Assets/Scripts/HomeFeedbackQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/homefeedbackqa-homefeedbackqa.md"
+  },
+  {
+    "id": "immediatespecialintro020qa-immediatespecialintro020qa",
+    "class": "ImmediateSpecialIntro020QA",
+    "source": "Assets/Scripts/ImmediateSpecialIntro020QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/immediatespecialintro020qa-immediatespecialintro020qa.md"
+  },
+  {
+    "id": "ingamefeedbackqa-ingamefeedbackqa",
+    "class": "InGameFeedbackQA",
+    "source": "Assets/Scripts/InGameFeedbackQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ingamefeedbackqa-ingamefeedbackqa.md"
+  },
+  {
+    "id": "ingotfxqa-ingotfxqa",
+    "class": "IngotFxQA",
+    "source": "Assets/Scripts/IngotFxQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ingotfxqa-ingotfxqa.md"
+  },
+  {
+    "id": "jellybalancer2qa-jellybalancer2qa",
+    "class": "JellyBalanceR2QA",
+    "source": "Assets/Scripts/JellyBalanceR2QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/jellybalancer2qa-jellybalancer2qa.md"
+  },
+  {
+    "id": "jellybrickqa-jellybrickqa",
+    "class": "JellyBrickQA",
+    "source": "Assets/Scripts/JellyBrickQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/jellybrickqa-jellybrickqa.md"
+  },
+  {
+    "id": "jellyjourney80qa-jellyjourney80preview",
+    "class": "JellyJourney80Preview",
+    "source": "Assets/Scripts/JellyJourney80QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/jellyjourney80qa-jellyjourney80preview.md"
+  },
+  {
+    "id": "jellyjourney80qa-jellyjourney80qa",
+    "class": "JellyJourney80QA",
+    "source": "Assets/Scripts/JellyJourney80QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/jellyjourney80qa-jellyjourney80qa.md"
+  },
+  {
+    "id": "jellyribbontexture80qa-jellyribbontexture80qa",
+    "class": "JellyRibbonTexture80QA",
+    "source": "Assets/Scripts/JellyRibbonTexture80QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/jellyribbontexture80qa-jellyribbontexture80qa.md"
+  },
+  {
+    "id": "jellyv40qa-jellyv40qa",
+    "class": "JellyV40QA",
+    "source": "Assets/Scripts/JellyV40QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/jellyv40qa-jellyv40qa.md"
+  },
+  {
+    "id": "jellywallqa-jellywallqa",
+    "class": "JellyWallQA",
+    "source": "Assets/Scripts/JellyWallQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/jellywallqa-jellywallqa.md"
+  },
+  {
+    "id": "leaguecalendarpreview-leaguecalendarpreview",
+    "class": "LeagueCalendarPreview",
+    "source": "Assets/Scripts/LeagueCalendarPreview.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leaguecalendarpreview-leaguecalendarpreview.md"
+  },
+  {
+    "id": "leaguecalendarqa-leaguecalendarqa",
+    "class": "LeagueCalendarQA",
+    "source": "Assets/Scripts/LeagueCalendarQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leaguecalendarqa-leaguecalendarqa.md"
+  },
+  {
+    "id": "leaguefontpreview-leaguefontpreview",
+    "class": "LeagueFontPreview",
+    "source": "Assets/Scripts/LeagueFontPreview.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leaguefontpreview-leaguefontpreview.md"
+  },
+  {
+    "id": "leagueqa-leagueqa",
+    "class": "LeagueQA",
+    "source": "Assets/Scripts/LeagueQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leagueqa-leagueqa.md"
+  },
+  {
+    "id": "leaguev66qa-leaguev66qa",
+    "class": "LeagueV66QA",
+    "source": "Assets/Scripts/LeagueV66QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leaguev66qa-leaguev66qa.md"
+  },
+  {
+    "id": "leaguev79qa-leaguev79qa",
+    "class": "LeagueV79QA",
+    "source": "Assets/Scripts/LeagueV79QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leaguev79qa-leaguev79qa.md"
+  },
+  {
+    "id": "leveleditor-fusioncoreqa-fusioncoreqa",
+    "class": "FusionCoreQA",
+    "source": "Assets/Scripts/LevelEditor/FusionCoreQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-fusioncoreqa-fusioncoreqa.md"
+  },
+  {
+    "id": "leveleditor-fusiondeviceqa-fusiondeviceqa",
+    "class": "FusionDeviceQA",
+    "source": "Assets/Scripts/LevelEditor/FusionDeviceQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-fusiondeviceqa-fusiondeviceqa.md"
+  },
+  {
+    "id": "leveleditor-fusionflowqa-fusionflowqa",
+    "class": "FusionFlowQA",
+    "source": "Assets/Scripts/LevelEditor/FusionFlowQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-fusionflowqa-fusionflowqa.md"
+  },
+  {
+    "id": "leveleditor-fusionqa-fusionqa",
+    "class": "FusionQA",
+    "source": "Assets/Scripts/LevelEditor/FusionQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-fusionqa-fusionqa.md"
+  },
+  {
+    "id": "leveleditor-fusionrearqa-fusionrearqa",
+    "class": "FusionRearQA",
+    "source": "Assets/Scripts/LevelEditor/FusionRearQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-fusionrearqa-fusionrearqa.md"
+  },
+  {
+    "id": "leveleditor-fusionsuperrangeqa-fusionsuperrangeqa",
+    "class": "FusionSuperRangeQA",
+    "source": "Assets/Scripts/LevelEditor/FusionSuperRangeQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-fusionsuperrangeqa-fusionsuperrangeqa.md"
+  },
+  {
+    "id": "leveleditor-levelbalancepolicy-balancefirepolicy",
+    "class": "BalanceFirePolicy",
+    "source": "Assets/Scripts/LevelEditor/LevelBalancePolicy.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-levelbalancepolicy-balancefirepolicy.md"
+  },
+  {
+    "id": "leveleditor-levelbalancerunner-levelbalancerunner",
+    "class": "LevelBalanceRunner",
+    "source": "Assets/Scripts/LevelEditor/LevelBalanceRunner.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-levelbalancerunner-levelbalancerunner.md"
+  },
+  {
+    "id": "leveleditor-leveleditorapp-leveleditorapp",
+    "class": "LevelEditorApp",
+    "source": "Assets/Scripts/LevelEditor/LevelEditorApp.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-leveleditorapp-leveleditorapp.md"
+  },
+  {
+    "id": "leveleditor-leveleditorplaytest-leveleditorplaytest",
+    "class": "LevelEditorPlaytest",
+    "source": "Assets/Scripts/LevelEditor/LevelEditorPlaytest.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-leveleditorplaytest-leveleditorplaytest.md"
+  },
+  {
+    "id": "leveleditor-openingbalancechecks-openingbalancechecks",
+    "class": "OpeningBalanceChecks",
+    "source": "Assets/Scripts/LevelEditor/OpeningBalanceChecks.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/leveleditor-openingbalancechecks-openingbalancechecks.md"
+  },
+  {
+    "id": "levelentry88qa-levelentry88qa",
+    "class": "LevelEntry88QA",
+    "source": "Assets/Scripts/LevelEntry88QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/levelentry88qa-levelentry88qa.md"
+  },
+  {
+    "id": "levelfivesettlementqa-levelfivesettlementqa",
+    "class": "LevelFiveSettlementQA",
+    "source": "Assets/Scripts/LevelFiveSettlementQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/levelfivesettlementqa-levelfivesettlementqa.md"
+  },
+  {
+    "id": "lifecycleqa-lifecycleqa",
+    "class": "LifecycleQA",
+    "source": "Assets/Scripts/LifecycleQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/lifecycleqa-lifecycleqa.md"
+  },
+  {
+    "id": "loadingqa-loadingqa",
+    "class": "LoadingQA",
+    "source": "Assets/Scripts/LoadingQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/loadingqa-loadingqa.md"
+  },
+  {
+    "id": "mobile73qa-mobile73qa",
+    "class": "Mobile73QA",
+    "source": "Assets/Scripts/Mobile73QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobile73qa-mobile73qa.md"
+  },
+  {
+    "id": "mobileframestats-mobileframestats",
+    "class": "MobileFrameStats",
+    "source": "Assets/Scripts/MobileFrameStats.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobileframestats-mobileframestats.md"
+  },
+  {
+    "id": "mobilev54qa-mobilev54qa",
+    "class": "MobileV54QA",
+    "source": "Assets/Scripts/MobileV54QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobilev54qa-mobilev54qa.md"
+  },
+  {
+    "id": "mobilev55handoffqa-mobilev55handoffqa",
+    "class": "MobileV55HandoffQA",
+    "source": "Assets/Scripts/MobileV55HandoffQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobilev55handoffqa-mobilev55handoffqa.md"
+  },
+  {
+    "id": "mobilev55stressqa-mobilev55stressqa",
+    "class": "MobileV55StressQA",
+    "source": "Assets/Scripts/MobileV55StressQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobilev55stressqa-mobilev55stressqa.md"
+  },
+  {
+    "id": "mobilev56brickqa-mobilev56brickqa",
+    "class": "MobileV56BrickQA",
+    "source": "Assets/Scripts/MobileV56BrickQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobilev56brickqa-mobilev56brickqa.md"
+  },
+  {
+    "id": "mobilev57inputqa-mobilev57inputqa",
+    "class": "MobileV57InputQA",
+    "source": "Assets/Scripts/MobileV57InputQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobilev57inputqa-mobilev57inputqa.md"
+  },
+  {
+    "id": "mobilev58outcomeqa-mobilev58outcomeqa",
+    "class": "MobileV58OutcomeQA",
+    "source": "Assets/Scripts/MobileV58OutcomeQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/mobilev58outcomeqa-mobilev58outcomeqa.md"
+  },
+  {
+    "id": "onboardingqa-onboardingqa",
+    "class": "OnboardingQA",
+    "source": "Assets/Scripts/OnboardingQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/onboardingqa-onboardingqa.md"
+  },
+  {
+    "id": "opening81qa-opening81qa",
+    "class": "Opening81QA",
+    "source": "Assets/Scripts/Opening81QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/opening81qa-opening81qa.md"
+  },
+  {
+    "id": "openingeffectsqa-openingeffectsqa",
+    "class": "OpeningEffectsQA",
+    "source": "Assets/Scripts/OpeningEffectsQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/openingeffectsqa-openingeffectsqa.md"
+  },
+  {
+    "id": "optimizationv76qa-optimizationv76qa",
+    "class": "OptimizationV76QA",
+    "source": "Assets/Scripts/OptimizationV76QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/optimizationv76qa-optimizationv76qa.md"
+  },
+  {
+    "id": "packagecleanupqa-packagecleanupqa",
+    "class": "PackageCleanupQA",
+    "source": "Assets/Scripts/PackageCleanupQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/packagecleanupqa-packagecleanupqa.md"
+  },
+  {
+    "id": "pastelqa-pastelqa",
+    "class": "PastelQA",
+    "source": "Assets/Scripts/PastelQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/pastelqa-pastelqa.md"
+  },
+  {
+    "id": "playerhaptics71-playerhaptics71",
+    "class": "PlayerHaptics71",
+    "source": "Assets/Scripts/PlayerHaptics71.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/playerhaptics71-playerhaptics71.md"
+  },
+  {
+    "id": "playtestmetrics76-playtestmetrics76",
+    "class": "PlaytestMetrics76",
+    "source": "Assets/Scripts/PlaytestMetrics76.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/playtestmetrics76-playtestmetrics76.md"
+  },
+  {
+    "id": "prefetchreuse020qa-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/PrefetchReuse020QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/prefetchreuse020qa-appui.md"
+  },
+  {
+    "id": "prefetchreuse020qa-prefetchreuse020qa",
+    "class": "PrefetchReuse020QA",
+    "source": "Assets/Scripts/PrefetchReuse020QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/prefetchreuse020qa-prefetchreuse020qa.md"
+  },
+  {
+    "id": "refill80qa-gamesession",
+    "class": "GameSession",
+    "source": "Assets/Scripts/Refill80QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/refill80qa-gamesession.md"
+  },
+  {
+    "id": "refill80qa-refill80qa",
+    "class": "Refill80QA",
+    "source": "Assets/Scripts/Refill80QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/refill80qa-refill80qa.md"
+  },
+  {
+    "id": "refillcolumnsqa-refillcolumnsqa",
+    "class": "RefillColumnsQA",
+    "source": "Assets/Scripts/RefillColumnsQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/refillcolumnsqa-refillcolumnsqa.md"
+  },
+  {
+    "id": "refillv63qa-refillv63qa",
+    "class": "RefillV63QA",
+    "source": "Assets/Scripts/RefillV63QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/refillv63qa-refillv63qa.md"
+  },
+  {
+    "id": "resultnosplashf4qa-resultnosplashf4qa",
+    "class": "ResultNoSplashF4QA",
+    "source": "Assets/Scripts/ResultNoSplashF4QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/resultnosplashf4qa-resultnosplashf4qa.md"
+  },
+  {
+    "id": "round4audit-round4audit",
+    "class": "Round4Audit",
+    "source": "Assets/Scripts/Round4Audit.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/round4audit-round4audit.md"
+  },
+  {
+    "id": "round5demo-round5demo",
+    "class": "Round5Demo",
+    "source": "Assets/Scripts/Round5Demo.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/round5demo-round5demo.md"
+  },
+  {
+    "id": "round6demo-round6demo",
+    "class": "Round6Demo",
+    "source": "Assets/Scripts/Round6Demo.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/round6demo-round6demo.md"
+  },
+  {
+    "id": "secondgroupintegrationqa-secondgroupintegrationqa",
+    "class": "SecondGroupIntegrationQA",
+    "source": "Assets/Scripts/SecondGroupIntegrationQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/secondgroupintegrationqa-secondgroupintegrationqa.md"
+  },
+  {
+    "id": "secondgroupintegrationqa-secondgrouppreview",
+    "class": "SecondGroupPreview",
+    "source": "Assets/Scripts/SecondGroupIntegrationQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/secondgroupintegrationqa-secondgrouppreview.md"
+  },
+  {
+    "id": "settingscpreview-settingscpreview",
+    "class": "SettingsCPreview",
+    "source": "Assets/Scripts/SettingsCPreview.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/settingscpreview-settingscpreview.md"
+  },
+  {
+    "id": "settingscqa-settingscqa",
+    "class": "SettingsCQA",
+    "source": "Assets/Scripts/SettingsCQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/settingscqa-settingscqa.md"
+  },
+  {
+    "id": "settlement82qa-settlement82qa",
+    "class": "Settlement82QA",
+    "source": "Assets/Scripts/Settlement82QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/settlement82qa-settlement82qa.md"
+  },
+  {
+    "id": "sevenspecial80qa-sevenspecial80qa",
+    "class": "SevenSpecial80QA",
+    "source": "Assets/Scripts/SevenSpecial80QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/sevenspecial80qa-sevenspecial80qa.md"
+  },
+  {
+    "id": "sfxv87qa-sfxv87qa",
+    "class": "SfxV87QA",
+    "source": "Assets/Scripts/SfxV87QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/sfxv87qa-sfxv87qa.md"
+  },
+  {
+    "id": "soundservice-soundservice",
+    "class": "SoundService",
+    "source": "Assets/Scripts/SoundService.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/soundservice-soundservice.md"
+  },
+  {
+    "id": "specialgenerationaudit-specialgenerationaudit",
+    "class": "SpecialGenerationAudit",
+    "source": "Assets/Scripts/SpecialGenerationAudit.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/specialgenerationaudit-specialgenerationaudit.md"
+  },
+  {
+    "id": "streakrewardv74qa-streakrewardv74qa",
+    "class": "StreakRewardV74QA",
+    "source": "Assets/Scripts/StreakRewardV74QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/streakrewardv74qa-streakrewardv74qa.md"
+  },
+  {
+    "id": "streakv61qa-streakv61qa",
+    "class": "StreakV61QA",
+    "source": "Assets/Scripts/StreakV61QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/streakv61qa-streakv61qa.md"
+  },
+  {
+    "id": "systemsv64qa-systemsv64qa",
+    "class": "SystemsV64QA",
+    "source": "Assets/Scripts/SystemsV64QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/systemsv64qa-systemsv64qa.md"
+  },
+  {
+    "id": "thirdgroupqa-thirdgroupqa",
+    "class": "ThirdGroupQA",
+    "source": "Assets/Scripts/ThirdGroupQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/thirdgroupqa-thirdgroupqa.md"
+  },
+  {
+    "id": "ui-activitycarousel-activitycarousel",
+    "class": "ActivityCarousel",
+    "source": "Assets/Scripts/UI/ActivityCarousel.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-activitycarousel-activitycarousel.md"
+  },
+  {
+    "id": "ui-activityjellymotion-activityjellymotion",
+    "class": "ActivityJellyMotion",
+    "source": "Assets/Scripts/UI/ActivityJellyMotion.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "ActivityJellyMotion",
+    "recipe": "references/recipes/ui-activityjellymotion-activityjellymotion.md"
+  },
+  {
+    "id": "ui-alphabetintroductionview-boosters-boosterstoryactor",
+    "class": "BoosterStoryActor",
+    "source": "Assets/Scripts/UI/AlphabetIntroductionView.Boosters.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-alphabetintroductionview-boosters-boosterstoryactor.md"
+  },
+  {
+    "id": "ui-alphabetintroductionview-alphabetintroductionview",
+    "class": "AlphabetIntroductionView",
+    "source": "Assets/Scripts/UI/AlphabetIntroductionView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-alphabetintroductionview-alphabetintroductionview.md"
+  },
+  {
+    "id": "ui-alphabetintroductionview-motion-alphabetintroductionview",
+    "class": "AlphabetIntroductionView",
+    "source": "Assets/Scripts/UI/AlphabetIntroductionView.Motion.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-alphabetintroductionview-motion-alphabetintroductionview.md"
+  },
+  {
+    "id": "ui-alphabettweenextensions-alphabettweenextensions",
+    "class": "AlphabetTweenExtensions",
+    "source": "Assets/Scripts/UI/AlphabetTweenExtensions.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-alphabettweenextensions-alphabettweenextensions.md"
+  },
+  {
+    "id": "ui-appui-alphabet-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.Alphabet.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-alphabet-appui.md"
+  },
+  {
+    "id": "ui-appui-boosterunlocks-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.BoosterUnlocks.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-boosterunlocks-appui.md"
+  },
+  {
+    "id": "ui-appui-chapteropening70-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.ChapterOpening70.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-chapteropening70-appui.md"
+  },
+  {
+    "id": "ui-appui-contentloading-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.ContentLoading.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-contentloading-appui.md"
+  },
+  {
+    "id": "ui-appui-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-appui.md"
+  },
+  {
+    "id": "ui-appui-leagueactivity-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.LeagueActivity.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-leagueactivity-appui.md"
+  },
+  {
+    "id": "ui-appui-leagueflow-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.LeagueFlow.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-leagueflow-appui.md"
+  },
+  {
+    "id": "ui-appui-playersettings71-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.PlayerSettings71.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-playersettings71-appui.md"
+  },
+  {
+    "id": "ui-appui-settingsc-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.SettingsC.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-settingsc-appui.md"
+  },
+  {
+    "id": "ui-appui-shop-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.Shop.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-shop-appui.md"
+  },
+  {
+    "id": "ui-appui-streakreward-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.StreakReward.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-streakreward-appui.md"
+  },
+  {
+    "id": "ui-appui-streakreward-streakrewardglow",
+    "class": "StreakRewardGlow",
+    "source": "Assets/Scripts/UI/AppUI.StreakReward.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-streakreward-streakrewardglow.md"
+  },
+  {
+    "id": "ui-appui-streakreward-streakrewardpresentation",
+    "class": "StreakRewardPresentation",
+    "source": "Assets/Scripts/UI/AppUI.StreakReward.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-streakreward-streakrewardpresentation.md"
+  },
+  {
+    "id": "ui-appui-tutorial-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/AppUI.Tutorial.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-appui-tutorial-appui.md"
+  },
+  {
+    "id": "ui-battlehudsummary-battlehudsummary",
+    "class": "BattleHUDSummary",
+    "source": "Assets/Scripts/UI/BattleHUDSummary.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-battlehudsummary-battlehudsummary.md"
+  },
+  {
+    "id": "ui-battleinterfacetour-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/BattleInterfaceTour.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-battleinterfacetour-appui.md"
+  },
+  {
+    "id": "ui-battleinterfacetour-battleinterfacetour",
+    "class": "BattleInterfaceTour",
+    "source": "Assets/Scripts/UI/BattleInterfaceTour.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-battleinterfacetour-battleinterfacetour.md"
+  },
+  {
+    "id": "ui-battlejellyart-collectionflightmotion",
+    "class": "CollectionFlightMotion",
+    "source": "Assets/Scripts/UI/BattleJellyArt.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "RewardFlight",
+    "recipe": "references/recipes/ui-battlejellyart-collectionflightmotion.md"
+  },
+  {
+    "id": "ui-battlescoremeter-battlescoremeter",
+    "class": "BattleScoreMeter",
+    "source": "Assets/Scripts/UI/BattleScoreMeter.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-battlescoremeter-battlescoremeter.md"
+  },
+  {
+    "id": "ui-battleuiart-battleaimhint",
+    "class": "BattleAimHint",
+    "source": "Assets/Scripts/UI/BattleUIArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-battleuiart-battleaimhint.md"
+  },
+  {
+    "id": "ui-bosshud-bosshud",
+    "class": "BossHUD",
+    "source": "Assets/Scripts/UI/BossHUD.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-bosshud-bosshud.md"
+  },
+  {
+    "id": "ui-chaincollectionhud-chaincollectionhud",
+    "class": "ChainCollectionHUD",
+    "source": "Assets/Scripts/UI/ChainCollectionHUD.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-chaincollectionhud-chaincollectionhud.md"
+  },
+  {
+    "id": "ui-chaincollectionhud-chaintaskcard",
+    "class": "ChainTaskCard",
+    "source": "Assets/Scripts/UI/ChainCollectionHUD.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-chaincollectionhud-chaintaskcard.md"
+  },
+  {
+    "id": "ui-chainratingview-chainratingview",
+    "class": "ChainRatingView",
+    "source": "Assets/Scripts/UI/ChainRatingView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-chainratingview-chainratingview.md"
+  },
+  {
+    "id": "ui-chapteropening70-chapteropening70",
+    "class": "ChapterOpening70",
+    "source": "Assets/Scripts/UI/ChapterOpening70.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-chapteropening70-chapteropening70.md"
+  },
+  {
+    "id": "ui-collectiongoalentrance-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/CollectionGoalEntrance.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-collectiongoalentrance-appui.md"
+  },
+  {
+    "id": "ui-collectiongoalentrance-collectiongoalentrance",
+    "class": "CollectionGoalEntrance",
+    "source": "Assets/Scripts/UI/CollectionGoalEntrance.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "CollectionGoalEntrance",
+    "recipe": "references/recipes/ui-collectiongoalentrance-collectiongoalentrance.md"
+  },
+  {
+    "id": "ui-encouragementdrag-encouragementdrag",
+    "class": "EncouragementDrag",
+    "source": "Assets/Scripts/UI/EncouragementDrag.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "EncouragementDrag",
+    "recipe": "references/recipes/ui-encouragementdrag-encouragementdrag.md"
+  },
+  {
+    "id": "ui-failurecatanimation-failurecatanimation",
+    "class": "FailureCatAnimation",
+    "source": "Assets/Scripts/UI/FailureCatAnimation.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "FrameSequence",
+    "recipe": "references/recipes/ui-failurecatanimation-failurecatanimation.md"
+  },
+  {
+    "id": "ui-failurepresentation-failurepresentation",
+    "class": "FailurePresentation",
+    "source": "Assets/Scripts/UI/FailurePresentation.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "FailurePresentation",
+    "recipe": "references/recipes/ui-failurepresentation-failurepresentation.md"
+  },
+  {
+    "id": "ui-gametypography-gametypography",
+    "class": "GameTypography",
+    "source": "Assets/Scripts/UI/GameTypography.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-gametypography-gametypography.md"
+  },
+  {
+    "id": "ui-goalcelebration-goalcelebration",
+    "class": "GoalCelebration",
+    "source": "Assets/Scripts/UI/GoalCelebration.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-goalcelebration-goalcelebration.md"
+  },
+  {
+    "id": "ui-homefeedbackview-homefeedbackview",
+    "class": "HomeFeedbackView",
+    "source": "Assets/Scripts/UI/HomeFeedbackView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-homefeedbackview-homefeedbackview.md"
+  },
+  {
+    "id": "ui-homewordmarkwiggle-homewordmarkwiggle",
+    "class": "HomeWordmarkWiggle",
+    "source": "Assets/Scripts/UI/HomeWordmarkWiggle.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "HomeWordmarkWiggle",
+    "recipe": "references/recipes/ui-homewordmarkwiggle-homewordmarkwiggle.md"
+  },
+  {
+    "id": "ui-ingamefeedbackview-ingamefeedbackview",
+    "class": "InGameFeedbackView",
+    "source": "Assets/Scripts/UI/InGameFeedbackView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-ingamefeedbackview-ingamefeedbackview.md"
+  },
+  {
+    "id": "ui-jellychapterorb-jellychapterorb",
+    "class": "JellyChapterOrb",
+    "source": "Assets/Scripts/UI/JellyChapterOrb.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-jellychapterorb-jellychapterorb.md"
+  },
+  {
+    "id": "ui-jellyjourney80-jellyjourney80",
+    "class": "JellyJourney80",
+    "source": "Assets/Scripts/UI/JellyJourney80.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-jellyjourney80-jellyjourney80.md"
+  },
+  {
+    "id": "ui-jellyjourneymotion80-jellylevelmotion80",
+    "class": "JellyLevelMotion80",
+    "source": "Assets/Scripts/UI/JellyJourneyMotion80.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-jellyjourneymotion80-jellylevelmotion80.md"
+  },
+  {
+    "id": "ui-jellyjourneymotion80-jellyrouteribbon80",
+    "class": "JellyRouteRibbon80",
+    "source": "Assets/Scripts/UI/JellyJourneyMotion80.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-jellyjourneymotion80-jellyrouteribbon80.md"
+  },
+  {
+    "id": "ui-jellylogointro-jellyglyph",
+    "class": "JellyGlyph",
+    "source": "Assets/Scripts/UI/JellyLogoIntro.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "JellyGlyph",
+    "recipe": "references/recipes/ui-jellylogointro-jellyglyph.md"
+  },
+  {
+    "id": "ui-jellylogointro-jellylogointro",
+    "class": "JellyLogoIntro",
+    "source": "Assets/Scripts/UI/JellyLogoIntro.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "JellyLogoIntro",
+    "recipe": "references/recipes/ui-jellylogointro-jellylogointro.md"
+  },
+  {
+    "id": "ui-journeyart-chaptertransitionpreview",
+    "class": "ChapterTransitionPreview",
+    "source": "Assets/Scripts/UI/JourneyArt.cs",
+    "status": "inactive-preview",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-journeyart-chaptertransitionpreview.md"
+  },
+  {
+    "id": "ui-leaguebannerstatus-leaguebannerstatus",
+    "class": "LeagueBannerStatus",
+    "source": "Assets/Scripts/UI/LeagueBannerStatus.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-leaguebannerstatus-leaguebannerstatus.md"
+  },
+  {
+    "id": "ui-leaguematchpresentation-leaguematchpresentation",
+    "class": "LeagueMatchPresentation",
+    "source": "Assets/Scripts/UI/LeagueMatchPresentation.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-leaguematchpresentation-leaguematchpresentation.md"
+  },
+  {
+    "id": "ui-leaguemotionart-leaguemedalpresentation",
+    "class": "LeagueMedalPresentation",
+    "source": "Assets/Scripts/UI/LeagueMotionArt.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "LeagueMedalPresentation",
+    "recipe": "references/recipes/ui-leaguemotionart-leaguemedalpresentation.md"
+  },
+  {
+    "id": "ui-leaguerankingview-leaguejelly",
+    "class": "LeagueJelly",
+    "source": "Assets/Scripts/UI/LeagueRankingView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-leaguerankingview-leaguejelly.md"
+  },
+  {
+    "id": "ui-leaguerankingview-leaguerankingview",
+    "class": "LeagueRankingView",
+    "source": "Assets/Scripts/UI/LeagueRankingView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-leaguerankingview-leaguerankingview.md"
+  },
+  {
+    "id": "ui-lessoncollectionflight-lessoncollectionflight",
+    "class": "LessonCollectionFlight",
+    "source": "Assets/Scripts/UI/LessonCollectionFlight.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-lessoncollectionflight-lessoncollectionflight.md"
+  },
+  {
+    "id": "ui-loadingpresentation-loadingpresentation",
+    "class": "LoadingPresentation",
+    "source": "Assets/Scripts/UI/LoadingPresentation.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "LoadingPresentation",
+    "recipe": "references/recipes/ui-loadingpresentation-loadingpresentation.md"
+  },
+  {
+    "id": "ui-openingintroduction-appui",
+    "class": "AppUI",
+    "source": "Assets/Scripts/UI/OpeningIntroduction.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-openingintroduction-appui.md"
+  },
+  {
+    "id": "ui-openingintroduction-openingruledemo",
+    "class": "OpeningRuleDemo",
+    "source": "Assets/Scripts/UI/OpeningIntroduction.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-openingintroduction-openingruledemo.md"
+  },
+  {
+    "id": "ui-paintingcollectionpresentation-paintingcollectionpresentation",
+    "class": "PaintingCollectionPresentation",
+    "source": "Assets/Scripts/UI/PaintingCollectionPresentation.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-paintingcollectionpresentation-paintingcollectionpresentation.md"
+  },
+  {
+    "id": "ui-playabletutorialguide-playabletutorialguide",
+    "class": "PlayableTutorialGuide",
+    "source": "Assets/Scripts/UI/PlayableTutorialGuide.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-playabletutorialguide-playabletutorialguide.md"
+  },
+  {
+    "id": "ui-referencechapterview-chapterhomeview",
+    "class": "ChapterHomeView",
+    "source": "Assets/Scripts/UI/ReferenceChapterView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-referencechapterview-chapterhomeview.md"
+  },
+  {
+    "id": "ui-resultaudiotimeline-resultaudiotimeline",
+    "class": "ResultAudioTimeline",
+    "source": "Assets/Scripts/UI/ResultAudioTimeline.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "ResultAudioTimeline",
+    "recipe": "references/recipes/ui-resultaudiotimeline-resultaudiotimeline.md"
+  },
+  {
+    "id": "ui-round6nav-round6nav",
+    "class": "Round6Nav",
+    "source": "Assets/Scripts/UI/Round6Nav.cs",
+    "status": "legacy-route-disabled",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-round6nav-round6nav.md"
+  },
+  {
+    "id": "ui-scoregainpresentation-scoregainpresentation",
+    "class": "ScoreGainPresentation",
+    "source": "Assets/Scripts/UI/ScoreGainPresentation.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-scoregainpresentation-scoregainpresentation.md"
+  },
+  {
+    "id": "ui-settingsswitch77-settingsswitch77",
+    "class": "SettingsSwitch77",
+    "source": "Assets/Scripts/UI/SettingsSwitch77.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "SettingsSwitch77",
+    "recipe": "references/recipes/ui-settingsswitch77-settingsswitch77.md"
+  },
+  {
+    "id": "ui-starchargeview-starchargeview",
+    "class": "StarChargeView",
+    "source": "Assets/Scripts/UI/StarChargeView.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "StarChargeView",
+    "recipe": "references/recipes/ui-starchargeview-starchargeview.md"
+  },
+  {
+    "id": "ui-tutorialmotionboard-tutorialmotionboard",
+    "class": "TutorialMotionBoard",
+    "source": "Assets/Scripts/UI/TutorialMotionBoard.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-tutorialmotionboard-tutorialmotionboard.md"
+  },
+  {
+    "id": "ui-uibounce-jellybuttonmesh",
+    "class": "JellyButtonMesh",
+    "source": "Assets/Scripts/UI/UIBounce.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-uibounce-jellybuttonmesh.md"
+  },
+  {
+    "id": "ui-uibounce-uibounce",
+    "class": "UIBounce",
+    "source": "Assets/Scripts/UI/UIBounce.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "UIBounce",
+    "recipe": "references/recipes/ui-uibounce-uibounce.md"
+  },
+  {
+    "id": "ui-uicraft-uicraft",
+    "class": "UICraft",
+    "source": "Assets/Scripts/UI/UICraft.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-uicraft-uicraft.md"
+  },
+  {
+    "id": "ui-uicraft-uifloat",
+    "class": "UIFloat",
+    "source": "Assets/Scripts/UI/UICraft.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "UIFloat",
+    "recipe": "references/recipes/ui-uicraft-uifloat.md"
+  },
+  {
+    "id": "ui-victorycatanimation-victorycatanimation",
+    "class": "VictoryCatAnimation",
+    "source": "Assets/Scripts/UI/VictoryCatAnimation.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "FrameSequence",
+    "recipe": "references/recipes/ui-victorycatanimation-victorycatanimation.md"
+  },
+  {
+    "id": "ui-victoryfinale-victoryfinale",
+    "class": "VictoryFinale",
+    "source": "Assets/Scripts/UI/VictoryFinale.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-victoryfinale-victoryfinale.md"
+  },
+  {
+    "id": "ui-victorypresentation-victorypresentation",
+    "class": "VictoryPresentation",
+    "source": "Assets/Scripts/UI/VictoryPresentation.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "VictoryPresentation",
+    "recipe": "references/recipes/ui-victorypresentation-victorypresentation.md"
+  },
+  {
+    "id": "ui-victorypresentation-stars-victorypresentation",
+    "class": "VictoryPresentation",
+    "source": "Assets/Scripts/UI/VictoryPresentation.Stars.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "VictoryPresentation",
+    "recipe": "references/recipes/ui-victorypresentation-stars-victorypresentation.md"
+  },
+  {
+    "id": "ui-victoryroundpreparation-victoryroundpreparation",
+    "class": "VictoryRoundPreparation",
+    "source": "Assets/Scripts/UI/VictoryRoundPreparation.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/ui-victoryroundpreparation-victoryroundpreparation.md"
+  },
+  {
+    "id": "victoryfinaleqa-victoryfinalepreview",
+    "class": "VictoryFinalePreview",
+    "source": "Assets/Scripts/VictoryFinaleQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/victoryfinaleqa-victoryfinalepreview.md"
+  },
+  {
+    "id": "victoryfinaleqa-victoryfinaleqa",
+    "class": "VictoryFinaleQA",
+    "source": "Assets/Scripts/VictoryFinaleQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/victoryfinaleqa-victoryfinaleqa.md"
+  },
+  {
+    "id": "victoryqa-victoryqa",
+    "class": "VictoryQA",
+    "source": "Assets/Scripts/VictoryQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/victoryqa-victoryqa.md"
+  },
+  {
+    "id": "victoryrace020qa-victoryrace020qa",
+    "class": "VictoryRace020QA",
+    "source": "Assets/Scripts/VictoryRace020QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/victoryrace020qa-victoryrace020qa.md"
+  },
+  {
+    "id": "victoryspeedr3qa-victoryspeedr3qa",
+    "class": "VictorySpeedR3QA",
+    "source": "Assets/Scripts/VictorySpeedR3QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/victoryspeedr3qa-victoryspeedr3qa.md"
+  },
+  {
+    "id": "wechatadaptation87qa-wechatadaptation87qa",
+    "class": "WeChatAdaptation87QA",
+    "source": "Assets/Scripts/WeChatAdaptation87QA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/wechatadaptation87qa-wechatadaptation87qa.md"
+  },
+  {
+    "id": "windowsdemorecorder-demorecorderbootstrap",
+    "class": "DemoRecorderBootstrap",
+    "source": "Assets/Scripts/WindowsDemoRecorder.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/windowsdemorecorder-demorecorderbootstrap.md"
+  },
+  {
+    "id": "windowsdemorecorder-windowsdemorecorder",
+    "class": "WindowsDemoRecorder",
+    "source": "Assets/Scripts/WindowsDemoRecorder.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/windowsdemorecorder-windowsdemorecorder.md"
+  },
+  {
+    "id": "world-abilityart-abilityframefx",
+    "class": "AbilityFrameFx",
+    "source": "Assets/Scripts/World/AbilityArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-abilityart-abilityframefx.md"
+  },
+  {
+    "id": "world-boarddisplay-boarddisplay",
+    "class": "BoardDisplay",
+    "source": "Assets/Scripts/World/BoardDisplay.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-boarddisplay-boarddisplay.md"
+  },
+  {
+    "id": "world-boardsurface-boardsurface",
+    "class": "BoardSurface",
+    "source": "Assets/Scripts/World/BoardSurface.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-boardsurface-boardsurface.md"
+  },
+  {
+    "id": "world-bossbody-bossbody",
+    "class": "BossBody",
+    "source": "Assets/Scripts/World/BossBody.cs",
+    "status": "mixed-physics-presentation-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-bossbody-bossbody.md"
+  },
+  {
+    "id": "world-camerajuice-camerajuice",
+    "class": "CameraJuice",
+    "source": "Assets/Scripts/World/CameraJuice.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-camerajuice-camerajuice.md"
+  },
+  {
+    "id": "world-chaincubeart-chainbondview",
+    "class": "ChainBondView",
+    "source": "Assets/Scripts/World/ChainCubeArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chaincubeart-chainbondview.md"
+  },
+  {
+    "id": "world-chaincubeart-chaincubeburst",
+    "class": "ChainCubeBurst",
+    "source": "Assets/Scripts/World/ChainCubeArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chaincubeart-chaincubeburst.md"
+  },
+  {
+    "id": "world-chaincubeart-chaincubeidle",
+    "class": "ChainCubeIdle",
+    "source": "Assets/Scripts/World/ChainCubeArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chaincubeart-chaincubeidle.md"
+  },
+  {
+    "id": "world-chaincubeart-chaincubeview",
+    "class": "ChainCubeView",
+    "source": "Assets/Scripts/World/ChainCubeArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chaincubeart-chaincubeview.md"
+  },
+  {
+    "id": "world-chainvisualart-chainbrickview",
+    "class": "ChainBrickView",
+    "source": "Assets/Scripts/World/ChainVisualArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chainvisualart-chainbrickview.md"
+  },
+  {
+    "id": "world-chainvisualart-chainglint",
+    "class": "ChainGlint",
+    "source": "Assets/Scripts/World/ChainVisualArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chainvisualart-chainglint.md"
+  },
+  {
+    "id": "world-chainvisualart-chainidlesprite",
+    "class": "ChainIdleSprite",
+    "source": "Assets/Scripts/World/ChainVisualArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chainvisualart-chainidlesprite.md"
+  },
+  {
+    "id": "world-chainvisualart-chainspritefx",
+    "class": "ChainSpriteFx",
+    "source": "Assets/Scripts/World/ChainVisualArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chainvisualart-chainspritefx.md"
+  },
+  {
+    "id": "world-chainvisualart-chainstoneview",
+    "class": "ChainStoneView",
+    "source": "Assets/Scripts/World/ChainVisualArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-chainvisualart-chainstoneview.md"
+  },
+  {
+    "id": "world-combatfeedback79-combatfeedback79",
+    "class": "CombatFeedback79",
+    "source": "Assets/Scripts/World/CombatFeedback79.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-combatfeedback79-combatfeedback79.md"
+  },
+  {
+    "id": "world-electriccircuit-electriccircuit",
+    "class": "ElectricCircuit",
+    "source": "Assets/Scripts/World/ElectricCircuit.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-electriccircuit-electriccircuit.md"
+  },
+  {
+    "id": "world-fusionballbudgetview-fusionballbudgetview",
+    "class": "FusionBallBudgetView",
+    "source": "Assets/Scripts/World/FusionBallBudgetView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-fusionballbudgetview-fusionballbudgetview.md"
+  },
+  {
+    "id": "world-gameplayflight-flighttrail",
+    "class": "FlightTrail",
+    "source": "Assets/Scripts/World/GameplayFlight.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-gameplayflight-flighttrail.md"
+  },
+  {
+    "id": "world-gardensceneart-gardensceneart",
+    "class": "GardenSceneArt",
+    "source": "Assets/Scripts/World/GardenSceneArt.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-gardensceneart-gardensceneart.md"
+  },
+  {
+    "id": "world-ingotspecialfx-ingotspecialfx",
+    "class": "IngotSpecialFx",
+    "source": "Assets/Scripts/World/IngotSpecialFx.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-ingotspecialfx-ingotspecialfx.md"
+  },
+  {
+    "id": "world-jellybrickart-jellypoppool",
+    "class": "JellyPopPool",
+    "source": "Assets/Scripts/World/JellyBrickArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-jellybrickart-jellypoppool.md"
+  },
+  {
+    "id": "world-jellymotion-jellymotion",
+    "class": "JellyMotion",
+    "source": "Assets/Scripts/World/JellyMotion.cs",
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "JellyHit",
+    "recipe": "references/recipes/world-jellymotion-jellymotion.md"
+  },
+  {
+    "id": "world-jellywallframe-jellywallframe",
+    "class": "JellyWallFrame",
+    "source": "Assets/Scripts/World/JellyWallFrame.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-jellywallframe-jellywallframe.md"
+  },
+  {
+    "id": "world-juicegardenview-juicegardenview",
+    "class": "JuiceGardenView",
+    "source": "Assets/Scripts/World/JuiceGardenView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-juicegardenview-juicegardenview.md"
+  },
+  {
+    "id": "world-mainlineart-mainlinebrickview",
+    "class": "MainlineBrickView",
+    "source": "Assets/Scripts/World/MainlineArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-mainlineart-mainlinebrickview.md"
+  },
+  {
+    "id": "world-mainlineart-mainlinecanvas",
+    "class": "MainlineCanvas",
+    "source": "Assets/Scripts/World/MainlineArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-mainlineart-mainlinecanvas.md"
+  },
+  {
+    "id": "world-mainlineart-mainlineframefx",
+    "class": "MainlineFrameFx",
+    "source": "Assets/Scripts/World/MainlineArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-mainlineart-mainlineframefx.md"
+  },
+  {
+    "id": "world-openingcookieboxview-openingcookieboxview",
+    "class": "OpeningCookieBoxView",
+    "source": "Assets/Scripts/World/OpeningCookieBoxView.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-openingcookieboxview-openingcookieboxview.md"
+  },
+  {
+    "id": "world-openingcopperart-openingcoppereffect",
+    "class": "OpeningCopperEffect",
+    "source": "Assets/Scripts/World/OpeningCopperArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-openingcopperart-openingcoppereffect.md"
+  },
+  {
+    "id": "world-openingcopperart-openingcopperview",
+    "class": "OpeningCopperView",
+    "source": "Assets/Scripts/World/OpeningCopperArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-openingcopperart-openingcopperview.md"
+  },
+  {
+    "id": "world-openingthirdart-openingthirddirector",
+    "class": "OpeningThirdDirector",
+    "source": "Assets/Scripts/World/OpeningThirdArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-openingthirdart-openingthirddirector.md"
+  },
+  {
+    "id": "world-openingyarnart-openingyarneffect",
+    "class": "OpeningYarnEffect",
+    "source": "Assets/Scripts/World/OpeningYarnArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-openingyarnart-openingyarneffect.md"
+  },
+  {
+    "id": "world-openingyarnart-openingyarnview",
+    "class": "OpeningYarnView",
+    "source": "Assets/Scripts/World/OpeningYarnArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-openingyarnart-openingyarnview.md"
+  },
+  {
+    "id": "world-paintingboard-paintingboard",
+    "class": "PaintingBoard",
+    "source": "Assets/Scripts/World/PaintingBoard.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-paintingboard-paintingboard.md"
+  },
+  {
+    "id": "world-physicsbodies-ballbody",
+    "class": "BallBody",
+    "source": "Assets/Scripts/World/PhysicsBodies.cs",
+    "status": "mixed-physics-presentation-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-physicsbodies-ballbody.md"
+  },
+  {
+    "id": "world-physicsbodies-brickbody",
+    "class": "BrickBody",
+    "source": "Assets/Scripts/World/PhysicsBodies.cs",
+    "status": "mixed-physics-presentation-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-physicsbodies-brickbody.md"
+  },
+  {
+    "id": "world-physicsbodies-movingobstacle",
+    "class": "MovingObstacle",
+    "source": "Assets/Scripts/World/PhysicsBodies.cs",
+    "status": "mixed-physics-presentation-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-physicsbodies-movingobstacle.md"
+  },
+  {
+    "id": "world-pixelpieceart-pixelpieceart",
+    "class": "PixelPieceArt",
+    "source": "Assets/Scripts/World/PixelPieceArt.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-pixelpieceart-pixelpieceart.md"
+  },
+  {
+    "id": "world-rearcatlauncher-rearcatlauncher",
+    "class": "RearCatLauncher",
+    "source": "Assets/Scripts/World/RearCatLauncher.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-rearcatlauncher-rearcatlauncher.md"
+  },
+  {
+    "id": "world-sevenspecialart-sevenspecialfx",
+    "class": "SevenSpecialFx",
+    "source": "Assets/Scripts/World/SevenSpecialArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-sevenspecialart-sevenspecialfx.md"
+  },
+  {
+    "id": "world-sevenspecialart-sevenspecialidle",
+    "class": "SevenSpecialIdle",
+    "source": "Assets/Scripts/World/SevenSpecialArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-sevenspecialart-sevenspecialidle.md"
+  },
+  {
+    "id": "world-sevenspecialcinematics-sevensuctionfx",
+    "class": "SevenSuctionFx",
+    "source": "Assets/Scripts/World/SevenSpecialCinematics.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-sevenspecialcinematics-sevensuctionfx.md"
+  },
+  {
+    "id": "world-sevenspecialcinematics-sevenwindup",
+    "class": "SevenWindup",
+    "source": "Assets/Scripts/World/SevenSpecialCinematics.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-sevenspecialcinematics-sevenwindup.md"
+  },
+  {
+    "id": "world-streakballart-streakimpactpool",
+    "class": "StreakImpactPool",
+    "source": "Assets/Scripts/World/StreakBallArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-streakballart-streakimpactpool.md"
+  },
+  {
+    "id": "world-worldart-worldart",
+    "class": "WorldArt",
+    "source": "Assets/Scripts/World/WorldArt.cs",
+    "status": "non-animation",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-worldart-worldart.md"
+  },
+  {
+    "id": "world-worldart-worldfx",
+    "class": "WorldFx",
+    "source": "Assets/Scripts/World/WorldArt.cs",
+    "status": "requires-route-review",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/world-worldart-worldfx.md"
+  },
+  {
+    "id": "yarnqa-yarnqa",
+    "class": "YarnQA",
+    "source": "Assets/Scripts/YarnQA.cs",
+    "status": "test-fixture",
+    "delivery": "source-evidence-only",
+    "component": null,
+    "recipe": "references/recipes/yarnqa-yarnqa.md"
+  }
+]

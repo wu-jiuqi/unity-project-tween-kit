@@ -1,0 +1,26 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden {
+public static class ColorMatchLevel {
+ public const int Index=13;
+ public const float Pitch=.78f;
+ // Top two rows mix colors; lower three islands introduce matching safely.
+ public static readonly string[] Rows=System.Array.Empty<string>();
+ public static Vector2 Center(int col,int row)=>new Vector2((col-4)*Pitch,5.35f-row*Pitch);
+ public static LevelData Create(){throw new System.InvalidOperationException("Legacy routes are archived in v37");}
+}
+
+public sealed partial class GameSession {
+ public bool IsColorMatch=>CurrentLevel!=null&&CurrentLevel.colorMatch;
+ public int SelectedColor {get;private set;}
+ int burstColor;
+ public int SpawningColor=>burstColor;
+ public bool SelectColor(int color){
+  if(!IsColorMatch||!IsPlaying||IsPaused||queuedShot.HasValue||PendingBurstBalls>0||color<0||color>=3)return false;
+  SelectedColor=color;
+  if(loadedBall!=null)loadedBall.GetComponent<SpriteRenderer>().sprite=YarnArt.Ball(YarnVariant);
+  changed=true;StateChanged?.Invoke();return true;
+ }
+}
+}

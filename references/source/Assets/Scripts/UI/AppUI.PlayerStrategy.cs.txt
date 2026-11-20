@@ -1,0 +1,42 @@
+using System;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public static class PlayerStrategyTestBuild {
+ public static bool Enabled {
+  get {
+#if BOUNCE_STRATEGY_PLAYTEST
+   return true;
+#else
+   return false;
+#endif
+  }
+ }
+}
+public partial class AppUI {
+ void ShowStrategyShots(BalanceRound round,int page=0){
+  OpenModal("发射策略明细",UICraft.Green,940,1540);var d=round.strategy;
+  if(round.strategyVersion!=2||d==null){UICraft.Label(modal,"此记录未采集发射策略",0,100,790,160,34,UICraft.Ink);}
+  else {
+   UICraft.Label(modal,PlayerStrategyRecorder.Mode(d)+" · 比例为探索指标\n连发 "+d.overlapCount+" / 完整等待 "+d.settledCount+" / 可比较 "+d.comparableShots+"\n未归因目标 "+d.unattributedGoals+" · 明细"+(d.detailRetained?"保留":"已轮替"),0,480,790,190,29,UICraft.Ink);
+   int row=0;foreach(var s in d.shots.Skip(page*5).Take(5)){
+    string label=s.mode=="initial"?"初始":s.mode=="rapid"?"重叠连发":s.mode=="settled"?"完整结算后":"结算中";
+    UICraft.Label(modal,$"第{s.number}发 · {label} · {s.angle:0.0}°\n间隔 {(s.interval<0?"—":s.interval.ToString("0.00"))}秒 · 前组 {s.previousGroups} · 目标到账 {s.goals}\n预计 {s.predictedKind} → 实际 {s.firstHitKind??"未命中"}",0,260-row++*160,790,150,26,UICraft.Ink,TextAnchor.MiddleLeft);
+   }
+   UICraft.Button(modal,"上一页",-220,-510,330,78,UICraft.Blue,()=>ShowStrategyShots(round,Math.Max(0,page-1)),28).interactable=page>0;
+   UICraft.Button(modal,"下一页",220,-510,330,78,UICraft.Blue,()=>ShowStrategyShots(round,page+1),28).interactable=(page+1)*5<d.shots.Count;
+  }
+  UICraft.Button(modal,"返回本局",0,-660,720,90,UICraft.Green,()=>ShowBalanceRound(round),33);FitSettingsModal77(1540);
+ }
+ void ShowStrategyTestLevels(int page=0){
+  OpenModal("选择测试关卡",UICraft.Green,940,1540);
+  UICraft.Label(modal,"Windows 本地测试 · 可直接选择1–45关\n试玩进度与正式包分开保存",0,550,800,120,30,UICraft.Ink);
+  for(int i=page*15;i<Math.Min(45,(page+1)*15);i++){
+   int index=i;UICraft.Button(modal,"第"+(i+1)+"关",(i%3-1)*255,370-(i%15/3)*166,230,120,UICraft.Blue,()=>BeginLevel(index,false,true),33);
+  }
+  UICraft.Button(modal,"上一页",-220,-530,330,85,UICraft.Blue,()=>ShowStrategyTestLevels(Math.Max(0,page-1)),30).interactable=page>0;
+  UICraft.Button(modal,"下一页",220,-530,330,85,UICraft.Blue,()=>ShowStrategyTestLevels(page+1),30).interactable=page<2;
+  UICraft.Button(modal,"返回统计",0,-665,720,90,UICraft.Green,DrawBalanceStatistics,33);FitSettingsModal77(1540);
+ }
+}
+}

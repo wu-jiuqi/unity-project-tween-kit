@@ -1,0 +1,5 @@
+using UnityEditor;
+using UnityEngine;
+public sealed class ShopReferenceImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/ShopV31/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Single;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.textureCompression=TextureImporterCompression.Uncompressed;t.npotScale=TextureImporterNPOTScale.None;t.wrapMode=TextureWrapMode.Clamp;t.maxTextureSize=1024;if(assetPath.EndsWith("card.png")||assetPath.EndsWith("panel.png")||assetPath.EndsWith("cream.png")||assetPath.EndsWith("mint.png")||assetPath.EndsWith("lilac.png"))t.spriteBorder=assetPath.EndsWith("card.png")||assetPath.EndsWith("panel.png")?new Vector4(38,38,38,38):new Vector4(48,48,48,48);}
+}

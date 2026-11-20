@@ -1,0 +1,46 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+namespace BounceGarden {
+public sealed class JellyChapterOrb:MonoBehaviour,IPointerDownHandler,IDragHandler,IPointerUpHandler,IPointerClickHandler {
+ RectTransform rect,visual,parent,hint;Action open;Vector2 velocity,pointerStart,anchor,pull;float squash,hintClock;bool dragging,moved;int pointer=-1;Vector2 squashAxis;
+ public int Bounces{get;private set;}public Vector2 Velocity=>velocity;public bool Dragging=>dragging;
+ public static JellyChapterOrb Create(RectTransform parent,Action action){
+  var rt=UICraft.Root(parent,"Chapter jelly orb",0,0,124,124);var hit=rt.gameObject.AddComponent<Image>();hit.color=Color.clear;hit.raycastTarget=true;
+  var visual=UICraft.Root(rt,"Jelly orb visual",0,0,124,124);var face=UICraft.Art(visual,"ChapterOrbV51/chapter-orb",0,0,124,124);face.name="Mint jelly chapter book";face.preserveAspect=true;face.raycastTarget=false;
+  var hint=UICraft.Root(visual,"Mainline chapter hint",-43,43,38,42);
+  var badge=UICraft.Art(hint,"pastel/button_circle_cream",0,0,38,40);badge.color=new Color(1,.88f,.56f);badge.raycastTarget=false;
+  var mark=UICraft.Label(hint,"!",0,1,30,36,31);mark.color=UICraft.Ink;mark.raycastTarget=false;
+  UICraft.Box(visual,"章节文字底",0,-77,160,48,new Color(1,.98f,.9f,.96f),true);UICraft.Label(visual,"章节地图",0,-77,158,44,30,UICraft.Ink).raycastTarget=false;
+  var orb=rt.gameObject.AddComponent<JellyChapterOrb>();orb.rect=rt;orb.visual=visual;orb.parent=parent;orb.hint=hint;orb.open=action;return orb;
+ }
+ Rect Bounds{get{var r=parent.rect;float radius=rect.rect.width*.5f+44;return Rect.MinMaxRect(r.xMin+radius,r.yMin+radius,r.xMax-radius,r.yMax-radius);}}
+ public void Relayout(){Constrain(false);if(dragging)anchor=rect.anchoredPosition;}
+ public void SetInitialPosition(){rect.anchoredPosition=new Vector2(Bounds.xMax,-120);Constrain(false);}
+ void Constrain(bool bounce){var p=rect.anchoredPosition;var b=Bounds;bool x=p.x<b.xMin||p.x>b.xMax,y=p.y<b.yMin||p.y>b.yMax;
+  if(x){p.x=Mathf.Clamp(p.x,b.xMin,b.xMax);if(bounce){velocity.x=-velocity.x*.83f;Impact(Vector2.right);}}
+  if(y){p.y=Mathf.Clamp(p.y,b.yMin,b.yMax);if(bounce){velocity.y=-velocity.y*.83f;Impact(Vector2.up);}}
+  rect.anchoredPosition=p;
+ }
+ void Impact(Vector2 axis){squash=.24f;squashAxis=axis;Bounces++;SoundService.Play("orb_jelly_bounce");}
+ public void Pulse(){squash=.24f;squashAxis=Vector2.up;}
+ void Update(){var owner=GetComponentInParent<AppUI>();if(owner!=null&&!owner.HomeMotionAllowed){velocity=Vector2.zero;return;}float dt=Mathf.Min(Time.unscaledDeltaTime,.033f);
+  if(!dragging){rect.anchoredPosition+=velocity*dt;Constrain(true);velocity*=Mathf.Exp(-1.25f*dt);if(velocity.sqrMagnitude<9)velocity=Vector2.zero;}
+  if(hint!=null){hintClock+=dt;float t=hintClock%5f;float bounce=t<.6f?Mathf.Sin(t/.6f*Mathf.PI*2)*Mathf.Exp(-t*5):0;hint.anchoredPosition=new Vector2(-43,43+6*Mathf.Abs(bounce));hint.localScale=new Vector3(1-bounce*.1f,1+bounce*.14f,1);}
+  if(dragging){RenderPull();return;}
+  visual.anchoredPosition=Vector2.Lerp(visual.anchoredPosition,Vector2.zero,1-Mathf.Exp(-22*dt));
+  if(squash>0){squash=Mathf.Max(0,squash-dt);float f=Mathf.Sin((.24f-squash)/.24f*Mathf.PI*2)*Mathf.Exp(-(.24f-squash)*9)*.23f;visual.localScale=squashAxis.x>0?new Vector3(1-f,1+f,1):new Vector3(1+f,1-f,1);}else visual.localScale=Vector3.Lerp(visual.localScale,Vector3.one,1-Mathf.Exp(-18*dt));
+ }
+ Vector2 Local(PointerEventData e){RectTransformUtility.ScreenPointToLocalPointInRectangle(parent,e.position,e.pressEventCamera,out var p);return p;}
+ public void OnPointerDown(PointerEventData e){if(dragging)return;pointer=e.pointerId;dragging=true;moved=false;velocity=Vector2.zero;pointerStart=Local(e);anchor=rect.anchoredPosition;pull=Vector2.zero;squash=0;visual.localScale=Vector3.one*.93f;}
+ public void OnDrag(PointerEventData e){if(!dragging||pointer!=e.pointerId)return;pull=Vector2.ClampMagnitude(Local(e)-pointerStart,180);if(!moved&&pull.magnitude>10)SoundService.Play("orb_jelly_stretch");moved|=pull.magnitude>10;rect.anchoredPosition=anchor;RenderPull();}
+ void RenderPull(){float amount=pull.magnitude/180;var direction=pull.sqrMagnitude>.001f?pull.normalized:Vector2.zero;visual.anchoredPosition=direction*amount*15;visual.localScale=new Vector3(.94f+Mathf.Abs(direction.x)*amount*.38f-Mathf.Abs(direction.y)*amount*.12f,.94f+Mathf.Abs(direction.y)*amount*.38f-Mathf.Abs(direction.x)*amount*.12f,1);}
+ public void OnPointerUp(PointerEventData e){if(pointer!=e.pointerId)return;if(moved)SoundService.Play("orb_jelly_release");dragging=false;pointer=-1;rect.anchoredPosition=anchor;velocity=moved?Vector2.ClampMagnitude(-pull*12,2160):Vector2.zero;pull=Vector2.zero;Pulse();}
+ public void OnPointerClick(PointerEventData e){if(!moved&&!dragging){velocity=Vector2.zero;open?.Invoke();}}
+ public void QAFling(Vector2 position,Vector2 speed){rect.anchoredPosition=position;velocity=speed;Constrain(false);}
+ public void QATap(){if(!moved)open?.Invoke();}
+ void OnDisable(){if(dragging&&moved)SoundService.Play("orb_jelly_release");dragging=false;pointer=-1;velocity=pull=Vector2.zero;if(visual!=null){visual.localScale=Vector3.one;visual.anchoredPosition=Vector2.zero;}}
+ void OnApplicationFocus(bool focus){if(!focus)OnDisable();}
+}
+}

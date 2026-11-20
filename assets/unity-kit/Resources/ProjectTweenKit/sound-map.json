@@ -1,0 +1,80 @@
+{
+  "clips": [
+    {
+      "cue": "click",
+      "path": "Audio/Jelly/AI/sfx/click"
+    },
+    {
+      "cue": "whoosh",
+      "path": "Audio/Jelly/AI/sfx/whoosh"
+    },
+    {
+      "cue": "ui_back",
+      "path": "Audio/Jelly/AI/sfx/ui_back"
+    },
+    {
+      "cue": "jelly_land",
+      "path": "Audio/Jelly/AI/sfx/jelly_land"
+    },
+    {
+      "cue": "coin",
+      "path": "Audio/Jelly/AI/sfx/coin"
+    },
+    {
+      "cue": "score_star_full",
+      "path": "Audio/DeliveryV87/score_star_full"
+    },
+    {
+      "cue": "rank_up",
+      "path": "Audio/DeliveryV68/rank_update"
+    },
+    {
+      "cue": "medal_arrive",
+      "path": "Audio/DeliveryV68/medal_award"
+    },
+    {
+      "cue": "result_win_stinger",
+      "path": "Audio/DeliveryV68/result_win_stinger"
+    },
+    {
+      "cue": "result_lose_stinger",
+      "path": "Audio/DeliveryV68/result_retry_stinger"
+    },
+    {
+      "cue": "cat_jump_soft",
+      "path": "Audio/DeliveryV68/cat_jump_up"
+    },
+    {
+      "cue": "cat_happy",
+      "path": "Audio/Jelly/AI/sfx/cat_happy"
+    },
+    {
+      "cue": "cat_land_soft",
+      "path": "Audio/DeliveryV68/cat_land_pad"
+    },
+    {
+      "cue": "result_win_burst",
+      "path": "Audio/DeliveryV68/victory_sparkle"
+    },
+    {
+      "cue": "result_reward_reveal",
+      "path": "Audio/DeliveryV68/reward_card_pop"
+    },
+    {
+      "cue": "cat_retry",
+      "path": "Audio/Jelly/AI/sfx/cat_retry"
+    },
+    {
+      "cue": "cat_droop_soft",
+      "path": "Audio/DeliveryV68/cat_slump"
+    },
+    {
+      "cue": "vo_win_zh",
+      "path": "Audio/DeliveryV68/vo_win_zh"
+    },
+    {
+      "cue": "vo_retry_zh",
+      "path": "Audio/DeliveryV68/vo_retry_zh"
+    }
+  ]
+}

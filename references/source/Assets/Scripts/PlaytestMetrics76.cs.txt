@@ -1,0 +1,53 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Profiling;
+namespace BounceGarden {
+// Bounded local playtest records. No identifiers, network requests or gameplay changes.
+public sealed class PlaytestMetrics76:MonoBehaviour {
+ [Serializable]public sealed class Round {
+  public int level,attempt,frames,shots,remainingShots,score,coinsBefore,coinsAfter,streak,collectionFailures;
+  public int pierce,bomb,super,latencySamples;
+  public float activeSeconds,frameP95Ms,frameP99Ms,worstFrameMs,releaseToSpawnMaxMs;
+  public long peakAllocatedBytes,peakReservedBytes;
+  public string outcome,version;
+  public bool firstAttempt;
+ }
+ [Serializable]public sealed class Report {public int schema=2;public Round[] rounds;public int[] attempts;public bool hasActive;public Round active;}
+ const int Capacity=2048,HistoryLimit=64;
+ readonly float[] frames=new float[Capacity],sorted=new float[Capacity];
+ readonly List<Round> rounds=new List<Round>();
+ int[] attempts=new int[78];int frameCount,cursor;float nextMemorySample;readonly Queue<float> releases=new Queue<float>();
+ AppUI app;Round round;string lastSavedJson;
+ const string StorageKey="BounceGarden.PlaytestMetrics.v76";
+ public Round Current=>round;
+ public int CompletedCount=>rounds.Count;
+ public int RecoveredCount {get;private set;}
+ public BalanceStatistics Balance {get;private set;}
+ public void Initialize(AppUI owner){app=owner;Balance=gameObject.AddComponent<BalanceStatistics>();Balance.Initialize(owner);app.Session.VolleyStarted+=VolleyStarted;if(RuntimeQA.IsIsolated)return;try{var json=PlayerPrefs.GetString(StorageKey,"");if(!string.IsNullOrEmpty(json)){RestoreJson(json);if(RecoveredCount>0)Save();}}catch(Exception e){Debug.LogWarning("Playtest metrics unavailable: "+e.Message);}}
+ internal void RestoreJson(string json){var report=JsonUtility.FromJson<Report>(json);if(report==null||report.schema<1||report.schema>2)throw new InvalidOperationException("Invalid metrics schema");if(report.attempts!=null&&report.attempts.Length==78)for(int i=0;i<78;i++)attempts[i]=Mathf.Clamp(report.attempts[i],0,1000000);rounds.Clear();if(report.rounds!=null)foreach(var item in report.rounds)if(item!=null&&item.level>=1&&item.level<=78)rounds.Add(item);if(report.active!=null&&report.active.level>=1&&report.active.level<=78){report.active.outcome="interrupted";rounds.Add(report.active);RecoveredCount++;}while(rounds.Count>HistoryLimit)rounds.RemoveAt(0);}
+ public void BeginRound(int level){
+  Finish("abandoned");if(app.Session.IsTutorial||app.Session.IsStreakTrial)return;
+  level=Mathf.Clamp(level,0,77);int n=attempts[level]=Mathf.Min(1000000,attempts[level]+1);
+  round=new Round{level=level+1,attempt=n,firstAttempt=n==1,coinsBefore=app.Profile.Coins,streak=app.Profile.CampaignWinStreak,version=GameVersion.Name};frameCount=cursor=0;nextMemorySample=0;releases.Clear();
+  Balance?.Begin();
+ }
+ public void AcceptedRelease(){if(round!=null)releases.Enqueue(Time.realtimeSinceStartup);}
+ public void ClearPendingRelease(){releases.Clear();}
+ void VolleyStarted(StreakBooster kind){Balance?.Volley(kind);if(round==null)return;round.shots++;if(kind==StreakBooster.Pierce)round.pierce++;else if(kind==StreakBooster.Bomb)round.bomb++;else if(kind==StreakBooster.Super)round.super++;if(releases.Count>0){round.releaseToSpawnMaxMs=Mathf.Max(round.releaseToSpawnMaxMs,(Time.realtimeSinceStartup-releases.Dequeue())*1000);round.latencySamples++;}}
+ void Update(){
+  if(app==null||round==null)return;var game=app.Session;
+  if(game.IsPaused)releases.Clear();
+  if(!game.IsPlaying||game.IsPaused)return;
+  float ms=Time.unscaledDeltaTime*1000;frames[cursor]=ms;cursor=(cursor+1)%Capacity;frameCount=Mathf.Min(Capacity,frameCount+1);round.frames++;round.activeSeconds+=Time.unscaledDeltaTime;round.worstFrameMs=Mathf.Max(round.worstFrameMs,ms);
+  if(Time.unscaledTime>=nextMemorySample){nextMemorySample=Time.unscaledTime+1;round.peakAllocatedBytes=Math.Max(round.peakAllocatedBytes,Profiler.GetTotalAllocatedMemoryLong());round.peakReservedBytes=Math.Max(round.peakReservedBytes,Profiler.GetTotalReservedMemoryLong());}
+ }
+ public void Finish(string outcome){Balance?.Finish(outcome);if(round==null)return;var game=app.Session;round.outcome=outcome;round.remainingShots=game.Shots;round.score=game.Score;round.coinsAfter=app.Profile.Coins;round.collectionFailures=app.Profile.RescueFailures(round.level-1);if(frameCount>0){Array.Copy(frames,sorted,frameCount);Array.Sort(sorted,0,frameCount);round.frameP95Ms=sorted[Mathf.CeilToInt(frameCount*.95f)-1];round.frameP99Ms=sorted[Mathf.CeilToInt(frameCount*.99f)-1];}rounds.Add(round);if(rounds.Count>HistoryLimit)rounds.RemoveAt(0);Debug.Log("BOUNCE_PLAYTEST "+JsonUtility.ToJson(round));round=null;releases.Clear();Save();}
+ Round Checkpoint(){if(round==null)return null;var copy=JsonUtility.FromJson<Round>(JsonUtility.ToJson(round));copy.outcome="in_progress";copy.remainingShots=app.Session.Shots;copy.score=app.Session.Score;copy.coinsAfter=app.Profile.Coins;copy.collectionFailures=app.Profile.RescueFailures(copy.level-1);if(frameCount>0){Array.Copy(frames,sorted,frameCount);Array.Sort(sorted,0,frameCount);copy.frameP95Ms=sorted[Mathf.CeilToInt(frameCount*.95f)-1];copy.frameP99Ms=sorted[Mathf.CeilToInt(frameCount*.99f)-1];}return copy;}
+ public string ExportJson()=>JsonUtility.ToJson(new Report{rounds=rounds.ToArray(),attempts=attempts,hasActive=round!=null,active=Checkpoint()},true);
+ public void Save(){if(RuntimeQA.IsIsolated)return;try{string json=ExportJson();if(json==lastSavedJson)return;PlayerPrefs.SetString(StorageKey,json);PlayerPrefs.Save();lastSavedJson=json;}catch(Exception e){Debug.LogWarning("Playtest metrics save skipped: "+e.Message);}}
+ void OnApplicationPause(bool paused){if(paused)Save();}
+ void OnApplicationQuit(){Finish("interrupted");}
+ void OnDestroy(){if(app!=null&&app.Session!=null)app.Session.VolleyStarted-=VolleyStarted;}
+}
+}

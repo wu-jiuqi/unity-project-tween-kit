@@ -1,0 +1,6 @@
+using UnityEditor;
+using UnityEngine;
+public sealed class AudioScoreV65Importer:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/ScoreV65/")&&!assetPath.Contains("/Art/PropsV65/")&&!assetPath.Contains("/Art/SkillPanelV65/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Single;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.npotScale=TextureImporterNPOTScale.None;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.Uncompressed;if(assetPath.EndsWith("score_capsule.png")||assetPath.EndsWith("best_capsule.png"))t.spriteBorder=new Vector4(130,55,65,55);else if(assetPath.EndsWith("result_card.png"))t.spriteBorder=new Vector4(95,75,70,75);else t.spriteBorder=Vector4.zero;}
+ void OnPreprocessAudio(){if(!assetPath.Contains("/Audio/DeliveryV65/")&&!assetPath.Contains("/Audio/DeliveryV87/"))return;var a=(AudioImporter)assetImporter;a.forceToMono=true;a.loadInBackground=false;var s=a.defaultSampleSettings;s.loadType=AudioClipLoadType.DecompressOnLoad;s.preloadAudioData=true;s.compressionFormat=assetPath.Contains("/Audio/DeliveryV87/")?AudioCompressionFormat.PCM:AudioCompressionFormat.ADPCM;s.sampleRateSetting=AudioSampleRateSetting.PreserveSampleRate;a.defaultSampleSettings=s;}
+}

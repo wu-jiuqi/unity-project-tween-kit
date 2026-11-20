@@ -1,0 +1,13 @@
+using UnityEditor;
+public sealed class CheerArtImporter:AssetPostprocessor {
+ public override int GetPostprocessOrder()=>40000;
+ void OnPreprocessTexture(){
+  if(!assetPath.Contains("/Art/ChineseV59/Cheers/"))return;
+  // The source artwork is 3:1. Power-of-two rounding resizes each axis
+  // independently (2048x512), flattening the letters despite preserveAspect.
+  var texture=(TextureImporter)assetImporter;
+  texture.npotScale=TextureImporterNPOTScale.None;
+  texture.mipmapEnabled=false;
+  texture.wrapMode=UnityEngine.TextureWrapMode.Clamp;
+ }
+}

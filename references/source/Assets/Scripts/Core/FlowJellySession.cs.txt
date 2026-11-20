@@ -1,0 +1,33 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ readonly List<FlowJellyDeform> flowingJellies=new List<FlowJellyDeform>(96);
+ void ClearFlowJelly(){foreach(var view in flowingJellies)if(view!=null)view.ResetPose();flowingJellies.Clear();}
+ FlowJellyDeform FlowJelly(ChainGridPiece p){var v=p.GetComponent<FlowJellyDeform>();if(v==null){v=p.gameObject.AddComponent<FlowJellyDeform>();v.Initialize(this,p.Size);}if(!flowingJellies.Contains(v))flowingJellies.Add(v);return v;}
+ void FlowJellyMoving(ChainGridPiece p,Vector2 velocity){if(FeedbackProfile.Active.enabledFeedback&&!FixedChainPiece(p))FlowJelly(p).Move(velocity);}
+ void FlowJellyLand(ChainGridPiece p){if(FeedbackProfile.Active.enabledFeedback&&!FixedChainPiece(p))FlowJelly(p).Land();}
+ void TickFlowJelly(float dt){for(int i=flowingJellies.Count-1;i>=0;i--){var v=flowingJellies[i];if(v==null||!v.gameObject.activeInHierarchy||!v.Tick(dt)){if(v!=null)v.ResetPose();flowingJellies.RemoveAt(i);}}}
+}
+// Restore last frame's additive pose before ordinary visual scripts update.
+// No hierarchy changes, no deformation of physics roots, no idle Update cost.
+[DefaultExecutionOrder(-1000)]
+public sealed class FlowJellyDeform:MonoBehaviour {
+ GameSession owner;Transform[] parts;Vector3[] scales;Quaternion[] rotations;bool applied,landed;float age,weight;Vector2 velocity;
+ public void Initialize(GameSession game,int size){owner=game;weight=size>1?.65f:1;int n=transform.childCount;parts=new Transform[n];scales=new Vector3[n];rotations=new Quaternion[n];for(int i=0;i<n;i++){var child=transform.GetChild(i);if(child.GetComponent<Collider2D>()==null&&child.GetComponent<Rigidbody2D>()==null)parts[i]=child;}enabled=false;}
+ public void Move(Vector2 v){velocity=v;age=0;landed=false;enabled=true;}
+ public void Land(){landed=true;age=0;enabled=true;}
+ public bool Tick(float dt){age+=dt;return age<(landed?.27f:.10f);}
+ void Restore(){if(!applied)return;for(int i=0;i<parts.Length;i++)if(parts[i]!=null){parts[i].localScale=scales[i];parts[i].localRotation=rotations[i];}applied=false;}
+ public void ResetPose(){Restore();age=1;enabled=false;}
+ void Update(){if(owner!=null&&!owner.IsPaused)Restore();}
+ void LateUpdate(){
+  if(owner==null||owner.IsPaused||!owner.IsPlaying||!FeedbackProfile.Active.enabledFeedback)return;
+  float squeeze=landed?Mathf.Sin(age/.27f*Mathf.PI*2)*Mathf.Exp(-age*11)*.12f*weight:-Mathf.Clamp01(velocity.magnitude/8.8f)*.055f*weight;
+  float tilt=landed?0:Mathf.Clamp(velocity.x/8.8f,-1,1)*-3f*weight;
+  for(int i=0;i<parts.Length;i++){var t=parts[i];if(t==null||t.GetComponent<Collider2D>()!=null||t.GetComponent<Rigidbody2D>()!=null)continue;scales[i]=t.localScale;rotations[i]=t.localRotation;t.localScale=Vector3.Scale(scales[i],new Vector3(1+squeeze,1-squeeze,1));t.localRotation=rotations[i]*Quaternion.Euler(0,0,tilt);}
+  applied=true;
+ }
+ void OnDisable(){Restore();}
+}
+}

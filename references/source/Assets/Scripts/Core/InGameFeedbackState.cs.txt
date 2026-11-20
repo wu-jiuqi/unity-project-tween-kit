@@ -1,0 +1,20 @@
+namespace BounceGarden {
+// Presentation-only state: no rewards or rule changes. Clock advances only during active play.
+public sealed class InGameFeedbackState {
+ public const float ChainGap=2f,CheerDuration=1.5f,CheerCooldown=2f;
+ public static readonly int[] Thresholds={4,8,12,18};
+ public int ChainCount {get;private set;}
+ public int PendingTier {get;private set;}=-1;
+ public float Clock {get;private set;}
+ public bool HasShot {get;private set;}
+ public bool CheerActive=>Clock<cheerUntil;
+ public float CheerAge=>Clock-cheerStarted;
+ float lastBreak=-100f,lastCheer=-100f,cheerUntil,cheerStarted,nextBullet;
+ int reached=-1;
+ public void Advance(float dt){Clock+=System.Math.Max(0,dt);if(Clock-lastBreak>=ChainGap){ChainCount=0;reached=-1;PendingTier=-1;}}
+ public void Shoot(){if(HasShot)return;HasShot=true;nextBullet=Clock+1f;}
+ public void Break(){if(Clock-lastBreak>=ChainGap){ChainCount=0;reached=-1;PendingTier=-1;}lastBreak=Clock;ChainCount++;for(int i=0;i<Thresholds.Length;i++)if(ChainCount>=Thresholds[i]&&i>reached){reached=i;PendingTier=i;}}
+ public bool TryCheer(out int tier){tier=-1;if(PendingTier<0||Clock-lastCheer<CheerCooldown)return false;tier=PendingTier;PendingTier=-1;lastCheer=cheerStarted=Clock;cheerUntil=Clock+CheerDuration;return true;}
+ public bool TryBullet(bool ballsInPlay,float followingDelay){if(!HasShot||!ballsInPlay||CheerActive||PendingTier>=0||Clock<nextBullet)return false;nextBullet=Clock+followingDelay;return true;}
+}
+}

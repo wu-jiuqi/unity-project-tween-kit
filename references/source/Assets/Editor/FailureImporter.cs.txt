@@ -1,0 +1,26 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+
+public sealed class FailureTextureImporter : AssetPostprocessor {
+    void OnPreprocessTexture() {
+        if (!assetPath.StartsWith("Assets/Resources/Art/FailureV25/", StringComparison.Ordinal)
+            && !assetPath.StartsWith("Assets/Resources/Art/FailureCatV26/", StringComparison.Ordinal)) return;
+        var texture = (TextureImporter)assetImporter;
+        texture.textureType = TextureImporterType.Default;
+        texture.alphaSource = TextureImporterAlphaSource.FromInput;
+        texture.alphaIsTransparency = true;
+        texture.mipmapEnabled = false; texture.isReadable = false;
+        texture.sRGBTexture = true; texture.npotScale = TextureImporterNPOTScale.None;
+        texture.wrapMode = TextureWrapMode.Clamp; texture.filterMode = FilterMode.Bilinear;
+        texture.maxTextureSize = 4096;
+        texture.textureCompression = TextureImporterCompression.Uncompressed;
+        texture.SetPlatformTextureSettings(new TextureImporterPlatformSettings {
+            name = "Android", overridden = true, maxTextureSize = 4096,
+            format = TextureImporterFormat.ETC2_RGBA8, compressionQuality = 100
+        });
+    }
+}
+

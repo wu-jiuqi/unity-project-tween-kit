@@ -1,0 +1,9 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public sealed class JellyTextureImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/StreakBoostersV62/")&&!assetPath.Contains("/Art/PowerJellyV62/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.alphaIsTransparency=true;t.sRGBTexture=true;t.mipmapEnabled=false;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.npotScale=TextureImporterNPOTScale.None;t.maxTextureSize=2048;t.textureCompression=TextureImporterCompression.Uncompressed;t.isReadable=false;var android=t.GetPlatformTextureSettings("Android");android.overridden=true;android.maxTextureSize=2048;android.format=TextureImporterFormat.ETC2_RGBA8;t.SetPlatformTextureSettings(android);}
+}

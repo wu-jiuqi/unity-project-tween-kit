@@ -1,0 +1,132 @@
+{
+  "checked_on": "2026-10-27",
+  "license": "CC0-1.0",
+  "commercial_use": true,
+  "attribution_required": false,
+  "game_source_disclosure_required": false,
+  "sources": {
+    "farfadet46": {
+      "author": "farfadet46",
+      "page": "https://opengameart.org/content/bubbles-pop",
+      "license": "CC0-1.0",
+      "evidence": "farfadet46-source.html"
+    },
+    "EZduzziteh": {
+      "author": "EZduzziteh",
+      "page": "https://opengameart.org/content/pop-sounds-0",
+      "license": "CC0-1.0",
+      "evidence": "EZduzziteh-source.html"
+    },
+    "Kenney": {
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/interface-sounds",
+      "license": "CC0-1.0",
+      "evidence": "kenney-interface-source.html",
+      "included_license": "kenney_interface-sounds/License.txt"
+    }
+  },
+  "clips": [
+    {
+      "cue": "break",
+      "source": "farfadet46-pop.ogg",
+      "source_sha256": "d55886ec5b145045d1abd13926675b93646a8865e53e1f7a3a58cfbb7b733cff",
+      "author_key": "farfadet46",
+      "processing": "Unmodified original OGG; runtime gain only; fixed pitch 1.0",
+      "output": "break.ogg",
+      "output_sha256": "d55886ec5b145045d1abd13926675b93646a8865e53e1f7a3a58cfbb7b733cff"
+    },
+    {
+      "cue": "wall",
+      "source": "pop7.wav",
+      "source_sha256": "a40f1291337bec27f39d8c3b205b61a336f04bc0a269b67c14b4ebe1fb1b0474",
+      "author_key": "EZduzziteh",
+      "processing": "aresample=44100,asetrate=37926,aresample=44100,highpass=f=35,lowpass=f=3000,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.42; offline peak gain=3.665779987569919",
+      "output": "wall.wav",
+      "output_sha256": "9ad92fe671501465864f42c7ad32fed10efb2b04eb47dd0e588dd3cc2ff8756b"
+    },
+    {
+      "cue": "shoot",
+      "source": "pop3.wav",
+      "source_sha256": "30faec930c94f3812bf9c065f11c67bfca91ac0a5f5da3f84013de0ef1144a6b",
+      "author_key": "EZduzziteh",
+      "processing": "aresample=44100,asetrate=37485,aresample=44100,highpass=f=35,lowpass=f=4000,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.75; offline peak gain=0.760320424285951",
+      "output": "shoot.wav",
+      "output_sha256": "0df9ecd00d7d3b8fafcdf5fca314823315f0c4e9905d450cf3038fb09f4fe7d0"
+    },
+    {
+      "cue": "hit",
+      "source": "pop2.wav",
+      "source_sha256": "4d3ab0324964adfcddca88c9f7340497e6dbe1ab30e7df474022e50a025ff5ba",
+      "author_key": "EZduzziteh",
+      "processing": "aresample=44100,asetrate=36162,aresample=44100,highpass=f=35,lowpass=f=3200,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.62; offline peak gain=1.5632044744201348",
+      "output": "hit.wav",
+      "output_sha256": "613813138fb04fde32d49bdc061a7fc6c0974fb1363fc153c4cfdba34cc8c725"
+    },
+    {
+      "cue": "click",
+      "source": "pop1.wav",
+      "source_sha256": "758416a61890a61f4e1f00a65531e75e7d867cad1e96392d829860b8aa3a66f6",
+      "author_key": "EZduzziteh",
+      "processing": "aresample=44100,asetrate=46746,aresample=44100,highpass=f=35,lowpass=f=4200,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.55; offline peak gain=0.7291036236490782",
+      "output": "click.wav",
+      "output_sha256": "a0e6d0ac0c139c2560bf4d2a03d5d329e4870c1968d9429185b3f8f604f6a4e5"
+    },
+    {
+      "cue": "jelly_land",
+      "source": "pop6.wav",
+      "source_sha256": "e5283d0cb7411da8185c8d93510b5a83b10525f4af34fdd845c1374db0000538",
+      "author_key": "EZduzziteh",
+      "processing": "aresample=44100,asetrate=27342,aresample=44100,highpass=f=35,lowpass=f=2100,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.1,alimiter=limit=0.8:level=0,volume=0.85; offline peak gain=6.656780091416963",
+      "output": "jelly_land.wav",
+      "output_sha256": "dadb31c212b7ee037612b02f283a2ccf06f37630437b829c07fc30d28ce33cca"
+    },
+    {
+      "cue": "splash",
+      "source": "pop5.wav",
+      "source_sha256": "f9cbf450849fd9db716359412664736bbd565800bfd31fb917860bf440c6f82a",
+      "author_key": "EZduzziteh",
+      "processing": "aresample=44100,asetrate=34398,aresample=44100,highpass=f=35,lowpass=f=2800,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.08,alimiter=limit=0.8:level=0,volume=0.48; offline peak gain=3.7304189435336976",
+      "output": "splash.wav",
+      "output_sha256": "f529f372313cd8f612aa20be9f7a8bfd793078d32f5225eedbab336ebbd89143"
+    },
+    {
+      "cue": "coin",
+      "source": "kenney_interface-sounds/Audio/pluck_002.ogg",
+      "source_sha256": "c977fe249ff42d1c93a552b33abc13a8399df3879fa510475426e5c4bbac1da9",
+      "author_key": "Kenney",
+      "processing": "aresample=44100,asetrate=50715,aresample=44100,highpass=f=35,lowpass=f=6500,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.45; offline peak gain=0.8543716321918998",
+      "output": "coin.wav",
+      "output_sha256": "21a01ff9ddd77bee425c79d4fbe144a51e25a41c4697843d373f8d83ef9efd25"
+    },
+    {
+      "cue": "win",
+      "source": "kenney_interface-sounds/Audio/confirmation_002.ogg",
+      "source_sha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+      "author_key": "Kenney",
+      "processing": "aresample=44100,asetrate=41013,aresample=44100,highpass=f=35,lowpass=f=5200,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.7; offline peak gain=0.8571465940054496",
+      "output": "win.wav",
+      "output_sha256": "99bdb4e7abe40a529f7e419c3315dd5ebf889c23705f8f21f4503ff4ec77c357"
+    },
+    {
+      "cue": "lose",
+      "source": "kenney_interface-sounds/Audio/minimize_001.ogg",
+      "source_sha256": "8481912bc7fa5828924a00ef15b6cd613b994956e0817bd3122065c9b2896d2d",
+      "author_key": "Kenney",
+      "processing": "aresample=44100,asetrate=35280,aresample=44100,highpass=f=35,lowpass=f=3000,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.56; offline peak gain=1.4767487526154839",
+      "output": "lose.wav",
+      "output_sha256": "4fc10980318ae3da6b78142d50b04ca069af00f1c084fce15a39faa4e5418e1d"
+    },
+    {
+      "cue": "whoosh",
+      "source": "kenney_interface-sounds/Audio/open_001.ogg",
+      "source_sha256": "a27c6bb0df7da1e6af5dd5937593c98bc58b6e513f42fe6a3254cd6a6949c648",
+      "author_key": "Kenney",
+      "processing": "aresample=44100,asetrate=38808,aresample=44100,highpass=f=35,lowpass=f=3200,silenceremove=start_periods=1:start_duration=0.001:start_threshold=-55dB:start_silence=0.002,apad=pad_dur=0.06,alimiter=limit=0.8:level=0,volume=0.4; offline peak gain=2.438296816866474",
+      "output": "whoosh.wav",
+      "output_sha256": "79ee5b120bc6bd9390c369ea1f33f420284f9c1dadbbaecc35e8c219e6b58250"
+    }
+  ],
+  "unused_downloads": [
+    "kenney_music-jingles.zip (candidate only; no clips used or shipped)"
+  ]
+}

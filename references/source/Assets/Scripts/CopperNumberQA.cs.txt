@@ -1,0 +1,17 @@
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;using TMPro;
+namespace BounceGarden {
+public sealed class CopperNumberQA:MonoBehaviour {
+ string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--copper-number-qa"))new GameObject("Copper readable numbers QA").AddComponent<CopperNumberQA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var im=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,im);File.WriteAllBytes(dir+"/"+name+".png",im.EncodeToPNG());Destroy(im);rt.Release();Destroy(rt);}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};
+  yield return new WaitForSecondsRealtime(3);var app=FindFirstObjectByType<AppUI>();app.QAStartLevel(30);yield return app.QAWaitForLevel();for(int n=0;n<100;n++){app.QAAdvanceAlphabetIntro();yield return new WaitForSecondsRealtime(.025f);if(n>8&&!app.AlphabetIntroActive&&!app.Session.IsPaused)break;}
+  var g=app.Session;g.QAIgnoreFocusLoss=true;g.SetPaused(false);var coins=g.QACopperViews();Check(coins.Length>=5,"real level has copper bricks");int index=0;Check(coins.All(c=>c.Brick.CurrentHealth==25),"all authored copper starts at 25 HP");for(int hp=1;hp<=25;hp++)Check(OpeningCopperArt.StateIndex(hp)==(25-hp)/5,"state changes every five damage at HP "+hp);
+  foreach(var view in coins.Take(5)){for(int damage=0;damage<index*5;damage++)g.SevenHit(view.Brick,1);view.Tick(.2f);var text=view.GetComponentsInChildren<TMP_Text>().First(t=>t.name=="Remaining copper HP");Check(text.color==OpeningCopperArt.NumberColor&&text.fontSize>=4.8f&&text.fontStyle.HasFlag(FontStyles.Bold),"dark bold HP for state "+view.Brick.CurrentHealth);Check(text.text==(25-index*5).ToString()&&text.outlineColor.r>.9f,"correct live HP and cream outline "+view.Brick.CurrentHealth);index++;}
+  yield return new WaitForSecondsRealtime(.25f);yield return Capture("level31-readable-copper");
+  app.QAGardenLesson(30);yield return new WaitForSecondsRealtime(1.1f);var intro=app.QAAlphabetIntro;var label=intro.GetComponentInChildren<OpeningRuleDemo>().GetComponentsInChildren<TMP_Text>().First(t=>int.TryParse(t.text,out _));Check(label.color.r<.4f&&label.color.g<.25f&&label.outlineColor.r>.9f,"intro number uses matching high contrast style");yield return Capture("intro-readable-copper");
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

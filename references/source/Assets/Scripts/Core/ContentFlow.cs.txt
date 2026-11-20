@@ -1,0 +1,57 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden {
+// Public UI depends on this contract; the platform installs its own resource adapter.
+public static class GameContent {
+ public static Func<int,IEnumerator> Level;
+ public static Func<int,IEnumerator> Prefetch;
+ public static Func<string,IEnumerator> Page;
+ public static Func<string,bool> Ready;
+ public static Func<string> Error, Status;
+ public static Func<long> Progress;
+ public static bool PageReady(string page)=>Ready==null||Ready(page);
+ public static IEnumerator PrepareLevel(int level){if(Level!=null)yield return Level(level);if(!string.IsNullOrEmpty(Error?.Invoke()))throw new InvalidOperationException(Error());}
+ public static IEnumerator PrefetchLevel(int level){if(Prefetch!=null)yield return Prefetch(level);}
+ public static IEnumerator PreparePage(string page){if(Page!=null)yield return Page(page);if(!string.IsNullOrEmpty(Error?.Invoke()))throw new InvalidOperationException(Error());}
+}
+
+// Flatten nested coroutines so errors, timeouts and cancellation all dispose the
+// complete iterator stack (including network requests and adapter lock finally blocks).
+public sealed class ContentLoadOperation {
+ public const float DefaultTimeout=45;
+ public bool Cancelled {get;private set;}
+ public bool TimedOut {get;private set;}
+ public bool PreparationComplete;
+ public Exception Failure {get;private set;}
+ public bool Succeeded=>!Cancelled&&!TimedOut&&Failure==null;
+ public void Cancel(){Cancelled=true;}
+ public IEnumerator Run(IEnumerator routine,float timeout=DefaultTimeout){
+  var deadline=new ContentLoadDeadline(Time.realtimeSinceStartup,timeout,GameContent.Progress!=null,GameContent.Progress?.Invoke()??0);
+  Func<bool> expired=()=>!PreparationComplete&&deadline.Expired(Time.realtimeSinceStartup,GameContent.Progress?.Invoke()??0);
+  var stack=new Stack<IEnumerator>();stack.Push(routine);
+  try {
+   while(stack.Count>0&&!Cancelled){
+    if(expired()){TimedOut=true;break;}
+    var top=stack.Peek();bool more=false;object next=null;
+    try{more=top.MoveNext();if(more)next=top.Current;}catch(Exception error){Failure=error;break;}
+    if(!more){stack.Pop();(top as IDisposable)?.Dispose();continue;}
+    if(next is IEnumerator nested){stack.Push(nested);continue;}
+    if(next is AsyncOperation async){
+     while(!async.isDone&&!Cancelled){if(expired()){TimedOut=true;break;}yield return null;}
+     if(TimedOut)break;
+    }else yield return next;
+   }
+  }finally{while(stack.Count>0){try{(stack.Pop() as IDisposable)?.Dispose();}catch(Exception error){if(Failure==null)Failure=error;}}}
+ }
+}
+// A slow but advancing transfer is different from a stalled transfer. Retain a
+// finite overall limit, and retain the original fixed timeout for other hosts.
+public sealed class ContentLoadDeadline {
+ readonly float start,timeout;readonly bool progressAware;float active;long progress;
+ public ContentLoadDeadline(float now,float timeout,bool progressAware,long initialProgress=0){start=active=now;this.timeout=timeout;this.progressAware=progressAware;progress=initialProgress;}
+ public bool Expired(float now,long value){if(value>progress){progress=value;active=now;}return now-start>=(progressAware?600:timeout)||now-active>=timeout;}
+}
+}

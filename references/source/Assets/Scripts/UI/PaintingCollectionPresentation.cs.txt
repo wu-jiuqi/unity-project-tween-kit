@@ -1,0 +1,58 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class PaintingCollectionPresentation:MonoBehaviour {
+ public const float Duration=4.6f;
+ sealed class Spark {public Image image;public Vector2 start,velocity;public float phase;}
+ readonly List<Spark> sparks=new List<Spark>();
+ RectTransform content,art;CanvasGroup whole;Image dimmer,rough,pixel,frame;CanvasGroup captions;Action completed;bool running,called;
+ public float Elapsed{get;private set;}
+ public float PixelAlpha=>pixel==null?0:pixel.color.a;
+ public float RoughAlpha=>rough==null?0:rough.color.a;
+ string artworkId;
+ public void Configure(string id){artworkId=id;}
+ public void Skip(){if(called)return;called=true;running=false;var done=completed;completed=null;done?.Invoke();}
+ public void Begin(bool saved,Action done){
+  completed=done;var root=(RectTransform)transform;root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.sizeDelta=Vector2.zero;root.anchoredPosition=Vector2.zero;
+  whole=gameObject.AddComponent<CanvasGroup>();whole.blocksRaycasts=true;
+  var back=UICraft.Root(transform,"Full screen black collection dimmer");back.anchorMin=Vector2.zero;back.anchorMax=Vector2.one;back.sizeDelta=Vector2.zero;back.anchoredPosition=Vector2.zero;
+  dimmer=back.gameObject.AddComponent<Image>();dimmer.color=Color.clear;dimmer.raycastTarget=true;
+  content=UICraft.Root(transform,"Collection content",0,0,1080,1800);
+  art=UICraft.Root(content,"Framed fox artwork",0,60,960,960);
+  UICraft.Box(art,"Artwork paper",0,0,658,658,new Color32(248,242,233,255));
+  rough=MakeImage(art,"Original irregular paint",PaintingArt.Image("fox_splatter"),650);
+  pixel=MakeImage(art,"Collected regular pixel artwork",PaintingArt.Image("fox_pixel"),650*720/768);
+  frame=MakeImage(art,"Generated honey wood picture frame",PaintingArt.Image("fox_frame"),960);
+  var text=UICraft.Root(content,"Collection captions");captions=text.gameObject.AddComponent<CanvasGroup>();
+  UICraft.Label(text,"小狐狸",0,-520,900,100,62).color=new Color32(255,240,207,255);
+  UICraft.Label(text,saved?"小狐狸001 · 已收入画册":"小狐狸001 · 创作完成",0,-615,940,70,29).color=new Color32(244,214,167,255);
+  for(int i=0;i<28;i++){
+   float angle=i*Mathf.PI*2/28;var image=UICraft.Box(content,"Collection golden paint spark",0,0,i%3==0?13:7,i%3==0?13:7,Color.white,true);
+   image.raycastTarget=false;sparks.Add(new Spark{image=image,start=new Vector2(Mathf.Cos(angle)*390,60+Mathf.Sin(angle)*390),velocity=new Vector2(Mathf.Cos(angle)*48,60+Mathf.Sin(angle)*38),phase=i*.618f});
+  }
+  if(!string.IsNullOrEmpty(artworkId)){
+   rough.sprite=MainlineArt.Art(MainlineCatalog.ArtIndex(artworkId),true);pixel.sprite=MainlineCatalog.Artwork(artworkId);frame.enabled=false;
+   foreach(var label in text.GetComponentsInChildren<TMPro.TMP_Text>())label.text=label.text=="小狐狸"?MainlineCatalog.All[MainlineCatalog.ArtIndex(artworkId)].artName:"已收入画册";
+  }
+  UICraft.Button(content,"SKIP / COLLECT",0,-790,680,110,UICraft.Green,Skip,32);
+  running=true;Render();
+ }
+ static Image MakeImage(Transform root,string name,Sprite sprite,float size){var image=UICraft.Box(root,name,0,0,size,size,Color.white);image.sprite=sprite;image.type=Image.Type.Simple;image.preserveAspect=true;image.raycastTarget=false;return image;}
+ static void Alpha(Image image,float value){var c=image.color;c.a=value;image.color=c;}
+ static float Ease(float p)=>p*p*(3-2*p);
+ void Update(){if(!running)return;Elapsed+=Time.unscaledDeltaTime;Render();if(Elapsed>=Duration&&!called){called=true;running=false;var callback=completed;completed=null;callback?.Invoke();}}
+ void Render(){
+  var parent=transform.parent as RectTransform;if(parent!=null)content.localScale=Vector3.one*Mathf.Min(parent.rect.width/1080,parent.rect.height/1850);
+  float intro=Ease(Mathf.Clamp01(Elapsed/.45f)),blend=Ease(Mathf.Clamp01((Elapsed-1.35f)/1.35f));
+  dimmer.color=new Color(0,0,0,.68f*intro);
+  art.localScale=Vector3.one*Mathf.Lerp(.88f,1,UICraft.OutBack(intro));
+  Alpha(rough,1-blend);Alpha(pixel,blend);Alpha(frame,Ease(Mathf.Clamp01((Elapsed-2.05f)/.8f)));
+  captions.alpha=Ease(Mathf.Clamp01((Elapsed-2.65f)/.45f));
+  foreach(var s in sparks){float age=Elapsed-1.65f-s.phase%1*.4f;float p=Mathf.Clamp01(age/2.1f);s.image.rectTransform.anchoredPosition=s.start+s.velocity*Mathf.Max(0,age);s.image.rectTransform.localRotation=Quaternion.Euler(0,0,s.phase*57+age*35);float a=age<0?0:Mathf.Sin(p*Mathf.PI)*.8f;s.image.color=new Color(1,.85f,.49f,a);s.image.rectTransform.localScale=Vector3.one*(.55f+Mathf.Sin(p*Mathf.PI)*.75f);}
+  whole.alpha=1-Ease(Mathf.Clamp01((Elapsed-4.1f)/.5f));
+ }
+ void OnDisable(){running=false;completed=null;}
+}
+}

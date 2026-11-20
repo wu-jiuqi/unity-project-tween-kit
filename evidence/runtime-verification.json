@@ -1,0 +1,342 @@
+{
+    "unityVersion": "6000.0.26f1",
+    "applicationVersion": "0.1.0",
+    "platform": "WindowsPlayer",
+    "checks": [
+        {
+            "name": "press: component exists",
+            "passed": true
+        },
+        {
+            "name": "press: pause clock",
+            "passed": true
+        },
+        {
+            "name": "press: pause pose",
+            "passed": true
+        },
+        {
+            "name": "switch: component exists",
+            "passed": true
+        },
+        {
+            "name": "switch: pause clock",
+            "passed": true
+        },
+        {
+            "name": "switch: pause pose",
+            "passed": true
+        },
+        {
+            "name": "modal: component exists",
+            "passed": true
+        },
+        {
+            "name": "modal: pause clock",
+            "passed": true
+        },
+        {
+            "name": "modal: pause pose",
+            "passed": true
+        },
+        {
+            "name": "reward: component exists",
+            "passed": true
+        },
+        {
+            "name": "reward: pause clock",
+            "passed": true
+        },
+        {
+            "name": "reward: pause pose",
+            "passed": true
+        },
+        {
+            "name": "number: component exists",
+            "passed": true
+        },
+        {
+            "name": "number: pause clock",
+            "passed": true
+        },
+        {
+            "name": "number: pause pose",
+            "passed": true
+        },
+        {
+            "name": "logo: component exists",
+            "passed": true
+        },
+        {
+            "name": "logo: pause clock",
+            "passed": true
+        },
+        {
+            "name": "logo: pause pose",
+            "passed": true
+        },
+        {
+            "name": "wordmark: component exists",
+            "passed": true
+        },
+        {
+            "name": "wordmark: pause clock",
+            "passed": true
+        },
+        {
+            "name": "wordmark: pause pose",
+            "passed": true
+        },
+        {
+            "name": "loading: component exists",
+            "passed": true
+        },
+        {
+            "name": "loading: pause clock",
+            "passed": true
+        },
+        {
+            "name": "loading: pause pose",
+            "passed": true
+        },
+        {
+            "name": "float: component exists",
+            "passed": true
+        },
+        {
+            "name": "float: pause clock",
+            "passed": true
+        },
+        {
+            "name": "float: pause pose",
+            "passed": true
+        },
+        {
+            "name": "drag: component exists",
+            "passed": true
+        },
+        {
+            "name": "drag: pause clock",
+            "passed": true
+        },
+        {
+            "name": "drag: pause pose",
+            "passed": true
+        },
+        {
+            "name": "activity: component exists",
+            "passed": true
+        },
+        {
+            "name": "activity: pause clock",
+            "passed": true
+        },
+        {
+            "name": "activity: pause pose",
+            "passed": true
+        },
+        {
+            "name": "hit: component exists",
+            "passed": true
+        },
+        {
+            "name": "hit: pause clock",
+            "passed": true
+        },
+        {
+            "name": "hit: pause pose",
+            "passed": true
+        },
+        {
+            "name": "goal: component exists",
+            "passed": true
+        },
+        {
+            "name": "goal: pause clock",
+            "passed": true
+        },
+        {
+            "name": "goal: pause pose",
+            "passed": true
+        },
+        {
+            "name": "charge: component exists",
+            "passed": true
+        },
+        {
+            "name": "charge: pause clock",
+            "passed": true
+        },
+        {
+            "name": "charge: pause pose",
+            "passed": true
+        },
+        {
+            "name": "victorycat: component exists",
+            "passed": true
+        },
+        {
+            "name": "victorycat: pause clock",
+            "passed": true
+        },
+        {
+            "name": "victorycat: pause pose",
+            "passed": true
+        },
+        {
+            "name": "failurecat: component exists",
+            "passed": true
+        },
+        {
+            "name": "failurecat: pause clock",
+            "passed": true
+        },
+        {
+            "name": "failurecat: pause pose",
+            "passed": true
+        },
+        {
+            "name": "victory: component exists",
+            "passed": true
+        },
+        {
+            "name": "victory: pause clock",
+            "passed": true
+        },
+        {
+            "name": "victory: pause pose",
+            "passed": true
+        },
+        {
+            "name": "failure: component exists",
+            "passed": true
+        },
+        {
+            "name": "failure: pause clock",
+            "passed": true
+        },
+        {
+            "name": "failure: pause pose",
+            "passed": true
+        },
+        {
+            "name": "medal: component exists",
+            "passed": true
+        },
+        {
+            "name": "medal: pause clock",
+            "passed": true
+        },
+        {
+            "name": "medal: pause pose",
+            "passed": true
+        },
+        {
+            "name": "press deforms only visual",
+            "passed": true
+        },
+        {
+            "name": "drag cancels click",
+            "passed": true
+        },
+        {
+            "name": "release returns to rest",
+            "passed": true
+        },
+        {
+            "name": "disable restores press",
+            "passed": true
+        },
+        {
+            "name": "focus loss restores press",
+            "passed": true
+        },
+        {
+            "name": "modal close interrupts open",
+            "passed": true
+        },
+        {
+            "name": "modal rapid reentry settles open",
+            "passed": true
+        },
+        {
+            "name": "instant number ends at requested value",
+            "passed": true
+        },
+        {
+            "name": "animated number same requested result",
+            "passed": true
+        },
+        {
+            "name": "preset round trip same component",
+            "passed": true
+        },
+        {
+            "name": "preset rejects different component",
+            "passed": true
+        },
+        {
+            "name": "replay retains tuned duration",
+            "passed": true
+        },
+        {
+            "name": "timeline holds sampled pose",
+            "passed": true
+        },
+        {
+            "name": "timeline resumes from sampled time",
+            "passed": true
+        },
+        {
+            "name": "reward instant and animated endpoint agree",
+            "passed": true
+        },
+        {
+            "name": "flight returns to start",
+            "passed": true
+        },
+        {
+            "name": "target entrance restores original hierarchy",
+            "passed": true
+        },
+        {
+            "name": "target entrance restores transform and sibling",
+            "passed": true
+        },
+        {
+            "name": "switch refresh performs no business write",
+            "passed": true
+        },
+        {
+            "name": "switch real click writes exactly once",
+            "passed": true
+        },
+        {
+            "name": "switch disable aligns to host state",
+            "passed": true
+        },
+        {
+            "name": "modal retains nonuniform target vector",
+            "passed": true
+        },
+        {
+            "name": "logo reentry leaves one set of four glyphs",
+            "passed": true
+        },
+        {
+            "name": "victory sequence preserves first nonuniform hold",
+            "passed": true
+        },
+        {
+            "name": "failure sequence preserves different first hold",
+            "passed": true
+        },
+        {
+            "name": "no runtime errors",
+            "passed": true
+        }
+    ],
+    "errors": [],
+    "passed": 83,
+    "failed": 0
+}

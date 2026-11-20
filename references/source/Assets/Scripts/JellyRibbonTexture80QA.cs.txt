@@ -1,0 +1,22 @@
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;
+namespace BounceGarden {
+// Use the actual backbuffer. QARecorder's canvas-mode switches mask material dirtiness bugs.
+public sealed class JellyRibbonTexture80QA:MonoBehaviour {
+ string dir;int checks,failures,errors;AppUI app;JellyJourney80 map;JellyRouteRibbon80 ribbon;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--jelly-ribbon-texture-qa"))new GameObject("Native ribbon texture audit").AddComponent<JellyRibbonTexture80QA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ Vector2 Probe(float t){Vector2 a=map.RoutePoint(34),d=map.RoutePoint(35);float dy=d.y-a.y;Vector2 b=a+Vector2.up*(dy*.46f),c=d-Vector2.up*(dy*.46f);float s=1-t;var p=s*s*s*a+3*s*s*t*b+3*s*t*t*c+t*t*t*d;return RectTransformUtility.WorldToScreenPoint(null,map.Scroll.content.TransformPoint(p));}
+ IEnumerator CaptureNative(string name,bool mint){yield return new WaitForEndOfFrame();var im=ScreenCapture.CaptureScreenshotAsTexture();File.WriteAllBytes(dir+"/"+name+".png",im.EncodeToPNG());for(int i=0;i<3;i++){var p=Probe(.38f+i*.12f);Color color=im.GetPixel(Mathf.Clamp(Mathf.RoundToInt(p.x),0,im.width-1),Mathf.Clamp(Mathf.RoundToInt(p.y),0,im.height-1));File.AppendAllText(dir+"/pixels.txt",name+" sample="+i+" screen="+p+" rgb="+color+"\n");Check(mint?color.g-color.r>.08f&&color.g-color.b>.025f:color.r>.96f&&color.g>.96f&&color.b>.96f,(mint?"mint texture visible":"white-renderer fixture reproduced")+" native "+name+" sample="+i);}Destroy(im);}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};yield return new WaitForSecondsRealtime(4);app=FindFirstObjectByType<AppUI>();app.QANavigate("home");Screen.SetResolution(390,844,false);yield return new WaitForSecondsRealtime(.5f);Screen.SetResolution(540,1170,false);yield return new WaitForSecondsRealtime(.6f);app.QASetViewport(new Vector2Int(540,1170));
+  for(int i=0;i<78;i++)app.Profile.CommitAlphabetWin("ribbon-native-"+i,i,50000);app.QAOpenChapters();yield return null;map=app.GetComponentInChildren<JellyJourney80>();map.FocusLevel(35);yield return new WaitForSecondsRealtime(1);ribbon=map.GetComponentInChildren<JellyRouteRibbon80>();Check(ribbon!=null&&ribbon.mainTexture==JellyJourneyArt80.Get("route-material").texture,"ribbon exposes authored material texture");yield return CaptureNative("01-first-open",true);
+  // Reproduce stale native binding without changing the sprite or rebuilding the canvas.
+  ribbon.canvasRenderer.SetTexture(Texture2D.whiteTexture);ribbon.SetVerticesDirty();yield return null;yield return CaptureNative("02-injected-stale-white",false);
+  ribbon.Configure(map,32,39);yield return null;yield return CaptureNative("03-configure-rebind",true);
+  ribbon.gameObject.SetActive(false);yield return null;ribbon.gameObject.SetActive(true);yield return null;yield return CaptureNative("04-reenable",true);
+  for(int i=0;i<78;i+=7){map.FocusLevel(i);yield return null;Check(ribbon.mainTexture==JellyJourneyArt80.Get("route-material").texture&&ribbon.VertexCount>0,"scroll retains texture and geometry at "+(i+1));}map.FocusLevel(35);yield return null;yield return CaptureNative("05-scroll-return",true);
+  app.QANavigate("home");yield return null;app.QAOpenChapters();yield return null;map.FocusLevel(35);yield return null;yield return CaptureNative("06-menu-return",true);
+  Screen.SetResolution(390,844,false);yield return new WaitForSecondsRealtime(.4f);app.QASetViewport(new Vector2Int(390,844));map.FocusLevel(35);yield return null;yield return CaptureNative("07-phone-layout",true);
+  Check(errors==0,"no runtime errors");File.WriteAllText(dir+"/report.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

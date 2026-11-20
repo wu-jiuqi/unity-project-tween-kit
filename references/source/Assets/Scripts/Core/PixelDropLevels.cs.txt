@@ -1,0 +1,10 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class PixelDropLevels {
+ public const int First=40; public const float Pitch=.62f;
+ static readonly float[] Masses={1,1.4f,2,2.8f,3.6f},Sizes={.90f,.94f,.97f,1,1};
+ public static float Mass(int stability)=>Masses[Mathf.Clamp(stability-1,0,4)];
+ public static float Size(int stability)=>Sizes[Mathf.Clamp(stability-1,0,4)];
+ public static LevelData Get(int n)=>throw new System.InvalidOperationException("Legacy routes are archived in v37");
+}}

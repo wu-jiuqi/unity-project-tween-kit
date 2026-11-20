@@ -1,0 +1,1084 @@
+[
+  {
+    "source": "Assets/Plugins/Demigiant/DOTween/DOTween.dll",
+    "target": "assets/unity-kit/Plugins/DOTween/DOTween.dll",
+    "sha256": "c51b065925bb37c308f9a05a776cdf09f49a97a6f7c2393b4fb3b3f01c045232",
+    "reason": "Exact project tween runtime dependency",
+    "packagedMetaSha256": "25b34c6500e5b264aae2ddbc545e8f99b72a486f13ef7a86308e7abab69709c0"
+  },
+  {
+    "source": "Assets/Plugins/Demigiant/DOTween/DOTween.dll.meta",
+    "target": "assets/unity-kit/Plugins/DOTween/DOTween.dll.meta",
+    "sha256": "25b34c6500e5b264aae2ddbc545e8f99b72a486f13ef7a86308e7abab69709c0",
+    "reason": "Exact project tween runtime dependency"
+  },
+  {
+    "source": "Assets/Plugins/Demigiant/DOTween/DOTween.XML",
+    "target": "assets/unity-kit/Plugins/DOTween/DOTween.XML",
+    "sha256": "fcc00f425967e04c71043cf4aa1b87233988bfb3b45333cea97c281ebd866cf5",
+    "reason": "Exact project tween runtime dependency",
+    "packagedMetaSha256": "79e65ca05b78af9985a93a105bf80aeb64fbbbf2258cddf2e1dbf3f53fa82f78"
+  },
+  {
+    "source": "Assets/Plugins/Demigiant/DOTween/DOTween.XML.meta",
+    "target": "assets/unity-kit/Plugins/DOTween/DOTween.XML.meta",
+    "sha256": "79e65ca05b78af9985a93a105bf80aeb64fbbbf2258cddf2e1dbf3f53fa82f78",
+    "reason": "Exact project tween runtime dependency"
+  },
+  {
+    "source": "Assets/Plugins/Demigiant/DOTween/Modules.meta",
+    "target": "assets/unity-kit/Plugins/DOTween/Modules.meta",
+    "sha256": "9d4869a96f412588ddda0140fc22b87f6832a2277b110a7221c5073df1daabb0",
+    "reason": "Exact project tween runtime dependency"
+  },
+  {
+    "source": "Assets/Plugins/Demigiant/DOTween/readme.txt.meta",
+    "target": "assets/unity-kit/Plugins/DOTween/readme.txt.meta",
+    "sha256": "62038325c1d167a77e7b13cb412c2796d75d88c4e04261073bdc65bf73e88688",
+    "reason": "Exact project tween runtime dependency"
+  },
+  {
+    "source": "third-party/DOTween-1.3.045/readme.txt",
+    "target": "assets/unity-kit/Plugins/DOTween/readme.txt",
+    "sha256": "750732579f45bb70c42a3906b38038e9c991010bcb5816fca1b3aebd30e967d4",
+    "reason": "Unmodified supplier file; preserves required readme and attribution",
+    "license": "DOTween Artistic License",
+    "licenseUrl": "https://dotween.demigiant.com/license.php",
+    "packagedMetaSha256": "62038325c1d167a77e7b13cb412c2796d75d88c4e04261073bdc65bf73e88688"
+  },
+  {
+    "source": "third-party/DOTween-1.3.045/Modules/DOTweenModuleUtils.cs",
+    "target": "assets/unity-kit/Plugins/DOTween/Modules/DOTweenModuleUtils.cs",
+    "sha256": "6a21fe7335a3626180e5c5342d8a19946de647ba3666fdfc4713c84fdfcc4609",
+    "reason": "Unmodified supplier file; preserves required readme and attribution",
+    "license": "DOTween Artistic License",
+    "licenseUrl": "https://dotween.demigiant.com/license.php",
+    "packagedMetaSha256": "8058e4ed3e9553b42af7f494f56bf7e042e86238c3c1232817b9d41341c04405"
+  },
+  {
+    "source": "third-party/DOTween-1.3.045/Modules/DOTweenModulePhysics.cs",
+    "target": "assets/unity-kit/Plugins/DOTween/Modules/DOTweenModulePhysics.cs",
+    "sha256": "26678b87b7fc1a56441910a12aef1647558dc83feb94604d588c4369c690fc81",
+    "reason": "Unmodified supplier file; preserves required readme and attribution",
+    "license": "DOTween Artistic License",
+    "licenseUrl": "https://dotween.demigiant.com/license.php",
+    "packagedMetaSha256": "8e5af19c1a59373033002164d8927a286df86fb02a9533d3c3d8fc67365a20e3"
+  },
+  {
+    "source": "third-party/DOTween-1.3.045/Modules/DOTweenModulePhysics2D.cs",
+    "target": "assets/unity-kit/Plugins/DOTween/Modules/DOTweenModulePhysics2D.cs",
+    "sha256": "7f3dd38cb0ac650de48028ac3d2600c4ea3afb9452a4ccccbd1d6fbf5b7deb82",
+    "reason": "Unmodified supplier file; preserves required readme and attribution",
+    "license": "DOTween Artistic License",
+    "licenseUrl": "https://dotween.demigiant.com/license.php",
+    "packagedMetaSha256": "0966e1f10ce3b4325675e3be1c0dcfd31e5fad16d86f1dd0530f24a9de502701"
+  },
+  {
+    "source": "Assets/Resources/Art/SettingsC/atlas-01.png",
+    "target": "assets/unity-kit/Resources/Art/SettingsC/atlas-01.png",
+    "sha256": "8a92518c1117a75fe8de49db99015d74fad43e9026486ceaaf46c5d0bcafaf4c",
+    "sourceGuid": "f9f543bc1e37ca64396c85a4fc47b907",
+    "reason": "CSettingsArt.Get / SettingsSwitch77.Create / AppUI.OpenSettingsSheetC",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "9b27b8f29d428dad14c80818f4b9b0f1144e36b312fab0827b792cf1afb5fbdf"
+  },
+  {
+    "source": "Assets/Resources/Art/SettingsC/atlas-02.png",
+    "target": "assets/unity-kit/Resources/Art/SettingsC/atlas-02.png",
+    "sha256": "088e1b0ae5dc1c3db0686daea4c823721adfbf54eef29ced4dd2fdb54bb3ebe0",
+    "sourceGuid": "43a4e69ce582a274caef0f80ebeb1895",
+    "reason": "CSettingsArt.Get / SettingsSwitch77.Create / AppUI.OpenSettingsSheetC",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "e5fb742225638a33fdaef44448e855184700ad84bd3c4639ba7dbd948e0c860e"
+  },
+  {
+    "source": "Assets/Resources/Art/SettingsC/atlas.json",
+    "target": "assets/unity-kit/Resources/Art/SettingsC/atlas.json",
+    "sha256": "5dbd8c3f8061b086fbe9e444a35de3d0c688a6445e062bc2c5568d36b7748c07",
+    "sourceGuid": "1877868992b555b4fa3050817d660672",
+    "reason": "CSettingsArt.Get / SettingsSwitch77.Create / AppUI.OpenSettingsSheetC",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "0642f63186652179590dde66ede837c7a82be29624be0f28a17964bf765b599f"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV60/Logo/chai.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV60/Logo/chai.png",
+    "sha256": "398b5c8f2dc8745b7a109f6bc32664039f513e622c9979322a0c65d937995d77",
+    "sourceGuid": "5b24e1818d8b4c248882730e95630c21",
+    "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "1343f521db3633e6a84e9f729862f371f89f171161cafe490f65ceddd5673b19"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV60/Logo/layout.json",
+    "target": "assets/unity-kit/Resources/Art/ChineseV60/Logo/layout.json",
+    "sha256": "3ffde87d848698f03127317d7d6dae4bb340b52a89cbd1751959335274fd2134",
+    "sourceGuid": "1663e94501e8b464c9890b230615ad9d",
+    "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "b828a1080ef844a82bb228b8b62797409f016f99b36fea5e00966cc34ec1d624"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV60/Logo/miao.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV60/Logo/miao.png",
+    "sha256": "f131bab9809c3d7bbd38aac77c9580c90a521190cc78c7080dcda3373b751e3a",
+    "sourceGuid": "c1bbf92fa2624a24d980661993d239d0",
+    "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "aefaa67b426f31d572fe41c65ef4011702ef07653a313549a25957256de0976d"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV60/Logo/tan.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV60/Logo/tan.png",
+    "sha256": "5695fcab4e9245d0a49758baf9e676dca9822dc2841d20930d250420df5be3c1",
+    "sourceGuid": "caacb5b8593c17f44bc73ab9a8947108",
+    "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "1e94f85fe6c2dd481a16e94fe4ede0cf5ca63de67ac9734d0b3163b751ff85dc"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV60/Logo/xiang.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV60/Logo/xiang.png",
+    "sha256": "9c24b718dec960756ef234f44169214cc6def7310299c2de54a703bfde76d557",
+    "sourceGuid": "7272143de58f91046896de3befce3d0f",
+    "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "a4da804eb3d2f3080b2edf4b6f614495f663a2a2d73e20aac66b89e3fe342b2a"
+  },
+  {
+    "source": "Assets/Resources/Art/FailureCatV26/cat-atlas.png",
+    "target": "assets/unity-kit/Resources/Art/FailureCatV26/cat-atlas.png",
+    "sha256": "69b6b4c77c67647b84b9f628bc981efe7cf864539474e39211e48571fc6e7c26",
+    "sourceGuid": "c09ac69eb2a1535478b7f9c2808cde88",
+    "reason": "FailureCatAnimation.Get / FailurePresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "0a71017ab9aa7f1ac7bb98b63180fedc2471c241c36f980262fbb52c1ac75553"
+  },
+  {
+    "source": "Assets/Resources/Art/VictoryCatV23/cat-atlas.png",
+    "target": "assets/unity-kit/Resources/Art/VictoryCatV23/cat-atlas.png",
+    "sha256": "6aff8b70ff1624c8432496bd20757329c1c253f39021c4a2d309c8c8de89c0dd",
+    "sourceGuid": "f4717097579d7b44294b2f6bedcfad07",
+    "reason": "VictoryCatAnimation.Get / VictoryPresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "68d9be0781424d5d338ab96897541adde1bf7c83513625689e542554b3c16a40"
+  },
+  {
+    "source": "Assets/Resources/Art/FailureV25/atlases.json",
+    "target": "assets/unity-kit/Resources/Art/FailureV25/atlases.json",
+    "sha256": "52a1ed99c7b99068c94cb8d7e54c7e9e37a2de411101759d805cc57d2433149f",
+    "sourceGuid": "131531d95a1aec84fad16426db8b0d3a",
+    "reason": "FailurePresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "334cffd29e758dc613eb0ac664d9e0a3c7132e59cb8f4ab185a2930fc44a363b"
+  },
+  {
+    "source": "Assets/Resources/Art/FailureV25/background.png",
+    "target": "assets/unity-kit/Resources/Art/FailureV25/background.png",
+    "sha256": "d607b9de1009de3cf787e9a8c2e0fa0ad874840ea8f22e50a0666e2802a41144",
+    "sourceGuid": "cd77180310737b64f92297e678e700d0",
+    "reason": "FailurePresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "902385a24770e818131e735171fecb58538f5fd01d1730beffff13b9dfe978ec"
+  },
+  {
+    "source": "Assets/Resources/Art/FailureV25/glyphs.png",
+    "target": "assets/unity-kit/Resources/Art/FailureV25/glyphs.png",
+    "sha256": "3080edf97de4cd3e2d50e74b3a00e93286ba0f0602d69d0f6f6078063df1953a",
+    "sourceGuid": "0cc440979ccd8ea4697ded50a63dcfab",
+    "reason": "FailurePresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "0b347aee53e54e41fbe711251f21b900df244a14e91c6697bbf61a57fa913889"
+  },
+  {
+    "source": "Assets/Resources/Art/VictoryV23/atlases.json",
+    "target": "assets/unity-kit/Resources/Art/VictoryV23/atlases.json",
+    "sha256": "462dfef586b7512b52b9ecd12c3983b0b1f80b46cdc058bf7007a30745b545ba",
+    "sourceGuid": "dcc3f192eb15b2741aaa7501505b79ae",
+    "reason": "VictoryPresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "b5d1b58a9b3358a0e2d6087d18742b4eba5c5eda641f812d26dd67dbe188b970"
+  },
+  {
+    "source": "Assets/Resources/Art/VictoryV23/burst.png",
+    "target": "assets/unity-kit/Resources/Art/VictoryV23/burst.png",
+    "sha256": "b4863d0aa6758e3ec79b4d8dff2a0c418e36c9bd5a13d99002d365d2204c8428",
+    "sourceGuid": "6b4bbc93d0f0a5647802ec5230dc9341",
+    "reason": "VictoryPresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "f868a185f8306c988709e36528e88792c65069c9329e099b10090f390c745be2"
+  },
+  {
+    "source": "Assets/Resources/Art/VictoryV23/glyphs.png",
+    "target": "assets/unity-kit/Resources/Art/VictoryV23/glyphs.png",
+    "sha256": "30581b35c9d9f4f947feac272a8f7014555a3c26221248a557933a2282230c87",
+    "sourceGuid": "fefe597eb2a7e094389c0d9172aad264",
+    "reason": "VictoryPresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "c6dccc7ea71f26193877067c5aa0818a53dcb033927a53994d6e8e606c799680"
+  },
+  {
+    "source": "Assets/Resources/Art/VictoryV23/halo.png",
+    "target": "assets/unity-kit/Resources/Art/VictoryV23/halo.png",
+    "sha256": "1dc16ce660775f142ba545d8308867a640d89d42d4867875d99ed0c3ec53b9c7",
+    "sourceGuid": "44426863489f70c45880552880df6790",
+    "reason": "VictoryPresentation.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "e12e28a800a9af115c8a600f880da58e179512ebcf3f3517748120cf7e05111c"
+  },
+  {
+    "source": "Assets/Resources/Art/LeagueCalendarV1/league-motion-atlas.png",
+    "target": "assets/unity-kit/Resources/Art/LeagueCalendarV1/league-motion-atlas.png",
+    "sha256": "3809ab63691da61ac730040df7b9c02a54cb7ecb4c1e1966d575c719a151061e",
+    "sourceGuid": "c6bce0d6d1fd66a499899e3889e3df4d",
+    "reason": "LeagueMedalPresentation.Build",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "da7300acd788382beab274cd53b99666c5c9443fa235f065342399511a6b22ca"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebrationV1/confetti.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebrationV1/confetti.png",
+    "sha256": "cf9db3462ec146baa828942528a2daf9b97967cd04b9c8df8bb5dcd0721e3b8f",
+    "sourceGuid": "5b3c47bca1f6fba458521b799d461211",
+    "reason": "CollectionGoalEntrance.Begin glow",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "bcc363d7d5493ad0a9abaf7ba72d45ada5106a6d962e67f277cb1a648bc3cb0e"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebrationV1/halo.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebrationV1/halo.png",
+    "sha256": "c92e0c096c645a8f616ea46bb6f3169730b913f3f91c17faa4915b95d082cdbb",
+    "sourceGuid": "b0bf2ca831f71db4db731cde8b2e9a65",
+    "reason": "CollectionGoalEntrance.Begin glow",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "286c0a99ffaa7c216a6c5da80f5beab403a15b77edb4aeab5839972bda3ea30a"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebrationV1/ribbon.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebrationV1/ribbon.png",
+    "sha256": "dc317478be82a7bc2b3d96a3f476bac132a3ddc5af37f7c0fdf14f87d2dbdcd9",
+    "sourceGuid": "b6f57db3166608846b79e1ec9c7951f9",
+    "reason": "CollectionGoalEntrance.Begin glow",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "3897123547142856998661b72b400e14aa867b198f52e48c1b6204fd82675ac1"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebrationV1/star.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebrationV1/star.png",
+    "sha256": "10838058ec4134ced53740008fda2c834cba4f0a2d468524e32450ecdd373679",
+    "sourceGuid": "b6581378433407c4c98365d4254ae9ad",
+    "reason": "CollectionGoalEntrance.Begin glow",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "a0d00b9b1f269c88748e0b14815d731f294f826833d51883739102a3150c873d"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/PastelArtData.json",
+    "target": "assets/unity-kit/Resources/Art/Pastel/PastelArtData.json",
+    "sha256": "7bfb0f5cab76db10ad7e3fc3593dec3148b65caf49379280ebcdf1b10aec723e",
+    "sourceGuid": "523024ea921be664daf7f4bf1f06dfdc",
+    "reason": "PastelArt.Get catalog and textures",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "1817ce89325bd3937346a068af1f300f6feee0dffe5b4f023918f9e1da943f87"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_wave.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/cat-poses/cat_wave.png",
+    "sha256": "9d3f65b726333a4c3cf4ffd6651e88a210923782b1389bbff242c2a9c328119f",
+    "sourceGuid": "ddb5a1d3f757ce84693a4c6fe2465ade",
+    "reason": "Delivered examples reference PastelArt key cat_wave",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "fa1b72bd317bf94990aece7750d84e32bf1bf0db21a9a82dca086b780e4dac55"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_anticipate.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/cat-poses/cat_anticipate.png",
+    "sha256": "a295add702bcf0f91fe9c9d946cd80efe3047933ac8e70d9bb8c84b64e1c52cc",
+    "sourceGuid": "1e49b3a433891504eb0d03f63ad50d7d",
+    "reason": "Delivered examples reference PastelArt key cat_anticipate",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "ade1e66bbfdc8c058448a3fa65322ae00ba7f6a13375e1282fe06adb4a378ecc"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_medal.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/controls/icon_medal.png",
+    "sha256": "c0d95491c94d60ad09763222f96384b3ceb327af759c3fd9a0077774d456c111",
+    "sourceGuid": "2a7fcc72b898c0a47977ccfe8e1d90c2",
+    "reason": "Delivered examples reference PastelArt key icon_medal",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "fe0df1bcdfa9fca4f6f30bf0b04e0fb3b1e4cdcd7c7d225e6c689ca7d6ddd9dc"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_settle.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/cat-poses/cat_settle.png",
+    "sha256": "a3361899d6fe963641bc57541237d4ee746f6b7c8f1aea4727c85210743529a0",
+    "sourceGuid": "e7f4d0ff7ee10ff46b6d4046ca4cb569",
+    "reason": "Delivered examples reference PastelArt key cat_settle",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "7f192de32beca6fce1050d2eeecc66490f5017dff440c55e53ee7407f63e8847"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_idle.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/cat-poses/cat_idle.png",
+    "sha256": "d214ef1b259f24e6607712525098c716283237b0d5f41a8a97dcafcf73c00da6",
+    "sourceGuid": "233f824adb770c54494660b858663b0d",
+    "reason": "Delivered examples reference PastelArt key cat_idle",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "7d3fb1c3fc6df1f8a26acf9f09ba56343accd7b4114800be1409def4ea3c9091"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/resource_capsule.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/surfaces/resource_capsule.png",
+    "sha256": "e0eda3529eba1313441d8ddf2194f9e5960ec7e7293c41c5cbb7891d866de374",
+    "sourceGuid": "b99c9161a4a1d354cb3799c777f92ab4",
+    "reason": "Delivered examples reference PastelArt key resource_capsule",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "2b92061434e90f68c240e364e13c3be1bb525b01e9a73abc13d38544f39da45c"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_mint.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/gameplay/brick_mint.png",
+    "sha256": "53dbbe723512acbf78d1630c76037041852a9a3d18fa1a4adc3b9357a8fd9310",
+    "sourceGuid": "e2e5e1b45ca12b24ca47f70342f90c8c",
+    "reason": "Delivered examples reference PastelArt key brick_mint",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "8656abfe64088808ca5e9c5b54214269f7d88f5417d10158634d4d9e88ce9a66"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_celebrate.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/cat-poses/cat_celebrate.png",
+    "sha256": "65fae42266bfa74c747980220d8fbfd3573b0952728b2860b3fb08a336aba664",
+    "sourceGuid": "6e4eaef2f5658ba4aa96b0eed8e3221b",
+    "reason": "Delivered examples reference PastelArt key cat_celebrate",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "7dccf376a9770c45091979f424fc5f32dbe24eda5e58b301e9d7f88e83121c03"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_video.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/controls/icon_video.png",
+    "sha256": "08fee43b4dd158ef12e8ff587c8efe328008917d1aa3d10eccb783660b30833d",
+    "sourceGuid": "65818823a9cb7524285008c9a4effc16",
+    "reason": "Delivered examples reference PastelArt key icon_video",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "4d10981cf2f67450fc8d55292991cc6c6cfc5d6342ef6b575ef9056677321282"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_coin.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/controls/icon_coin.png",
+    "sha256": "b72e66191a5459c1967364e8c139aca6e97cb3702d31cb91682ec5bddadb574d",
+    "sourceGuid": "10139ef72e025d74ca025ea04a99886b",
+    "reason": "Delivered examples reference PastelArt key icon_coin",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "73477adcf4517681b478051341243589cc88ec6d1bc9b67f4f1624d118b301b4"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_home.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/controls/icon_home.png",
+    "sha256": "032315e3af46ae91f74a7560aafb30436d5fefd5eb465bf22f89bb0b863f800a",
+    "sourceGuid": "e33eb303ceadd7a4386721fcd6a1e11c",
+    "reason": "Delivered examples reference PastelArt key icon_home",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "0c7ffb9d93bfb486c343695de8c516b9e516da18387b7ee1fefe672348f2fca5"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_restart.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/controls/icon_restart.png",
+    "sha256": "ffdd848873d0ad7cb26dbdbc6bd39c56149742dd9dbf3615205e3bab14985085",
+    "sourceGuid": "8ece0b7e4d6d05e458930158c596bc82",
+    "reason": "Delivered examples reference PastelArt key icon_restart",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "8c008b6474feace54f261a8b7de40adcfe16f71195dc745d86c90981fbd4fea8"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/modal_panel.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/surfaces/modal_panel.png",
+    "sha256": "02b103bf8701fff94df3cc87198221ab51b95e11b65123131ed3ca095e43f0e7",
+    "sourceGuid": "aca35012a2a538a44b8f5a172553eacd",
+    "reason": "Delivered examples reference PastelArt key modal_panel",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "78c8a721cf274481c8164e488ba1d4332be9e8ef6f1cc27c93c9d311fedca2b4"
+  },
+  {
+    "source": "Assets/Resources/Art/BannerJelly/panel.png",
+    "target": "assets/unity-kit/Resources/Art/BannerJelly/panel.png",
+    "sha256": "d181b2d1f78275870a696ed661796a1f4e9bd3445ae6f86580722445e50a4aab",
+    "sourceGuid": "8e83bf73644831a4483833d3933e49ec",
+    "reason": "ActivityCarousel.Build panel",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "33adeacc9d08b83c4a0bb2186ebac4ae4302a58465874cbf05b029e857914a36"
+  },
+  {
+    "source": "Assets/Resources/Art/BannerJelly/medal.png",
+    "target": "assets/unity-kit/Resources/Art/BannerJelly/medal.png",
+    "sha256": "a33c7def3ca7d05afe8156ecbb944ad681fbe7bff217ad3ece5d22fdd3786cf2",
+    "sourceGuid": "8c014028579e89f4080dfd6a9f32d6a0",
+    "reason": "ActivityCarousel.Build medal",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "372e052dbc8f1096633fefa955430457f7232318c465788148a33c4cdb4a84c1"
+  },
+  {
+    "source": "Assets/Resources/Art/FourthGroup/states.png",
+    "target": "assets/unity-kit/Resources/Art/FourthGroup/states.png",
+    "sha256": "edce284dbaadcbb7512a426956bf7666463e2b6c0145e3f56663eef16f93cc8a",
+    "sourceGuid": "d79722988a285f0cb1571365f99430d4",
+    "reason": "OpeningCopperView.Render",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "feae0e832ec4439f667d9bac51a5edb0aaa83bdcfd80b071386c5e9177cfec3c"
+  },
+  {
+    "source": "Assets/Resources/Art/FourthGroup/layout.json",
+    "target": "assets/unity-kit/Resources/Art/FourthGroup/layout.json",
+    "sha256": "40336a9371651f452810a3169f95006a6f78259b22a56889c9160bc13068d1d6",
+    "sourceGuid": "b350b9a65b0f5c4ba4c0392a43e1b342",
+    "reason": "OpeningCopperArt.Clip",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "e6427e120d5bb07345d87ae976dcf897ab9d7b5355a8458953e1ee4c854ebdf3"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleJellyV5/vine-star-on.png",
+    "target": "assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-on.png",
+    "sha256": "5ce998f19ddd15e139ecb0a06eb36075cf3eae8b1a9cab028c0947be4ae7d191",
+    "sourceGuid": "84005ea3eaf69074889a1838ad16ce92",
+    "reason": "StarChargeView.Initialize",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "f18eba23fe5cbd5ca97884317212c21cd61f9f546fc829d6bcbe13f1f18c2fc2"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleJellyV5/vine-star-off.png",
+    "target": "assets/unity-kit/Resources/Art/BattleJellyV5/vine-star-off.png",
+    "sha256": "bb2b7332fd8fd0a816f4859550293280e2ace60770997c946cf5bcc9c790fa2d",
+    "sourceGuid": "c5643122ae2a512498fa2dae872c017d",
+    "reason": "StarChargeView.Initialize",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "3307a27221f988765b94512f4cc230681498ecabc3a5f5d6c9aa510f0b5211aa"
+  },
+  {
+    "source": "Assets/Resources/Fonts/MaokenZhuyuanTi-OFL.txt",
+    "target": "assets/unity-kit/Resources/Fonts/MaokenZhuyuanTi-OFL.txt",
+    "sha256": "f1aaf0bd7443cebbbe4c1faa124e398728bb780a61dec1e347045898bb9f0f28",
+    "sourceGuid": "e576d4365efe2984c9196b8059dcd074",
+    "reason": "GameTypography.Font/HeadingFont",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "3032f0c9cf8fb57335211f5959f75f453e8f0e465f4e4904ba0fab491b5d6315"
+  },
+  {
+    "source": "Assets/Resources/Fonts/MaokenZhuyuanTi-OFL_ZHS.txt",
+    "target": "assets/unity-kit/Resources/Fonts/MaokenZhuyuanTi-OFL_ZHS.txt",
+    "sha256": "e2c2e3bf57c46809197a762788a86ca44914964ad61339474c6be6c5618b1725",
+    "sourceGuid": "99e4031e7a7e018439f64ee74bf4b683",
+    "reason": "GameTypography.Font/HeadingFont",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "3a9358f60e4ceceb0b7b096d26d2642c1f9aa6911d6a3cde95f142371497a009"
+  },
+  {
+    "source": "Assets/Resources/Fonts/MaokenZhuyuanTi-字体授权说明.txt",
+    "target": "assets/unity-kit/Resources/Fonts/MaokenZhuyuanTi-字体授权说明.txt",
+    "sha256": "3c824e0c8b47590f6e7b1b7be39b96c6c1e728c553f87e18c0b4cf2ed8e0934f",
+    "sourceGuid": "016e6c9d1c4a15a4da73a7d7d10c65e5",
+    "reason": "GameTypography.Font/HeadingFont",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "f2440ff78efd544ed879701dd692560ef85061701ba48b6dc15a37e27161c297"
+  },
+  {
+    "source": "Assets/Resources/Fonts/MaokenZhuyuanTi.ttf",
+    "target": "assets/unity-kit/Resources/Fonts/MaokenZhuyuanTi.ttf",
+    "sha256": "221ce3d8e2fc52f982ce9be57de3c66726ed951c8d07b0208b726763fbf7e96a",
+    "sourceGuid": "f5a41ffe63004ad093f5a558ed2a79e8",
+    "reason": "GameTypography.Font/HeadingFont",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "581f5e7a1fee0d6d7826fe4f2affc5f3695b9c94408a238b43cf3b97aadaf3df"
+  },
+  {
+    "source": "Assets/Resources/Fonts/MiaoRoundedUI-Bold.ttf",
+    "target": "assets/unity-kit/Resources/Fonts/MiaoRoundedUI-Bold.ttf",
+    "sha256": "63e17bacce03c9872894423bb748c4885c39d27976f6a35cdf00e6004ec4bf7e",
+    "sourceGuid": "7bfd3814f15961348be6c699bf0150ac",
+    "reason": "GameTypography.Font/HeadingFont",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "6c3bc917bbfac1087265d2ea35df5d1a12629ed81261c4b9fe67106aa61ffbae"
+  },
+  {
+    "source": "Assets/Resources/StarCharge.shader",
+    "target": "assets/unity-kit/Resources/StarCharge.shader",
+    "sha256": "fadc599ba81b1d7fd6939dc859fbf228ec54deeacf0599b5252065bb58dfe27f",
+    "sourceGuid": "c8ae533b188bc06489b529daaacb2899",
+    "reason": "StarChargeView material shader",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "0dac427c0d79eb46592a981190db6fdf9c635bbc304450b095ae243ba5b22704"
+  },
+  {
+    "source": "Assets/Resources/Audio/Jelly/AI/sfx/click.wav",
+    "target": "assets/unity-kit/Resources/Audio/Jelly/AI/sfx/click.wav",
+    "sha256": "ef142f64f65edc0c0383b7707ece671c626afaadbb0521246c1713d2512e5242",
+    "sourceGuid": "ec76408e4b916a74a89c54278160612e",
+    "reason": "SoundService cue click",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "78d7a649a691f312096cb7bd6efe41574f83c1749e875fe123f4da46d6c959c4"
+  },
+  {
+    "source": "Assets/Resources/Audio/Jelly/AI/sfx/whoosh.wav",
+    "target": "assets/unity-kit/Resources/Audio/Jelly/AI/sfx/whoosh.wav",
+    "sha256": "95fc9bf92edf4eea5bc021b3b989e61a24b49a4417117a8a72855d2d5caca518",
+    "sourceGuid": "83e3a2cb1beedc6429be62f5f9ea47a4",
+    "reason": "SoundService cue whoosh",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "dad4d4f3118d17935d42b06738a61c4dbc3e4304285085a4522fd608494fed6b"
+  },
+  {
+    "source": "Assets/Resources/Audio/Jelly/AI/sfx/ui_back.wav",
+    "target": "assets/unity-kit/Resources/Audio/Jelly/AI/sfx/ui_back.wav",
+    "sha256": "2c187e84d3024bc01bec0ca4edb44a824cd018cbbae14631d5e0db4b54af7f80",
+    "sourceGuid": "17c1e653af2dd4b4fac4cb2111ebb32c",
+    "reason": "SoundService cue ui_back",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "9d006195c15b5c1045fd301f5a47deb58c7a4e35fedbfb9a48d3a3dc1d8b0e66"
+  },
+  {
+    "source": "Assets/Resources/Audio/Jelly/AI/sfx/jelly_land.wav",
+    "target": "assets/unity-kit/Resources/Audio/Jelly/AI/sfx/jelly_land.wav",
+    "sha256": "6ba3b14d1a18f875e8198d0c8ad7bdb986c896edeb9e471dcdb89397b4cac7e1",
+    "sourceGuid": "52078d3f0cdbf514e801b1de4ce083b4",
+    "reason": "SoundService cue jelly_land",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "f74df92a619fdb5165b29ae825d24cdc9c3415e0a1d0159ee9ebd033fc7f8d35"
+  },
+  {
+    "source": "Assets/Resources/Audio/Jelly/AI/sfx/coin.wav",
+    "target": "assets/unity-kit/Resources/Audio/Jelly/AI/sfx/coin.wav",
+    "sha256": "9bb2e35fd4b7465195e738af05e4cf8f725c3e0bd0f3eacc38e1dc2ccffd4c61",
+    "sourceGuid": "5321eaabf23bfaa41a9d077bf5e2583c",
+    "reason": "SoundService cue coin",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "35e99f85a96f1315a15a417110a4523211127e72c558daf7df1e51bf0c956012"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV87/score_star_full.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV87/score_star_full.wav",
+    "sha256": "fe1264c27660b656dd3e961e30627462260c9d967f8d7200a856a0e68c81b553",
+    "sourceGuid": "4982333d1d3e2ed313937a2329f37836",
+    "reason": "SoundService cue score_star_full",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "7a075aaf90791ed89ab1fb1653eef502ad7afb5abec779110bde3fcb5edd1329"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/rank_update.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/rank_update.wav",
+    "sha256": "c1b84107671e4089ee42f5dc641c1e5c5db309b7a22b422dc2c8b7aad7c1a076",
+    "sourceGuid": "2494e86c477529347b6078a6b17e6e3d",
+    "reason": "SoundService cue rank_up",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "24abc7fa3842a78b7560ee37fc89237928b5ea909c672d70d1915fb5e8c95b6d"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/medal_award.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/medal_award.wav",
+    "sha256": "6878d642c01ca2c32ac53aa6ff71dd7d1ab8192095734ba85daca7d47f4c4791",
+    "sourceGuid": "4c197dd53060dec45827ca7c8321d7ee",
+    "reason": "SoundService cue medal_arrive",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "a40cf1896e59a2d278151cdb380a0d82e4a7725c8bd3a74d48a487d42c2f8e4f"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/result_win_stinger.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/result_win_stinger.wav",
+    "sha256": "0cb1d5769dc4ce59e60ed6a20d081e5fdda3432a79e9f5310d9dbde35edcde90",
+    "sourceGuid": "d071ac926157708409434e0cd4adf95e",
+    "reason": "SoundService cue result_win_stinger",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "0db8df9e4797aa42dfddb1287d8d0f63099c6e5328e31048eefdf9124ee33ec6"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/result_retry_stinger.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/result_retry_stinger.wav",
+    "sha256": "cb9ca0919d1609df943bd69dba01251e8c86f54fe75dcbedf1cbfb2003c8e250",
+    "sourceGuid": "ab07ae0abcec9eb48bb211c56b7d96ae",
+    "reason": "SoundService cue result_lose_stinger",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "975afd20d3cceca520d021202e124fc3ae6f3463c492a108ee6c15d29d4b80dc"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/cat_jump_up.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/cat_jump_up.wav",
+    "sha256": "420bcad5fbdbafb9c8951983c46301a4a13bbbc376b85269d71afc17acaa43af",
+    "sourceGuid": "2fdcf1f6b5f6f514d957928d134f7d33",
+    "reason": "SoundService cue cat_jump_soft",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "7b3be069d0e344d3725f8eb2a63caf8868d0b10dad9a31af0667a85b2423f159"
+  },
+  {
+    "source": "Assets/Resources/Audio/Jelly/AI/sfx/cat_happy.wav",
+    "target": "assets/unity-kit/Resources/Audio/Jelly/AI/sfx/cat_happy.wav",
+    "sha256": "82fe666f65a39dfdd4b5fcf9e791bb6a224458c4e87cdb69eb2249cf20784b25",
+    "sourceGuid": "e0a3dc6f0162b594eb36d71a7b4d073c",
+    "reason": "SoundService cue cat_happy",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "aab0d46d06c742d70b10160eab1e132bdf664290513fe64d147f47dae10922e7"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/cat_land_pad.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/cat_land_pad.wav",
+    "sha256": "00a20d43d51bf9f6131f9522e5e809bfb679c06c5c89eb586092fe81a5ee0973",
+    "sourceGuid": "44cdfcabeaec9464a8bff0757ef070d9",
+    "reason": "SoundService cue cat_land_soft",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "ee6fb38161669a686aea5359f5b9e5f6b1535eb4d16f0a2f65e874e9b09ae480"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/victory_sparkle.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/victory_sparkle.wav",
+    "sha256": "8920eb2be1f6634e847b5519133c4a9b566b8e9a0f675da656571254a9e70ad1",
+    "sourceGuid": "b28839c371f4d1e448111b5661a6714b",
+    "reason": "SoundService cue result_win_burst",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "fdacc1297cc7bcb7d8f22882f61edf2ff3f1c640c69df4e47997816313567898"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/reward_card_pop.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/reward_card_pop.wav",
+    "sha256": "fa80e1a6e766c77260dfd1c4912d67de4e2331339cfd2be70bb9abe81129171b",
+    "sourceGuid": "c459c009d46c52e45b12a94adf6b261e",
+    "reason": "SoundService cue result_reward_reveal",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "097e27bf64c51b84d4b0b9cfb45b599485ee015a16cda2b0aec1015e1cd4ac73"
+  },
+  {
+    "source": "Assets/Resources/Audio/Jelly/AI/sfx/cat_retry.wav",
+    "target": "assets/unity-kit/Resources/Audio/Jelly/AI/sfx/cat_retry.wav",
+    "sha256": "f14c05766343426b7854d3fa5afe219200866db813853c60acc8d30cd2ea9a49",
+    "sourceGuid": "dbb5cdb810ce152428568fbee5c69567",
+    "reason": "SoundService cue cat_retry",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "e154ee6006409302de54ea17b4cd8c4d275beed104dce317fdee71f817356ebd"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/cat_slump.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/cat_slump.wav",
+    "sha256": "19db528f1dc21aa9b5adb3651ccd2c6b10067a2d4fe70fc9359ed416de8f8969",
+    "sourceGuid": "5fe04eb7e1580594ebfa2529027f7f84",
+    "reason": "SoundService cue cat_droop_soft",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "005988744c24d797fb922b883277438033dd36d1ce8c46e7415bc0e75caed6d9"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/vo_win_zh.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/vo_win_zh.wav",
+    "sha256": "21260781a5fc22b5485f27e8efd561271575a173acaaded108043cdb9782e4d5",
+    "sourceGuid": "5141b76dd0ceb62449f33efc86be8b2f",
+    "reason": "SoundService cue vo_win_zh",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "5bf38a3ab2c098568ae51378dbb4a7115e2cecae8c62264c0627155a4c3ab468"
+  },
+  {
+    "source": "Assets/Resources/Audio/DeliveryV68/vo_retry_zh.wav",
+    "target": "assets/unity-kit/Resources/Audio/DeliveryV68/vo_retry_zh.wav",
+    "sha256": "5297e7681e60727c5167e6296008bc53283c2c63034ee4f4276aa800ae20fc05",
+    "sourceGuid": "74ae3447b575d50458b44e99e768d8e0",
+    "reason": "SoundService cue vo_retry_zh",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "fd73170db8d466e74d7306582714fa36513267a32eb5a0220e40fe6693eecf47"
+  },
+  {
+    "source": "Assets/StreamingAssets/AudioLicenses/EZduzziteh-source.html",
+    "target": "assets/unity-kit/StreamingAssets/AudioLicenses/EZduzziteh-source.html",
+    "sha256": "b5d2365e9869e6603e16250f6de742a7147666fabcf00f8571d547da3a63f556",
+    "sourceGuid": "981b7d2113e9b814fb18afda0753b2c6",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "ced8578fb7da397df23f0455f38e6a25fd39e067f8e76073686a56da9254b09e"
+  },
+  {
+    "source": "Assets/StreamingAssets/AudioLicenses/farfadet46-source.html",
+    "target": "assets/unity-kit/StreamingAssets/AudioLicenses/farfadet46-source.html",
+    "sha256": "c2d3c9224d600f7b3ca9e953280679c45b448b71dbb080109637532e6ac50024",
+    "sourceGuid": "925790318ea47fd4781dc48f79cc0cf4",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "5d834ee92fa71fceb6893beaa85ceb8522b9f90b57f78a7acda3ca85705bc88b"
+  },
+  {
+    "source": "Assets/StreamingAssets/AudioLicenses/Kenney-CC0.txt",
+    "target": "assets/unity-kit/StreamingAssets/AudioLicenses/Kenney-CC0.txt",
+    "sha256": "f7966c773bbed0eca6a9c75081c44a178b38eae112724dbb5fdfbd4192d118a9",
+    "sourceGuid": "3ff58be90b3085645949896e6ce3bd3a",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "e21aaf4911a7d8217c5f73b8ba5ae288a30a605e93d6c9a829ea40275c645460"
+  },
+  {
+    "source": "Assets/StreamingAssets/AudioLicenses/manifest.json",
+    "target": "assets/unity-kit/StreamingAssets/AudioLicenses/manifest.json",
+    "sha256": "b2ed93f12bb03adcf744ced443b52dfba6418f4999634933ff77a326c5f3d9b1",
+    "sourceGuid": "509a5a5a19e203f4a8af4e9f13ac0a8f",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "2b9a7586fb24b3d177637e9b9ba25bcdfa216e07f8b6bc9edb7525f1f18f51f0"
+  },
+  {
+    "source": "Assets/StreamingAssets/AudioLicenses/SOURCES.zh-CN.md",
+    "target": "assets/unity-kit/StreamingAssets/AudioLicenses/SOURCES.zh-CN.md",
+    "sha256": "1cbfc6e3d3b1f09859bcb9871ef0e1ceab4e9f927fb6c1ecef3badc2ce7811a0",
+    "sourceGuid": "eed53da184fd1fc419b32a107f59801d",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "7bd4aa77ecebecb29ba73c09c50f9bb7386a4971ae21c4e494f3e416d6eec629"
+  },
+  {
+    "source": "Assets/StreamingAssets/FontLicenses/ChillRound-OFL.txt",
+    "target": "assets/unity-kit/StreamingAssets/FontLicenses/ChillRound-OFL.txt",
+    "sha256": "8e9a9d9db5488ed7d816f35e2a6ab4e5710b7f994fff2bb81e023388e2c32fef",
+    "sourceGuid": "cbbca9220ab1e904cb664f6c283d0436",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "cbc5a767d21ca2fbd5ccaf943708e3e28bc4d3991bc045f34baff0da553d024d"
+  },
+  {
+    "source": "Assets/StreamingAssets/FontLicenses/NotoSansSC-OFL.txt",
+    "target": "assets/unity-kit/StreamingAssets/FontLicenses/NotoSansSC-OFL.txt",
+    "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
+    "sourceGuid": "6b48fc73110a31f4baa7e323943c1939",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "faf34ddc10ca525a75119387433a97e3bbb403e9d27e24a6f295f807c66b2911"
+  },
+  {
+    "source": "Assets/StreamingAssets/FontLicenses/ResourceHanRounded-OFL.txt",
+    "target": "assets/unity-kit/StreamingAssets/FontLicenses/ResourceHanRounded-OFL.txt",
+    "sha256": "586a072c53a12f6e4389f0eb6034f9780afcb9f0a49558e9ed299664ab1107d8",
+    "sourceGuid": "1950c3ab6dd792943a3eaf64854678cf",
+    "reason": "Original project font/audio attribution evidence",
+    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "packagedMetaSha256": "f6554f80ecbc95b0d324709cf6c07b762351d504ce32d30dd0635afc41ff7381"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt",
+    "target": "assets/unity-kit/TextMesh Pro/Fonts/LiberationSans - OFL.txt",
+    "sha256": "37f8552e9a874ec10710dc0ede6a9adf168e6609fbd02a507f35629373b85a48",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "5dbec32c014c17d94674af5f1494d49b42ba00edd50397f895f088c868ccbf86"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Fonts/LiberationSans.ttf",
+    "target": "assets/unity-kit/TextMesh Pro/Fonts/LiberationSans.ttf",
+    "sha256": "e5b0af421ea2bfbc1ac8d251d647268087ae82786234c57f757d1f0b90fa8b49",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "e2e35a015703584fb119355fa02631764d111c3e112d32519801d46bd697b596"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat",
+    "sha256": "b6b65c34e4907dd3006c2217fc8a4cef81b6da24df0a3de8e2288199eb6c5a9d",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "ef2eee63b288d47823da38109e3e8c879f4717a82dc662ac2d5e2460dacde698"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset",
+    "sha256": "4258bed1e28868571085fe493031136fa2ded7a885d7d38a7cd8183ba15abe7d",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "d6d86504040cf6e736767fda9bdef494afb06d5304384243e2dd703eba3a4a3d"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat",
+    "sha256": "25874340976d40e9f9e8abf731b7f32e5a478541dead9288140bd60c7a3287d9",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "a8cf0ee9888a163e892368b4660b9c62a7375e7f8afdb8ee02e5c91ca1cdb355"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset",
+    "sha256": "c3ff50e3133d989180b187748ffc67903f1fede099a5b85b4fcbd8cb6e8be958",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "37233890984555987cb585551bc885069f2849a9b0d1c2191af073b9376aa10f"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/LineBreaking Following Characters.txt",
+    "sha256": "3a73e5ffe2510756dd3c2e982fdc1218b4be82c6e21abde88070d6860e1bc8e6",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "d5a86d8b7db6aa3ca6f4a63750eb94e0c42a64909b47d8c6c6f2565845534490"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/LineBreaking Leading Characters.txt",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/LineBreaking Leading Characters.txt",
+    "sha256": "62d3f4d5f64aaf885692d2d13a8313f6918e6e4c5aeb3990a43f614652bfd89c",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "6a925814d5e251a0ced6de210db2bacf2de29b4f0dc2991e85c908632e9565e4"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset",
+    "sha256": "155fff99f467baa93dd2d0886df466bd242cd5e3c8c60c9d43e9cdad269f7f54",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "097525b164260b0fb34b4e0c73b3187c693f4dfe2991f475b5b416dbf07dfbbc"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/Style Sheets/Default Style Sheet.asset",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/Style Sheets/Default Style Sheet.asset",
+    "sha256": "93e073cdb91b7e3d2fa31e2dd13626d7b9d2f327904ba8c3c2b97a3eecfbabac",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "b832663ca09ec7af8c8e816fd91a718b2af6c21ab4f126fa818871ad53bce763"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Resources/TMP Settings.asset",
+    "target": "assets/unity-kit/TextMesh Pro/Resources/TMP Settings.asset",
+    "sha256": "7be438062cdc296835a1258b68bcbeb8e9fdc4b01ea27c05a24a1074260f7424",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "a65193b095ec3606789a3191751a837704cf52d4f461993ae7903024c6d43f45"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/SDFFunctions.hlsl",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/SDFFunctions.hlsl",
+    "sha256": "88cf0f62e4000b71750c059d0886b19504cd1cf10f39bb61ddc11b77a882d417",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "e1d0c5347b3c55930759f5bc0985e11611a4b2ff22eef24523eb108687bd1642"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader",
+    "sha256": "42892a52f22bdde6d482cf2da5f35e4b813063fc6fe42189eee5562080079494",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "91be1d5618a7da33c878e20cf2be3e13b897d4976c70bde0cda7a67dbd502cd2"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader",
+    "sha256": "b50afc7edc8a710f8b4159149b2391e7238b5e4076cc0ea2119090ed29e13b4a",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "7430f3e97ae1b46f34e1ca75508705bb7b944307c41dc568ea728011f327086d"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_Bitmap.shader",
+    "sha256": "1d32f34c71276c1321aa0540a2410e15808743a38b2026923045a4dec4a79b58",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "3d462e6f8ba57f45dc5e6000020db066c36ed5a1a24f74f749727812373c2325"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF Overlay.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF Overlay.shader",
+    "sha256": "a0d318756cba0f95a7052c387e629d0add3e9a4125c8333f1d1ed591af5f17cb",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "fb8fc84b612e19c169cdf3596195b416e68d227a8987a0eaa90d8c137fb69797"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF SSD.shader",
+    "sha256": "2a991951b00b0c052363a1025f655450054325437b3d13c2623a987c8ec77c30",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "bea74d576f181a8bb04b8cf02eedd0136540325ecb2824928a3aa52c75adcb13"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP LIT.shadergraph",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-HDRP LIT.shadergraph",
+    "sha256": "bf68062f68b38b588abd1c354f64e905f824d9a2c47f92ebdd70a32989eb2097",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "d1b70558e8b974d918e13c010db6d375fef815ba530bc2421ab031aa3a784ee8"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP UNLIT.shadergraph",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-HDRP UNLIT.shadergraph",
+    "sha256": "8a969c2d775079cce4e1c45d5eb6d3964b27d44dc884178363050c74fd5e9742",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "8cd498ce8f6ed2e7c0560d605eb912455cd6fdaf09a4d545d9743f63b3426bd0"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader",
+    "sha256": "41cff58473557bf760d03513a8c098f43a24e4eeb4c8ccd7d828c045a338a9ed",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "3744d078f9a8b6d3c5d9bca51e43f9223544fcafaf9396e121f49ea84a0609d3"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader",
+    "sha256": "fb286386d0592ce6d63eb736f180b4b0f638ec538b0855aa54767a438ebd1173",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "1eeca1536c7506f79d4d877b866a5fb88db8f402634e091b6d78aa9d21c9d18b"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader",
+    "sha256": "8b30c140f6af9134392fe6ecf4c0676db73f873489ac52adfb47bbd288cb51b8",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "e3412891b9306b017e60cba4ae4f6d258ee8b161d986dcde9cefb3d60345514d"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile-2-Pass.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-Mobile-2-Pass.shader",
+    "sha256": "4bc2db64befbd0e37e23539f21096ad2fcd9d61b36d2174d208a7d831a0883f7",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "65ecbce6f1621f2d7ddc5e6004dda5e55e1f58ec6e01178f3691e1e81e01de55"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader",
+    "sha256": "44c39aabc7e88e7e1feffc1880df754f4adf86b62e9512aa89e9d2d65171aff4",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "f2112f50c72762d4e6731391495ea11f76975d677b698e9bcfdd38275ea18f9d"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader",
+    "sha256": "f9fae5906dd37d89298338953294459975de58a5421e68dd9e82a79794b95509",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "95aa060f371ee503a22c0a0b018e029c0328bd82b9317feaa784432b0a787343"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-Surface.shader",
+    "sha256": "5dadb68b56429547918b392626e9af8fd5173936d20bb43cfca58dfa00947257",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "42439f5ac7491998f562e8ede73d64c3512953eb99fb1b49e833f5d9999a7660"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-URP Lit.shadergraph",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-URP Lit.shadergraph",
+    "sha256": "e0148ce8e5904232a4e711376a45b7af2a007fb9690c5a69c1cb4952a696cdbf",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "4c36abf5f2611c9d2cb04e7da8c30e42077503a17cb218020e171b6d3ff664f7"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF-URP Unlit.shadergraph",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF-URP Unlit.shadergraph",
+    "sha256": "dc15b6819ad87a4b34ed888ae2c274624efc0ada902d1a9e7752d87922414dcc",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "f1ef815e2672fd770f47ee424c64f7ecdbdc642b7475828c29db032586aa10b6"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_SDF.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_SDF.shader",
+    "sha256": "10efe6d4728474a09970b857faf37913793e168dc13dbd4d7316b54b37615d97",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "0897fb06d170043fffa2d28783b347bbaee87a3f09f08374ca44b2c3848697d6"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMP_Sprite.shader",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMP_Sprite.shader",
+    "sha256": "af669bb9ae136c8099f8e0a94a6933fd2f1e1fb0a6842129939a319fab4b8dbb",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "9609584c5249687f3765f0018a93dfd6445c7e35d5aee4e87556f111c8852819"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMPro.cginc",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMPro.cginc",
+    "sha256": "14edb7d7b88caf2b82cae68200abe895e5b5b3474c3fffbf0e9b4b09a4e2467e",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "a9cf9d5431b809e36b8ffff4377b5ebda7d386a36d48838cd134bc09f3caec6c"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMPro_Mobile.cginc",
+    "sha256": "d9d43ddd9810476162f21b42477d9ce2cdc4e6cc7571d354c3253aafc6673ead",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "2e16fa15ef884a60a402d8b696f8b09e5315cbb468ba223d256030c7fe2b0667"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMPro_Properties.cginc",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMPro_Properties.cginc",
+    "sha256": "66db1f03e8d7a413eba79bcb6602fdb2de710b586f34a6f2584ed6f68f028e90",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "edace33591894d86d9a4144466fb3606e538d3341030fe22f908551755120ea5"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Shaders/TMPro_Surface.cginc",
+    "target": "assets/unity-kit/TextMesh Pro/Shaders/TMPro_Surface.cginc",
+    "sha256": "244b442520282a66363d121c8d2aeeb30bb1e72cbbadbf41ce68d9100322ade5",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "247746f3a4e39dd24d1ad99e4fae03ae8976586307948b2846529a876dcb0a63"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Sprites/EmojiOne Attribution.txt",
+    "target": "assets/unity-kit/TextMesh Pro/Sprites/EmojiOne Attribution.txt",
+    "sha256": "4b65f8960e4f4c5c8b35fd139e369265e9bb45667fc16461b2ba01188d464d93",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "9fffc8ac513116b8ac394d86d81ca9ac4ec52ee92c63c114d355808384ea16fc"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Sprites/EmojiOne.json",
+    "target": "assets/unity-kit/TextMesh Pro/Sprites/EmojiOne.json",
+    "sha256": "b85c4b3001b6ba82d175f4cd5dab83da467bbc2527d3d447b66919d2d20c4faf",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "ac2c551b5bc7f7d636d54ded634dfc3493e249567283b2efc06d1299f9360061"
+  },
+  {
+    "source": "Assets/TextMesh Pro/Sprites/EmojiOne.png",
+    "target": "assets/unity-kit/TextMesh Pro/Sprites/EmojiOne.png",
+    "sha256": "a87b965a701de3dc31d7401e542b1fc946587f912c51d7a26e46ade9f098bd1a",
+    "reason": "Original TMP essentials: shaders, includes, defaults and serialized GUID closure",
+    "license": "Unity package license",
+    "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
+    "packagedMetaSha256": "eb63c0321658b980b138ce5f675d44689b8c7144df43976931e132e7706d1e1a"
+  }
+]

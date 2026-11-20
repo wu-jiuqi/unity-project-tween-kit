@@ -1,0 +1,43 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+
+public sealed class GardenBackgroundImporter : AssetPostprocessor
+{
+    void OnPreprocessTexture()
+    {
+        if (!assetPath.StartsWith("Assets/Resources/Art/GardenBackground/") && !assetPath.StartsWith("Assets/Resources/Art/GardenBackgroundV2/") && !assetPath.StartsWith("Assets/Resources/Art/CatGardenWalls/")) return;
+        var t = (TextureImporter)assetImporter;
+        t.textureType = TextureImporterType.Default; t.isReadable = false;
+        t.textureShape = TextureImporterShape.Texture2D;
+        t.alphaIsTransparency = true; t.mipmapEnabled = false;
+        t.npotScale = TextureImporterNPOTScale.None; t.filterMode = FilterMode.Bilinear;
+        t.maxTextureSize = assetPath.EndsWith("cream-plate.png") ? 4096 : 2048;
+        t.textureCompression = TextureImporterCompression.Uncompressed;
+    }
+}
+public static class GardenBackgroundBuild
+{
+    public static void Windows()
+    {
+        BuildEntry.Configure();
+        // This tiny inherited paper asset had an incomplete importer and could
+        // become a cubemap on a fresh import, breaking the mainline canvas.
+        if (Resources.Load<Texture2D>("Art/PaintingTrial/paper") == null)
+            throw new Exception("Mainline paper must import as Texture2D");
+        if(Resources.Load<Texture2D>("Art/GardenBackgroundV2/reference-plate")==null || Resources.Load<Shader>("GardenReferenceMotion")==null)
+            throw new Exception("Missing approved reference plate or motion shader");
+        if(Resources.Load<Texture2D>("Art/CatGardenWalls/vine-strip")==null)throw new Exception("Missing new cream vine wall asset");
+        PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
+        string path = Path.GetFullPath(Path.Combine(Application.dataPath,
+            "../../Builds/CatGarden-v3/Windows/BounceGarden.exe"));
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
+            scenes = new[] { "Assets/Scenes/Main.unity" }, locationPathName = path,
+            target = BuildTarget.StandaloneWindows64, options = BuildOptions.None });
+        if (report.summary.result != BuildResult.Succeeded) throw new Exception("Garden build failed");
+        Debug.Log("GARDEN_BUILD PASS " + path);
+    }
+}

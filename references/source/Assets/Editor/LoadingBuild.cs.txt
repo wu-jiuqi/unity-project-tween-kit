@@ -1,0 +1,22 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class LoadingBuild {
+ public static void Windows() { Build(BuildTarget.StandaloneWindows64); }
+ public static void Android() { Build(BuildTarget.Android); }
+ static void Build(BuildTarget target) {
+  BuildEntry.Configure();BuildEntry.Rules();
+  Debug.Log("FEEDBACK_TESTS "+BounceGarden.LocalHomeFeedbackSource.RunSelfTests());
+  PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+  PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  string path=Environment.GetEnvironmentVariable("BOUNCE_LOADING_OUTPUT");
+  if(string.IsNullOrEmpty(path))throw new Exception("BOUNCE_LOADING_OUTPUT required");
+  Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=target,locationPathName=path,options=BuildOptions.CompressWithLz4HC,extraScriptingDefines=new[]{"BOUNCE_TEST_TOOLS"}});
+  string result="LOADING_V14_BUILD "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings;
+  Debug.Log(result);File.WriteAllText(path+".build.txt",result);
+  if(report.summary.result!=BuildResult.Succeeded)throw new Exception(result);
+ }
+}

@@ -1,0 +1,16 @@
+using UnityEngine;
+namespace BounceGarden {
+// Provided layers are B, O ball, UNCE and BUSTERS groups, not individual letters.
+public static class Round4Logo {
+ public static RectTransform Create(Transform parent,float x,float y,float width,float height){
+  if(ProductionArt.Get("round4/logo_backing")==null)return null;
+  var root=UICraft.Root(parent,"Layered supplied logo",x,y,width,height);
+  Part(root,"logo_backing",0,0,1000,500,width,height);
+  Part(root,"logo_letter_B",105,60,155,190,width,height);
+  Part(root,"logo_star_O",262,76,145,145,width,height);
+  Part(root,"logo_letters_UNCE",408,65,480,185,width,height);
+  Part(root,"logo_letters_BUSTERS",63,210,874,250,width,height);return root;
+ }
+ static void Part(Transform root,string key,float x,float y,float w,float h,float width,float height){var image=UICraft.Art(root,"round4/"+key,(x+w/2-500)*width/1000,(250-y-h/2)*height/500,w*width/1000,h*height/500);image.preserveAspect=false;image.name=key;}
+}
+}

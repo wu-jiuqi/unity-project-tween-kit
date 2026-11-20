@@ -1,0 +1,18 @@
+namespace BounceGarden {
+public sealed partial class GameSession {
+ // Earned HUD flights already belong to the player. Once this is true, future
+ // board supply and rating replacements cannot become prerequisites for victory.
+ bool CollectionGoalEarned=>IsPlaying&&IsChainCollection&&!FusionActive&&(CollectionVictoryPending||CollectionWon||EarnedChainGoal());
+ void FinishEarnedCollectionSupply(){
+  if(!CollectionGoalEarned)return;
+  PreserveVictorySupply();
+  bool pending=refillRemaining>0||refillFull||refillEmptyEdge||chainReplacementRewards.Count>0||queuedShot.HasValue||bufferedChainShot.HasValue;
+  refillRemaining=0;refillFull=refillEmptyEdge=false;
+  chainReplacementRewards.Clear();strategyRewardOrigins.Clear();System.Array.Clear(NextChainRowTools,0,NextChainRowTools.Length);
+  queuedShot=null;ClearBufferedChainShot();
+  // Existing arrivals keep their motion/collision protection until they land;
+  // existing casts, waiting flowers, balls and earned loot finish normally.
+  if(pending)changed=true;
+ }
+}
+}

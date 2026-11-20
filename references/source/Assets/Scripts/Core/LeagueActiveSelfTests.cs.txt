@@ -1,0 +1,53 @@
+using System;
+using System.Linq;
+namespace BounceGarden {
+public static class LeagueActiveSelfTests {
+ [Serializable]sealed class Envelope {public LeagueState league;}
+ static bool SameActiveSave(string before,string after){
+  var a=UnityEngine.JsonUtility.FromJson<Envelope>(before).league;var b=UnityEngine.JsonUtility.FromJson<Envelope>(after).league;
+  if(a.current.rivals.Length!=b.current.rivals.Length)return false;
+  for(int i=0;i<a.current.rivals.Length;i++){
+   var x=a.current.rivals[i];var y=b.current.rivals[i];
+   // JsonUtility may change the last double digit (~3e-14 seconds). Check time numerically;
+   // keep exact serialized equality for scores, counters, roster and every other saved field.
+   if(Math.Abs(x.nextGainAt-y.nextGainAt)>1e-9||Math.Abs(x.gainInterval-y.gainInterval)>1e-9||Math.Abs(x.shieldUntil-y.shieldUntil)>1e-9||Math.Abs(x.chaseProgress-y.chaseProgress)>1e-9)return false;
+   x.nextGainAt=y.nextGainAt;x.gainInterval=y.gainInterval;x.shieldUntil=y.shieldUntil;x.chaseProgress=y.chaseProgress;
+  }
+  return UnityEngine.JsonUtility.ToJson(a)==UnityEngine.JsonUtility.ToJson(b);
+ }
+ public static string RunAll(){
+  int checks=0;Action<bool,string> check=(ok,msg)=>{checks++;if(!ok)throw new Exception("Active league: "+msg);};
+  var config=new LeagueConfig{activeCompetition=true};long now=1900000000;var state=new LeagueState();LeagueEngine.Open(state,config,now,24);var p=state.current;
+  check(p.competitionVersion==LeagueEngine.ActiveCompetitionVersion&&p.rivals.All(r=>r.events.Length==0),"new active schedule initialized");
+  string scores=string.Join(",",LeagueEngine.Standings(p,24).Select(e=>e.id+":"+e.medals));
+  LeagueEngine.Advance(state,now+3600,24,true);
+  check(scores==string.Join(",",LeagueEngine.Standings(p,24).Select(e=>e.id+":"+e.medals)),"offline freezes every score");check(p.returnRounds==2&&p.graceUses==1,"long offline grants two rounds");
+  double elapsed=p.activeElapsed;LeagueEngine.ActiveTick(p,10,24);check(p.activeElapsed==elapsed,"return protection freezes competitive clock");
+  LeagueEngine.FinishRound(p,false,24,24);LeagueEngine.FinishRound(p,true,24,25);check(p.returnRounds==0,"two completed rounds consume return protection");
+  LeagueEngine.Advance(state,p.lastObserved+10,25,true);check(p.returnRounds==0&&p.graceUses==1,"short reconnect grants no protection");
+  LeagueEngine.Advance(state,p.lastObserved+1800,25,true);check(p.returnRounds==2&&p.graceUses==2,"second long return eligible");p.returnRounds=0;
+  LeagueEngine.Advance(state,p.lastObserved+1800,25,true);check(p.returnRounds==0&&p.graceUses==2,"daily return allowance capped");
+  LeagueEngine.FinishRound(p,false,25,25);LeagueEngine.FinishRound(p,false,25,25);check(p.lossRounds==2,"two losses start respite");
+  elapsed=p.activeElapsed;LeagueEngine.ActiveTick(p,10,25);check(p.activeElapsed==elapsed,"loss protection pauses pressure");LeagueEngine.FinishRound(p,false,25,25);LeagueEngine.FinishRound(p,false,25,25);check(p.lossRounds==0,"respite expires after two further rounds");
+  int before=LeagueEngine.Standings(p,25).First(e=>e.player).rank;p.roundStartRank=before;
+  foreach(var r in p.rivals){r.nextGainAt=p.activeElapsed;r.initialMedals=25;r.activeMedals=0;}
+  before=LeagueEngine.Standings(p,25).First(e=>e.player).rank;p.roundStartRank=before;
+  LeagueEngine.ActiveTick(p,10,25);check(LeagueEngine.Standings(p,25).First(e=>e.player).rank<=before+1,"online activity preserves rank");check(p.rivals.Sum(r=>r.activeMedals)==0,"online time cannot award rival medals");
+  foreach(var r in p.rivals){r.initialMedals=0;r.activeMedals=0;r.nextGainAt=p.activeElapsed;}
+  var rival=p.rivals[0];rival.initialMedals=25;LeagueEngine.FinishRound(p,true,24,26);check(rival.Medals(p.elapsed)<26,"newly passed rival cannot immediately counter-pass");
+  int score=rival.Medals(p.elapsed);LeagueEngine.ActiveTick(p,10,26);check(rival.Medals(p.elapsed)==score,"overtake shield respected");
+  for(int i=0;i<100;i++)LeagueEngine.ActiveTick(p,10,999);check(LeagueEngine.Standings(p,999).First(e=>e.player).rank==1,"large earned lead remains");
+  var old=new LeagueState();LeagueEngine.Open(old,new LeagueConfig(),now,24);old.current.elapsed=200000;var oldP=old.current;string oldScores=string.Join(",",oldP.rivals.Select(r=>r.Medals(oldP.elapsed)));long end=oldP.endsAt;int coins=oldP.config.rewardTiers[0].coins;
+  LeagueEngine.PrepareActive(old,config,now+200000,24);check(oldScores==string.Join(",",oldP.rivals.Select(r=>r.Medals(oldP.elapsed))),"migration retains exact score per rival");check(oldP.endsAt==end&&oldP.config.rewardTiers[0].coins==coins,"migration keeps deadline and reward");
+  string migrated=string.Join(",",oldP.rivals.Select(r=>r.Medals(oldP.elapsed)));LeagueEngine.PrepareActive(old,config,now+300000,24);check(migrated==string.Join(",",oldP.rivals.Select(r=>r.Medals(oldP.elapsed))),"migration idempotent");
+  p.participated=true;int finalRank=LeagueEngine.Standings(p,999).First(e=>e.player).rank;LeagueEngine.Advance(state,p.endsAt+9*86400,999,true);check(state.current==null&&state.rewards.Single().rank==finalRank,"cross-period offline freezes final standing");
+  var clock=new LeagueSelfTests.Clock();var provider=new LeagueSelfTests.ConfigProvider{Value=config};var store=new LeagueSelfTests.Store();var profile=LocalProfile.Load(store);profile.ConfigureLeague(provider,clock);var initial=profile.ReadLeague();check(!profile.LeagueMatchSeen(initial.periodId),"match initially unseen");check(profile.CompleteLeagueMatch(initial.periodId),"match acknowledgement saves");
+  clock.Now+=5;profile.TickLeague(5);string saved=profile.ExportForQA();var restored=LocalProfile.ImportForQA(saved);restored.ConfigureLeague(provider,clock);check(restored.LeagueMatchSeen(initial.periodId),"match acknowledgement survives restart");check(SameActiveSave(saved,restored.ExportForQA()),"active counters survive serialization");
+  profile.SuspendLeague();clock.Now+=1801;profile.ReadLeague(true);check(profile.LeagueReturnRounds==2,"profile resume grants protection");
+  profile.BeginLeagueRound();profile.CommitAlphabetWin("grace-first",1);profile.CommitAlphabetWin("grace-second",1);profile.SuspendLeague();clock.Now+=1801;profile.ReadLeague(false);profile.ReadLeague(true);check(profile.LeagueReturnRounds==2,"same-second resume grants grace despite background view polling");
+  check(profile.CommitAlphabetWin("active-win",1),"normal win remains available");check(profile.Badges==3,"normal win grants exactly one medal");int grace=profile.LeagueReturnRounds;profile.CommitAlphabetWin("active-win",1);check(profile.Badges==3&&profile.LeagueReturnRounds==grace,"replayed victory cannot consume grace or grant medals");
+  int count=LeagueEngine.Standings(oldP,24).Length;check(count==21,"roster remains 21");
+  return "PASS: "+checks+" active competition / protection / migration checks";
+ }
+}
+}

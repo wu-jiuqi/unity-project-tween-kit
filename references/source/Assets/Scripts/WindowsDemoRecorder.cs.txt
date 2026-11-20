@@ -1,0 +1,48 @@
+using System;
+using System.Collections;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using UnityEngine;
+namespace BounceGarden {
+// Opt-in evidence utility: captures the final displayed framebuffer, never Camera.Render.
+// F9 starts/stops. Audio is the AudioListener mix, not a reconstruction of SFX events.
+public sealed class WindowsDemoRecorder : MonoBehaviour {
+ string directory; StreamWriter frames,events; BinaryWriter audioWriter; readonly object audioLock=new object();
+ volatile bool recording; bool finished; int frame,channels,rate; float started,next; double dspStart;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){
+  var args=Environment.GetCommandLineArgs();if(Array.IndexOf(args,"--demo-record")<0)return;
+  new GameObject("Demo recorder bootstrap").AddComponent<DemoRecorderBootstrap>();
+ }
+ public static void Attach(){var listener=FindFirstObjectByType<AudioListener>();if(listener==null)throw new Exception("Demo recording needs the game AudioListener");listener.gameObject.AddComponent<WindowsDemoRecorder>();}
+ void Start(){var args=Environment.GetCommandLineArgs();int i=Array.IndexOf(args,"--demo-out");directory=i>=0&&i+1<args.Length?args[i+1]:Path.Combine(Application.persistentDataPath,"FullDemo");Directory.CreateDirectory(directory);rate=AudioSettings.outputSampleRate;StartCoroutine(CaptureDisplayedFrames());Debug.Log("DEMO_RECORDER ready: F9 start/stop; final framebuffer and listener audio.");}
+ void Update(){if(Input.GetMouseButtonDown(0)||Input.GetMouseButtonUp(0))Debug.Log("DEMO_INPUT down="+Input.GetMouseButtonDown(0)+" up="+Input.GetMouseButtonUp(0)+" pos="+Input.mousePosition+" touch="+Input.touchCount);if(Input.GetKeyDown(KeyCode.F9)){if(recording)Finish();else if(!finished)Begin();}}
+ void Begin(){
+  frames=new StreamWriter(Path.Combine(directory,"frames.csv"));frames.WriteLine("frame,seconds");
+  events=new StreamWriter(Path.Combine(directory,"events.csv"));events.WriteLine("seconds,event");
+  lock(audioLock){audioWriter=new BinaryWriter(File.Create(Path.Combine(directory,"live-mix.wav")));audioWriter.Write(new byte[44]);channels=0;dspStart=AudioSettings.dspTime;recording=true;}
+  started=Time.realtimeSinceStartup;next=started;
+  var app=FindFirstObjectByType<AppUI>();if(app!=null){app.Session.Feedback+=OnFeedback;app.Session.Outcome+=OnOutcome;}
+  File.WriteAllText(Path.Combine(directory,"capture-info.txt"),"Windows standalone. See demo-run.txt for the actual input method. Final displayed framebuffer via ScreenCapture.CaptureScreenshotAsTexture; mixed AudioListener PCM. No forced outcomes, no offscreen re-render, no event-reconstructed audio.\n"+DateTime.Now.ToString("o")+"\nUnity="+Application.unityVersion+"\nGPU="+SystemInfo.graphicsDeviceName+"\nCPU="+SystemInfo.processorType+"\nResolution="+Screen.width+"x"+Screen.height+"\nAudioRate="+rate+"\n");
+  Mark("recording-start");Debug.Log("DEMO_RECORDER started");
+ }
+ void OnFeedback(Vector2 point,string cue){if(recording)Mark(cue);}
+ public void StartEvidence(){if(!recording&&!finished)Begin();}
+ public void StopEvidence(){Finish();}
+ void OnOutcome(bool win){if(recording)Mark(win?"actual-victory":"actual-defeat");}
+ void Mark(string text){events?.WriteLine((Time.realtimeSinceStartup-started).ToString("F6",CultureInfo.InvariantCulture)+","+text);}
+ IEnumerator CaptureDisplayedFrames(){while(true){yield return new WaitForEndOfFrame();if(!recording||Time.realtimeSinceStartup<next)continue;float stamp=Time.realtimeSinceStartup-started;next=Time.realtimeSinceStartup+1f/30;
+  var texture=ScreenCapture.CaptureScreenshotAsTexture();File.WriteAllBytes(Path.Combine(directory,frame.ToString("D6")+".jpg"),texture.EncodeToJPG(92));Destroy(texture);frames.WriteLine(frame+","+stamp.ToString("F6",CultureInfo.InvariantCulture));frame++;
+ }}
+ void OnAudioFilterRead(float[] data,int count){if(!recording)return;lock(audioLock){if(!recording||audioWriter==null)return;
+  if(channels==0){channels=count;int pad=Math.Max(0,(int)((AudioSettings.dspTime-dspStart)*rate)*channels);for(int i=0;i<pad;i++)audioWriter.Write((short)0);}
+  foreach(var sample in data)audioWriter.Write((short)(Math.Max(-1f,Math.Min(1f,sample))*32767));
+ }}
+ void Finish(){
+  if(!recording)return;Mark("recording-stop");lock(audioLock){recording=false;int bytes=(int)audioWriter.BaseStream.Length-44;audioWriter.Seek(0,SeekOrigin.Begin);audioWriter.Write(Encoding.ASCII.GetBytes("RIFF"));audioWriter.Write(36+bytes);audioWriter.Write(Encoding.ASCII.GetBytes("WAVEfmt "));audioWriter.Write(16);audioWriter.Write((short)1);audioWriter.Write((short)Math.Max(1,channels));audioWriter.Write(rate);audioWriter.Write(rate*Math.Max(1,channels)*2);audioWriter.Write((short)(Math.Max(1,channels)*2));audioWriter.Write((short)16);audioWriter.Write(Encoding.ASCII.GetBytes("data"));audioWriter.Write(bytes);audioWriter.Dispose();audioWriter=null;}
+  frames.Dispose();frames=null;events.Dispose();events=null;finished=true;File.AppendAllText(Path.Combine(directory,"capture-info.txt"),"Duration="+(Time.realtimeSinceStartup-started).ToString("F3",CultureInfo.InvariantCulture)+"\nFrames="+frame+"\nAudioChannels="+channels+"\n");Debug.Log("DEMO_RECORDER finished frames="+frame);
+ }
+ void OnApplicationQuit(){Finish();}
+}
+public sealed class DemoRecorderBootstrap:MonoBehaviour {IEnumerator Start(){yield return null;WindowsDemoRecorder.Attach();Destroy(gameObject);}}
+}

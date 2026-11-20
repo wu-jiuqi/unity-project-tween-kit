@@ -1,0 +1,22 @@
+using TMPro;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class JuiceHUD:MonoBehaviour {
+ GameSession owner;TMP_Text status;int generation;
+ public void Initialize(GameSession game){
+  owner=game;generation=game.Generation;var group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;group.interactable=false;
+  var hint=UICraft.Label(transform,game.CurrentLevel.note,0,682,930,75,25,UICraft.Ink);hint.enableAutoSizing=true;hint.fontSizeMin=21;hint.fontSizeMax=25;
+  status=UICraft.Label(transform,"",0,-965,920,62,29,UICraft.Ink);
+ }
+ void Update(){
+  if(owner==null||owner.Generation!=generation||!owner.IsPlaying){gameObject.SetActive(false);return;}if(owner.IsPaused)return;
+  switch(owner.Mechanic){
+   case JuiceMechanic.Heat:status.text=owner.IsMainline?"HEAT "+owner.JuicePeak+"  |  TARGETS "+owner.RemainingTargets+"  |  PAINT "+(owner.MainlinePainting==null?0:owner.MainlinePainting.RevealedCount)+"/"+owner.CurrentLevel.bricks.Length:"BEST STREAK  "+owner.JuicePeak+"   |   WARM x2 / BLAZING x3";break;
+   case JuiceMechanic.Bank:status.text="BANK CHARGE  +2 / +4 DAMAGE   |   BANKS "+owner.JuiceTriggers;break;
+   case JuiceMechanic.Zipper:status.text="UNRAVELLED  "+owner.ZipperSteps+"   |   AIM FOR THE BOW";break;
+   case JuiceMechanic.Sandwich:status.text="CREAM EDGE = 5 DAMAGE   |   SOFT FAMILY: 4 SEC";break;
+   case JuiceMechanic.Return:status.text=(owner.PawReady?"PAW READY":"FIRE TO READY THE PAW")+"   |   SAVES "+owner.PawReturns;break;
+  }
+ }
+}
+}

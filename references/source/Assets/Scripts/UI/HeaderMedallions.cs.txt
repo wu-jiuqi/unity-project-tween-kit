@@ -1,0 +1,13 @@
+using System;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+public static class HeaderMedallions {
+ // Align visible artwork rather than transparent texture bounds. Face centres exclude cast shadows.
+ public static Image CenteredArt(Transform parent,string key,float visibleWidth,Vector2? opticalCentre=null){var info=PastelArt.Info(key);float scale=visibleWidth/info.visible[2];Vector2 centre=opticalCentre??new Vector2(info.visible[0]+info.visible[2]*.5f,info.visible[1]+info.visible[3]*.5f);var art=UICraft.Art(parent,"pastel/"+key,(info.size[0]*.5f-centre.x)*scale,(centre.y-info.size[1]*.5f)*scale,info.size[0]*scale,info.size[1]*scale);art.name=key;return art;}
+ public static void Avatar(Transform parent,float x,float y,LocalProfile profile=null){var root=UICraft.Root(parent,"Avatar medallion",x,y,176,176);
+ LeaguePortrait.Create(root,profile,"",0,0,176,true);
+ }
+ public static Button Settings(Transform parent,float x,float y,Action action){var button=UICraft.Button(parent,"",x,y,176,176,UICraft.Blue,action);button.name="Settings medallion";var visual=button.transform.Find("ButtonVisual");foreach(Transform child in visual)child.gameObject.SetActive(false);
+ CenteredArt(visual,"button_circle_cream",148,new Vector2(101,100));CenteredArt(visual,"icon_settings",86);return button;
+ }
+}
+}

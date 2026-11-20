@@ -1,0 +1,46 @@
+using TMPro;
+using UnityEngine;
+
+namespace BounceGarden {
+public sealed class HomeFeedbackView:MonoBehaviour {
+ TMP_Text title,detail,mode;RectTransform decoration;CanvasGroup group;string rendered;AppUI app;
+ float entrance=-1,idle,strength;bool focused=true,pendingEntrance;
+ public static HomeFeedbackView Create(Transform parent){
+  var root=UICraft.Root(parent,"Home achievement feedback",0,-75,900,320);var view=root.gameObject.AddComponent<HomeFeedbackView>();
+  view.group=root.gameObject.AddComponent<CanvasGroup>();
+  var hit=root.gameObject.AddComponent<UnityEngine.UI.Image>();hit.color=Color.clear;hit.raycastTarget=true;
+  var visual=UICraft.Root(root,"Encouragement drag visual",0,0,900,320);
+  view.app=root.GetComponentInParent<AppUI>();
+  var flower=UICraft.Art(visual,"pastel/icon_medal",0,113,96,96);view.decoration=flower.rectTransform;
+  view.title=UICraft.Label(visual,"",0,15,900,100,78,UICraft.Ink);view.title.fontSizeMin=32;
+  view.detail=UICraft.Label(visual,"",0,-82,860,76,48,UICraft.Ink);view.detail.fontSizeMin=26;
+  view.mode=UICraft.Label(visual,"",0,-142,860,36,22,UICraft.Ink);
+  root.gameObject.AddComponent<EncouragementDrag>().Initialize(visual,view.title,view.detail,()=>view.focused&&(view.app==null||view.app.HomeMotionAllowed));
+  return view;
+ }
+ public void Present(HomeFeedbackSnapshot snapshot,bool animate,bool celebrate){
+  if(!snapshot.Preview&&app!=null&&snapshot.PlayedToday&&!snapshot.AfterLoss&&snapshot.WinStreak!=app.Profile.CampaignWinStreak){int n=app.Profile.CampaignWinStreak;snapshot.WinStreak=n;snapshot.Title=n==0?"慢慢来，你可以的！":n==1?"开了个好头！":n==2?"找到节奏啦！":n<5?"状态越来越好！":n<10?"好厉害！":"连胜不停，加油！";snapshot.Detail=n==0?"每次尝试，都会更进一步。":n==1?"第一场胜利，收下啦。":n==2?"已经连续赢了2局。":n+"连胜，继续加油！";}
+  string key=snapshot.Key+"|"+snapshot.Title+"|"+snapshot.Detail;bool changed=rendered!=key;rendered=key;
+  title.text=snapshot.Title;detail.text=snapshot.Detail;mode.text=snapshot.Preview?"预览模式 · 不影响存档":"";decoration.gameObject.SetActive(snapshot.LoginDays>1||snapshot.WinStreak>0);
+  title.color=snapshot.PlayedToday?new Color32(130,94,153,255):UICraft.Ink;
+  if(changed||!animate)pendingEntrance=true;
+  if(!animate||(!pendingEntrance&&!celebrate)||!FeedbackProfile.Active.enabledFeedback)return;
+  pendingEntrance=false;entrance=0;strength=celebrate?1.25f:1;
+ }
+ void Update(){if(title==null)return;if(!focused||!FeedbackProfile.Active.enabledFeedback||(app!=null&&!app.HomeMotionAllowed)){ResetPose();return;}
+  float dt=Mathf.Min(Time.unscaledDeltaTime,.05f);idle+=dt;if(entrance>=0){entrance+=dt;if(entrance>1.35f)entrance=-1;}
+  float breath=Mathf.Sin(idle*1.8f),wave=Pop(entrance,0)*strength,follow=Pop(entrance,.13f)*strength;
+  title.rectTransform.localScale=new Vector3(1+breath*.018f-wave*.065f,1+breath*.018f+wave*.12f,1);
+  title.rectTransform.anchoredPosition=new Vector2(0,15+breath*3+wave*13);
+  detail.rectTransform.localScale=Vector3.one*(1+Mathf.Sin(idle*1.8f-.6f)*.009f+follow*.045f);
+  detail.rectTransform.anchoredPosition=new Vector2(0,-82+Mathf.Sin(idle*1.8f-.6f)*2+follow*9);
+  decoration.localScale=new Vector3(1-wave*.09f,1+wave*.17f,1);decoration.anchoredPosition=new Vector2(0,113+Mathf.Sin(idle*1.8f+.4f)*4+wave*9);
+  decoration.localRotation=Quaternion.Euler(0,0,Mathf.Sin(idle*1.5f)*3+wave*5);
+ }
+ static float Pop(float time,float delay){if(time<0)return 0;float t=time-delay;if(t<0)return -.75f;return -Mathf.Cos(t*17)*Mathf.Exp(-t*4.7f)*.85f;}
+ void ResetPose(){entrance=-1;if(group!=null)group.alpha=1;if(title!=null){title.rectTransform.localScale=Vector3.one;title.rectTransform.anchoredPosition=new Vector2(0,15);}if(detail!=null){detail.rectTransform.localScale=Vector3.one;detail.rectTransform.anchoredPosition=new Vector2(0,-82);}if(decoration!=null){decoration.localScale=Vector3.one;decoration.anchoredPosition=new Vector2(0,113);decoration.localRotation=Quaternion.identity;}}
+ void OnApplicationFocus(bool value){focused=value;if(!value)ResetPose();}
+ void OnApplicationPause(bool paused){focused=!paused;if(paused)ResetPose();}
+ void OnDisable(){ResetPose();}
+}
+}

@@ -1,0 +1,9 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class MobileV54Build {
+ public static void Windows(){BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/Mobile-v54/Windows/BounceGarden.exe"));Directory.CreateDirectory(Path.GetDirectoryName(path));var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("MOBILE_V54_BUILD "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings);if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Mobile v54 validation build failed");}
+}

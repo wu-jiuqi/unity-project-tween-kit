@@ -1,0 +1,40 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using UnityEngine;
+using TMPro;
+namespace BounceGarden {
+public sealed class LeagueV79QA:MonoBehaviour {
+ [Serializable] sealed class Envelope{public LeagueState league;}
+ [Serializable] sealed class Result{public int checks,failures,errors;}
+ string dir;int checks,failures,errors;AppUI app;
+ LeaguePeriod Period()=>JsonUtility.FromJson<Envelope>(app.Profile.ExportForQA()).league.current;
+ string Scores()=>string.Join(",",Period().rivals.Select(r=>r.Medals(0)));
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--league-v79-qa"))new GameObject("Per-clear league audit").AddComponent<LeagueV79QA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var im=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,im);File.WriteAllBytes(dir+"/"+name+".png",im.EncodeToPNG());Destroy(im);rt.Release();Destroy(rt);}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(4);app=FindFirstObjectByType<AppUI>();app.QANavigate("home");
+  Check(Period().chaseRounds==0,"fresh profile starts without a chase");
+  for(int level=0;level<3;level++){
+   app.QAStartLevel(level);yield return app.QAWaitForLevel();for(int i=0;i<100&&app.AlphabetIntroActive;i++){app.QAAdvanceAlphabetIntro();yield return new WaitForSecondsRealtime(.02f);}
+   var game=app.Session;game.QAIgnoreFocusLoss=true;game.SetPaused(false);
+   string before=Scores();yield return new WaitForSecondsRealtime(6);Check(before==Scores(),"active battle time cannot grow rivals "+level);
+   int rounds=Period().chaseRounds;int medals=app.Profile.Badges;string resultKey=app.QAResultKey;
+   // Exercise the actual target-clear -> OnOutcome -> reward transaction -> result UI path.
+   for(int pass=0;pass<6;pass++)foreach(var brick in game.CollectionBricks.Where(b=>b.Alive&&(b.Definition.juiceGroup>0||game.IsJellyTarget(b))).ToArray())game.ApplyChainImpact(brick,int.MaxValue,Vector2.up,brick.transform.position,false);
+   yield return new WaitForSecondsRealtime(4);
+   Check(app.Profile.Badges==medals+1&&Period().chaseRounds==rounds+1,"actual level clear awards one medal and one chase "+level);
+   Check(Period().lastChaseRivals>0&&before!=Scores(),"rival medals change immediately after level clear "+level);
+   Check(FindObjectsByType<TMP_Text>(FindObjectsSortMode.None).Any(t=>t.text.Contains("位对手已追赶")),"result shows the committed chase "+level);
+   string saved=Scores();app.Profile.CommitAlphabetWin(resultKey,level,game.Score);Check(saved==Scores()&&Period().chaseRounds==rounds+1,"replayed reward cannot rerun chase "+level);
+   yield return Capture("win-"+(level+1));app.QANavigate("ranking");yield return new WaitForSecondsRealtime(.3f);
+   var view=FindFirstObjectByType<LeagueRankingView>();Check(view!=null&&view.Snapshot.player.medals==app.Profile.Badges,"ranking reflects the committed result "+level);
+   Check(saved==Scores(),"opening ranking does not cause another chase "+level);app.QANavigate("home");
+  }
+  File.WriteAllText(dir+"/profile.json",app.Profile.ExportForQA());File.WriteAllText(dir+"/result.json",JsonUtility.ToJson(new Result{checks=checks,failures=failures,errors=errors},true));Application.Quit(failures+errors==0?0:3);
+ }
+}
+}

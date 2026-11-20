@@ -1,0 +1,10 @@
+using System;using System.IO;using BounceGarden;using UnityEditor;using UnityEditor.Build;using UnityEditor.Build.Reporting;using UnityEngine;
+public static class SecondGroupIntegrationBuild {
+ public static void ColliderFixWindows(){SecondGroupArtBuild.BuildAndValidate();Windows();}
+ public static void Windows(){
+  foreach(string key in new[]{"yarn-obstacle-l3","yarn-layer-loss-l3"}){var path="Assets/Resources/Art/YarnObstacleV3/"+key+".png";var im=(TextureImporter)AssetImporter.GetAtPath(path);im.textureType=TextureImporterType.Default;im.textureShape=TextureImporterShape.Texture2D;im.alphaIsTransparency=true;im.mipmapEnabled=false;im.npotScale=TextureImporterNPOTScale.None;im.wrapMode=TextureWrapMode.Clamp;im.SaveAndReimport();}
+  var fish=(TextureImporter)AssetImporter.GetAtPath("Assets/Resources/Art/SecondGroupProduction/fish-biscuit.png");fish.textureType=TextureImporterType.Default;fish.textureShape=TextureImporterShape.Texture2D;fish.alphaIsTransparency=true;fish.mipmapEnabled=false;fish.npotScale=TextureImporterNPOTScale.None;fish.SaveAndReimport();
+  Debug.Log("SECOND_GROUP_LAYOUT_CHECKS "+OpeningCampaign.Validate());BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  var pathOut=Path.GetFullPath("../../Builds/SecondGroupIntegration/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(pathOut));var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=pathOut,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Second group build failed");Debug.Log("SECOND_GROUP_BUILD_OK");
+ }
+}

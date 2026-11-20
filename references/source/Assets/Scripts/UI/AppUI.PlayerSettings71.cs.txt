@@ -1,0 +1,82 @@
+using UnityEngine;
+using UnityEngine.UI;
+using DG.Tweening;
+namespace BounceGarden {
+public partial class AppUI {
+ void BuildPlayerSettings(){
+  CancelAim();bool battle=playing;if(battle)Session.SetPaused(true);
+  float height=battle?2180:1920;OpenSettingsSheetC(battle?"游戏暂停":"设置",height,battle?"pause":"settings");
+  float top=height*.5f-600;
+  CSettingsArt.Image(modal,"card_cream_wide",0,top,880,210,true);
+  CSettingsArt.Button(modal,"声音设置","",-130,top,600,205,OpenAudioSettings,null);
+  CSettingsArt.Image(modal,"icon_sound",-335,top,125,130);
+  SettingsTextC("声音",-60,top+38,380,76,58,true);
+  SettingsTextC("音量调节  ›",-60,top-42,380,60,33,true,true);
+  SettingsSwitch77.Create(modal,"声音总开关",315,top,()=>Profile.SoundEnabled,value=>{Profile.SoundEnabled=value;SoundService.SetMuted(!value);});
+  float vibration=top-245;
+  CSettingsArt.Image(modal,"card_cream_wide",0,vibration,880,210,true);
+  CSettingsArt.Image(modal,"icon_vibration",-335,vibration,130,140);
+  SettingsTextC("震动",-60,vibration+38,380,76,58,true);
+  SettingsTextC("碰撞短震 · 特殊砖长震",-55,vibration-42,390,60,28,true,true);
+  SettingsSwitch77.Create(modal,"震动",315,vibration,()=>PlayerHaptics71.Enabled,value=>PlayerHaptics71.Enabled=value);
+  float tileY=height*.5f-1130;
+  SettingsTileC("玩法帮助","icon_help_book",-225,tileY,OpenPlayerHelp71);
+  SettingsTileC("关于游戏","icon_about_jelly",225,tileY,OpenPlayerAbout71);
+  float primary=height*.5f-1535;
+  CSettingsArt.Button(modal,battle?"继续游戏":"完成",battle?"继续游戏":"完成",0,primary,860,170,CloseModal);
+  if(battle){
+   SettingsActionC("重新开始","icon_restart",-225,primary-245,()=>ConfirmLeaveRound71(true));
+   SettingsActionC("返回首页","icon_home",225,primary-245,()=>ConfirmLeaveRound71(false));
+  }
+  SettingsVersionC(battle?-height*.5f+135:-height*.5f+155);
+  if(PlayerStrategyTestBuild.Enabled)SettingsLink77(modal,"试玩统计","仅测试用 · 试玩记录与策略分析  ›",0,-height*.5f+65,720,55,OpenBalanceStatistics,25);
+  FitSettingsModal77(height);
+ }
+ void SettingsTileC(string caption,string icon,float x,float y,System.Action action){
+  var button=CSettingsArt.Button(modal,caption,"",x,y,420,350,action,"card_cream_tile");var visual=button.transform.Find("ButtonVisual");
+  CSettingsArt.Image(visual,icon,0,48,285,200);var text=UICraft.Label(visual,caption,0,-112,370,90,48,CSettingsArt.Ink);text.color=CSettingsArt.Ink;
+ }
+ void SettingsActionC(string caption,string icon,float x,float y,System.Action action){
+  var button=CSettingsArt.Button(modal,caption,"",x,y,415,125,action,"button_cream_normal");var visual=button.transform.Find("ButtonVisual");
+  CSettingsArt.Image(visual,icon,-140,0,52,52);var text=UICraft.Label(visual,caption,35,0,270,80,39,CSettingsArt.Ink);text.color=CSettingsArt.Ink;
+ }
+ Button SettingsLink77(Transform parent,string name,string text,float x,float y,float width,float height,System.Action action,int font=32){
+  var root=UICraft.Root(parent,name,x,y,width,height);var hit=root.gameObject.AddComponent<Image>();hit.color=Color.clear;hit.raycastTarget=true;
+  if(!string.IsNullOrEmpty(text))UICraft.Label(root,text,0,0,width-8,Mathf.Min(74,height-6),font,UICraft.Ink,TextAnchor.MiddleLeft);
+  var button=root.gameObject.AddComponent<Button>();button.targetGraphic=hit;button.onClick.AddListener(()=>{SoundService.Play("click");action();});return button;
+ }
+ void FitSettingsModal77(float height){
+  if(modal==null)return;var sheet=modal.GetComponent<CSettingsSheet>();if(sheet!=null){LayoutSettingsSheetC(sheet,true);return;}
+  modalMotion?.Kill(false);float scale=Mathf.Min(1,Mathf.Max(.1f,(menuHeight-100)/height));var group=modal.GetComponent<CanvasGroup>();group.alpha=0;modal.localScale=Vector3.one*scale*.96f;
+  var dimmer=modal.Find("Dimmer") as RectTransform;if(dimmer!=null)dimmer.sizeDelta=new Vector2(1200/scale,(menuHeight+200)/scale);
+  modalMotion=DOTween.Sequence().SetUpdate(true).SetId(modal);modalMotion.Append(modal.DOScale(scale,.18f).SetEase(Ease.OutCubic));modalMotion.Join(DOTween.To(()=>group.alpha,value=>group.alpha=value,1,.18f));
+ }
+ void OpenPlayerHelp71(){
+  const float height=2180;OpenSettingsSheetC("玩法帮助",height,"help",BuildPlayerSettings);
+  string[] icons={"help_basic","help_mechanisms","help_boosters","help_streak"};
+  string[] titles={"基础操作","机关收集","强化道具","连胜奖励"};
+  string[] copy={"拖动瞄准，松手发射一组五球。\n完成收集目标即可过关。","消除相邻砖块，拆开毛线、\n释放小鱼干。\n招财猫蓄能后生成元宝。","选中后，下一组五球获得强化。\n穿透普通砖，固定砖会阻挡。\n爆炸球范围爆炸；超级光球\n十字激光造成2点伤害。","连续通关3／5／10关，\n下一关自动获得对应的临时强化。"};
+  for(int i=0;i<4;i++){
+   float y=height*.5f-600-i*335;CSettingsArt.Image(modal,"card_cream_help",0,y,880,290,true);CSettingsArt.Image(modal,icons[i],-290,y,270,215);CSettingsArt.Image(modal,"divider_peach",-122,y,5,220);
+   SettingsTextC(titles[i],155,y+85,530,65,48,true);var body=SettingsTextC(copy[i],155,y-40,530,165,34,true,true);body.textWrappingMode=TMPro.TextWrappingModes.Normal;body.fontSizeMin=31;
+  }
+  CSettingsArt.Button(modal,"返回设置","返回设置",0,-865,860,165,BuildPlayerSettings);FitSettingsModal77(height);
+ }
+ void OpenPlayerAbout71(){
+  const float height=1840;OpenSettingsSheetC("关于游戏",height,"about",BuildPlayerSettings);
+  var hero=CSettingsArt.Image(modal,"illustration_about",0,110,700,465);var idle=hero.gameObject.AddComponent<UIFloat>();idle.amplitude=4;idle.speed=1.3f;
+  SettingsTextC("喵弹拆箱",0,-230,780,110,74);SettingsTextC("版本 "+GameVersion.Name,0,-375,700,70,42,false,true);SettingsTextC("在花园里收集小美好。",0,-520,800,90,43);
+  CSettingsArt.Button(modal,"返回设置","返回设置",0,-730,860,165,BuildPlayerSettings);FitSettingsModal77(height);
+ }
+ void ConfirmLeaveRound71(bool restart){
+  const float height=1640;OpenSettingsSheetC(restart?"重新开始？":"返回首页？",height,restart?"restart-confirm":"home-confirm",null,true);
+  CSettingsArt.Image(modal,restart?"illustration_restart":"illustration_home",0,545,680,295);
+  var body=SettingsTextC("当前关卡将结束\n已使用的道具不会返还。",0,35,860,180,48);body.textWrappingMode=TMPro.TextWrappingModes.Normal;
+  CSettingsArt.Button(modal,"继续本局","继续本局",0,-260,860,170,CloseModal);
+  CSettingsArt.Button(modal,restart?"确认重新开始":"确认返回首页",restart?"确认重新开始":"确认返回首页",0,-515,860,150,()=>{RemoveModal(false);if(restart)BeginLevel(currentLevel,Session.IsTutorial,true,streakTrial);else ReturnHome();},"button_cream_normal",43);
+  FitSettingsModal77(height);
+ }
+}
+// All dismissal paths persist the mix, including the existing Escape/back closure.
+public sealed class SaveAudioMix71:MonoBehaviour {void OnDisable(){SoundService.SaveMix();}}
+}

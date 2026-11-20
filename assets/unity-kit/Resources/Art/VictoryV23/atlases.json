@@ -1,0 +1,1220 @@
+{
+  "version": 23,
+  "source": "Approved Victory-v22 HTML after cat removal",
+  "sprites": [
+    {
+      "name": "halo_00",
+      "texture": "halo",
+      "rect": [
+        8,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_01",
+      "texture": "halo",
+      "rect": [
+        264,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_02",
+      "texture": "halo",
+      "rect": [
+        520,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_03",
+      "texture": "halo",
+      "rect": [
+        776,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_04",
+      "texture": "halo",
+      "rect": [
+        1032,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_05",
+      "texture": "halo",
+      "rect": [
+        1288,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_06",
+      "texture": "halo",
+      "rect": [
+        1544,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_07",
+      "texture": "halo",
+      "rect": [
+        1800,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_08",
+      "texture": "halo",
+      "rect": [
+        2056,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_09",
+      "texture": "halo",
+      "rect": [
+        2312,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_10",
+      "texture": "halo",
+      "rect": [
+        2568,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_11",
+      "texture": "halo",
+      "rect": [
+        2824,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_12",
+      "texture": "halo",
+      "rect": [
+        8,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_13",
+      "texture": "halo",
+      "rect": [
+        264,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_14",
+      "texture": "halo",
+      "rect": [
+        520,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_15",
+      "texture": "halo",
+      "rect": [
+        776,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_16",
+      "texture": "halo",
+      "rect": [
+        1032,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_17",
+      "texture": "halo",
+      "rect": [
+        1288,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_18",
+      "texture": "halo",
+      "rect": [
+        1544,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_19",
+      "texture": "halo",
+      "rect": [
+        1800,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_20",
+      "texture": "halo",
+      "rect": [
+        2056,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_21",
+      "texture": "halo",
+      "rect": [
+        2312,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_22",
+      "texture": "halo",
+      "rect": [
+        2568,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_23",
+      "texture": "halo",
+      "rect": [
+        2824,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_24",
+      "texture": "halo",
+      "rect": [
+        8,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_25",
+      "texture": "halo",
+      "rect": [
+        264,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_26",
+      "texture": "halo",
+      "rect": [
+        520,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_27",
+      "texture": "halo",
+      "rect": [
+        776,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_28",
+      "texture": "halo",
+      "rect": [
+        1032,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_29",
+      "texture": "halo",
+      "rect": [
+        1288,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_30",
+      "texture": "halo",
+      "rect": [
+        1544,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_31",
+      "texture": "halo",
+      "rect": [
+        1800,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_32",
+      "texture": "halo",
+      "rect": [
+        2056,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_33",
+      "texture": "halo",
+      "rect": [
+        2312,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_34",
+      "texture": "halo",
+      "rect": [
+        2568,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_35",
+      "texture": "halo",
+      "rect": [
+        2824,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_36",
+      "texture": "halo",
+      "rect": [
+        8,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_37",
+      "texture": "halo",
+      "rect": [
+        264,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_38",
+      "texture": "halo",
+      "rect": [
+        520,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_39",
+      "texture": "halo",
+      "rect": [
+        776,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_40",
+      "texture": "halo",
+      "rect": [
+        1032,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_41",
+      "texture": "halo",
+      "rect": [
+        1288,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_42",
+      "texture": "halo",
+      "rect": [
+        1544,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_43",
+      "texture": "halo",
+      "rect": [
+        1800,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_44",
+      "texture": "halo",
+      "rect": [
+        2056,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_45",
+      "texture": "halo",
+      "rect": [
+        2312,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_46",
+      "texture": "halo",
+      "rect": [
+        2568,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_47",
+      "texture": "halo",
+      "rect": [
+        2824,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_48",
+      "texture": "halo",
+      "rect": [
+        8,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_49",
+      "texture": "halo",
+      "rect": [
+        264,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_50",
+      "texture": "halo",
+      "rect": [
+        520,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_51",
+      "texture": "halo",
+      "rect": [
+        776,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_52",
+      "texture": "halo",
+      "rect": [
+        1032,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_53",
+      "texture": "halo",
+      "rect": [
+        1288,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_54",
+      "texture": "halo",
+      "rect": [
+        1544,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_55",
+      "texture": "halo",
+      "rect": [
+        1800,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_56",
+      "texture": "halo",
+      "rect": [
+        2056,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_57",
+      "texture": "halo",
+      "rect": [
+        2312,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_58",
+      "texture": "halo",
+      "rect": [
+        2568,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_59",
+      "texture": "halo",
+      "rect": [
+        2824,
+        1032,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_60",
+      "texture": "halo",
+      "rect": [
+        8,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_61",
+      "texture": "halo",
+      "rect": [
+        264,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_62",
+      "texture": "halo",
+      "rect": [
+        520,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_63",
+      "texture": "halo",
+      "rect": [
+        776,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_64",
+      "texture": "halo",
+      "rect": [
+        1032,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_65",
+      "texture": "halo",
+      "rect": [
+        1288,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_66",
+      "texture": "halo",
+      "rect": [
+        1544,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_67",
+      "texture": "halo",
+      "rect": [
+        1800,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_68",
+      "texture": "halo",
+      "rect": [
+        2056,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_69",
+      "texture": "halo",
+      "rect": [
+        2312,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_70",
+      "texture": "halo",
+      "rect": [
+        2568,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_71",
+      "texture": "halo",
+      "rect": [
+        2824,
+        1288,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_72",
+      "texture": "halo",
+      "rect": [
+        8,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_73",
+      "texture": "halo",
+      "rect": [
+        264,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_74",
+      "texture": "halo",
+      "rect": [
+        520,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_75",
+      "texture": "halo",
+      "rect": [
+        776,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_76",
+      "texture": "halo",
+      "rect": [
+        1032,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_77",
+      "texture": "halo",
+      "rect": [
+        1288,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_78",
+      "texture": "halo",
+      "rect": [
+        1544,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_79",
+      "texture": "halo",
+      "rect": [
+        1800,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_80",
+      "texture": "halo",
+      "rect": [
+        2056,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_81",
+      "texture": "halo",
+      "rect": [
+        2312,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_82",
+      "texture": "halo",
+      "rect": [
+        2568,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_83",
+      "texture": "halo",
+      "rect": [
+        2824,
+        1544,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_84",
+      "texture": "halo",
+      "rect": [
+        8,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_85",
+      "texture": "halo",
+      "rect": [
+        264,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_86",
+      "texture": "halo",
+      "rect": [
+        520,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_87",
+      "texture": "halo",
+      "rect": [
+        776,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_88",
+      "texture": "halo",
+      "rect": [
+        1032,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_89",
+      "texture": "halo",
+      "rect": [
+        1288,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_90",
+      "texture": "halo",
+      "rect": [
+        1544,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_91",
+      "texture": "halo",
+      "rect": [
+        1800,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_92",
+      "texture": "halo",
+      "rect": [
+        2056,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_93",
+      "texture": "halo",
+      "rect": [
+        2312,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_94",
+      "texture": "halo",
+      "rect": [
+        2568,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "halo_95",
+      "texture": "halo",
+      "rect": [
+        2824,
+        1800,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_00",
+      "texture": "burst",
+      "rect": [
+        8,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_01",
+      "texture": "burst",
+      "rect": [
+        264,
+        8,
+        239,
+        240
+      ]
+    },
+    {
+      "name": "burst_02",
+      "texture": "burst",
+      "rect": [
+        520,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_03",
+      "texture": "burst",
+      "rect": [
+        776,
+        8,
+        239,
+        240
+      ]
+    },
+    {
+      "name": "burst_04",
+      "texture": "burst",
+      "rect": [
+        8,
+        264,
+        240,
+        239
+      ]
+    },
+    {
+      "name": "burst_05",
+      "texture": "burst",
+      "rect": [
+        264,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_06",
+      "texture": "burst",
+      "rect": [
+        520,
+        264,
+        240,
+        239
+      ]
+    },
+    {
+      "name": "burst_07",
+      "texture": "burst",
+      "rect": [
+        776,
+        264,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_08",
+      "texture": "burst",
+      "rect": [
+        8,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_09",
+      "texture": "burst",
+      "rect": [
+        264,
+        520,
+        239,
+        240
+      ]
+    },
+    {
+      "name": "burst_10",
+      "texture": "burst",
+      "rect": [
+        520,
+        520,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_11",
+      "texture": "burst",
+      "rect": [
+        776,
+        520,
+        239,
+        240
+      ]
+    },
+    {
+      "name": "burst_12",
+      "texture": "burst",
+      "rect": [
+        8,
+        776,
+        240,
+        239
+      ]
+    },
+    {
+      "name": "burst_13",
+      "texture": "burst",
+      "rect": [
+        264,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "burst_14",
+      "texture": "burst",
+      "rect": [
+        520,
+        776,
+        240,
+        239
+      ]
+    },
+    {
+      "name": "burst_15",
+      "texture": "burst",
+      "rect": [
+        776,
+        776,
+        240,
+        240
+      ]
+    },
+    {
+      "name": "glyph_L",
+      "texture": "glyphs",
+      "rect": [
+        37,
+        8,
+        182,
+        240
+      ]
+    },
+    {
+      "name": "glyph_E",
+      "texture": "glyphs",
+      "rect": [
+        290,
+        8,
+        187,
+        240
+      ]
+    },
+    {
+      "name": "glyph_V",
+      "texture": "glyphs",
+      "rect": [
+        520,
+        20,
+        240,
+        215
+      ]
+    },
+    {
+      "name": "glyph_C",
+      "texture": "glyphs",
+      "rect": [
+        790,
+        8,
+        212,
+        240
+      ]
+    },
+    {
+      "name": "glyph_O",
+      "texture": "glyphs",
+      "rect": [
+        19,
+        264,
+        218,
+        240
+      ]
+    },
+    {
+      "name": "glyph_M",
+      "texture": "glyphs",
+      "rect": [
+        264,
+        278,
+        240,
+        211
+      ]
+    },
+    {
+      "name": "glyph_P",
+      "texture": "glyphs",
+      "rect": [
+        535,
+        264,
+        210,
+        240
+      ]
+    },
+    {
+      "name": "glyph_T",
+      "texture": "glyphs",
+      "rect": [
+        782,
+        264,
+        227,
+        240
+      ]
+    },
+    {
+      "name": "glyph_exclamation",
+      "texture": "glyphs",
+      "rect": [
+        84,
+        520,
+        88,
+        240
+      ]
+    }
+  ],
+  "haloFrames": 96,
+  "haloFps": 8,
+  "burstFrames": 16,
+  "burstFps": 12
+}

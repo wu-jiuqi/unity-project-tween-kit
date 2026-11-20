@@ -1,0 +1,15 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden {
+public enum JuiceMechanic { None, Heat, Bank, Zipper, Sandwich, Return }
+public static class JuiceLevels {
+ public const int FirstIndex=15;
+ public const float Pitch=.78f;
+ public static readonly string[] Names=System.Array.Empty<string>();
+ public static readonly string[] Hints=System.Array.Empty<string>();
+ public static Vector2 Center(int col,int row)=>new Vector2((col-4)*Pitch,5.35f-row*Pitch);
+ static BrickSpawn Brick(int c,int r,int hp,int group=-1,int order=-1){var p=Center(c,r);return new BrickSpawn{position=new Vector2(p.x/.86f,(p.y-.44f)/1.23f),hp=hp,colorIndex=group<0?c%5:group,referenceCol=c,referenceRow=r,juiceGroup=group,juiceOrder=order};}
+ public static LevelData Create(int stage){throw new System.InvalidOperationException("Legacy routes are archived in v37");}
+}
+}

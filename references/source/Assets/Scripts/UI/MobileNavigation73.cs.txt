@@ -1,0 +1,33 @@
+using UnityEngine;
+namespace BounceGarden {
+// Place only navigation controls beside the native menu. Content keeps its own layout.
+public sealed class MobileNavigation73:MonoBehaviour {
+ public RectTransform Title,Back;public float TitleWidth=720,TitleHeight=155;
+ void LateUpdate(){
+  var app=GetComponentInParent<AppUI>();if(app==null||Title==null||Back==null)return;
+  var page=GetComponentInParent<CanvasGroup>();if(page!=null&&!page.interactable)return;
+  Rect blocked;var pixels=app.MenuAvoidanceViewport;
+  if(!WeChatLayoutMetrics.TryGetBlockedRect(pixels,out blocked))return;
+  var safe=app.MenuSafeRect;float unit=WeChatLayoutMetrics.LogicalPixelScale(pixels);
+  float touch=44*unit,left=safe.xMin+8*unit,right=Mathf.Min(safe.xMax-8*unit,blocked.xMin);
+  float y=Mathf.Min(safe.yMax-touch*.5f,blocked.center.y);
+  var canvas=GetComponentInParent<Canvas>();var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;
+  Place(Back,new Vector2(left+touch*.5f,y),touch,touch,camera);
+  float center=pixels.x*.5f;
+  float width=2*Mathf.Min(center-(left+touch+6*unit),right-4*unit-center);
+  // Keep the title on the physical screen center, including on asymmetric safe areas.
+  // A narrow phone gets a centered second row instead of tiny text or a shifted title.
+  if(width<156*unit){width=2*Mathf.Min(center-safe.xMin-12*unit,safe.xMax-center-12*unit);y=Mathf.Min(y,blocked.yMin-24*unit);}
+  Place(Title,new Vector2(center,y),width,40*unit,camera);
+ }
+ void Place(RectTransform item,Vector2 screen,float width,float height,Camera camera){
+  var parent=(RectTransform)item.parent;Vector2 at,a,b;
+  RectTransformUtility.ScreenPointToLocalPointInRectangle(parent,screen,camera,out at);
+  RectTransformUtility.ScreenPointToLocalPointInRectangle(parent,screen+new Vector2(width,height),camera,out b);
+  RectTransformUtility.ScreenPointToLocalPointInRectangle(parent,screen,camera,out a);
+  item.localPosition=new Vector3(at.x,at.y,0);
+  float w=item==Title?TitleWidth:item.rect.width,h=item==Title?TitleHeight:item.rect.height;
+  item.localScale=Vector3.one*Mathf.Min(Mathf.Abs(b.x-a.x)/w,Mathf.Abs(b.y-a.y)/h);
+ }
+}
+}

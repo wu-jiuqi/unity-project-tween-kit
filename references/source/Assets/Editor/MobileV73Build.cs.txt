@@ -1,0 +1,7 @@
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class MobileV73Build {
+ public static void Windows(){BuildEntry.Configure();var output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/Mobile-v73/Windows/BounceGarden.exe"));Directory.CreateDirectory(Path.GetDirectoryName(output));var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=output,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("MOBILE_V73_BUILD "+result.summary.result+" errors="+result.summary.totalErrors);if(result.summary.result!=BuildResult.Succeeded)throw new System.Exception("Mobile 73 validation build failed");}
+}

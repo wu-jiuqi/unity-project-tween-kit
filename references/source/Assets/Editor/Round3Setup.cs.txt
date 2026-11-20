@@ -1,0 +1,10 @@
+using UnityEditor;
+using UnityEngine;
+using BounceGarden;
+public static class Round3Setup {
+ public static void Configure(){
+  if(AssetDatabase.LoadAssetAtPath<FeedbackProfile>("Assets/Resources/FeedbackProfile.asset")==null){var profile=ScriptableObject.CreateInstance<FeedbackProfile>();AssetDatabase.CreateAsset(profile,"Assets/Resources/FeedbackProfile.asset");}
+  AssetDatabase.SaveAssets();
+ }
+ public static void Build(){Configure();BuildEntry.ValidateAndWindows();}
+}

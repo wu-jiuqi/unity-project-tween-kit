@@ -1,0 +1,72 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class ChainLiveBurst {public int Id,YarnColor,Remaining=5,Breaks,Tier=-1;public StreakBooster Booster;public int Hits=>Breaks;}
+public sealed partial class GameSession {
+ readonly Dictionary<int,ChainLiveBurst> chainBursts=new Dictionary<int,ChainLiveBurst>();
+ readonly HashSet<Transform> chainMovedThisStep=new HashSet<Transform>();
+ int chainBurstSerial;float chainNextLaunch;
+ Vector2? bufferedChainShot;
+ public bool ChainLaunchQueued=>bufferedChainShot.HasValue;
+ public float ChainLaunchWait=>Mathf.Max(0,chainNextLaunch-simulationClock);
+ void ClearBufferedChainShot(){bufferedChainShot=null;}
+ bool BufferChainShot(Vector2 direction){if(bufferedChainShot.HasValue)return false;bufferedChainShot=NormalizeAimDirection(direction);changed=true;return true;}
+ void PromoteBufferedChainShot(){if(!bufferedChainShot.HasValue||!ChainCanLaunch)return;queuedShot=bufferedChainShot;strategyQueuedRequest=strategyBufferedRequest;bufferedChainShot=null;changed=true;}
+ public int ChainLiveGroups=>chainBursts.Count;
+ public bool ChainCanLaunch=>IsPlaying&&!IsPaused&&!RefillFreezeBalls&&!CollectionGoalEarned&&Shots>0&&PendingBurstBalls==0&&!queuedShot.HasValue&&simulationClock+.00001f>=chainNextLaunch;
+ public int ChainMovingHits {get;private set;}public int ChainMovingBreaks {get;private set;}
+ static Vector2 ChainPiecePosition(ChainGridPiece p){var b=p.GetComponent<Rigidbody2D>();return b!=null?b.position:(Vector2)p.transform.position;}
+ void ClearChainLive(){StrategyReset();ClearBufferedChainShot();ChainMovingHits=ChainMovingBreaks=0;chainMovedThisStep.Clear();chainBursts.Clear();chainBurstSerial=0;chainNextLaunch=0;}
+ void BeginChainLiveBurst(){RefillBeforeVolley();var b=new ChainLiveBurst{Id=++chainBurstSerial,YarnColor=nextVolleyYarn,Remaining=UnityEngine.Mathf.Max(1,CurrentLevel.volleyCount),Booster=ConsumeStreakSelection()};chainBursts.Add(b.Id,b);nextVolleyYarn=UnityEngine.Random.Range(0,YarnArt.ColorCount);chainNextLaunch=simulationClock+.55f;CollectionRound=Mathf.Max(1,CurrentLevel.initialShots-Shots);ChainRatingBreaks=0;ChainRatingTier=-1;chainRewardTier=-1;NextChainRowTools=new int[9];if(FusionActive)FusionBeginVolley();changed=true;}
+ void AssignChainBall(BallBody ball){ball.ChainBurstId=chainBurstSerial;ball.ChainBornAt=simulationClock;if(chainBursts.TryGetValue(chainBurstSerial,out var burst)){ball.SetYarnColor(burst.YarnColor);ball.SetStreakBooster(burst.Booster);}}
+ void RecordChainLiveBreak(BallBody ball){
+  if(!chainBursts.TryGetValue(ball.ChainBurstId,out var b)){RecordChainRatingBreak();return;}
+  b.Breaks++;ChainRatingBreaks=b.Breaks;int tier=ChainRatingRules.Tier(b.Breaks);if(tier>b.Tier){b.Tier=tier;ChainRatingTier=tier;ChainRatingSerial++;ChainMessage=ChainRatingRules.Names[tier]+" · GROUP REWARD ON RETURN";}else ChainRatingTier=b.Tier;changed=true;
+ }
+ void ReturnChainBall(BallBody ball){
+  if(!chainBursts.TryGetValue(ball.ChainBurstId,out var b))return;b.Remaining--;if(b.Remaining>0)return;
+  using(StrategyCause("group-return",b.Id)){
+  StrategyEmit(new StrategyEvent{kind="group-return"});chainBursts.Remove(b.Id);if(FusionActive)QueueFusionRating(b.Tier);else if(CollectionGoalEarned&&!IsTutorial&&!IsStreakTrial)DeferVictoryGroup(b);else {QueueChainLiveReward(CampaignChainRewards(b.Tier));RefillAfterVolley(b.Id);}changed=true;}
+ }
+ void QueueChainLiveReward(int[] packet){
+  if(CollectionGoalEarned){FinishEarnedCollectionSupply();return;}
+  foreach(int kind in packet){chainReplacementRewards.Enqueue(kind);if(StrategyObserver!=null)strategyRewardOrigins.Enqueue(strategyContext?.Group??0);}
+  TryChainReplacementRewards();
+ }
+ void TryChainReplacementRewards(){
+  if(CollectionGoalEarned){FinishEarnedCollectionSupply();return;}
+  if(FusionActive||SevenFreezeBoard)return;
+  if(chainReplacementRewards.Count==0||!IsPlaying&&!VictorySettlementActive||IsPaused||CollectionWon&&!SevenSpecialActive)return;
+  var candidates=CollectionBricks.Where(b=>b.Alive&&!RefillProtected(b)&&b.Definition.kind==BrickKind.Normal&&b.Definition.juiceGroup==0&&!OpeningCopperBrick(b)&&!OpeningCatBrick(b)&&!OpeningIngotBrick(b)&&!OpeningYarnBrick(b)&&!OpeningCookieBrick(b)&&(!IsJellyTarget(b)||IsOpening)&&!ChainPowerRules.IsNest(b.Definition)&&!b.GetComponent<ChainTileVisibility>().Hidden&&!ChainBonds.Any(g=>g.Members.Contains(b))).ToList();
+  while(chainReplacementRewards.Count>0&&candidates.Count>0){
+   var preferred=candidates.Where(b=>!IsJellyTarget(b)).ToList();if(preferred.Count==0)preferred=candidates;var old=preferred[chainRewardRandom.Next(preferred.Count)];candidates.Remove(old);
+   var previous=old.GetComponent<ChainGridPiece>();var position=ChainPiecePosition(previous);
+   jellyTargets.Remove(old.Id);rules.DamageTarget(old.Id,int.MaxValue,out _);old.Remove(false);
+   ChainTool tool;int origin=strategyRewardOrigins.Count>0?strategyRewardOrigins.Dequeue():0;
+   using(StrategyCause("reward-place",origin))tool=SpawnChainTool(chainReplacementRewards.Dequeue(),position);var piece=tool.View.GetComponent<ChainGridPiece>();
+   piece.Col=previous.Col;piece.Row=previous.Row;piece.Size=previous.Size;piece.FallAt=previous.FallAt;piece.MotionVersion=previous.MotionVersion;
+   // Replacing a waiting or moving tile keeps its existing deadline and path.
+   foreach(var move in chainMotions)if(move.View==old.transform)move.View=tool.View;
+   CollectionBricks.Remove(old);Destroy(old.gameObject);changed=true;
+  }
+  // A stable board made entirely of mechanisms/specials cannot accept a rating
+  // replacement. During victory those rewards must not wait for the next
+  // phase's special casts to create a candidate: that phase waits for us.
+  if(VictorySettlementActive&&chainReplacementRewards.Count>0&&ChainGridReady&&!ChainEffectsPending&&!SevenAnimationsPending){
+   while(chainReplacementRewards.Count>0)victoryUnplacedRewards.Enqueue(chainReplacementRewards.Dequeue());
+   changed=true;
+  }
+ }
+ readonly List<BallBody> expiredChainBalls=new List<BallBody>(32);
+ void TickChainBallLifetime(){expiredChainBalls.Clear();foreach(var ball in active.Values)if(simulationClock-ball.ChainBornAt>=ChainGridRules.FlightLimit)expiredChainBalls.Add(ball);foreach(var ball in expiredChainBalls){LoseBall(ball,ball.Body.position);ChainAutoReturns++;}expiredChainBalls.Clear();}
+ bool ChainTopPathClear(bool[,] occupied,int c,int r,int size){for(int y=0;y<r;y++)for(int x=c;x<c+size;x++)if(occupied[x,y])return false;return true;}
+}
+public sealed class ChainTileVisibility:MonoBehaviour {
+ Renderer[] renderers;int size;Rigidbody2D body;BoxCollider2D colliderBox;bool visibilityApplied;
+ public bool Hidden {get;private set;}
+ public void Initialize(int s){size=s;body=GetComponent<Rigidbody2D>();colliderBox=GetComponent<BoxCollider2D>();renderers=GetComponentsInChildren<Renderer>(true);Refresh();}
+ public void Refresh(){bool hidden=(body!=null?body.position.y:transform.position.y)>CollectionLevels.Top+(size-1)*CollectionLevels.Pitch*.5f+.5f;if(!visibilityApplied||Hidden!=hidden){Hidden=hidden;visibilityApplied=true;foreach(var renderer in renderers)if(renderer!=null)renderer.forceRenderingOff=Hidden;}bool solid=!Hidden&&GetComponent<ChainGridPiece>()?.RefillProtected!=true;if(colliderBox!=null&&colliderBox.enabled!=solid)colliderBox.enabled=solid;}
+ void LateUpdate(){Refresh();}
+}
+}

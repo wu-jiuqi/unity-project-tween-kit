@@ -1,0 +1,89 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public bool IsJuiceStage=>CurrentLevel!=null&&CurrentLevel.juiceMechanic!=JuiceMechanic.None;
+ public JuiceMechanic Mechanic=>IsJuiceStage?CurrentLevel.juiceMechanic:JuiceMechanic.None;
+ public JuiceGardenView JuiceView {get;private set;}
+ public bool JuiceFrozen=>JuiceView!=null&&JuiceView.Frozen;
+ public int JuicePeak {get;private set;}
+ public int JuiceTriggers {get;private set;}
+ public int PawReturns {get;private set;}
+ public bool PawReady {get;private set;}
+ public int ZipperSteps {get;private set;}
+ public float JuiceClock=>simulationClock;
+ public readonly List<BrickBody> juiceBricks=new List<BrickBody>();
+ readonly Dictionary<long,float> juiceContacts=new Dictionary<long,float>();
+ readonly float[] softUntil=new float[3];
+ sealed class Unzip {public int group,order;public float due;}
+ readonly List<Unzip> unzips=new List<Unzip>();
+ void StartJuice(){
+  if(!IsJuiceStage)return;
+  JuiceView=new GameObject("Juice garden presentation").AddComponent<JuiceGardenView>();JuiceView.transform.SetParent(world,false);JuiceView.Initialize(this);
+ }
+ void ClearJuice(){
+  JuiceView=null;juiceBricks.Clear();juiceContacts.Clear();unzips.Clear();System.Array.Clear(softUntil,0,softUntil.Length);
+  JuicePeak=JuiceTriggers=PawReturns=ZipperSteps=0;PawReady=false;
+ }
+ void OnJuiceBurst(){if(Mechanic==JuiceMechanic.Return)PawReady=true;}
+ public bool IsSoft(BrickBody b)=>b!=null&&b.Definition.juiceGroup>=0&&b.Definition.juiceGroup<3&&softUntil[b.Definition.juiceGroup]>simulationClock;
+ public bool IsZipperHead(BrickBody b){
+  if(b==null||!b.Alive||Mechanic!=JuiceMechanic.Zipper)return false;
+  foreach(var other in juiceBricks)if(other.Alive&&other.Definition.juiceGroup==b.Definition.juiceGroup&&other.Definition.juiceOrder<b.Definition.juiceOrder)return false;
+  foreach(var u in unzips)if(u.group==b.Definition.juiceGroup)return false;
+  return true;
+ }
+ public void OnJuiceWall(BallBody b,int side,Vector2 p){
+  if(Mechanic!=JuiceMechanic.Bank||!IsPlaying||IsPaused||JuiceFrozen||b==null||!b.Active||side==1)return;
+  long key=-1L-b.Id*3L-side;if(juiceContacts.TryGetValue(key,out float previous)&&simulationClock-previous<.10f)return;juiceContacts[key]=simulationClock;
+  b.BankCharge=Mathf.Min(2,b.BankCharge+1);JuicePeak=Mathf.Max(JuicePeak,b.BankCharge);JuiceTriggers++;
+  JuiceView.Burst(p,1,1.25f);JuiceView.Tether(p,b.transform.position,JuiceGardenView.Mint);SoundService.Play("bank_charge",1+.05f*b.BankCharge);changed=true;
+ }
+ void HitJuiceBrick(BrickBody b,BallBody ball,Vector2 point){
+  long key=((long)b.Id<<32)|(uint)ball.Id;
+  if(juiceContacts.TryGetValue(key,out float t)&&simulationClock-t<.12f)return;juiceContacts[key]=simulationClock;
+  int damage=1;bool strong=false;int row=0;
+  if(Mechanic==JuiceMechanic.Heat){
+   int old=ball.HeatHits;ball.HeatHits++;int tier=ball.HeatHits>=8?2:ball.HeatHits>=4?1:0;damage=1+tier;JuicePeak=Mathf.Max(JuicePeak,ball.HeatHits);
+   if(old<4&&ball.HeatHits>=4||old<8&&ball.HeatHits>=8){SoundService.Play("heat_upgrade");JuiceTriggers++;JuiceView.Callout(ball.transform.position,tier==2?"BLAZING!":"WARM!",JuiceGardenView.Gold);JuiceView.Impact(point,0,tier==2?1.8f:1.25f,.040f);}
+   SoundService.Play("hit",.9f+Mathf.Min(.25f,ball.HeatHits*.025f));strong=tier==2;
+  }else if(Mechanic==JuiceMechanic.Bank){
+   int charge=ball.BankCharge;damage=1+charge*2;ball.BankCharge=0;strong=charge>0;row=1;
+   if(charge>0)JuiceView.Impact(point,1,1.2f+charge*.3f,charge==2?.055f:.035f);
+  }else if(Mechanic==JuiceMechanic.Sandwich){
+   bool back=point.y>b.transform.position.y+Board.CellHeight*.30f;
+   if(back){SoundService.Play("cream_critical");softUntil[b.Definition.juiceGroup]=simulationClock+4;JuiceTriggers++;damage=5;strong=true;row=3;JuiceView.Impact(point,3,1.6f,.05f);JuiceView.Callout(point,"SOFT FAMILY!",JuiceGardenView.Lilac);}
+   else damage=IsSoft(b)?3:1;
+  }
+  bool head=IsZipperHead(b);bool destroyed=JuiceDamage(b,damage,point);
+  if(strong&&destroyed)JuiceView.Burst(point,row,1.15f);
+  if(Mechanic==JuiceMechanic.Zipper&&head&&destroyed){
+   unzips.Add(new Unzip{group=b.Definition.juiceGroup,order=b.Definition.juiceOrder+1,due=simulationClock+.09f});rules.BeginDamageChain();JuiceTriggers++;JuiceView.Burst(point,5,1.1f);JuiceView.Impact(point,2,1.4f,.045f);
+  }
+  changed=true;
+ }
+ bool JuiceDamage(BrickBody b,int damage,Vector2 point){
+  if(b==null||!b.Alive||!rules.DamageTarget(b.Id,damage,out bool dead))return false;
+  noDamageTime=0;HitCount++;changed=true;
+  if(!dead){b.Damage(rules.Health(b.Id));EmitFeedback(point,"hit",b.Tint);return false;}
+  BreakCount++;if(Mechanic==JuiceMechanic.Sandwich)JuiceView.Burst(b.transform.position,3,1.25f);else fx.PlayJelly(b);b.Remove();EmitFeedback(b.transform.position,"break",Mechanic==JuiceMechanic.Sandwich?JuiceGardenView.Lilac:b.Tint);return true;
+ }
+ void TickJuice(float dt){
+  if(!IsJuiceStage)return;
+  for(int i=unzips.Count-1;i>=0;i--){
+   var u=unzips[i];if(simulationClock<u.due)continue;
+   BrickBody next=null;foreach(var b in juiceBricks)if(b.Alive&&b.Definition.juiceGroup==u.group&&b.Definition.juiceOrder>=u.order&&(next==null||b.Definition.juiceOrder<next.Definition.juiceOrder))next=b;
+   bool keep=false;
+   if(next!=null){var p=(Vector2)next.transform.position;keep=JuiceDamage(next,2,p);u.order=next.Definition.juiceOrder+1;u.due=simulationClock+.09f;ZipperSteps++;
+    JuiceView.Burst(p,2,1.2f);JuiceView.Callout(p,"+"+(u.order),JuiceGardenView.Coral);SoundService.Play("zip_step",.9f+Mathf.Min(.25f,u.order*.025f));}
+   if(!keep){unzips.RemoveAt(i);rules.CompleteDamageChain();}
+  }
+ }
+ public bool TryPawReturn(BallBody ball,Vector2 exit){
+  if(Mechanic!=JuiceMechanic.Return||!IsPlaying||IsPaused||JuiceFrozen||!PawReady||ball==null||!ball.Active||ball.SessionGeneration!=Generation||exit.y<FlightGeometry.ReturnY-.65f||exit.y>FlightGeometry.ReturnY+.1f||Mathf.Abs(exit.x)>1.6f||ball.Body.linearVelocity.y>=0)return false;
+  PawReady=false;PawReturns++;JuiceTriggers++;ball.RedirectFromPaw(new Vector2(exit.x,FlightGeometry.ReturnY+.22f));
+  JuiceView.PawFlick();JuiceView.Impact(new Vector2(exit.x,FlightGeometry.ReturnY+.25f),4,1.8f,.045f);JuiceView.Callout(new Vector2(0,-4.9f),"ONE MORE!",JuiceGardenView.Mint);SoundService.Play("paw_bounce",1.15f);changed=true;return true;
+ }
+}
+}

@@ -1,0 +1,44 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public double FlowLastPlanMilliseconds{get;private set;}
+ const float BoardFlowSpeed=8.8f;
+ // Cell release times give local dependencies. There is no board-wide
+ // vertical/sideways/vertical animation gate and no repeated two-second wait.
+ void BeginBoardFlowGravity(){PlanFlowBoard();}
+ void SimplifyFlowRoutes(List<ChainGridPiece> pieces,Dictionary<Transform,int> inherited){
+  var sizes=pieces.ToDictionary(p=>p.transform,p=>p.Size);var moving=new HashSet<Transform>();foreach(var route in chainMotions)moving.Add(route.View);var stationary=pieces.Where(p=>!moving.Contains(p.transform)).ToArray();
+  var sweepBounds=new Dictionary<Transform,Rect>(chainMotions.Count);
+  foreach(var route in chainMotions){Vector2 lo=route.From,hi=route.From;foreach(var point in route.Path){lo=Vector2.Min(lo,point);hi=Vector2.Max(hi,point);}sweepBounds[route.View]=Rect.MinMaxRect(lo.x,lo.y,hi.x,hi.y);}
+  // Collapse collinear steps and take a direct diagonal only when its entire
+  // space-time sweep is clear. This preserves release order around obstacles.
+  foreach(var route in chainMotions)for(int i=inherited.TryGetValue(route.View,out var frozen)?frozen:0;i+1<route.Path.Count;){
+   var from=i==0?route.From:route.Path[i-1];float start=route.PathStarts[i],end=route.PathEnds[i+1];var to=route.Path[i+1];
+   var middle=route.Path[i];var a=middle-from;var b=to-middle;
+   // Contiguous segments at the same velocity have exactly the same space-time
+   // sweep after merging, so no all-route collision test is necessary.
+   float da=route.PathEnds[i]-start,db=end-route.PathStarts[i+1];
+   bool identical=da>0&&db>0&&Mathf.Abs(route.PathStarts[i+1]-route.PathEnds[i])<.00001f&&(a/da-b/db).sqrMagnitude<.000001f;
+   if(identical||FlowShortcutSafe(route,from,to,start,end,sizes,stationary,sweepBounds)){route.Path.RemoveAt(i);route.PathEnds.RemoveAt(i);route.PathStarts.RemoveAt(i+1);}else i++;
+  }
+
+ }
+ bool FlowReservedAbove(int c,int r){for(int y=0;y<r;y++)if(FlowReserved(c,y))return true;return false;}
+ bool FlowShortcutSafe(GridMotion own,Vector2 from,Vector2 to,float start,float end,Dictionary<Transform,int> sizes,ChainGridPiece[] stationary,Dictionary<Transform,Rect> sweepBounds){
+  int size=sizes[own.View];foreach(var p in stationary)if(FlowSegmentBox(from,to,ChainPiecePosition(p),CollectionLevels.Pitch*(size+p.Size)*.5f-.035f))return false;
+  Vector2 lo=Vector2.Min(from,to),hi=Vector2.Max(from,to);
+  foreach(var other in chainMotions)if(other!=own&&other.View!=null){float half=CollectionLevels.Pitch*(size+sizes[other.View])*.5f-.035f;var bounds=sweepBounds[other.View];if(hi.x<=bounds.xMin-half||lo.x>=bounds.xMax+half||hi.y<=bounds.yMin-half||lo.y>=bounds.yMax+half)continue;float cursor=start;
+   for(int i=0;i<other.Path.Count;i++){float a=other.PathStarts[i],b=other.PathEnds[i];if(a>cursor&&a<end){if(FlowRelativeCollision(from,to,start,end,other,cursor,a,half))return false;cursor=a;}if(b>cursor&&b<end){if(FlowRelativeCollision(from,to,start,end,other,cursor,b,half))return false;cursor=b;}}
+   if(cursor<end&&FlowRelativeCollision(from,to,start,end,other,cursor,end,half))return false;
+  }
+  return true;
+ }
+ static bool FlowRelativeCollision(Vector2 from,Vector2 to,float start,float end,GridMotion other,float a,float b,float half){var p=Vector2.Lerp(from,to,Mathf.InverseLerp(start,end,a))-FlowPositionAt(other,a);var q=Vector2.Lerp(from,to,Mathf.InverseLerp(start,end,b))-FlowPositionAt(other,b);return FlowSegmentBox(p,q,Vector2.zero,half);}
+ static Vector2 FlowPositionAt(GridMotion route,float time){Vector2 from=route.From;for(int i=0;i<route.Path.Count;i++){if(time<route.PathStarts[i])return from;if(time<route.PathEnds[i])return Vector2.Lerp(from,route.Path[i],Mathf.InverseLerp(route.PathStarts[i],route.PathEnds[i],time));from=route.Path[i];}return from;}
+ Vector2 AdvanceBoardFlow(GridMotion move,Vector2 position,float dt,List<ChainGridPiece> pieces){while(move.PathIndex<move.Path.Count&&simulationClock+.00001f>=move.PathEnds[move.PathIndex])move.PathIndex++;return FlowPositionAt(move,simulationClock);}
+ static bool FlowSegmentBox(Vector2 from,Vector2 to,Vector2 center,float half){float lo=0,hi=1;var d=to-from;for(int axis=0;axis<2;axis++){float p=from[axis],v=d[axis],min=center[axis]-half,max=center[axis]+half;if(Mathf.Abs(v)<.00001f){if(p<=min||p>=max)return false;}else{float a=(min-p)/v,b=(max-p)/v;if(a>b){float temp=a;a=b;b=temp;}lo=Mathf.Max(lo,a);hi=Mathf.Min(hi,b);if(lo>=hi)return false;}}return true;}
+}
+}

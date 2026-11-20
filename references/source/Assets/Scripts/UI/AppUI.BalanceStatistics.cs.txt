@@ -1,0 +1,68 @@
+using System;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public partial class AppUI {
+ int balancePage; bool balanceByLevel;
+ void OpenBalanceStatistics(){balancePage=0;balanceByLevel=false;DrawBalanceStatistics();}
+ void DrawBalanceStatistics(){
+  var stats=Metrics?.Balance;if(stats==null){Toast("统计暂不可用");return;}
+  // Also refresh the active checkpoint for viewing while the round is paused.
+  stats.ExportJson();
+  OpenModal("试玩统计",UICraft.Green,940,1540);
+  var history=stats.History;
+  UICraft.Button(modal,"下局策略记录："+(stats.StrategyRecordingEnabled?"开":"关"),-180,584,440,64,UICraft.Blue,()=>{stats.StrategyRecordingEnabled=!stats.StrategyRecordingEnabled;DrawBalanceStatistics();},26);
+  if(PlayerStrategyTestBuild.Enabled)UICraft.Button(modal,"选择测试关卡",275,584,320,64,UICraft.Green,()=>ShowStrategyTestLevels(),26);
+  UICraft.Button(modal,balanceByLevel?"查看逐局":"查看关卡汇总",0,493,720,88,UICraft.Blue,()=>{balanceByLevel=!balanceByLevel;balancePage=0;DrawBalanceStatistics();},32);
+  var records=history.rounds.AsEnumerable();if(history.active!=null)records=records.Concat(new[]{history.active});
+  var all=records.Reverse().ToArray();int total=balanceByLevel?all.GroupBy(BalanceReport.Group).Count():all.Length;
+  const int pageSize=5;int pages=Math.Max(1,(total+pageSize-1)/pageSize);balancePage=Mathf.Clamp(balancePage,0,pages-1);
+  if(total==0)UICraft.Label(modal,"还没有记录\n完成、失败或重开一局后可在这里查看",0,100,800,260,33,UICraft.Ink);
+  if(balanceByLevel){
+   int row=0;foreach(var group in all.GroupBy(BalanceReport.Group).Skip(balancePage*pageSize).Take(pageSize)){
+    var a=group.ToArray();var wins=a.Where(r=>r.outcome=="win").ToArray();int losses=a.Count(r=>r.outcome=="loss");int resolved=wins.Length+losses;
+    string rate=resolved==0?"暂无胜负局":$"胜率 {wins.Length*100/resolved}%（{wins.Length}/{resolved}）";
+    string message=$"第{a[0].level}关 · {(a[0].Assisted?"有辅助":"无辅助")} · {a.Length}局\n{rate}  胜局用步中位数 {BalanceReport.Median(wins.Select(r=>(double)r.usedShots))}\n配置 {a[0].configHash.Substring(0,8)} · {(resolved<5?"样本不足，继续试玩":"可导出分析")}";
+  UICraft.Label(modal,message,0,340-row++*161,790,150,28,UICraft.Ink,TextAnchor.MiddleLeft);
+   }
+  }else{
+   int row=0;foreach(var item in all.Skip(balancePage*pageSize).Take(pageSize)){
+    var r=item;string message=$"第{r.level}关 · {BalanceReport.Outcome(r.outcome)} · {r.score:N0}分\n用{r.usedShots}/{r.initialShots}步 · 剩{r.remainingShots}步 · {(r.Assisted?"有辅助":"无辅助")}  ›";
+    SettingsLink77(modal,"Balance round "+r.id,message,0,340-row++*161,790,150,()=>ShowBalanceRound(r),30);
+   }
+  }
+  UICraft.Button(modal,"上一页",-270,-471,220,76,UICraft.Blue,()=>{balancePage--;DrawBalanceStatistics();},28).interactable=balancePage>0;
+  UICraft.Label(modal,$"{balancePage+1} / {pages}",0,-471,230,65,28,UICraft.Ink);
+  UICraft.Button(modal,"下一页",270,-471,220,76,UICraft.Blue,()=>{balancePage++;DrawBalanceStatistics();},28).interactable=balancePage<pages-1;
+#if UNITY_WEBGL && !UNITY_EDITOR
+  UICraft.Label(modal,"此平台暂支持本地记录；文件导出请用电脑试玩版",0,-562,810,80,25,UICraft.Ink);
+#else
+  UICraft.Button(modal,"导出试玩数据",0,-567,720,88,UICraft.Green,()=>{
+   if(stats.Export(out string folder)){ShowBalanceExport(folder);}else Toast("导出失败："+stats.LastError);
+  },34);
+#endif
+  UICraft.Button(modal,"返回设置",0,-668,720,88,UICraft.Blue,BuildPlayerSettings,33);
+  FitSettingsModal77(1540);
+ }
+ void ShowBalanceRound(BalanceRound r){
+  OpenModal($"第{r.level}关 · 本局明细",UICraft.Green,940,1540);
+  string goals=string.Join("\n",r.goals.Select(g=>$"{BalanceGoalName(g.kind)}{(string.IsNullOrEmpty(g.color)?"":" / "+g.color)}：{g.collected}/{g.required}"));
+  string message=$"{BalanceReport.Outcome(r.outcome)} · 同配置第{r.configAttempt}次挑战\n用步 {r.usedShots} / 初始 {r.initialShots} · 剩余 {r.remainingShots}\n有效游玩 {r.activeSeconds:0.0} 秒\n\n总分 {r.score:N0}\n伤害 {r.damageScore:N0} · 击碎 {r.breakScore:N0}\n目标 {r.objectiveScore:N0} · 其他 {r.otherScore:N0}\n剩余步数奖励 {r.completionBonus:N0}\n\n特殊砖：初始 {r.initialSpecials} / 生成 {r.generatedSpecials}\n触发 {r.activatedSpecials} / 剩余 {r.remainingSpecials} / 组合 {r.combos}\n强化发射 {r.boostedVolleys} 次 · 续关 {r.continues} 次\n\n{goals}\n\n配置 {r.configHash.Substring(0,12)} · 版本 {r.version}";
+  if(r.hasSettlementBreakdown)message=message.Replace("总分 "+r.score.ToString("N0"),"总分 "+r.score.ToString("N0")+"\n操作阶段 "+r.playScore.ToString("N0")+" · 通关清场 "+r.victoryClearScore.ToString("N0"));
+  UICraft.Label(modal,message,0,65,790,1090,30,UICraft.Ink,TextAnchor.MiddleLeft);
+  UICraft.Button(modal,"查看发射策略",0,-520,720,86,UICraft.Blue,()=>ShowStrategyShots(r),31);
+  UICraft.Button(modal,"返回统计",0,-665,720,90,UICraft.Green,DrawBalanceStatistics,34);FitSettingsModal77(1540);
+ }
+ static string BalanceGoalName(string kind){switch(kind){case "yarn":return "毛线";case "cookie":return "饼干";case "ordinary_color":return "颜色砖";case "ingot":return "元宝";case "copper_coin":return "铜钱";case "jelly":return "果冻";case "collection_1":return "收集目标一";case "collection_2":return "收集目标二";case "horizontal":return "横向激光";case "vertical":return "纵向激光";case "cross":return "十字激光";case "bomb":return "炸弹";case "rainbow":return "五色花";default:return kind;}}
+ void ShowBalanceExport(string folder){
+  OpenModal("试玩数据已导出",UICraft.Green,940,1120);
+  UICraft.Label(modal,"已生成 JSON、CSV、策略报告 HTML 和校准摘要。\n双击 strategy-report.html 可离线查看发射时间线。",0,285,800,165,32,UICraft.Ink);
+  var path=UICraft.Label(modal,folder,0,70,800,220,25,UICraft.Ink);path.textWrappingMode=TMPro.TextWrappingModes.Normal;
+  UICraft.Button(modal,"打开文件夹",0,-135,720,90,UICraft.Green,()=>Application.OpenURL(new Uri(folder+PathSeparator()).AbsoluteUri),34);
+  UICraft.Button(modal,"复制路径",0,-255,720,90,UICraft.Blue,()=>{GUIUtility.systemCopyBuffer=folder;Toast("已复制导出路径");},32);
+  UICraft.Button(modal,"返回统计",0,-390,720,90,UICraft.Blue,DrawBalanceStatistics,32);FitSettingsModal77(1120);
+ }
+ static string PathSeparator()=>System.IO.Path.DirectorySeparatorChar.ToString();
+}
+}

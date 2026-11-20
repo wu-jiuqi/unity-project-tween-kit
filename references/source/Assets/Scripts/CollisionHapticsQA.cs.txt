@@ -1,0 +1,64 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class CollisionHapticsQA:MonoBehaviour {
+ readonly List<PlayerHaptics71.Strength> pulses=new List<PlayerHaptics71.Strength>();
+ readonly List<string> sounds=new List<string>();
+ string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--collision-haptics-qa"))new GameObject("Collision haptics QA").AddComponent<CollisionHapticsQA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);
+  Check(RuntimeQA.IsIsolated,"QA uses memory profile");
+  PlayerHaptics71.MobilePulse=(strength,done)=>{pulses.Add(strength);done?.Invoke(true);};PlayerHaptics71.Enabled=true;
+  PlayerHaptics71.Pulse();PlayerHaptics71.Pulse();PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);
+  Check(pulses.SequenceEqual(new[]{PlayerHaptics71.Strength.Medium,PlayerHaptics71.Strength.Medium,PlayerHaptics71.Strength.Heavy}),"rapid collisions retain both medium pulses and immediate heavy pulse");
+  int longCount=pulses.Count;PlayerHaptics71.Pulse();PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);Check(pulses.Count==longCount,"active long vibration cannot be interrupted by medium or restarted by a chain");
+  yield return new WaitForSecondsRealtime(.45f);PlayerHaptics71.Pulse();Check(pulses.Count==longCount+1&&pulses.Last()==PlayerHaptics71.Strength.Medium,"medium collisions resume immediately after long vibration window");
+  pulses.Clear();PlayerHaptics71.Enabled=false;PlayerHaptics71.Pulse();PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);Check(pulses.Count==0,"disabled switch blocks both strengths");PlayerHaptics71.Enabled=true;Check(pulses.Count==0,"enabling switch has no preview");
+  bool? result=null;PlayerHaptics71.MobilePulse=(strength,done)=>throw new Exception("test failure");PlayerHaptics71.TryPulse(PlayerHaptics71.Strength.Heavy,ok=>result=ok);Check(result==false,"platform exception reports failure");
+  PlayerHaptics71.MobilePulse=(strength,done)=>{pulses.Add(strength);done?.Invoke(true);};
+  int failedCount=pulses.Count;PlayerHaptics71.Pulse();Check(pulses.Count==failedCount+1,"failed long request releases motor priority immediately");
+  var app=FindFirstObjectByType<AppUI>();app.QANavigate("home");var g=app.Session;g.StartLevel(0);g.QAIgnoreFocusLoss=true;g.SetPaused(false);g.enabled=false;Physics2D.simulationMode=SimulationMode2D.Script;g.QASevenClear();
+  var material=new PhysicsMaterial2D("Haptic contact test"){friction=0,bounciness=1};var obj=new GameObject("Haptic test ball");obj.transform.SetParent(g.transform);var ball=obj.AddComponent<BallBody>();ball.Create(g,material);
+  pulses.Clear();ball.Initialize(9000,g.Generation,new Vector2(FlightGeometry.Right-.5f,0),Vector2.right*g.CurrentLevel.ballSpeed,0);Physics2D.SyncTransforms();
+  for(int i=0;i<8;i++){ball.QATick();Physics2D.Simulate(.02f);}
+  Check(pulses.Count>0&&pulses.All(s=>s==PlayerHaptics71.Strength.Medium),"real wall contact emits medium short impact");ball.Deactivate();
+  g.QASevenClear();var brick=g.QASevenBrick(4,4,999);Vector2 pos=brick.transform.position;pulses.Clear();ball.Initialize(9000,g.Generation,pos+Vector2.left*.8f,Vector2.right*g.CurrentLevel.ballSpeed,0);Physics2D.SyncTransforms();
+  for(int i=0;i<7;i++){ball.QATick();Physics2D.Simulate(.02f);}
+  Check(pulses.Count>0&&pulses.All(s=>s==PlayerHaptics71.Strength.Medium),"real ordinary brick contact emits medium short impact");ball.Deactivate();
+  SoundService.Played+=sounds.Add;
+  foreach(int kind in new[]{1,2,3,5,6}){
+   SoundService.CancelTransient();g.QASevenClear();var tool=g.QASevenTool(kind,4,4,0);pulses.Clear();sounds.Clear();g.ActivateChainTool(tool,Vector2.up);
+   Check(pulses.Count==1&&pulses[0]==PlayerHaptics71.Strength.Heavy,"special activation requests one protected long vibration kind="+kind);
+   string cue=kind==3?"rainbow_sweep":kind==2?"bomb":"cross_laser";
+   Check(sounds.Contains(cue),"special activation plays matching existing SFX "+cue);
+   pulses.Clear();g.ActivateChainTool(tool,Vector2.up);Check(pulses.Count==0,"consumed special cannot pulse again kind="+kind);
+   yield return new WaitForSecondsRealtime(.45f);
+  }
+  foreach(var pair in new[]{new[]{2,2},new[]{2,1},new[]{1,5},new[]{3,3},new[]{3,2}}){
+   SoundService.CancelTransient();g.QASevenClear();var first=g.QASevenTool(pair[0],4,4,0);g.QASevenTool(pair[1],5,4,0);pulses.Clear();sounds.Clear();g.ActivateChainTool(first,Vector2.up);
+   Check(pulses.Count>0&&pulses.All(s=>s==PlayerHaptics71.Strength.Heavy),"combo requests protected long vibration "+pair[0]+"+"+pair[1]);
+   string cue=pair.Contains(3)?"rainbow_sweep":pair.Contains(2)?"bomb":"cross_laser";
+   Check(sounds.Contains(cue),"combo sound matches effect "+pair[0]+"+"+pair[1]);
+   if(pair[0]==2&&pair[1]==1)Check(sounds.Contains("cross_laser"),"bomb and laser combo layers existing blast and beam SFX");
+   yield return new WaitForSecondsRealtime(.45f);
+  }
+  g.QASevenClear();var locked=g.QASevenTool(2,4,4,0);locked.ReadyAt=float.MaxValue;pulses.Clear();g.ActivateChainTool(locked,Vector2.up);Check(pulses.Count==0,"protected special emits no impact before activation");
+  foreach(string cue in new[]{"wall","hit","break","bomb","cross_laser","rainbow_sweep"})Check(SoundService.QAClip(cue)!=null,"runtime audio asset resolves "+cue);
+  Check(errors==0,"zero runtime errors");SoundService.Played-=sounds.Add;PlayerHaptics71.MobilePulse=null;g.StopLevel();
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");
+  #if UNITY_EDITOR
+  UnityEditor.EditorApplication.Exit(failures+errors==0?0:1);
+  #else
+  Application.Quit(failures+errors==0?0:1);
+  #endif
+ }
+}
+}

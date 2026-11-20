@@ -1,0 +1,26 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class FourthGroupBuild {
+ public static void Windows(){
+  foreach(var key in new[]{"states","burst"}){var p="Assets/Resources/Art/FourthGroup/"+key+".png";var t=(TextureImporter)AssetImporter.GetAtPath(p);t.textureShape=TextureImporterShape.Texture2D;t.SaveAndReimport();}
+  Debug.Log("FOURTH_VALIDATE "+BounceGarden.OpeningCampaign.Validate());
+  for(int i=0;i<5;i++)BounceGarden.OpeningCopperArt.Frame("states",i);
+  for(int i=0;i<8;i++)BounceGarden.OpeningCopperArt.Frame("burst",i);
+  BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  var root=new DirectoryInfo(Application.dataPath).Parent.Parent.Parent.FullName;
+  var output=Environment.GetEnvironmentVariable("BOUNCE_FOURTH_OUTPUT");if(string.IsNullOrEmpty(output))output=Path.Combine(root,"Builds/FourthGroup-v87");
+  var path=Path.Combine(output,"Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});
+  Debug.Log("FOURTH_BUILD "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings);
+  if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Fourth group build failed");
+ }
+ public static void Compile(){Debug.Log("FOURTH_PLATFORM_COMPILE_OK");}
+}
+public sealed class FourthGroupTextureImporter:AssetPostprocessor {
+ public override int GetPostprocessOrder()=>34000;
+ void OnPreprocessTexture(){if(!assetPath.Contains("/Art/FourthGroup/"))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Default;t.textureShape=TextureImporterShape.Texture2D;t.npotScale=TextureImporterNPOTScale.None;t.alphaSource=TextureImporterAlphaSource.FromInput;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.wrapMode=TextureWrapMode.Clamp;t.filterMode=FilterMode.Bilinear;t.maxTextureSize=4096;t.textureCompression=TextureImporterCompression.Uncompressed;foreach(var name in new[]{"Standalone","Android","WebGL"}){var p=t.GetPlatformTextureSettings(name);p.overridden=true;p.maxTextureSize=4096;p.format=name=="Standalone"?TextureImporterFormat.RGBA32:TextureImporterFormat.ETC2_RGBA8;t.SetPlatformTextureSettings(p);}}
+}

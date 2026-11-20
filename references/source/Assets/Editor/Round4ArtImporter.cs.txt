@@ -1,0 +1,101 @@
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+public sealed class Round4ArtImporter:AssetPostprocessor{void OnPreprocessTexture(){
+if(!assetPath.StartsWith("Assets/Resources/Art/Round4/"))return;
+var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Multiple;t.spritePixelsPerUnit=100;t.mipmapEnabled=false;t.isReadable=false;t.maxTextureSize=4096;t.textureCompression=TextureImporterCompression.Uncompressed;t.filterMode=FilterMode.Bilinear;t.wrapMode=TextureWrapMode.Clamp;
+switch(Path.GetFileName(assetPath)){
+case "home_background_empty.png":t.alphaIsTransparency=false;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="home_background_empty",rect=new Rect(0,0,853,1844),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "home_hero_group.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="home_hero_group",rect=new Rect(84,106,1117,1108),pivot=new Vector2(0.5f,0.02f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "victory_cake.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="victory_cake",rect=new Rect(36,56,981,1314),pivot=new Vector2(0.5f,0.02f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "victory_confetti.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="victory_confetti",rect=new Rect(257,117,695,1017),pivot=new Vector2(0.5f,0.02f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "victory_ensemble_keyposes.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="anticipate",rect=new Rect(0,0,724,724),pivot=new Vector2(0.5f,0.1f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="celebrate",rect=new Rect(724,0,724,724),pivot=new Vector2(0.5f,0.1f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="settle",rect=new Rect(1448,0,724,724),pivot=new Vector2(0.5f,0.1f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "victory_partyhat.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="victory_partyhat",rect=new Rect(214,52,745,1370),pivot=new Vector2(0.5f,0.02f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "logo_layers_atlas.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="logo_backing",rect=new Rect(46,446,801,358),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="logo_letter_B",rect=new Rect(1029,498,163,180),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="logo_letters_UNCE",rect=new Rect(1260,501,467,188),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="logo_letters_BUSTERS",rect=new Rect(53,80,813,222),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="logo_star_O",rect=new Rect(1256,64,240,240),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "rewards_atlas.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="coin_single",rect=new Rect(73,86,537,539),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="coin_pile",rect=new Rect(695,47,727,617),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="badge_spade",rect=new Rect(1495,78,637,553),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "core_icons_atlas.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="settings_gold",rect=new Rect(201,525,412,414),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="home_nav",rect=new Rect(857,512,506,435),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="home_simple",rect=new Rect(247,95,325,295),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+new SpriteMetaData{name="ad_tv",rect=new Rect(934,62,373,382),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+case "page_components_atlas.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="shop_row",rect=new Rect(16,521,2140,185),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(110,35,110,35)},
+new SpriteMetaData{name="ranking_row",rect=new Rect(24,358,2125,149),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(70,22,70,22)},
+new SpriteMetaData{name="ranking_row_selected",rect=new Rect(24,189,2125,152),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(70,22,70,22)},
+new SpriteMetaData{name="tab_cyan",rect=new Rect(23,24,702,154),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(65,25,65,25)},
+new SpriteMetaData{name="tab_purple",rect=new Rect(735,24,702,153),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(65,25,65,25)},
+new SpriteMetaData{name="tab_orange",rect=new Rect(1446,24,703,154),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(65,25,65,25)},
+};
+#pragma warning restore 0618
+break;
+case "well_done_heading.png":t.alphaIsTransparency=true;
+#pragma warning disable 0618
+t.spritesheet=new SpriteMetaData[]{
+new SpriteMetaData{name="well_done",rect=new Rect(77,101,2018,480),pivot=new Vector2(0.5f,0.5f),alignment=9,border=new Vector4(0,0,0,0)},
+};
+#pragma warning restore 0618
+break;
+}}}

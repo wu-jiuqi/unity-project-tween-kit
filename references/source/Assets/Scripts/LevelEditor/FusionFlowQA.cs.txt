@@ -1,0 +1,135 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing
+{
+    // Injected board fixtures on the production session, never natural-play evidence.
+    public static class FusionFlowQA
+    {
+        public static IEnumerator Run(GameSession session, Action<string, bool, string> check)
+        {
+            for (int variant = 0; variant < 4; variant++)
+            {
+                try { Scenario(session, check, variant); }
+                catch (Exception error) { check("flow_rule_fixture " + variant + " executes", false, error.ToString()); }
+                session.StopLevel(); session.BoosterProfile = null;
+                yield return null;
+            }
+        }
+
+        static FusionPieceDefinition Put(FusionLevelDefinition board, string id, string kind, int c, int r, int size = 1)
+        {
+            var p = FusionRules.DefaultPiece(kind, c, r); p.id = "flow_qa_" + id; p.hp = 99; p.size = size;
+            board.pieces = board.pieces.Where(q => !(q.c < c + size && q.c + q.size > c && q.r < r + size && q.r + q.size > r)).Concat(new[] { p }).ToArray();
+            return p;
+        }
+
+        static void Scenario(GameSession game, Action<string, bool, string> check, int variant)
+        {
+            string name = new[] { "empty feeder budget zero", "real row donor", "real upstream donor", "finite supply exhausted" }[variant];
+            var board = JsonUtility.FromJson<FusionLevelDefinition>(JsonUtility.ToJson(FusionSamples.CreateDefinitions()[0].definition));
+            board.pieces = board.pieces.Select(p => new FusionPieceDefinition { id = "flow_filler_" + p.c + "_" + p.r, kind = "normal", c = p.c, r = p.r, hp = 99 }).ToArray();
+            board.milestones = Array.Empty<FusionMilestoneDefinition>(); board.ratingRewards = false; board.refillBudget = variant == 3 ? 1 : 0;
+            var hold = Put(board, "hold_goal", "fish", 0, 0);
+            var box = Put(board, "wide_box", "chest", 6, 5, 2);
+            box.contents = Enumerable.Range(0, 4).Select(i => new FusionContentDefinition { id = "flow_box_content_" + i, kind = "normal", hp = 1 }).ToArray();
+            var shadowDonor = Put(board, "shadow_donor", "normal", 7, 7);
+            var keep = new HashSet<string> { hold.id, box.id, shadowDonor.id };
+            // A real 2x2 ceiling spans columns 6/7; columns 5/8 are open feeders.
+            // The floor supports row 7, and the wall isolates unrelated left-hand bricks.
+            for (int c = 0; c < 9; c++) keep.Add(Put(board, "floor_" + c, "stone", c, 8).id);
+            keep.Add(Put(board, "wall", "stone", 4, 7).id);
+            FusionPieceDefinition externalDonor = null;
+            if (variant == 1 || variant == 2)
+            {
+                externalDonor = Put(board, "external_donor", "normal", 8, variant == 1 ? 7 : 6);
+                keep.Add(externalDonor.id);
+            }
+
+            game.StartFusionSample(board, 12, "QA flow_rule_fixture " + name, 93201 + variant);
+            game.enabled = false; game.QAIgnoreFocusLoss = true; game.BoosterProfile = null;
+            game.FusionRunAttack("qa:flow_cavity", 1, () =>
+            {
+                foreach (var p in game.FusionPieces.Where(p => p.Alive && !keep.Contains(p.Definition.id)).ToArray())
+                    game.FusionRemove(p, false, false);
+            });
+            bool physical = true, grid = true, finite = true;
+            Advance(game, 180, ref physical, ref grid, ref finite);
+            Check(check, name + " settles through actual flow caller", game.ChainGridReady && !game.ChainFalling,
+                "waves=" + game.FlowPlanWaves + ", refills=" + game.FusionMetrics.Refills);
+            if (variant == 0)
+            {
+                var cell = Find(game, shadowDonor.id).Transform.GetComponent<ChainGridPiece>();
+                Check(check, name + " cannot move a hole between two shadow cells", cell.Col == 7 && cell.Row == 7 && game.FlowSideSlides == 0);
+            }
+            if (externalDonor != null)
+            {
+                var cell = Find(game, externalDonor.id).Transform.GetComponent<ChainGridPiece>();
+                var first = Find(game, shadowDonor.id).Transform.GetComponent<ChainGridPiece>();
+                Check(check, name + " still fills the shadow with real stock", cell.Col == 7 && cell.Row == 7 && first.Col == 6 && first.Row == 7,
+                    "external=" + cell.Col + "," + cell.Row + "; original=" + first.Col + "," + first.Row);
+            }
+            if (variant == 3)
+            {
+                Check(check, name + " spends exactly its one available refill", game.FusionMetrics.Refills == 1);
+                var supplied = game.FusionPieces.FirstOrDefault(p => p.Alive && p.Definition.id.StartsWith("refill:", StringComparison.Ordinal));
+                Check(check, name + " creates an actual tracked refill", supplied != null);
+                if (supplied != null)
+                {
+                    game.FusionRunAttack("qa:exhausted_supply_replan", 2, () => game.FusionRemove(supplied, false, false));
+                    Advance(game, 180, ref physical, ref grid, ref finite);
+                }
+                Check(check, name + " remains finite on the next real replan", game.ChainGridReady && game.FusionMetrics.Refills == 1);
+            }
+            Check(check, name + " keeps legal logical footprints", grid);
+            Check(check, name + " never overlaps physical bodies including the 2x2 box", physical);
+            Check(check, name + " has finite bounded motion reservations", finite);
+            Check(check, name + " preserves all retained identities and the goal ledger",
+                keep.All(id => game.FusionPieces.Any(p => p.Alive && p.Definition.id == id))
+                && game.FusionGoalsTotal == 1 && game.FusionGoalsCredited == 0);
+            Check(check, name + " obeys its finite refill budget", game.FusionMetrics.Refills <= board.refillBudget);
+        }
+
+        static FusionRuntimePiece Find(GameSession game, string id) => game.FusionPieces.Single(p => p.Definition.id == id);
+        static void Check(Action<string, bool, string> check, string name, bool passed, string detail = "") => check("flow_rule_fixture " + name, passed, detail);
+
+        static void Advance(GameSession game, int steps, ref bool physical, ref bool grid, ref bool finite)
+        {
+            for (int i = 0; i < steps && game.IsPlaying; i++)
+            {
+                game.QAAdvanceOneStep();
+                var alive = game.FusionPieces.Where(p => p.Alive && p.Transform != null).ToArray();
+                var occupied = new HashSet<int>();
+                foreach (var p in alive)
+                {
+                    var cell = p.Transform.GetComponent<ChainGridPiece>();
+                    if (cell.Col < 0 || cell.Row < 0 || cell.Col + cell.Size > 9 || cell.Row + cell.Size > 9) grid = false;
+                    for (int r = cell.Row; r < cell.Row + cell.Size; r++) for (int c = cell.Col; c < cell.Col + cell.Size; c++)
+                        if (!occupied.Add(c + r * 9)) grid = false;
+                }
+                for (int a = 0; a < alive.Length; a++) for (int b = a + 1; b < alive.Length; b++)
+                {
+                    float half = CollectionLevels.Pitch * (alive[a].Definition.size + alive[b].Definition.size) * .5f - .061f;
+                    Vector2 delta = alive[a].Position - alive[b].Position;
+                    if (Mathf.Abs(delta.x) < half && Mathf.Abs(delta.y) < half) physical = false;
+                }
+                // Inspect real reservations without mirroring the planner's feed predicate.
+                var routes = (IEnumerable)typeof(GameSession).GetField("chainMotions", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(game);
+                foreach (var route in routes)
+                {
+                    var type = route.GetType();
+                    var starts = type.GetField("PathStarts").GetValue(route) as List<float>;
+                    var ends = type.GetField("PathEnds").GetValue(route) as List<float>;
+                    if (starts == null || ends == null || starts.Count != ends.Count) { finite = false; continue; }
+                    for (int n = 0; n < starts.Count; n++)
+                        if (float.IsNaN(starts[n]) || float.IsInfinity(starts[n]) || float.IsNaN(ends[n]) || float.IsInfinity(ends[n])
+                            || ends[n] < starts[n] || ends[n] > 10) finite = false;
+                }
+            }
+        }
+    }
+}

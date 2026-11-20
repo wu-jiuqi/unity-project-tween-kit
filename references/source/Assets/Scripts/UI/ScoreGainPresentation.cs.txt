@@ -1,0 +1,11 @@
+using UnityEngine;
+using TMPro;
+namespace BounceGarden {
+public sealed class ScoreGainPresentation:MonoBehaviour {
+ GameSession game;int seen,pending;float age=2,wait;TMP_Text text;CanvasGroup group;RectTransform content;
+ public void Initialize(GameSession owner){game=owner;seen=game.Score;content=UICraft.Root(transform,"Score gain visual");group=content.gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;group.interactable=false;ScoreSkillArt.Image(content,"Score gain spark artwork","ScoreV65","gain_spark",-133,0,64,64);ScoreSkillArt.Image(content,"Score gain star artwork","ScoreV65","score_star",-92,0,35,35);text=UICraft.Label(content,"",40,0,250,54,30,new Color32(175,118,27,255));game.StateChanged+=Changed;group.alpha=0;}
+ void Changed(){if(game.Score>seen){pending+=game.Score-seen;wait=.07f;}seen=game.Score;}
+ void Update(){if(game==null||game.IsPaused)return;if(pending>0){wait-=Time.deltaTime;if(wait<=0){text.text="+"+pending.ToString("N0");pending=0;age=0;}}age+=Time.deltaTime;float t=Mathf.Clamp01(age/.65f);group.alpha=(1-t)*Mathf.Clamp01(age/.05f);content.anchoredPosition=Vector2.up*(t*32);content.localScale=Vector3.one*(1+Mathf.Sin(t*Mathf.PI)*.06f);}
+ void OnDestroy(){if(game!=null)game.StateChanged-=Changed;}
+}
+}

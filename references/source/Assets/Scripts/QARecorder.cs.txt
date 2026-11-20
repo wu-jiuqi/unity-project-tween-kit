@@ -1,0 +1,24 @@
+using System.IO;
+using UnityEngine;
+namespace BounceGarden {
+// QA-only offscreen capture. Not a device performance benchmark.
+public sealed class QARecorder : MonoBehaviour {
+ RenderTexture target;Texture2D texture;string directory;StreamWriter timeline,audioTimeline;int frame;float start,next;
+ public void Begin(string path){directory=path;Directory.CreateDirectory(path);target=new RenderTexture(444,960,24);texture=new Texture2D(444,960,TextureFormat.RGB24,false);timeline=new StreamWriter(Path.Combine(path,"frames.csv"));timeline.WriteLine("frame,seconds");audioTimeline=new StreamWriter(Path.Combine(path,"audio.csv"));audioTimeline.WriteLine("cue,seconds");start=Time.realtimeSinceStartup;next=start;SoundService.ExportQAClips(Path.Combine(path,"SFX"));SoundService.Played+=AudioCue;}
+ void AudioCue(string cue){audioTimeline?.WriteLine(cue+","+(Time.realtimeSinceStartup-start).ToString("F6",System.Globalization.CultureInfo.InvariantCulture));}
+ void LateUpdate(){if(timeline==null||Time.realtimeSinceStartup<next)return;next=Time.realtimeSinceStartup+1f/60;var camera=Camera.main;if(camera==null)return;Capture(camera,target,texture);File.WriteAllBytes(Path.Combine(directory,frame.ToString("D6")+".jpg"),texture.EncodeToJPG(87));timeline.WriteLine(frame+","+(Time.realtimeSinceStartup-start).ToString("F6",System.Globalization.CultureInfo.InvariantCulture));frame++;}
+ public void Finish(){SoundService.Played-=AudioCue;if(audioTimeline!=null){audioTimeline.Dispose();audioTimeline=null;}if(timeline!=null){timeline.Dispose();timeline=null;}if(target!=null){target.Release();Destroy(target);target=null;}if(texture!=null){Destroy(texture);texture=null;}}
+ void OnDestroy(){Finish();}
+ public static void Capture(Camera camera,RenderTexture target,Texture2D texture){
+  var canvases=FindObjectsByType<Canvas>(FindObjectsSortMode.None);var modes=new RenderMode[canvases.Length];var cameras=new Camera[canvases.Length];var distances=new float[canvases.Length];
+  var oldTarget=camera.targetTexture;var oldActive=RenderTexture.active;var oldRect=camera.rect;
+  try{
+   for(int i=0;i<canvases.Length;i++){modes[i]=canvases[i].renderMode;cameras[i]=canvases[i].worldCamera;distances[i]=canvases[i].planeDistance;if(modes[i]==RenderMode.ScreenSpaceOverlay){canvases[i].renderMode=RenderMode.ScreenSpaceCamera;canvases[i].worldCamera=camera;canvases[i].planeDistance=1;}}
+   camera.targetTexture=target;camera.rect=new Rect(0,0,1,1);Canvas.ForceUpdateCanvases();camera.Render();RenderTexture.active=target;texture.ReadPixels(new Rect(0,0,target.width,target.height),0,0);texture.Apply();
+  }finally{
+   camera.targetTexture=oldTarget;camera.rect=oldRect;RenderTexture.active=oldActive;
+   for(int i=0;i<canvases.Length;i++){canvases[i].renderMode=modes[i];canvases[i].worldCamera=cameras[i];canvases[i].planeDistance=distances[i];}Canvas.ForceUpdateCanvases();
+  }
+ }
+}
+}

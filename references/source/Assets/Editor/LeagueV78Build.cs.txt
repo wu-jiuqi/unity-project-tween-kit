@@ -1,0 +1,10 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class LeagueV78Build {
+ public static void Validate(){OptimizationV76Build.Validate();Debug.Log(BounceGarden.LeagueGrowthSelfTests.RunAll(Path.GetFullPath("../../BounceGarden/Evidence/League-v78")));Debug.Log("LEAGUE_V78_VALIDATED");}
+ public static void Windows(){Validate();BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);string output=Path.GetFullPath("../../Builds/League-v78/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=output,target=BuildTarget.StandaloneWindows64,options=BuildOptions.None});Debug.Log("LEAGUE_V78_BUILD "+result.summary.result+" errors="+result.summary.totalErrors+" warnings="+result.summary.totalWarnings);if(result.summary.result!=BuildResult.Succeeded)throw new Exception("League v78 build failed");}
+}

@@ -1,0 +1,11 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class Opening82Build {
+ public static void Windows(){BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);Build(BuildTarget.StandaloneWindows64,"Windows/BounceGarden.exe");}
+ public static void Android(){BuildEntry.Configure();PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;PlayerSettings.Android.useCustomKeystore=false;Build(BuildTarget.Android,"Android/BounceGarden-v0.1.82-arm64.apk");}
+ static void Build(BuildTarget target,string name){var root=new DirectoryInfo(Application.dataPath);while(root!=null&&!File.Exists(Path.Combine(root.FullName,"version.json")))root=root.Parent;if(root==null)throw new Exception("Workspace missing");var path=Path.Combine(root.FullName,"Builds/Opening-v82",name);Directory.CreateDirectory(Path.GetDirectoryName(path));var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},locationPathName=path,target=target,options=BuildOptions.None});Debug.Log("OPENING82_BUILD "+target+" "+report.summary.result+" errors="+report.summary.totalErrors+" warnings="+report.summary.totalWarnings);if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Opening82 build failed");}
+}

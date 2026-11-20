@@ -1,0 +1,48 @@
+using System;
+using System.Collections.Generic;
+using DG.Tweening;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public static class AlphabetTypography {
+ public static void Install(){}
+}
+public sealed partial class AlphabetIntroductionView:MonoBehaviour {
+ AppUI owner;AlphabetIntro page;Action completed;RectTransform content;CanvasGroup group;Sequence entrance;readonly List<Tween> loops=new List<Tween>();bool ready,closing;float started;Vector2Int layoutSize;Rect lastSafe;int layoutRevision=-1;
+ public int PageId=>page==null?0:page.id;
+ public int AnimatedElementCount {get;private set;}
+ public int LoadedArtCount {get;private set;}
+ public bool Ready=>ready;
+ public bool LayoutFits {get;private set;}
+ Image Picture(Transform parent,string name,Sprite sprite,Vector2 position,Vector2 size){var image=UICraft.Box(parent,name,position.x,position.y,size.x,size.y,Color.white);image.sprite=sprite;image.type=Image.Type.Simple;image.preserveAspect=true;image.raycastTarget=false;return image;}
+ TMP_Text Caption(Transform parent,string value,float x,float y,float w,float h,int size,Color color){var text=UICraft.Label(parent,value,x,y,w,h,size,color);text.color=color;return text;}
+ public void Begin(AppUI app,AlphabetIntro intro,Action done){
+  owner=app;page=intro;completed=done;started=Time.unscaledTime;
+  var root=(RectTransform)transform;root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.sizeDelta=Vector2.zero;root.anchoredPosition=Vector2.zero;
+  var mask=gameObject.AddComponent<Image>();mask.color=new Color(.025f,.02f,.015f,OpeningIntroduction.IsPage(page.id)?.68f:.87f);mask.raycastTarget=true;
+  var tap=gameObject.AddComponent<Button>();tap.transition=Selectable.Transition.None;tap.targetGraphic=mask;tap.onClick.AddListener(Advance);
+  group=gameObject.AddComponent<CanvasGroup>();group.alpha=0;
+  content=UICraft.Root(transform,"Independent animated elements",0,0,1080,2340);
+  entrance=DOTween.Sequence().SetUpdate(true).SetId(this);
+  entrance.Append(DOTween.To(()=>group.alpha,x=>group.alpha=x,1,.24f));AnimatedElementCount++;
+  if(OpeningIntroduction.IsPage(page.id)){BuildGardenOpening();return;}if(page.id>=301){BuildBoosterIntroduction();return;}
+  if(UsesMotion){BuildMotionIntroduction();return;}
+  throw new InvalidOperationException("Retired introduction page: "+page.id);
+ }
+ void Enter(RectTransform target,float delay,float initialScale){
+  Vector2 settled=target.anchoredPosition;target.anchoredPosition=settled+Vector2.down*28;target.localScale=Vector3.one*initialScale;
+  var alpha=target.gameObject.AddComponent<CanvasGroup>();alpha.alpha=0;alpha.blocksRaycasts=false;
+  entrance.Insert(delay,target.DOAnchorPos(settled,.36f).SetEase(Ease.OutCubic));entrance.Insert(delay,target.DOScale(1,.46f).SetEase(Ease.OutBack));entrance.Insert(delay,DOTween.To(()=>alpha.alpha,v=>alpha.alpha=v,1,.3f));AnimatedElementCount++;
+ }
+ void Layout(){if(owner==null||content==null)return;layoutSize=owner.AlphabetViewport;lastSafe=owner.AlphabetSafeRect;layoutRevision=WeChatLayoutMetrics.Revision;Rect safe=lastSafe;Rect blocked;if(WeChatLayoutMetrics.TryGetBlockedRect(layoutSize,out blocked))safe.yMax=Mathf.Min(safe.yMax,blocked.yMin-12);
+  var root=(RectTransform)transform;float sw=safe.width/layoutSize.x*root.rect.width,sh=safe.height/layoutSize.y*root.rect.height;float fit=Mathf.Min(sw/1080f,sh/2340f);content.localScale=Vector3.one*fit;content.anchoredPosition=new Vector2((safe.center.x/layoutSize.x-.5f)*root.rect.width,(safe.center.y/layoutSize.y-.5f)*root.rect.height);LayoutFits=fit>0&&1080*fit<=sw+.5f&&2340*fit<=sh+.5f;
+ }
+ void Update(){if(owner!=null&&(layoutSize!=owner.AlphabetViewport||lastSafe!=owner.AlphabetSafeRect||layoutRevision!=WeChatLayoutMetrics.Revision||!LayoutFits))Layout();}
+ public void Advance(){if(closing||(!OpeningIntroduction.IsPage(page.id)&&Time.unscaledTime-started<.25f))return;if(!ready){entrance.Complete(true);ready=true;if(!OpeningIntroduction.IsPage(page.id))return;}if(AdvanceMotion())return;closing=true;StopMotion();group.blocksRaycasts=true;group.DOFade(0,.18f).SetUpdate(true).OnComplete(()=>{var next=completed;completed=null;gameObject.SetActive(false);Destroy(gameObject);next?.Invoke();});}
+ public void AdvanceForQA(){motionSecond=true;if(entrance!=null&&!ready)entrance.Complete(true);ready=true;started=Time.unscaledTime-1;Advance();}
+ void StopMotion(){entrance?.Kill(false);foreach(var t in loops)t?.Kill(false);loops.Clear();}
+ public void Cancel(){completed=null;StopMotion();DOTween.Kill(group);gameObject.SetActive(false);Destroy(gameObject);}
+ void OnDestroy(){StopMotion();if(group!=null)DOTween.Kill(group);}
+}
+}

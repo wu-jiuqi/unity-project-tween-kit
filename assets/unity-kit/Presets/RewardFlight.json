@@ -1,0 +1,46 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.RewardFlight",
+    "settings": [
+        {
+            "field": "Kind",
+            "type": "ProjectTweenKit.RewardFlight+LootKind",
+            "value": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "Duration",
+            "type": "System.Single",
+            "value": 0.6000000238418579,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "Delay",
+            "type": "System.Single",
+            "value": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "UnitsPerWorldUnit",
+            "type": "System.Single",
+            "value": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "EndScale",
+            "type": "System.Single",
+            "value": 0.2800000011920929,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    ]
+}

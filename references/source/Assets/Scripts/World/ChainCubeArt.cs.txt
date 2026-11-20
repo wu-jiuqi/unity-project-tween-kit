@@ -1,0 +1,48 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static partial class ChainCubeArt {
+ static Texture2D atlas;static readonly Sprite[] frames=new Sprite[24];
+ public static void ReleaseContentCache(){for(int i=0;i<frames.Length;i++){if(frames[i]!=null)Object.Destroy(frames[i]);frames[i]=null;}atlas=null;}
+ public static Sprite Frame(int row,int col){int i=row*6+Mathf.Clamp(col,0,5);if(frames[i]!=null)return frames[i];if(atlas==null)atlas=Resources.Load<Texture2D>("Art/ContainerChainV6/cubes");if(atlas==null)throw new System.InvalidOperationException("Missing square block atlas");float sx=atlas.width/1536f,sy=atlas.height/1024f;var rect=Rects[i];return frames[i]=Sprite.Create(atlas,new Rect(rect.x*sx,rect.y*sy,rect.width*sx,rect.height*sy),Pivots[i],256*sx,0,SpriteMeshType.FullRect);}
+ public static Color ToolColor(int kind)=>kind==1?new Color(.38f,.9f,1):kind==2?new Color(1,.53f,.32f):new Color(.76f,.5f,1);
+ public static Transform Tool(Transform parent,int kind,Vector2 p){var root=new GameObject(kind==1?"Cross laser block":kind==2?"3x3 bomb block":"Five-link block").transform;root.SetParent(parent,false);root.localPosition=p;var image=ChainVisualArt.Draw(root,"Square power face",ScoreSkillArt.Get("PropsV65",kind==1?"cross":kind==2?"blast":"link"),.94f,63);root.gameObject.AddComponent<ChainCubeIdle>().Initialize(parent.GetComponentInParent<GameSession>(),image,kind);return root;}
+ public static void Burst(GameSession game,Vector2 p,float size=1){var root=new GameObject("Square block shatter").transform;root.SetParent(game.transform.Find("WorldRoot"),false);root.localPosition=p;root.gameObject.AddComponent<ChainCubeBurst>().Initialize(game,size);}
+}
+public sealed class ChainCubeView:MonoBehaviour {
+ BrickBody brick;GameSession owner;SpriteRenderer image;TMPro.TMP_Text health,healthShadow;int kind;float hit;Transform armor;bool previousShell;
+ public SpriteRenderer Image=>image;
+ public void Initialize(BrickBody b,GameSession g,int role){
+  brick=b;owner=g;kind=role;
+  // Closed shells must not render the hidden loot as four tiny tiles on top.
+  // Hide the generic HP too: translucent cracks otherwise reveal duplicate text.
+  foreach(var old in b.GetComponentsInChildren<TMPro.TMP_Text>())old.gameObject.SetActive(false);
+  image=ChainVisualArt.Draw(transform,"Square block face",ChainCubeArt.Frame(role==3?3:role-1,0),role==3?1.93f:.94f,61);
+  Vector2 label=new Vector2(0,role==3?-.43f:-.24f);
+  WorldArt.Draw(transform,"Contained HP badge","circle",label,role==3?new Vector2(.46f,.32f):new Vector2(.32f,.24f),new Color(1,.97f,.87f,.96f),68);
+  health=WorldArt.Text(transform,role==3?"Nest HP":"Container health",b.CurrentHealth.ToString(),label,role==3?.095f:.065f,new Color(.28f,.23f,.25f),70);
+  healthShadow=WorldArt.Text(transform,"Health shadow",b.CurrentHealth.ToString(),label+new Vector2(.008f,-.015f),role==3?.095f:.065f,new Color(1,1,1,.55f),69);
+  if(role==3&&b.Definition.kind==BrickKind.RearWeak){image.enabled=false;gameObject.AddComponent<ChainBrickView>().Initialize(b,g,3,2f);}
+  previousShell=b.ShellIntact;
+  if(previousShell){armor=new GameObject("Gold protective frame").transform;armor.SetParent(transform,false);float edge=role==3?.75f:.355f,width=role==3?.065f:.035f;foreach(Vector2 d in new[]{Vector2.up,Vector2.down,Vector2.left,Vector2.right})WorldArt.Draw(armor,"Gold rim","brick",d*edge,d.x==0?new Vector2(edge*2+width,width):new Vector2(width,edge*2+width),new Color(1,.74f,.2f),65);}
+  Refresh();
+ }
+ public void Refresh(){if(previousShell&&!brick.ShellIntact){previousShell=false;if(armor!=null)armor.gameObject.SetActive(false);ChainVisualArt.Effect(owner,3,1,brick.transform.position,kind==3?2.1f:1.05f);}health.text=brick.CurrentHealth.ToString();healthShadow.text=health.text;int lost=brick.Definition.hp-brick.CurrentHealth;int f=kind==3?(brick.CurrentHealth>brick.Definition.hp/2?0:1):kind==1?Mathf.RoundToInt(lost*5f/Mathf.Max(1,brick.Definition.hp-1)):lost==0?0:1+Mathf.RoundToInt((lost-1)*4f/Mathf.Max(1,brick.Definition.hp-2));image.sprite=ChainCubeArt.Frame(kind==3?3:kind-1,Mathf.Clamp(f,0,5));hit=.16f;}
+ void Update(){if(owner==null||owner.IsPaused||!owner.IsPlaying)return;hit=Mathf.Max(0,hit-Time.deltaTime);float k=Mathf.Sin(hit/.16f*Mathf.PI)*.035f;image.transform.localScale=new Vector3(1+k,1-k,1)*(kind==3?1.93f:.94f);}
+}
+public sealed class ChainCubeIdle:MonoBehaviour {
+ GameSession owner;SpriteRenderer image;int kind,generation;float age;
+ public void Initialize(GameSession g,SpriteRenderer s,int role){owner=g;image=s;kind=role;generation=g.Generation;image.transform.localScale=Vector3.one*(.86f/image.sprite.bounds.size.x);}
+ void Update(){if(owner==null||owner.Generation!=generation){Destroy(gameObject);return;}if(owner.IsPaused||!owner.IsPlaying)return;age+=Time.deltaTime;image.transform.localScale=Vector3.one*((.86f+Mathf.Sin(age*4)*.012f)/image.sprite.bounds.size.x);}
+}
+public sealed class ChainCubeBurst:MonoBehaviour {
+ GameSession owner;SpriteRenderer image;int generation;float age;
+ public void Initialize(GameSession g,float size){owner=g;generation=g.Generation;image=ChainVisualArt.Draw(transform,"Square fragments",ChainCubeArt.Frame(3,0),size,73);}
+ void Update(){if(owner==null||owner.Generation!=generation){Destroy(gameObject);return;}if(owner.IsPaused)return;age+=Time.deltaTime;image.sprite=ChainCubeArt.Frame(3,Mathf.Min(5,(int)(age*18)));if(age>=6f/18)Destroy(gameObject);}
+}
+public sealed class ChainBondView:MonoBehaviour {
+ GameSession owner;ChainBond bond;readonly List<Transform> lines=new List<Transform>();readonly List<Transform> marks=new List<Transform>();float age;
+ public void Initialize(GameSession g,ChainBond group){owner=g;bond=group;foreach(var b in bond.Members){var root=new GameObject("Linked block outline").transform;root.SetParent(transform,false);marks.Add(root);var marker=root.gameObject.AddComponent<SpriteRenderer>();marker.sprite=JellyPowerArt.Frame(3,0);marker.sharedMaterial=JellyPowerArt.Material(3);marker.sortingOrder=68;root.localScale=Vector3.one*JellyPowerArt.MarkerScale;if(marks.Count>1)lines.Add(JellyPowerArt.Beam(transform,3,60));}Update();}
+ void Update(){if(owner==null||!owner.IsPlaying||owner.IsPaused)return;age+=Time.deltaTime;for(int i=0;i<marks.Count;i++){if(bond.Members[i]==null)continue;Vector2 p=bond.Members[i].transform.position;marks[i].position=p;marks[i].localScale=Vector3.one*JellyPowerArt.MarkerScale*(1+Mathf.Sin(age*5+i)*.015f);if(i==0)continue;Vector2 q=bond.Members[i-1].transform.position,delta=p-q;var line=lines[i-1];JellyPowerArt.BeamPose(line,p,q,.045f);line.GetComponent<SpriteRenderer>().color=new Color(1,1,1,.62f+Mathf.Sin(age*4+i)*.12f);}}
+}
+}

@@ -1,0 +1,10 @@
+using UnityEngine;
+namespace BounceGarden {
+// Storage owns durability; profile owns validation and transaction boundaries.
+public interface IProfileStorage {bool Exists{get;}string Read();void Write(string json);}
+public sealed class PlayerPrefsProfileStorage:IProfileStorage {
+ readonly string key;public PlayerPrefsProfileStorage(string value){key=value;}
+ public bool Exists=>PlayerPrefs.HasKey(key);public string Read()=>PlayerPrefs.GetString(key);
+ public void Write(string json){PlayerPrefs.SetString(key,json);PlayerPrefs.Save();}
+}
+}

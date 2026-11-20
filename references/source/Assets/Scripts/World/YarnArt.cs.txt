@@ -1,0 +1,57 @@
+using System;
+using UnityEngine;
+
+namespace BounceGarden {
+// Only the launcher, loaded ball, flight ball and its strand use these assets.
+// Existing brick appearance and damage/destruction resources remain independent.
+public static class YarnArt {
+ public const float BallVisualScale=1.35f;
+ [Serializable] public sealed class Layout {
+  public int[] canvas,frame_durations_ms;
+  public float[] pivot_unity;
+  public float pixels_per_unit;
+  public int contact_frame,contact_ms,duration_ms;
+ }
+ public const int ColorCount=5;
+ static readonly string[] colors={"apricot","blue","coral","mint","lilac"};
+ static Sprite[] cats,balls;
+ static Material[] strands;
+ static Layout layout;
+ public static Layout Calibration {get{Ensure();return layout;}}
+ public static int VariantForLevel(int level)=>Mathf.Abs(level)%colors.Length;
+ public static string ColorName(int variant)=>colors[Mathf.Abs(variant)%colors.Length];
+ public static Sprite CatFrame(int index){Ensure();return cats[Mathf.Clamp(index,0,cats.Length-1)];}
+ public static Sprite Ball(int variant){Ensure();return balls[Mathf.Abs(variant)%balls.Length];}
+ public static Material Strand(int variant){Ensure();return strands[Mathf.Abs(variant)%strands.Length];}
+ static void Ensure(){
+  if(cats!=null)return;
+  var data=Resources.Load<TextAsset>("Art/YarnV19/launcher_manifest");
+  if(data==null)throw new InvalidOperationException("YarnV19 launcher manifest missing");
+  layout=JsonUtility.FromJson<Layout>(data.text);
+  var atlas=Resources.Load<Texture2D>("Art/YarnV19/cat_fixed_pivot_atlas");
+  if(atlas==null||layout.canvas==null||layout.frame_durations_ms.Length!=16)throw new InvalidOperationException("YarnV19 atlas/calibration invalid");
+  int w=layout.canvas[0],h=layout.canvas[1];
+  var frames=new Sprite[16];var round=new Sprite[ColorCount];var materials=new Material[ColorCount];
+  for(int i=0;i<frames.Length;i++){
+   frames[i]=Sprite.Create(atlas,new Rect(i%4*w,(3-i/4)*h,w,h),new Vector2(layout.pivot_unity[0],layout.pivot_unity[1]),layout.pixels_per_unit,0,SpriteMeshType.FullRect);
+   frames[i].name="cat_fixed_pivot_"+i.ToString("D2");
+  }
+  for(int i=0;i<ColorCount;i++){
+   var texture=Resources.Load<Texture2D>("Art/YarnV19/ball_yarn_"+colors[i]);
+   var strand=Resources.Load<Texture2D>("Art/YarnV19/thread_line_"+colors[i]);
+   if(texture==null||strand==null)throw new InvalidOperationException("YarnV19 color missing: "+colors[i]);
+   // The 224px visible footprint and physical diameter share the same size.
+   float bodyPixels=i==4?texture.width*(1123f/1254f):224f;round[i]=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),Vector2.one*.5f,bodyPixels/(FlightGeometry.Radius*2),0,SpriteMeshType.FullRect);
+   round[i].name="ball_yarn_"+colors[i];
+   materials[i]=new Material(WorldArt.BoardMaterial){name="Yarn strand "+colors[i],mainTexture=strand};
+  }
+  balls=round;strands=materials;cats=frames;
+ }
+ public static SpriteRenderer DrawBall(Transform parent,string name,Vector2 position,int variant){
+  var go=new GameObject(name);go.transform.SetParent(parent,false);go.transform.localPosition=position;
+  var renderer=go.AddComponent<SpriteRenderer>();renderer.sprite=Ball(variant);renderer.sortingOrder=45;renderer.color=Color.white;renderer.sharedMaterial=WorldArt.BoardMaterial;
+  
+  return renderer;
+ }
+}
+}

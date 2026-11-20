@@ -1,0 +1,57 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using DG.Tweening;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace BounceGarden {
+public static class OpeningIntroduction {
+ public static bool IsPage(int id)=>id>=501&&id<=545;
+ public static AlphabetIntro Page(int index)=>index==30?new AlphabetIntro{id=531,title="果冻铜钱",captions=Array.Empty<string>(),rule="铜钱开局25点血量，每扣5点改变一档外观，数字显示剩余血量。\n直接命中可扣血打碎；消除上下左右的砖块，可无视血量直接收集。\n铜色区域逐块褪去，大小保持不变；铜钱与招财猫生成的元宝分别计数。"}:index==20?new AlphabetIntro{id=521,title="招财猫与元宝",captions=Array.Empty<string>(),rule="招财猫固定原位，不能被消除。\n相邻消除三次后挥爪生成5枚元宝，替换特殊砖时保留技能。\n无可替换砖时抛向随机空格，生成后正常下落。\n收集元宝完成目标；新补砖无实体穿过障碍，落稳后恢复实体。"}:new AlphabetIntro{id=501+index,title=index==10?"小鱼干点心盒":index==17?"三级毛线团":index==4?"绒绒毛线团":index==5?"双层毛线团":"收集指定颜色",captions=Array.Empty<string>(),rule=index==10?"消除盒子上下左右的砖块，即可收集小鱼干。\n激光穿过两格收集两次；爆炸按覆盖格数收集。\n直接撞盒子无效，盒子始终是完整的2×2。":index==17?"青色外圈 → 紫色交叉圈 → 奶油内芯。\n三次独立消除才能完全解开并收集。\n双五色花可一次削减两层。":index==4?"邻格消除，或被爆炸、激光范围命中，均可解线。\n一次攻击只算一次；球直接撞击不会解线。":index==5?"紫色交叉外圈表示第二层。\n普通攻击先脱紫圈，再次触发后收集。\n双五色花可直接解开两层。":"按上方目标，瞄准并消除对应颜色的普通砖。\n不必清空所有砖块，完成上方目标就能过关。"};
+ public static IEnumerable<int> LessonKeys(int level){
+  var pieces=OpeningCampaign.Stage(level).pieces;
+  if(level==0)yield return 0;
+  if(pieces.Any(p=>p.kind=="yarn"))yield return pieces.Any(p=>p.kind=="yarn"&&p.layers>=3)?17:pieces.Any(p=>p.kind=="yarn"&&p.layers>=2)?5:4;
+  if(pieces.Any(p=>p.kind=="cookie_box"))yield return 10;
+  if(pieces.Any(p=>p.kind=="lucky_cat"))yield return 20;
+  if(pieces.Any(p=>p.kind=="copper_coin"))yield return 30;
+ }
+}
+public partial class LocalProfile {
+ public bool HasOpeningIntro(int index)=>committed.Contains("opening-dim-v3/intro/"+index);
+ public bool MarkOpeningIntro(int index)=>index>=0&&index<OpeningCampaign.Count&&LeagueTransaction(()=>{if(index==5||index==17)committed.Add("opening-dim-v3/intro/4");if(index==17)committed.Add("opening-dim-v3/intro/5");committed.Add("opening-dim-v3/intro/"+index);});
+}
+public partial class AppUI {
+ IEnumerator ShowOpeningIntroduction(int generation){
+  foreach(int index in OpeningIntroduction.LessonKeys(currentLevel)){
+  if(Profile.HasOpeningIntro(index))continue;
+  bool complete=false;var root=UICraft.Root(canvasRoot,"Opening campaign introduction "+index);alphabetIntroduction=root.gameObject.AddComponent<AlphabetIntroductionView>();alphabetIntroduction.Begin(this,OpeningIntroduction.Page(index),()=>{Profile.MarkOpeningIntro(index);complete=true;});
+  while(!complete&&generation==viewGeneration&&alphabetIntroduction!=null)yield return null;
+  if(generation!=viewGeneration){CloseAlphabetIntroduction();yield break;}alphabetIntroduction=null;}
+ }
+}
+public sealed class OpeningRuleDemo:MonoBehaviour {
+ Image target,left,right,ball;RectTransform targetRect;TMPro.TMP_Text caption,copperHp;int page;float age;
+ public void Initialize(int id,bool onDark=false){page=id;left=Picture("Left ordinary brick",SevenSpecialArt.OrdinaryIcon(3),-260,0,130);right=Picture("Right ordinary brick",SevenSpecialArt.OrdinaryIcon(0),260,0,130);target=Picture("Goal",id==531?OpeningCopperArt.State(OpeningCopperArt.MaxHealth):id==521?OpeningThirdArt.Frame("cat",0):id==511?SecondGroupArt.Sprite("box-8"):id==518?OpeningYarnArt.Rest(3):id==505||id==506?OpeningYarnArt.Rest(id==506?2:1):id==512?SevenSpecialArt.SpecialIcon(2,1):id==513?SevenSpecialArt.SpecialIcon(6,0):SevenSpecialArt.OrdinaryIcon(0),0,0,230);targetRect=target.rectTransform;ball=Picture("Demonstration projectile",YarnArt.Ball(0),0,-270,46);caption=UICraft.Label(transform,"",0,-300,760,160,32,UICraft.Ink);if(onDark)caption.color=new Color(1,.96f,.84f);if(id==531){copperHp=UICraft.Label(target.transform,"25",0,0,90,90,58,Color.white);OpeningCopperArt.StyleNumber(copperHp);}Render();}
+ Image Picture(string name,Sprite sprite,float x,float y,float size){var image=UICraft.Box(transform,name,x,y,size,size,Color.white);image.sprite=sprite;image.preserveAspect=true;image.raycastTarget=false;return image;}
+ static void Alpha(Image image,float a){var color=image.color;color.a=a;image.color=color;}
+ void Render(){float t=age%7;Alpha(left,1);Alpha(right,1);Alpha(target,1);Alpha(ball,0);targetRect.anchoredPosition=Vector2.zero;targetRect.localScale=Vector3.one;
+  if(page==531){int hp=Mathf.Max(1,25-Mathf.FloorToInt(Mathf.Min(t,4.99f)*5));target.sprite=OnboardingArt.Get(7,OpeningCopperArt.StateIndex(hp));if(copperHp!=null){copperHp.text=hp.ToString();var ink=OpeningCopperArt.NumberColor;copperHp.color=new Color(ink.r,ink.g,ink.b,t>=5?Mathf.Clamp01((6-t)*2):1);}if(t>=5){Alpha(left,0);Alpha(target,Mathf.Clamp01((6-t)*2));}caption.text=t<5?"逐点扣血，每损失5点改变外观":"邻格消除：无视血量，直接收集";return;}
+  if(page==521){int stage=t<1.5f?0:t<3?1:t<4.5f?2:Mathf.Clamp(3+(int)((t-4.5f)*8),3,15);target.sprite=OnboardingArt.Get(6,stage<3?stage:3);right.sprite=t<4.5f?SevenSpecialArt.OrdinaryIcon(0):OnboardingArt.Get(6,4);caption.text=t<1.5f?"收爪 → 初始":t<3?"一次相邻消除 → 单爪":t<4.5f?"两次相邻消除 → 双爪":"第三次挥爪 → 5枚元宝，再回到初始";return;}
+  if(page==511){int remaining=t<1.5f?8:t<3.5f?7:5;target.sprite=t<1.5f?OnboardingArt.Get(5,0):SecondGroupArt.Sprite("box-"+remaining);targetRect.sizeDelta=Vector2.one*290;target.preserveAspect=true;float local=t<3.5f?t-1.5f:t-3.5f;targetRect.anchoredPosition=Vector2.up*(Mathf.Sin(Mathf.Clamp01(local/.34f)*Mathf.PI)*38);if(t>=1.5f)Alpha(left,0);if(t>=3.5f)Alpha(right,0);caption.text=t<1.5f?"在完整盒子旁消除":t<3.5f?"相邻消除 → 小鱼干 +1":"激光穿过盒子两格 → 小鱼干 +2";return;}
+  if(page==518){string key=t<1.5f?"yarn-obstacle-l3":t<2.18f?"yarn-layer-loss-l3":t<3.5f?"yarn-obstacle-l2":t<4.18f?"yarn-layer-loss":t<5.5f?"yarn-obstacle-l1":"yarn-unravel";float start=key=="yarn-layer-loss-l3"?1.5f:key=="yarn-layer-loss"?3.5f:5.5f;int frame=key.StartsWith("yarn-obstacle")?0:Mathf.Clamp((int)((t-start)/.68f*16),0,15);target.sprite=key.StartsWith("yarn-obstacle")?OnboardingArt.Get(4,t<1.5f?2:t<3.5f?1:0):OpeningYarnArt.Frame(key,frame);if(t>1.5f)Alpha(left,0);if(t>3.5f)Alpha(right,0);if(t>6.18f)Alpha(target,0);caption.text=t<1.5f?"青色编织外圈：三级":t<3.5f?"脱掉青色外圈 → 二级":t<5.5f?"再脱紫色交叉圈 → 一级":"完全解开 → 毛线收集 +1";return;}
+  if(page==505||page==506){bool two=page==506;float second=two?3.5f:1.5f;bool unwrap=two&&t>=1.5f&&t<2.18f,clear=t>=second&&t<second+.64f;target.sprite=OnboardingArt.Get(4,two&&t<1.5f?1:0);if(unwrap)target.sprite=OpeningYarnArt.Frame("yarn-layer-loss",Mathf.Clamp((int)((t-1.5f)/.68f*16),0,15));if(clear)target.sprite=OpeningYarnArt.Frame("yarn-unravel",Mathf.Clamp((int)((t-second)/.64f*16),0,15));if(t>=1.5f)Alpha(left,0);if(t>=second)Alpha(right,0);if(t>=second+.64f)Alpha(target,0);caption.text=t<1.5f?"消除上下左右的普通砖":two&&t<second?"紫色外圈脱落 → 一级 · 收集数不变":t<second+.64f?"完全解开，准备收集":"收集 +1";
+  }else{Alpha(ball,t<1.5f?1:0);ball.rectTransform.anchoredPosition=new Vector2(0,Mathf.Lerp(-280,-100,Mathf.Clamp01(t/1.5f)));float k=Mathf.Sin(Mathf.Clamp01((t-1.5f)/.24f)*Mathf.PI)*.12f;targetRect.localScale=new Vector3(1+k,1-k,1);if(t>1.5f&&t<4.5f){if(page==512||page==513){Alpha(left,0);Alpha(right,0);}else Alpha(target,0);}caption.text=page==501?"消除目标颜色，增加收集进度":page==512?"一次爆炸，清除周围砖块":"沿这一整排横向消除";}
+ }
+ void FitYarnDemo(){
+  if(page==518){float t3=age%7;string k=t3<1.5f?"yarn-obstacle-l3":t3<2.18f?"yarn-layer-loss-l3":t3<3.5f?"yarn-obstacle-l2":t3<4.18f?"yarn-layer-loss":t3<5.5f?"yarn-obstacle-l1":"yarn-unravel";float start=k=="yarn-layer-loss-l3"?1.5f:k=="yarn-layer-loss"?3.5f:5.5f;int f=k.StartsWith("yarn-obstacle")?0:Mathf.Clamp((int)((t3-start)/.68f*16),0,15);if(k.StartsWith("yarn-obstacle")){target.preserveAspect=true;targetRect.pivot=Vector2.one*.5f;targetRect.sizeDelta=Vector2.one*230;targetRect.anchoredPosition=Vector2.zero;return;}var spec=OpeningYarnArt.Spec(k,f);target.preserveAspect=false;targetRect.pivot=new Vector2(spec.px,spec.py);targetRect.sizeDelta=new Vector2(230*spec.w/spec.bodyWidth,230*spec.h/spec.bodyHeight);targetRect.anchoredPosition=new Vector2(0,-115);return;}
+  if(page!=505&&page!=506)return;float t=age%7,second=page==506?3.5f:1.5f;string key=page==506&&t<1.5f?"yarn-obstacle-l2":"yarn-obstacle-l1";int frame=0;
+  if(page==506&&t>=1.5f&&t<2.18f){key="yarn-layer-loss";frame=Mathf.Clamp((int)((t-1.5f)/.68f*16),0,15);}
+  if(t>=second&&t<second+.64f){key="yarn-unravel";frame=Mathf.Clamp((int)((t-second)/.64f*16),0,15);}
+  if(key.StartsWith("yarn-obstacle")){target.preserveAspect=true;targetRect.pivot=Vector2.one*.5f;targetRect.sizeDelta=Vector2.one*230;targetRect.anchoredPosition=Vector2.zero;return;}var s=OpeningYarnArt.Spec(key,frame);target.preserveAspect=false;targetRect.pivot=new Vector2(s.px,s.py);targetRect.sizeDelta=new Vector2(230*s.w/s.bodyWidth,230*s.h/s.bodyHeight);targetRect.anchoredPosition=new Vector2(0,-115);
+ }
+ void Update(){age=Mathf.Repeat(age+Time.unscaledDeltaTime*(7f/2.2f),7f);Render();FitYarnDemo();}
+}
+}

@@ -1,0 +1,24 @@
+using UnityEngine;
+namespace BounceGarden {
+public static class ColorMatchArt {
+ public static readonly string[] Names={"RED","BLUE","GREEN"};
+ static readonly string[] Keys={"coral","blue","mint"};
+ public static readonly Color[] Palette={new Color32(236,100,106,255),new Color32(99,163,232,255),new Color32(74,185,138,255)};
+ static readonly Sprite[][] frames=new Sprite[3][];
+ static readonly Sprite[] buttons=new Sprite[3];
+ public static Sprite Button(int color){
+  if(buttons[color]!=null)return buttons[color];
+  var t=Resources.Load<Texture2D>("Art/ColorMatch/"+Keys[color]+"_button");
+  return buttons[color]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,new Vector4(40,40,40,40));
+ }
+ public static int YarnVariant(int color)=>color==0?2:color==1?1:3;
+ public static Sprite[] Frames(int color){
+  if(frames[color]!=null)return frames[color];
+  var texture=Resources.Load<Texture2D>("Art/ColorMatch/"+Keys[color]+"_jelly_pop");
+  if(texture==null)throw new System.InvalidOperationException("Color match atlas missing: "+Keys[color]);
+  int cell=texture.width/4;var result=new Sprite[16];
+  for(int i=0;i<16;i++){result[i]=Sprite.Create(texture,new Rect(i%4*cell,(3-i/4)*cell,cell,cell),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);result[i].name="match_"+Keys[color]+"_"+i;}
+  return frames[color]=result;
+ }
+}
+}

@@ -1,0 +1,30 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.FrameSequence",
+    "settings": [
+        {
+            "field": "Victory",
+            "type": "System.Boolean",
+            "value": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "Loop",
+            "type": "System.Boolean",
+            "value": 0.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "field": "PlaybackSpeed",
+            "type": "System.Single",
+            "value": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    ]
+}

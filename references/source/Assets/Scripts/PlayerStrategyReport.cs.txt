@@ -1,0 +1,28 @@
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+namespace BounceGarden {
+public static class PlayerStrategyReport {
+ static string fingerprint;
+ public static string EngineFingerprint {get {if(fingerprint!=null)return fingerprint;try{using(var sha=System.Security.Cryptography.SHA256.Create())using(var input=System.IO.File.OpenRead(typeof(GameSession).Assembly.Location))fingerprint=BitConverter.ToString(sha.ComputeHash(input)).Replace("-","").ToLowerInvariant();}catch{fingerprint="unavailable";}return fingerprint;}}
+
+ public static string Html(BalanceHistory history){var template=Resources.Load<TextAsset>("PlaytestStrategyReport");if(template==null)throw new InvalidOperationException("Strategy report template missing");return template.text.Replace("__STRATEGY_DATA__",BalanceReport.Json(history).Replace("<","\\u003c").Replace(">","\\u003e").Replace("&","\\u0026"));}
+ public static string ShotsCsv(BalanceHistory history){
+  var text=new StringBuilder("局ID,关卡,配置,同配置挑战次数,辅助,球组,发射序号,模式,有效秒,操作秒,间隔秒,可操作间隔秒,角度_竖直0左负右正,角度变化,前组数,前球数,结算后等待,预计目标,预计种类,预测置信,实际首次命中,实际种类,伤害,击碎,实际目标到账,因果得分,特殊触发,组合,球回收秒,回收状态,瞄准秒,调整次数\n");
+  foreach(var r in history.rounds.Concat(history.active==null?Array.Empty<BalanceRound>():new[]{history.active}))if(r.strategyVersion==2&&r.strategy!=null)foreach(var s in r.strategy.shots){
+   var values=new object[]{r.id,r.level,r.configHash,r.configAttempt,r.Assisted,s.group,s.number,s.mode,s.seconds,s.operableSeconds,s.interval,s.operableInterval,s.angle,s.angleChange,s.previousGroups,s.previousBalls,s.stableWait,s.predicted,s.predictedKind,s.confidence,s.firstHit,s.firstHitKind,s.damage,s.breaks,s.goals,s.score,s.specials,s.combos,s.returnedAt,s.returnState,s.aimSeconds,s.aimAdjustments};text.AppendLine(string.Join(",",values.Select(BalanceReport.Csv)));
+  }return text.ToString();
+ }
+ [Serializable] sealed class CalibrationSet {public string schema="observed-player-strategy-v2",status="observations-only-not-auto-applied",limitations="Mode labels are exploratory. Cross-player skill, assistance and attempts confound outcomes. Goal and special weights cannot be inferred from win-rate correlation.";public CalibrationGroup[] groups;}
+ [Serializable] sealed class CalibrationGroup {public string key,mode,configHash,status;public int level,rounds,completeDetailRounds,intervalSamples;public float medianInterval,medianOperableInterval,overlapShare,settledShare,specialTargetShare;public int[] angleBins;}
+ static float Median(float[] values)=>values.Length==0?-1:(values.OrderBy(v=>v).ElementAt((values.Length-1)/2)+values.OrderBy(v=>v).ElementAt(values.Length/2))*.5f;
+ public static string Calibration(BalanceHistory history){
+  var groups=history.rounds.Where(r=>r.strategyVersion==2&&r.strategy!=null).GroupBy(r=>BalanceReport.Group(r)+"/"+(r.configAttempt==1?"first":"retry")+"/"+PlayerStrategyRecorder.Mode(r.strategy)).Select(g=>{
+   var rs=g.ToArray();var shots=rs.SelectMany(r=>r.strategy.shots).Where(s=>s.interval>=0).ToArray();var d=rs[0].strategy;int comparable=rs.Sum(r=>r.strategy.comparableShots),count=rs.Sum(r=>r.strategy.shotCount);
+   return new CalibrationGroup{key=g.Key,mode=PlayerStrategyRecorder.Mode(d),level=rs[0].level,configHash=rs[0].configHash,rounds=rs.Length,completeDetailRounds=rs.Count(r=>r.strategy.detailRetained&&r.strategy.omittedShots==0&&r.strategy.omittedEvents==0),intervalSamples=shots.Length,status=rs.Length>=20&&shots.Length>=100?"eligible-for-offline-review":"insufficient-samples",medianInterval=Median(shots.Select(s=>s.interval).ToArray()),medianOperableInterval=Median(shots.Select(s=>s.operableInterval).ToArray()),overlapShare=comparable==0?-1:rs.Sum(r=>r.strategy.overlapCount)/(float)comparable,settledShare=comparable==0?-1:rs.Sum(r=>r.strategy.settledCount)/(float)comparable,specialTargetShare=count==0?-1:rs.Sum(r=>r.strategy.specialTargetShots)/(float)count,angleBins=Enumerable.Range(0,12).Select(i=>shots.Count(s=>Mathf.Clamp((int)((s.angle+90)/15),0,11)==i)).ToArray()};
+  }).ToArray();return JsonUtility.ToJson(new CalibrationSet{groups=groups},true);
+ }
+}
+}

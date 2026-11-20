@@ -1,0 +1,65 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public BrickBody QALightFeedbackHealthBrick(int col,int row){
+  // Authored opening ordinary bricks default to 1 HP; explicitly retain 25 HP
+  // here so this fixture can verify damage rather than only disappearance.
+  CreateBrick(new BrickSpawn{position=ChainGridRules.Center(col,row),size=Vector2.one*.76f,hp=25,colorIndex=1,reveal="opening-N"},0);
+  return CollectionBricks.Last();
+ }
+}
+public sealed class Celebration020QA:MonoBehaviour {
+ sealed class Store:IProfileStorage{public string Json;public bool Exists=>Json!=null;public string Read()=>Json;public void Write(string value){Json=value;}}
+ AppUI app;GameSession game;string dir;int checks,failures,errors;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--celebration020-qa"))new GameObject("Celebration and simplified mechanisms QA").AddComponent<Celebration020QA>();}
+ void Check(bool ok,string label){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var image=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,image);File.WriteAllBytes(dir+"/"+name+".png",image.EncodeToPNG());Destroy(image);rt.Release();Destroy(rt);}
+ IEnumerator Level(int index=0){if(game!=null)game.enabled=true;app.QAStartLevel(index);yield return app.QAWaitForLevel();game=app.Session;game.QAIgnoreFocusLoss=true;for(int n=0;n<150;n++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return new WaitForSecondsRealtime(.02f);if(n>8&&!app.AlphabetIntroActive&&!game.IsPaused)break;}game.SetPaused(false);Check(game.IsPlaying&&!game.IsPaused,"level loads and resumes "+index);}
+ IEnumerator WaitResult(){float end=Time.realtimeSinceStartup+24;while(app.QAVictoryPage==null&&Time.realtimeSinceStartup<end)yield return null;Check(app.QAVictoryPage!=null,"reward sequence reaches the victory page");}
+ IEnumerator Start(){
+  var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");int fps=Array.IndexOf(args,"--qa-fps");Application.targetFrameRate=fps>=0?int.Parse(args[fps+1]):60;QualitySettings.vSyncCount=0;
+  Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception||t==LogType.Assert){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+  yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();yield return Level();
+  foreach(string key in new[]{"ribbon","star","confetti","halo"}){var sprite=GoalCelebrationArt.Get(key);Check(sprite!=null&&sprite.texture.width>0,"generated transparent art bound "+key);}
+  foreach(int index in new[]{0,4,5,10,17,20,30}){
+   app.QAGardenLesson(index);yield return null;var view=app.QAAlphabetIntro;
+   Check(view!=null&&view.Ready&&view.UsesDimMechanismLayout&&view.LayoutFits,"mechanism ready immediately and fits safe area "+index);
+   Check(view.GetComponentsInChildren<Image>().All(i=>!i.name.Contains("lesson card")),"mechanism has no large painted panel "+index);
+   Check(view.GetComponentsInChildren<OpeningRuleDemo>().Length==1&&view.GetComponentInChildren<LessonCollectionFlight>()!=null,"mechanism keeps independent gameplay demonstration "+index);
+   if(index==4||index==20||index==30){yield return new WaitForSecondsRealtime(.55f);yield return Capture("mechanism-"+index);}
+   var button=view.GetComponentsInChildren<Button>().First(b=>b.name=="Mechanism understood immediately");button.onClick.Invoke();yield return new WaitForSecondsRealtime(.22f);Check(app.QAAlphabetIntro==null,"understood closes without waiting for animation "+index);
+  }
+  yield return Level(4);game.QASevenClear();foreach(int kind in SevenSpecialRules.Kinds){var tool=game.QASevenTool(kind,kind,8,kind%5);tool.Waiting=true;}
+  yield return new WaitForSecondsRealtime(.15f);Check(!app.AlphabetIntroActive&&!game.IsPaused,"all five first appearances have no page or teaching pause");Check(game.TryShoot(Vector2.up),"all five new specials do not gate firing");
+  // Singles keep moving; combinations retain only a tiny, rate-limited stop.
+  yield return Level();game.enabled=false;game.QASevenClear();var target=game.QALightFeedbackHealthBrick(4,3);var source=game.QASevenTool(2,4,4,0);int stops=game.CombatFeel.HitStops;game.ActivateChainTool(source,Vector2.up);float until=Time.realtimeSinceStartup+.42f,minScale=1;
+  while(Time.realtimeSinceStartup<until){minScale=Mathf.Min(minScale,Time.timeScale);yield return null;}
+  Check(game.CombatFeel.HitStops==stops&&minScale>=.5f&&minScale<1,"single uses gentle slow motion without a hard stop");Check(target.CurrentHealth==15,"lighter single preserves ten damage hp="+target.CurrentHealth);Check(Mathf.Approximately(Time.timeScale,1),"single restores normal time");
+  yield return Level();game.enabled=false;game.QASevenClear();target=game.QALightFeedbackHealthBrick(4,3);source=game.QASevenTool(6,4,4,0);game.QASevenTool(2,5,5,3);stops=game.CombatFeel.HitStops;game.ActivateChainTool(source,Vector2.up);yield return new WaitForSecondsRealtime(.45f);
+  Check(game.CombatFeel.HitStops==stops+1&&game.CombatFeel.LastStop<=.0251f,"combo has exactly one stop capped at 25 ms");Check(target.CurrentHealth==15&&game.SevenCombos==1,"lighter combination preserves damage and one activation hp="+target.CurrentHealth+" combos="+game.SevenCombos);
+  stops=game.CombatFeel.HitStops;for(int n=0;n<4;n++){game.CombatFeel.Power(Vector2.zero,.025f);yield return new WaitForSecondsRealtime(.025f);}Check(game.CombatFeel.HitStops==stops,"nearby repeated effects do not stack pauses");
+  // Reward sequencing, duplicate outcome protection and suspension.
+  yield return Level();game.QASpeedFixture();int coins=app.Profile.Coins;game.QAFinaleGoal(5,1800);int score=game.Score;
+  until=Time.realtimeSinceStartup+2;while(app.QAGoalCelebration==null&&Time.realtimeSinceStartup<until)yield return null;
+  var celebration=app.QAGoalCelebration;Check(celebration!=null&&game.IsPaused&&!game.VictorySettlementActive,"celebration starts before any reward preparation");
+  Check(app.QAVictoryPreparation==null&&app.QAVictoryFinale==null&&!game.ScoreFinalized&&app.Profile.Coins==coins,"no reward page, score finalization or coins during celebration");
+  app.SendMessage("OnOutcome",true);Check(app.GetComponentsInChildren<GoalCelebration>().Length==1,"duplicate win event does not start another celebration");
+  yield return new WaitForSecondsRealtime(.35f);Check(celebration!=null&&celebration.LayoutFits&&game.Score==score,"generated celebration fits and score stays fixed");yield return Capture("goal-celebration");
+  if(celebration!=null){celebration.SendMessage("OnApplicationPause",true);float elapsed=celebration.Elapsed;yield return new WaitForSecondsRealtime(.18f);Check(Mathf.Abs(celebration.Elapsed-elapsed)<.001f,"background suspension freezes celebration clock");celebration.SendMessage("OnApplicationPause",false);}
+  until=Time.realtimeSinceStartup+3;while(app.QAGoalCelebration!=null&&Time.realtimeSinceStartup<until)yield return null;
+  Check(game.VictorySettlementActive&&app.QAVictoryPreparation!=null,"reward preparation starts after celebration completes");game.AccelerateVictoryPlayback();yield return WaitResult();
+  Check(game.ScoreFinalized&&game.VictoryBoardSwept&&game.CompletionBonus==15000&&game.Shots==0,"celebration preserves five spare steps, score and terminal sweep");
+  coins=app.Profile.Coins;score=game.Score;app.SendMessage("OnOutcome",true);yield return null;Check(app.Profile.Coins==coins&&game.Score==score,"duplicate outcome cannot pay twice");yield return Capture("victory-result");
+  // Replacing the board cancels the old callback.
+  yield return Level();game.QAFinaleGoal(2,1800);until=Time.realtimeSinceStartup+2;while(app.QAGoalCelebration==null&&Time.realtimeSinceStartup<until)yield return null;int generation=game.Generation;yield return Level(4);yield return new WaitForSecondsRealtime(1.3f);Check(game.Generation!=generation&&game.IsPlaying&&app.QAGoalCelebration==null&&app.QAVictoryPreparation==null&&app.QAVictoryPage==null,"restart during celebration never settles the replacement board");
+  // Legacy committed keys remain harmless and normal progress stays readable.
+  var store=new Store();var profile=LocalProfile.Load(store);profile.MarkOpeningIntro(0);store.Json=store.Json.Replace("opening-dim-v3/intro/0","special-brick-intro-v2/5");profile=LocalProfile.Load(store);int oldCoins=profile.Coins;profile.MarkOpeningIntro(17);var loaded=LocalProfile.Load(store);Check(loaded.Coins==oldCoins&&new[]{4,5,17}.All(loaded.HasOpeningIntro),"legacy keys coexist with new tier-aware mechanism flags");
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+",\"fps\":"+Application.targetFrameRate+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

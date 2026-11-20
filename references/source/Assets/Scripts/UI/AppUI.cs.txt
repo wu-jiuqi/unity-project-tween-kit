@@ -1,0 +1,251 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using DG.Tweening;
+using UnityEngine.EventSystems;
+
+namespace BounceGarden {
+public partial class AppUI : MonoBehaviour {
+ public GameSession Session {get;private set;}
+ public PlaytestMetrics76 Metrics {get;private set;}
+ public string CurrentPage {get;private set;}="home";
+ public bool HomeMotionAllowed=>CurrentPage=="home"&&!playing&&!NavigationActive&&modal==null&&overlayRoot!=null&&overlayRoot.childCount==0;
+ public LocalProfile Profile {get;private set;}
+ RectTransform canvasRoot,safeRoot,designRoot,pageRoot,hudRoot,overlayRoot,effectsRoot,navRoot,rankingBackdrop;
+ RectTransform currentPage,modal,results,tutorial,walletTarget; TMP_Text walletText,shotsText,ballsText,targetText;
+ VictoryPresentation victory;
+ UnityEngine.UI.Button recallButton;TMP_Text recallText;
+ bool boardLayout; float menuHeight=2340; Image bottomFill; RectTransform coinPoolRoot; readonly Stack<RectTransform> coinPool=new Stack<RectTransform>();readonly Dictionary<RectTransform,int> coinLeases=new Dictionary<RectTransform,int>();
+ RectTransform pageTrack,headerSlot,navSlot; Sequence navigation,modalMotion; readonly Dictionary<string,RectTransform> pages=new Dictionary<string,RectTransform>(); Round6Nav nav;
+ Vector2Int? qaViewport;
+ public Vector2Int MenuAvoidanceViewport=>qaViewport??new Vector2Int(Screen.width,Screen.height);
+ Rect ViewSafe=>WeChatLayoutMetrics.ContentSafeArea(qaSafe??(qaViewport.HasValue?new Rect(0,0,qaViewport.Value.x,qaViewport.Value.y):Screen.safeArea),MenuAvoidanceViewport);
+ Canvas canvas; Camera gameCamera; Rect? qaSafe; Rect lastSafe; Vector2Int lastSize; int routeVersion,viewGeneration,pointerId=-999,tutorialStep; int earnedWinCoins; string earnedWinNote=""; bool busy,playing,aiming,won,qaResult,hasAdBonus,baseRewardSaved;
+ Vector2 pointerStart,aimDirection; string resultKey; int currentLevel; Coroutine resultSequence,walletPulse; Action skipResult; TMP_Text toast; float toastUntil;
+ public ILeagueSource LeagueSource {get;private set;}
+ readonly List<RaycastResult> uiHits=new List<RaycastResult>();
+ Color sky=new Color32(139,220,235,255),grass=new Color32(112,184,80,255),purple=new Color32(98,65,155,255);
+ void Awake(){InitializeBattleInput();feedback=new LocalHomeFeedbackSource(RuntimeQA.IsIsolated?(IHomeFeedbackStorage)new MemoryHomeFeedbackStorage():new LocalHomeFeedbackStorage());savedFeedback=feedback;feedback.Visit();lastFeedbackDate=DateTime.Now.Date;Profile=LocalProfile.Load();Profile.EnsureAlphabetRoute();AlphabetTypography.Install();LeagueSource=new LocalLeagueSource(Profile);LeagueSource.Read(true);Profile.InitializeChapterGates();Profile.InitializeStreak70(feedback.Read().WinStreak);SoundService.SetMuted(!Profile.SoundEnabled);BuildCanvas();Session=new GameObject("GameSession").AddComponent<GameSession>();Session.transform.SetParent(transform,false);Metrics=gameObject.AddComponent<PlaytestMetrics76>();Metrics.Initialize(this);Session.StateChanged+=RefreshHUD;Session.Outcome+=OnOutcome;Session.Feedback+=OnFeedback;gameCamera=Camera.main;ApplySafeArea();ShowPage("home",false);ShowIntro();}
+ void OnDestroy(){CloseCollectionGoalEntrance();CancelContentLoad();CloseTutorialGuide();CloseAlphabetIntroduction();ClearPaintingCollection();modalMotion?.Kill();KillNavigation();if(Session!=null){Session.StateChanged-=RefreshHUD;Session.Outcome-=OnOutcome;Session.Feedback-=OnFeedback;}Profile?.Save();}
+ void BuildCanvas(){
+ var go=new GameObject("UI",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));go.transform.SetParent(transform,false);
+ canvas=go.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=100;
+ var scaler=go.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1080,2340);scaler.matchWidthOrHeight=0;
+ canvasRoot=go.GetComponent<RectTransform>();
+ // A rectangular screen background must not inherit safe-area insets or portrait fitting.
+ bottomFill=UICraft.Root(canvasRoot,"Full screen cream backdrop").gameObject.AddComponent<Image>();bottomFill.color=new Color32(248,242,233,255);bottomFill.raycastTarget=false;
+ var backdrop=bottomFill.rectTransform;backdrop.anchorMin=Vector2.zero;backdrop.anchorMax=Vector2.one;backdrop.sizeDelta=Vector2.zero;backdrop.anchoredPosition=Vector2.zero;
+ rankingBackdrop=UICraft.Root(canvasRoot,"Full screen ranking gradient");rankingBackdrop.anchorMin=Vector2.zero;rankingBackdrop.anchorMax=Vector2.one;rankingBackdrop.sizeDelta=Vector2.zero;rankingBackdrop.gameObject.AddComponent<LeagueTintGradient>().raycastTarget=false;rankingBackdrop.gameObject.SetActive(false);
+ safeRoot=UICraft.Root(canvasRoot,"Safe area");safeRoot.anchorMin=Vector2.zero;safeRoot.anchorMax=Vector2.one;safeRoot.sizeDelta=Vector2.zero;
+ designRoot=UICraft.Root(safeRoot,"Portrait layout");pageRoot=UICraft.Root(designRoot,"Content viewport");pageRoot.gameObject.AddComponent<RectMask2D>();pageTrack=UICraft.Root(pageRoot,"Page slots");
+ headerSlot=UICraft.Root(designRoot,"Fixed top bar");navSlot=UICraft.Root(designRoot,"Fixed bottom navigation");hudRoot=UICraft.Root(designRoot,"Battle HUD");overlayRoot=UICraft.Root(designRoot,"Modal overlays");effectsRoot=UICraft.Root(designRoot,"UI effects");coinPoolRoot=UICraft.Root(designRoot,"Inactive reward pool");
+ if(EventSystem.current==null){var e=new GameObject("EventSystem",typeof(EventSystem),typeof(StandaloneInputModule));e.transform.SetParent(transform,false);}
+ }
+ void ApplySafeArea(){
+ var viewSize=qaViewport??new Vector2Int(Screen.width,Screen.height);lastSafe=ViewSafe;lastSize=viewSize;
+ // Restore the menu camera before measuring the canvas (also needed by offscreen QA).
+ if(gameCamera==null)gameCamera=Camera.main;
+ if(gameCamera!=null){
+  if(gameCamera.GetComponent<ViewportBackdrop>()==null)gameCamera.gameObject.AddComponent<ViewportBackdrop>();
+  gameCamera.GetComponent<ViewportBackdrop>().ShowGarden(false);
+  gameCamera.rect=new Rect(0,0,1,1);
+  // Stretch the authored board over the physical screen. A fixed projection
+  // preserves world/input coordinates while the viewport scales both axes.
+  if(boardLayout)gameCamera.aspect=1080f/2340f;else gameCamera.ResetAspect();
+  gameCamera.orthographic=true;gameCamera.orthographicSize=11.7f;
+ }
+ safeRoot.anchorMin=boardLayout?Vector2.zero:new Vector2(lastSafe.x/viewSize.x,lastSafe.y/viewSize.y);safeRoot.anchorMax=boardLayout?Vector2.one:new Vector2(lastSafe.xMax/viewSize.x,lastSafe.yMax/viewSize.y);Canvas.ForceUpdateCanvases();
+ float widthScale=safeRoot.rect.width/1080f;
+ float scale=boardLayout?Mathf.Min(widthScale,safeRoot.rect.height/2340f):widthScale;
+ designRoot.localScale=boardLayout?new Vector3(widthScale,safeRoot.rect.height/2340f,1):Vector3.one*scale;menuHeight=boardLayout?2340:safeRoot.rect.height/Mathf.Max(scale,.001f);
+ designRoot.sizeDelta=new Vector2(1080,menuHeight);pageRoot.sizeDelta=pageTrack.sizeDelta=new Vector2(1080,menuHeight);
+ var launchCover=overlayRoot.Find("Logo animation page") as RectTransform;if(launchCover!=null)launchCover.sizeDelta=new Vector2(1080,Mathf.Max(menuHeight,2340));
+ // Preserve the authored bar geometry, but pin its top/bottom to the actual safe area.
+ headerSlot.anchoredPosition=new Vector2(0,(menuHeight-2340)*.5f);navSlot.anchoredPosition=new Vector2(0,-(menuHeight-2340)*.5f);
+ LayoutBattleHeaderInsets();
+ foreach(var pair in pages)LayoutMenuPage(pair.Value,pair.Key);
+ if(pageTrack!=null&&!playing&&pages.Count>0)SnapNavigation();ReflowNativeShopModal();
+ }
+ float BattleHeaderDrop=>Mathf.Max(0,(1-lastSafe.yMax/Mathf.Max(1,lastSize.y))*2340f-56);
+ void LayoutBattleHeaderInsets(){
+  if(!boardLayout||hudRoot==null)return;
+  var header=hudRoot.Find("Safe battle header") as RectTransform;
+  if(header!=null)header.anchoredPosition=new Vector2(0,-BattleHeaderDrop);
+  var collection=hudRoot.GetComponentInChildren<ChainCollectionHUD>();
+  if(collection!=null&&collection.GoalsRect!=null){var destination=new Vector2(-15,1000-BattleHeaderDrop);if(QAGoalEntrance!=null)QAGoalEntrance.SetDestination(destination);else collection.GoalsRect.anchoredPosition=destination;}
+ }
+ void LayoutMenuPage(RectTransform page,string key){
+ page.sizeDelta=new Vector2(1080,menuHeight);float extra=(menuHeight-2340)*.5f;
+ if(key=="shop"){var reference=page.Find("Reference shop") as RectTransform;if(reference!=null){reference.localScale=Vector3.one*(1080f/500);float reserve=WeChatSecondaryTopReserve();reference.sizeDelta=new Vector2(500,(menuHeight-reserve)/(1080f/500));reference.anchoredPosition=new Vector2(0,-reserve*.5f);if(Mathf.Abs(reference.rect.height-referenceShopHeight)>.5f)DrawShop();}return;}
+ if(key=="home"){LayoutHomeHeader(page);} else if(key=="chapters"){float unit=Mathf.Max(.001f,lastSafe.width/1080f);float topInset=(lastSize.y-lastSafe.yMax)/unit,bottomInset=lastSafe.yMin/unit;
+ var bleed=new Vector4(0,-bottomInset,0,-topInset);pageRoot.GetComponent<RectMask2D>().padding=bleed;page.GetComponent<RectMask2D>().padding=bleed;
+ page.GetComponent<ChapterRouteView>()?.Layout(menuHeight,WeChatPageTopReserve(),topInset,bottomInset);}
+ else if(key=="ranking"||key=="vip"){var league=page.Find("Live league content") as RectTransform;if(league!=null){float reserve=WeChatSecondaryTopReserve();league.sizeDelta=new Vector2(1080,menuHeight-reserve);league.anchoredPosition=new Vector2(0,-reserve*.5f);}}
+ else{var content=page.Find("Responsive menu content") as RectTransform;if(content!=null){float top=key=="shop"?868:879,bottom=key=="shop"?-789:-740;float fit=Mathf.Min(1,Mathf.Max(.1f,(menuHeight-(2340-(top-bottom)))/(top-bottom)));content.localScale=Vector3.one*fit;content.anchoredPosition=new Vector2(0,menuHeight*.5f-(1170-top)-top*fit);}}
+ }
+ void Update(){if(lastFeedbackDate!=DateTime.Now.Date){lastFeedbackDate=DateTime.Now.Date;savedFeedback.Visit();feedbackRefreshPending=true;}if(lastSafe!=ViewSafe||lastSize!=(qaViewport??new Vector2Int(Screen.width,Screen.height)))ApplySafeArea();RefreshWeChatHomeHeader();if(toast!=null&&Time.unscaledTime>toastUntil){Destroy(toast.transform.parent.gameObject);toast=null;}TickLeagueActivity();TickLeagueFlow();if(LeagueFlowActive)return;HandleInput();if(Input.GetKeyDown(KeyCode.Escape)){if(modal!=null)CloseModal();else if(playing&&results==null)Pause();else if(!playing&&CurrentPage!="home")ShowPage("home");}}
+ void OnApplicationFocus(bool focus){leagueFocused=focus;if(!focus)FlushLeagueActivity(true);LeagueSource?.Read(focus);if(!focus){if(!playing)SnapNavigation();CancelAim();if(playing&&Session.IsPlaying&&results==null){Session.SetPaused(true);Pause();}}}
+ void OnApplicationPause(bool pause){leagueFocused=!pause;if(pause)FlushLeagueActivity(true);if(!pause)LeagueSource?.Read(true);if(pause){Metrics?.Save();SoundService.SaveMix();CancelAim();Profile?.Save();if(playing&&Session.IsPlaying&&results==null)Pause();}}
+ void OnFeedback(Vector2 pos,string cue){if(cue=="booster-save-failed"){Metrics?.ClearPendingRelease();Toast("道具保存失败，本次未发射；请重启后重试。");return;}if(cue=="win"||cue=="lose")return;SoundService.Play(cue);}
+ void Clear(Transform t){for(int i=t.childCount-1;i>=0;i--){var g=t.GetChild(i).gameObject;g.SetActive(false);Destroy(g);}}
+ void KillNavigation(){routeVersion++;navigation?.Kill(false);navigation=null;}
+ void ClearPages(){KillNavigation();pages.Clear();Clear(pageTrack);currentPage=null;}
+ public bool NavigationActive=>navigation!=null&&navigation.IsActive()&&navigation.IsPlaying();
+ public Vector2 NavigationPosition=>pageTrack.anchoredPosition;
+ public int PageInstances=>pages.Count;
+ void SnapNavigation(){KillNavigation();pageTrack.anchoredPosition=new Vector2(-PageOrder(CurrentPage)*pageRoot.rect.width,0);busy=false;SetPageInput();}
+ void SetPageInput(){foreach(var pair in pages){var group=pair.Value.GetComponent<CanvasGroup>();group.interactable=group.blocksRaycasts=pair.Key==CurrentPage&&!NavigationActive;}}
+ void ShowPage(string page,bool animate=true){CloseCollectionGoalEntrance();if(!GameContent.PageReady(page)){PrepareMenuContent(page,animate);return;}CancelContentLoad();SoundService.CancelTransient();if(busy&&playing)return;CloseTutorialGuide();CloseAlphabetIntroduction();ClearPaintingCollection();CancelAim();RemoveModal(false);viewGeneration++;if(resultSequence!=null){StopCoroutine(resultSequence);resultSequence=null;}skipResult=null;victory=null;results=null;Metrics?.Finish("abandoned");playing=false;boardLayout=false;Session.StopLevel();ApplySafeArea();Clear(hudRoot);Clear(overlayRoot);RecycleCoins();Clear(effectsRoot);KillNavigation();CurrentPage=page;SoundService.Music("bgm_home");
+  if(!pages.TryGetValue(page,out var next)||next==null){next=UICraft.Root(pageTrack,page);next.gameObject.AddComponent<RectMask2D>();next.gameObject.AddComponent<CanvasGroup>();pages[page]=next;switch(page){case "chapters":BuildChapters(next);break;case "shop":BuildShop(next);break;case "ranking":BuildRanking(next,false);break;case "vip":BuildRanking(next,true);break;default:BuildHome(next);break;}}
+  foreach(var pair in pages)pair.Value.anchoredPosition=new Vector2(PageOrder(pair.Key)*pageRoot.rect.width,0);currentPage=next;LayoutMenuPage(next,page);if(page=="home"){feedback.Visit();RefreshHomeFeedback(false);feedbackRefreshPending=true;}
+  bottomFill.gameObject.SetActive(true);rankingBackdrop.gameObject.SetActive(page=="ranking"||page=="vip"||page=="shop");headerSlot.gameObject.SetActive(true);navSlot.gameObject.SetActive(false);TopBar(headerSlot,page=="home");float target=-PageOrder(page)*pageRoot.rect.width;int version=routeVersion;busy=false;
+  if(animate&&Mathf.Abs(pageTrack.anchoredPosition.x-target)>.1f){SoundService.Play("click");navigation=DOTween.Sequence().SetUpdate(true).SetId(this);navigation.Append(DOTween.To(()=>pageTrack.anchoredPosition,v=>pageTrack.anchoredPosition=v,new Vector2(target,0),.27f).SetEase(Ease.OutCubic));navigation.OnComplete(()=>{if(version!=routeVersion)return;pageTrack.anchoredPosition=new Vector2(target,0);navigation=null;SetPageInput();});}else pageTrack.anchoredPosition=new Vector2(target,0);SetPageInput();RefreshWallet();if(page=="ranking"||page=="vip")next.GetComponentInChildren<LeagueRankingView>()?.Enter();if(page=="home"){SoundService.Play("cat_home_greeting");}if(page=="home"||page=="chapters")StartIdleContentPrefetch();
+ }
+ int PageOrder(string p){return p=="shop"?0:p=="home"?1:p=="ranking"?2:3;}
+ public void QANavigateAnimated(string page){if(!RuntimeQA.IsIsolated)return;ShowPage(page,true);}
+ public void QAStaticNavigation(string page){if(!RuntimeQA.IsIsolated)return;ShowPage(page,false);}
+ public void QASetWalletText(string value){if(!RuntimeQA.IsIsolated)return;if(walletText!=null)walletText.text=value;}
+ void TopBar(Transform ignored,bool lives=true){Clear(headerSlot);var p=headerSlot;walletText=null;walletTarget=null;if(CurrentPage=="home"||CurrentPage=="ranking"||CurrentPage=="vip"||CurrentPage=="chapters")return;if(CurrentPage=="shop"){walletText=referenceWallet;walletTarget=referenceWalletTarget;return;}
+ HeaderMedallions.Avatar(p,-446,1010,Profile);
+ var avatarHit=UICraft.Button(p,"",-446,1010,176,176,UICraft.Green,OpenLeagueCustomization);avatarHit.transform.Find("ButtonVisual").gameObject.SetActive(false);
+ if(CurrentPage=="ranking"||CurrentPage=="vip"||CurrentPage=="shop"){var capsule=UICraft.Art(p,"pastel/resource_capsule",175,1010,330,105);UICraft.Coin(capsule.transform,-115,0,70);walletText=UICraft.Label(capsule.transform,Profile.Coins.ToString("N0"),35,0,205,80,38);walletTarget=capsule.rectTransform;}
+ HeaderMedallions.Settings(p,446,1010,Settings);
+ if(!lives){var home=UICraft.Button(p,"花园",-260,1010,160,100,UICraft.Green,()=>ShowPage("home"),34);home.name="Return home";}
+ if(lives){var logo=PastelLogo.Create(p,0,1010,490,180);logo.name="Header wordmark";logo.gameObject.AddComponent<HomeWordmarkWiggle>();}
+ }
+ void BuildNav(Transform ignored,string selected){navSlot.gameObject.SetActive(false);}
+ void Background(RectTransform p,Color unused){var image=UICraft.Root(p,"Cream backdrop").gameObject.AddComponent<Image>();image.color=new Color32(248,242,233,255);image.raycastTarget=false;var rect=image.rectTransform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.sizeDelta=Vector2.zero;rect.anchoredPosition=Vector2.zero;}
+ void BuildHome(RectTransform p){BuildChapterHome(p);}
+ public void ShowIntro(bool autoDismiss=true){Clear(overlayRoot);int generation=++viewGeneration;
+ var intro=UICraft.Root(overlayRoot,"Logo animation page",0,0,1080,Mathf.Max(menuHeight,2340));intro.gameObject.AddComponent<RectMask2D>();Background(intro,Color.white);var cover=intro.GetChild(0).GetComponent<RectTransform>();cover.anchorMin=cover.anchorMax=new Vector2(.5f,.5f);cover.sizeDelta=new Vector2(10000,10000);
+ // Block the home screen while the launch animation is visible.
+ intro.GetChild(0).GetComponent<Image>().raycastTarget=true;
+ StartCoroutine(StartIntroWhenVisible(intro,generation,autoDismiss));
+ }
+ IEnumerator StartIntroWhenVisible(RectTransform intro,int generation,bool autoDismiss){
+ while(!UnityEngine.Rendering.SplashScreen.isFinished){if(generation!=viewGeneration||intro==null)yield break;yield return null;}
+ // Present the empty cream page before the first animation tick, even on a slow first frame.
+ #if UNITY_EDITOR
+  if(Application.isBatchMode)yield return null;else yield return new WaitForEndOfFrame();
+  #else
+  yield return new WaitForEndOfFrame();
+  #endif
+  yield return null;
+ if(generation!=viewGeneration||intro==null)yield break;
+ var presentation=intro.gameObject.AddComponent<JellyLogoIntro>();presentation.Begin();
+ Debug.Log("INTRO_VISIBLE_START splashFinished="+UnityEngine.Rendering.SplashScreen.isFinished+" realtime="+Time.realtimeSinceStartup);
+ if(autoDismiss)StartCoroutine(DismissIntro(intro,generation));
+ }
+ IEnumerator DismissIntro(RectTransform intro,int generation){yield return new WaitForSecondsRealtime(JellyLogoIntro.HoldDuration);if(generation!=viewGeneration||intro==null)yield break;
+ var group=intro.gameObject.AddComponent<CanvasGroup>();float t=0;while(t<JellyLogoIntro.FadeDuration){if(generation!=viewGeneration||intro==null)yield break;t+=Time.unscaledDeltaTime;group.alpha=1-Mathf.Clamp01(t/JellyLogoIntro.FadeDuration);yield return null;}if(intro!=null)Destroy(intro.gameObject);
+ }
+ public void OpenShopCategory(int category=0){shopCategory=Mathf.Clamp(category,0,2);ShowPage("shop");DrawShop();}
+ void BuildShop(RectTransform p){BuildCosmeticShop(p);}
+ void BuildRanking(RectTransform p,bool vip){if(!Profile.LeagueUnlocked){UICraft.Label(p,"花园联赛",0,250,900,120,64,UICraft.Ink);UICraft.Label(p,"通关第10关后解锁",0,80,900,100,42,UICraft.Ink);UICraft.Button(p,"继续闯关",0,-180,700,140,UICraft.Green,()=>BeginLevel(Mathf.Clamp(Profile.AlphabetUnlocked,0,LevelCatalog.Count-1)),48);return;}var root=UICraft.Root(p,"Live league content",0,0,1080,menuHeight);root.gameObject.AddComponent<LeagueRankingView>().Initialize(Profile,LeagueSource,()=>BeginLevel(Mathf.Clamp(Profile.AlphabetUnlocked,0,LevelCatalog.Count-1)),OpenLeagueRewards,()=>ShowPage("home"));}
+ void BeginLevel(int index,bool tutorialMode=false,bool skipOnboarding=false,int trial=-1){if(busy)return;CloseCollectionGoalEntrance();victoryCelebrated=false;victoryCelebration=null;victoryRoundPrepared=false;victoryPreparation=null;Metrics?.Finish("restarted");CancelContentForLevel(index);if(trial<0&&!tutorialMode&&!RuntimeQA.IsIsolated&&!TreeJourney80.CanPlay(Profile,index)&&!PlayerStrategyTestBuild.Enabled){Toast("请先通关前面的关卡");return;}FlushLeagueActivity(false);Profile.BeginLeagueRound();SoundService.CancelTransient();streakTrial=trial;CloseTutorialGuide();tutorialRun=tutorialMode||(!skipOnboarding&&index==0&&Profile.AlphabetUnlocked==0&&!Profile.FirstBounceComplete);CloseAlphabetIntroduction();ClearPaintingCollection();continueAdPending=false;ClearPages();bottomFill.gameObject.SetActive(false);rankingBackdrop.gameObject.SetActive(false);headerSlot.gameObject.SetActive(false);navSlot.gameObject.SetActive(false);CancelAim();RemoveModal(false);viewGeneration++;busy=true;playing=false;qaResult=false;won=false;hasAdBonus=false;baseRewardSaved=false;earnedWinCoins=0;earnedWinNote="";currentLevel=Mathf.Clamp(index,0,LevelCatalog.Count-1);resultKey=AlphabetCampaign.Id+"/"+Guid.NewGuid().ToString("N");if(resultSequence!=null){StopCoroutine(resultSequence);resultSequence=null;}Clear(overlayRoot);Clear(hudRoot);RecycleCoins();Clear(effectsRoot);results=null;skipResult=null;var loading=UICraft.Root(overlayRoot,"Loading");Background(loading,purple);var loadingCover=(RectTransform)loading.GetChild(0);loadingCover.anchorMin=loadingCover.anchorMax=new Vector2(.5f,.5f);loadingCover.sizeDelta=new Vector2(10000,10000);loadingCover.GetComponent<Image>().raycastTarget=true;var presentation=loading.gameObject.AddComponent<LoadingPresentation>();presentation.Build();presentation.Play();StartCoroutine(RunLevelLoad(loading,viewGeneration,index,tutorialMode,skipOnboarding,trial));}
+ IEnumerator StartPreparedLevel(RectTransform loading,int generation){
+  // Present the overlay before synchronous level preparation, then start its visible clock.
+  #if UNITY_EDITOR
+  if(Application.isBatchMode)yield return null;else yield return new WaitForEndOfFrame();
+  #else
+  yield return new WaitForEndOfFrame();
+  #endif
+  yield return null;
+  if(generation!=viewGeneration||loading==null)yield break;
+  Session.StopLevel();yield return null;
+  yield return GameContent.PrepareLevel(currentLevel);
+  if(generation!=viewGeneration||loading==null)yield break;
+  loading.GetComponent<LoadingPresentation>().SetStatus("正在布置棋盘…");
+  yield return null;
+  yield return Session.PrepareSession(currentLevel,tutorialRun,streakTrial);
+  if(generation!=viewGeneration||loading==null)yield break;
+  SoundService.Music(Session.IsBossTrial?"bgm_boss":"bgm_gameplay");Session.BoosterProfile=Profile;Session.SetPaused(true);
+  progressionRun=streakTrial<0&&currentLevel>=Profile.AlphabetUnlocked;feedback=savedFeedback;if(streakTrial<0)feedback.StartLevel();
+  boardLayout=true;gameCamera=Camera.main;ApplySafeArea();
+  var presentation=loading.GetComponent<LoadingPresentation>();presentation.Play();
+  double revealAt=Time.realtimeSinceStartupAsDouble+LoadingPresentation.MinimumDuration;
+  while(Time.realtimeSinceStartupAsDouble<revealAt){
+   if(generation!=viewGeneration||loading==null)yield break;
+   yield return null;
+  }
+  if(generation!=viewGeneration||loading==null)yield break;
+  if(currentPage!=null){Destroy(currentPage.gameObject);currentPage=null;}
+  Destroy(loading.gameObject);busy=false;playing=true;CurrentPage="battle";
+  BuildBattleHUD();RefreshHUD();if(contentLoad!=null)contentLoad.PreparationComplete=true;StartCoroutine(PrefetchFollowingLevel(currentLevel,generation));Session.SetPaused(true);yield return ShowCollectionGoalEntrance(generation);if(generation!=viewGeneration)yield break;if(tutorialRun)yield return ShowFirstBounceIntroduction(generation);else if(streakTrial<0)yield return ShowAlphabetIntroductions(generation);if(generation!=viewGeneration)yield break;if(streakTrial<0&&(tutorialRun||currentLevel==0))yield return ShowBattleInterfaceTour(generation);if(generation!=viewGeneration)yield break;if(!tutorialRun&&streakTrial<0&&!Session.IsOpening)yield return ShowBoosterUnlocks(generation);if(generation!=viewGeneration)yield break;if(Session.ApplyCampaignStreakBonus())yield return ShowCampaignStreakReward(generation);if(generation!=viewGeneration)yield break;Session.SetPaused(false);Metrics?.BeginRound(currentLevel);ShowBoosterSelectionGuide();StartTutorialGuide();SoundService.Play("click");if(tutorialRun)SoundService.Speak("vo_tutorial_launch_zh",70);
+ }
+ void BuildBattleHUD(){hudRoot.gameObject.SetActive(true);if(Session.IsStreakTrial||Session.UsesShopBoosters||Session.IsOpening)BuildStreakToolsHUD();BuildScoreHUD();var battleHeader=UICraft.Root(hudRoot,"Safe battle header");if(Session.IsOpening||Session.IsTutorial)battleHeader.gameObject.AddComponent<BattleHUDSummary>().Initialize(Session);var settings=HeaderMedallions.Settings(battleHeader,-405,1010,Pause);settings.name="Battle settings";settings.transform.localScale=Vector3.one*.64f;settings.gameObject.AddComponent<WeChatMenuAvoider>().FullSystemBand=false;if(!Session.IsChainCollection){var capsule=UICraft.Art(hudRoot,"pastel/resource_capsule",0,868,420,100);capsule.type=Image.Type.Sliced;capsule.preserveAspect=false;LeaguePortrait.Create(hudRoot,Profile,"",-135,868,100,true);shotsText=UICraft.Label(hudRoot,"0",20,868,170,80,48,UICraft.Ink);UICraft.Label(hudRoot,Session.IsChainCollection?"剩余步数":Session.IsCollection?"回合":"剩余次数",116,868,100,65,24,UICraft.Ink);}else shotsText=null;recallButton=UICraft.Button(hudRoot,"回收小球",0,760,Session.IsChainCollection?330:420,Session.IsChainCollection?78:72,UICraft.Blue,()=>Session.RecallBalls());if(Session.IsCollection)recallButton.GetComponent<RectTransform>().anchoredPosition=new Vector2(285,-730);recallText=recallButton.GetComponentInChildren<TMP_Text>();recallButton.gameObject.SetActive(false);if(!Session.IsCollection)UICraft.Label(hudRoot,"拖动瞄准，松手发射",0,-1090,900,58,28,UICraft.Ink);if(Session.IsCollection){var collectionRoot=UICraft.Root(hudRoot,"Collection HUD");collectionRoot.gameObject.AddComponent<CollectionHUD>().Initialize(Session);}if(Session.IsPixelDrop){targetText=UICraft.Label(hudRoot,"",0,690,850,70,30,UICraft.Ink);UICraft.Label(hudRoot,"把果冻弹进两侧通道",0,-575,900,65,27,UICraft.Ink);}if(Session.IsJuiceStage){var juiceRoot=UICraft.Root(hudRoot,"Juice garden HUD");juiceRoot.gameObject.AddComponent<JuiceHUD>().Initialize(Session);}if(Session.IsColorMatch){var colorRoot=UICraft.Root(hudRoot,"Color match controls");colorRoot.gameObject.AddComponent<ColorMatchHUD>().Initialize(Session);}if(Session.IsAbilityRoute){recallButton.GetComponent<RectTransform>().anchoredPosition=new Vector2(230,760);var abilityRoot=UICraft.Root(hudRoot,"Ability chapter controls");abilityRoot.gameObject.AddComponent<AbilityHUD>().Initialize(Session);}if(Session.IsBossTrial){var bossRoot=UICraft.Root(hudRoot,"Boss encounter HUD");bossRoot.gameObject.AddComponent<BossHUD>().Initialize(Session);}else if(!Session.IsCollection||Session.IsChainCollection){var feedbackRoot=UICraft.Root(hudRoot,"In-game feedback");feedbackRoot.gameObject.AddComponent<InGameFeedbackView>().Initialize(Session,!Session.IsChainCollection);}tutorialStep=0;if(tutorialStep>0)ShowTutorial(1);LayoutBattleHeaderInsets();}
+ void ShowTutorial(int step){if(tutorial!=null)Destroy(tutorial.gameObject);tutorialStep=step;if(step==0)return;tutorial=UICraft.Root(hudRoot,"Tutorial",0,-400,700,180);var card=UICraft.Art(tutorial,"pastel/modal_panel",0,0,700,180);card.type=Image.Type.Sliced;card.preserveAspect=false;UICraft.Label(tutorial,step==1?"拖动瞄准，松手发射！":"在次数用完前完成所有目标！",0,0,610,130,36,UICraft.Ink);if(step==2)StartCoroutine(HideTutorialLater(viewGeneration));}
+ IEnumerator HideTutorialLater(int generation){yield return new WaitForSecondsRealtime(3.4f);if(generation==viewGeneration&&tutorialStep==2)ShowTutorial(0);}
+ void RefreshHUD(){RefreshScoreHUD();if(recallButton!=null){recallButton.gameObject.SetActive(Session.RecallAvailable);recallButton.interactable=!Session.IsPaused;if(recallText!=null)recallText.text="回收小球（"+Session.ActiveBalls+")";}if(shotsText!=null)shotsText.text=(Session.IsCollection&&!Session.IsChainCollection?Session.CollectionRound:Session.Shots).ToString();if(ballsText!=null)ballsText.text="场上小球  "+Session.ActiveBalls;if(targetText!=null)targetText.text=(Session.IsPixelDrop?"剩余果冻  ":"目标  ")+Session.RemainingTargets;}
+ bool UIBlocked(Vector2 pos){if(EventSystem.current==null)return false;uiHits.Clear();var data=new PointerEventData(EventSystem.current){position=pos};EventSystem.current.RaycastAll(data,uiHits);return uiHits.Count>0;}
+ void HandleInput(){if(DrainNativeBattleInput())return;if(!playing||busy||modal!=null||results!=null||!Session.IsPlaying||Session.IsPaused){if(aiming)CancelAim();return;}if(Input.touchCount>0){if(!aiming){for(int i=0;i<Input.touchCount;i++){var t=Input.GetTouch(i);if(t.phase==TouchPhase.Began){BeginAim(t.position,t.fingerId);break;}}}else{bool found=false;for(int i=0;i<Input.touchCount;i++){var t=Input.GetTouch(i);if(t.fingerId!=pointerId)continue;found=true;if(t.phase==TouchPhase.Canceled){CancelAim();break;}if(t.phase!=TouchPhase.Stationary)UpdateAim(t.position);if(t.phase==TouchPhase.Ended)EndAim(t.position);break;}if(!found)CancelAim();}}}
+ // Consume desktop pointer event positions so a quick drag inside one rendered frame
+ // retains its actual press position instead of sampling the release position twice.
+ void OnGUI(){
+  if(nativeTouchReady||Input.touchCount>0)return;var e=Event.current;if(e==null||e.button!=0)return;
+  if(!playing||busy||modal!=null||results!=null||!Session.IsPlaying||Session.IsPaused)return;
+  Vector2 position=new Vector2(e.mousePosition.x,Screen.height-e.mousePosition.y);
+  if(e.type==EventType.MouseDown)BeginAim(position,-1);
+  else if(e.type==EventType.MouseDrag&&aiming&&pointerId==-1)UpdateAim(position);
+  else if(e.type==EventType.MouseUp&&aiming&&pointerId==-1){UpdateAim(position);EndAim(position);}
+ }
+ void BeginAim(Vector2 pos,int id){if(aiming)return;if(UIBlocked(pos)){BattleInputStatus="ui-hit";return;}if(gameCamera==null||!gameCamera.pixelRect.Contains(pos)){BattleInputStatus="outside";return;}if(Session.GardenDecor!=null&&Session.GardenDecor.TryTap(gameCamera.ScreenToWorldPoint(pos)))return;if(Session.IsCollection&&Session.CollectionTool!=0){Session.UseCollectionTool(BoardDisplay.Inverse(gameCamera.ScreenToWorldPoint(pos)));return;}if(Session.IsAbilityRoute&&Session.ActiveBalls>0){Session.ActivateAbility();return;}aiming=true;BattleInputStatus="aiming";NotifyTutorialPointer(true);pointerId=id;pointerStart=pos;Metrics?.Balance?.StrategyInput("begin",aimDirection);UpdateAim(pos);}
+ void UpdateAim(Vector2 pos){if(!aiming)return;var w=BoardDisplay.Inverse(CameraJuice.StableScreenToWorld(gameCamera,pos));var d=w-Session.LauncherPosition;if(d.y<.2f)d.y=.2f;if(d.sqrMagnitude<.01f)d=Vector2.up;aimDirection=d.normalized;Metrics?.Balance?.StrategyInput("adjust",aimDirection);Session.SetAim(aimDirection);}
+ void EndAim(Vector2 pos){if(!aiming)return;bool valid=(pos-pointerStart).sqrMagnitude>36&&gameCamera.pixelRect.Contains(pos);if(Array.IndexOf(Environment.GetCommandLineArgs(),"--demo-record")>=0)Debug.Log("DEMO_AIM start="+pointerStart+" end="+pos+" valid="+valid+" paused="+Session.IsPaused);var dir=aimDirection;Metrics?.Balance?.StrategyInput(valid?"release":"cancel",dir);CancelAim();if(valid&&Session.TryShoot(dir)){Metrics?.AcceptedRelease();BattleAcceptedShots++;BattleInputStatus="accepted";if(tutorialStep==1)ShowTutorial(2);}else BattleInputStatus=valid?"shot-wait":"short/outside";}
+ void CancelAim(){if(aiming){Metrics?.Balance?.StrategyInput("cancel",aimDirection);NotifyTutorialPointer(false);}aiming=false;pointerId=-999;if(Session!=null)Session.SetAim(null);}
+ void Pause(){if(victoryCelebration!=null||victoryFinale!=null||victoryPreparation!=null||StreakRewardActive||AlphabetIntroActive||results!=null||IsCollectingPainting)return;BuildPlayerSettings();}
+ void Settings(){BuildPlayerSettings();}
+ void OpenModal(string title,Color color,float w,float h){RemoveModal(false);modal=UICraft.Root(overlayRoot,"Modal",0,0,w,h);modal.gameObject.AddComponent<UILightSurface>();UICraft.Box(modal,"Dimmer",0,0,1200,2500,new Color(.20f,.16f,.15f,.43f),false,true);var panel=UICraft.Art(modal,"modal_panel",0,0,w,h);if(panel!=null){panel.type=Image.Type.Sliced;panel.preserveAspect=false;panel.raycastTarget=true;}else UICraft.Box(modal,"Panel",0,0,w,h,color,false,true);UICraft.Label(modal,title,0,h/2-70,w-170,115,48,UICraft.Ink);UICraft.Button(modal,"X",w/2-62,h/2-62,91,91,new Color32(239,91,78,255),CloseModal,41);OpenModalMotion();}
+ void OpenModalMotion(){var group=modal.gameObject.AddComponent<CanvasGroup>();group.alpha=0;modal.localScale=Vector3.one*.94f;modalMotion=DOTween.Sequence().SetUpdate(true).SetId(modal);modalMotion.Append(modal.DOScale(1,.21f).SetEase(Ease.OutCubic));modalMotion.Join(DOTween.To(()=>group.alpha,v=>group.alpha=v,1,.21f));SoundService.Play("whoosh");}
+ void CloseModal(){if(modal==null)return;SoundService.Play("ui_back");modalMotion?.Kill(false);var old=modal;var group=old.GetComponent<CanvasGroup>();group.blocksRaycasts=false;modalMotion=DOTween.Sequence().SetUpdate(true).SetId(old);modalMotion.Append(old.DOScale(old.localScale*.94f,.14f).SetEase(Ease.InCubic));modalMotion.Join(DOTween.To(()=>group.alpha,v=>group.alpha=v,0,.14f));modalMotion.OnComplete(()=>{if(modal!=old)return;modalMotion=null;RemoveModal(true);});}
+ void RemoveModal(bool resume){modalMotion?.Kill(false);modalMotion=null;if(modal!=null){modal.gameObject.SetActive(false);Destroy(modal.gameObject);modal=null;}if(resume&&playing&&results==null&&Session!=null&&Session.IsPaused)Session.SetPaused(false);}
+ IEnumerator Pop(RectTransform rt,float duration){float t=0;while(t<duration&&rt!=null){t+=Time.unscaledDeltaTime;rt.localScale=Vector3.one*Mathf.LerpUnclamped(.75f,1,UICraft.OutBack(Mathf.Clamp01(t/duration)));yield return null;}if(rt!=null)rt.localScale=Vector3.one;}
+ void ContentEnd(){OpenModal("恭喜通关！",new Color32(146,49,77,255),920,1220);UICraft.Badge(modal,0,224,265);UICraft.Label(modal,"新关卡正在生长！",0,27,810,120,49);UICraft.Label(modal,"加入花园联赛，\n在轻松闯关的同时收集奖章。",0,-124,810,145,34);UICraft.Label(modal,"本地演示，尚未接入在线对战",0,-264,810,80,27,UICraft.Ink);UICraft.Button(modal,"前往联赛",0,-442,660,145,UICraft.Green,()=>{CloseModal();ShowPage("vip");},58);}
+ void LevelPicker(){ShowPage("chapters");}
+ public void OpenStagePage(int page){OpenAlphabetStagePage(page);}
+
+ void MockPurchase(int coins,string name){if(!LocalTestTools.Available)return;OpenModal("本地购买演示",new Color32(89,104,169,255),940,1110);UICraft.Label(modal,name,0,299,810,110,51,UICraft.Ink);UICraft.Label(modal,"选择模拟结果。\n当前尚未接入支付服务。",0,159,820,145,34);string transaction=Guid.NewGuid().ToString("N");UICraft.Button(modal,"模拟成功",0,-35,760,123,UICraft.Green,()=>{if(coins==0){CloseModal();Toast("仅供预览，尚未接入购买或广告服务。");return;}var status=LocalMockServices.ResolvePurchase(Profile,transaction,coins,MockOutcome.Completed);CloseModal();RefreshWallet();Toast(status==MockOutcome.Completed?"演示购买：+"+coins+" 金币":"购买保存失败，未增加金币。");},40);UICraft.Button(modal,"取消",-200,-205,350,112,UICraft.Blue,()=>{LocalMockServices.ResolvePurchase(Profile,transaction,coins,MockOutcome.Cancelled);CloseModal();Toast("购买已取消，余额不变。");},37);UICraft.Button(modal,"模拟失败",200,-205,350,112,new Color32(226,104,79,255),()=>{LocalMockServices.ResolvePurchase(Profile,transaction,coins,MockOutcome.Failed);CloseModal();Toast("模拟失败，余额不变。");},37);UICraft.Label(modal,"商品列表仅为界面演示，\n不提供实际购买或当前报价。",0,-388,820,140,29);}
+ void OnOutcome(bool win){if(!playing||results!=null||victoryCelebration!=null||victoryFinale!=null||victoryPreparation!=null)return;if(win&&UsesVictoryFinale&&!victoryCelebrated){BeginGoalCelebration();return;}if(!GameContent.PageReady(win?"result-win":"result-lose")){PrepareOutcomeContent(win);return;}if(win&&UsesVictoryFinale&&!victoryRoundPrepared){BeginVictoryPreparation();return;}FlushLeagueActivity(false);if(!win&&!Session.IsStreakTrial&&!Session.IsTutorial){Profile.LeagueLoss();if(!Profile.RecordCampaignLoss(resultKey,currentLevel))Toast("救助进度保存失败，请重启后重试。");}if(win&&UsesVictoryFinale)PrepareVictoryCounter();Session.FinalizeScore(win);if(Session.IsStreakTrial){ShowStreakTrialResult(win);return;}if(Session.IsTutorial){FinishFirstBounce(win);return;}CloseTutorialGuide();feedback.RecordResult(resultKey,currentLevel,win,progressionRun);won=win;qaResult=false;mainlineReplay=false;earnedWinCoins=win?Profile.CampaignWinCoins(currentLevel,Session.Score):0;earnedWinNote=win?(earnedWinCoins-ScoreRules.WinCoins(Session.Score)-Profile.NewPlayerMilestone(currentLevel)>0?"首次通关 +20 金币":"")+(Profile.NewPlayerMilestone(currentLevel)>0?"  新手奖励 +100 金币":""):"";baseRewardSaved=win&&Profile.CommitAlphabetWin(resultKey,currentLevel,Session.Score);Metrics?.Finish(win?"win":"loss");if(win&&UsesVictoryFinale)BeginVictoryFinale();else ShowResult(win);if(!win&&Profile.HasRescue(currentLevel))Toast("已补充本关专用穿透球，下次发射可免费使用1次。");}
+ void ShowResult(bool win){
+ CancelAim();if(tutorial!=null){Destroy(tutorial.gameObject);tutorial=null;}Clear(overlayRoot);modal=null;results=UICraft.Root(overlayRoot,"Result overlay");viewGeneration++;
+ if(win){hudRoot.gameObject.SetActive(false);victory=results.gameObject.AddComponent<VictoryPresentation>();victory.Begin(BuildResultActions,currentLevel+1,!mainlineReplay,qaResult?20:earnedWinCoins,Profile.LeagueUnlocked?Profile.LastLeagueMedalGain:-1);skipResult=()=>victory.Finish();}
+ else{hudRoot.gameObject.SetActive(false);results.gameObject.AddComponent<FailurePresentation>().Begin(()=>BeginLevel(currentLevel),ReturnHome,WatchContinueAd,Session.CanContinue&&!qaResult);}
+
+ }
+ RectTransform BuildResultActions(){return BuildAlphabetResultActions();}
+ public bool RewardReady=>won&&results!=null&&victory!=null&&victory.Ready;
+ public bool RewardClaimed=>baseRewardSaved;
+ public string QAResultKey=>resultKey;
+ bool ClaimBaseOnce(){if(baseRewardSaved)return true;if(!RewardReady||qaResult)return false;baseRewardSaved=Profile.CommitBase(resultKey,currentLevel)||Profile.HasBaseReward(resultKey);if(!baseRewardSaved)Toast("奖励保存失败，请重试。");return baseRewardSaved;}
+ public void CollectReward(){if(results==null||victory==null||!victory.Ready||qaResult)return;if(ClaimBaseOnce())ReturnHome();}
+ void MockAd(){if(!LocalTestTools.Available)return;if(qaResult){Toast("界面预览不会发放金币。");return;}if(!baseRewardSaved){Toast("基础奖励保存失败，暂时无法领取加成。");return;}if(hasAdBonus){Toast("本轮加成已领取。");return;}OpenModal("本地广告演示",new Color32(151,96,49,255),930,1030);UICraft.Label(modal,"当前尚未接入广告服务。\n请选择模拟播放结果。",0,220,820,180,35);UICraft.Button(modal,"模拟看完 · +20",0,19,740,127,UICraft.Green,()=>{var status=LocalMockServices.ResolveAd(Profile,resultKey,MockOutcome.Completed);hasAdBonus=status==MockOutcome.Completed;CloseModal();Toast(hasAdBonus?"演示奖励：20金币，仅发放一次。":"奖励保存失败，未增加金币。");},44);UICraft.Button(modal,"取消",-195,-155,350,118,UICraft.Blue,()=>{LocalMockServices.ResolveAd(Profile,resultKey,MockOutcome.Cancelled);RemoveModal(true);Toast("广告已取消，未发放额外奖励。");},38);UICraft.Button(modal,"模拟失败",195,-155,350,118,new Color32(225,91,66,255),()=>{LocalMockServices.ResolveAd(Profile,resultKey,MockOutcome.Failed);RemoveModal(true);Toast("模拟广告失败，未发放额外奖励。");},38);UICraft.Label(modal,"基础奖励已保存。",0,-334,830,90,31);}
+ void ReturnHome(){ShowPage(returnToTree?"chapters":"home",false);}
+ IEnumerator CountWallet(int from,int to,int generation){float t=0;yield return new WaitForSecondsRealtime(.32f);while(t<.65f&&generation==viewGeneration){t+=Time.unscaledDeltaTime;if(walletText!=null)walletText.text=Mathf.RoundToInt(Mathf.Lerp(from,to,1-Mathf.Pow(1-Mathf.Clamp01(t/.65f),3))).ToString();yield return null;}if(generation==viewGeneration)RefreshWallet();}
+ IEnumerator FlyCoins(){yield return null;for(int i=0;i<8;i++){var coin=TakeCoin(viewGeneration);coin.anchoredPosition=new Vector2(UnityEngine.Random.Range(-220,220),UnityEngine.Random.Range(-80,120));StartCoroutine(FlyCoin(coin,i*.04f,viewGeneration));}yield return new WaitForSecondsRealtime(1.5f);RefreshWallet();}
+ IEnumerator FlyCoin(RectTransform coin,float delay,int generation){yield return new WaitForSecondsRealtime(delay);if(coin==null||!coinLeases.TryGetValue(coin,out int lease)||lease!=generation)yield break;Vector2 start=coin.anchoredPosition,end=new Vector2(30,1010);float t=0;while(t<.48f&&coin!=null&&generation==viewGeneration){t+=Time.unscaledDeltaTime;float a=Mathf.Clamp01(t/.48f);Vector2 c=Vector2.Lerp(start,end,a*a);c.x+=Mathf.Sin(a*Mathf.PI)*(start.x<0?-130:130);coin.anchoredPosition=c;coin.localScale=Vector3.one*Mathf.Lerp(1,.56f,a);coin.localRotation=Quaternion.Euler(0,0,a*360);yield return null;}ReturnCoin(coin,generation);if(generation==viewGeneration&&walletTarget!=null){if(walletPulse!=null)StopCoroutine(walletPulse);walletPulse=StartCoroutine(WalletPulse(viewGeneration));if(delay>=.08f&&Mathf.RoundToInt(delay/.04f)%3==0)SoundService.Play("coin");}}
+ RectTransform TakeCoin(int generation){var coin=coinPool.Count>0?coinPool.Pop():UICraft.Coin(coinPoolRoot,0,0,72);coin.SetParent(effectsRoot,false);coin.gameObject.SetActive(true);coin.localScale=Vector3.one;coin.localRotation=Quaternion.identity;coinLeases[coin]=generation;return coin;}
+ void ReturnCoin(RectTransform coin,int generation){if(coin==null||!coinLeases.TryGetValue(coin,out int lease)||lease!=generation)return;coinLeases.Remove(coin);coin.gameObject.SetActive(false);coin.SetParent(coinPoolRoot,false);coin.localScale=Vector3.one;coin.localRotation=Quaternion.identity;coinPool.Push(coin);}
+ void RecycleCoins(){var keys=new List<RectTransform>(coinLeases.Keys);foreach(var coin in keys)if(coin!=null)ReturnCoin(coin,coinLeases[coin]);}
+ IEnumerator WalletPulse(int generation){float t=0;while(t<.16f&&walletTarget!=null&&generation==viewGeneration){t+=Time.unscaledDeltaTime;float f=1-Mathf.Pow(1-Mathf.Clamp01(t/.16f),3);walletTarget.localScale=Vector3.one*Mathf.Lerp(1.14f,1,f);yield return null;}if(walletTarget!=null&&generation==viewGeneration)walletTarget.localScale=Vector3.one;walletPulse=null;}
+ IEnumerator Fireworks(int generation){float until=Time.unscaledTime+5;while(Time.unscaledTime<until&&generation==viewGeneration){Vector2 center=new Vector2(UnityEngine.Random.Range(-360,360),UnityEngine.Random.Range(50,800));Color color=Color.Lerp(new Color(1,.63f,.10f),new Color(1,1,.70f),UnityEngine.Random.value);for(int i=0;i<20;i++){float a=i*Mathf.PI*2/20;var dot=UICraft.Box(effectsRoot,"Firework spark",center.x,center.y,5,25,color);dot.rectTransform.localRotation=Quaternion.Euler(0,0,a*Mathf.Rad2Deg-90);StartCoroutine(Spark(dot,center,new Vector2(Mathf.Cos(a),Mathf.Sin(a))*UnityEngine.Random.Range(170,320),.85f,generation));}yield return new WaitForSecondsRealtime(.40f);}if(generation==viewGeneration){for(int i=0;i<70;i++){var c=UICraft.Box(effectsRoot,"Confetti",UnityEngine.Random.Range(-500,500),1200+UnityEngine.Random.Range(0,500),13,28,Color.HSVToRGB(UnityEngine.Random.value,.65f,1));StartCoroutine(Confetti(c,generation));}}}
+ IEnumerator Spark(Image image,Vector2 start,Vector2 velocity,float duration,int generation){float t=0;Color color=image.color;while(t<duration&&image!=null&&generation==viewGeneration){t+=Time.unscaledDeltaTime;image.rectTransform.anchoredPosition=start+velocity*t+Vector2.down*(120*t*t);color.a=1-t/duration;image.color=color;yield return null;}if(image!=null)Destroy(image.gameObject);}
+ IEnumerator Confetti(Image image,int generation){float t=0;var start=image.rectTransform.anchoredPosition;float speed=UnityEngine.Random.Range(330,510),phase=UnityEngine.Random.value*6;while(t<5.8f&&image!=null&&generation==viewGeneration){t+=Time.unscaledDeltaTime;image.rectTransform.anchoredPosition=start+new Vector2(Mathf.Sin(t*3+phase)*75,-speed*t);image.rectTransform.localRotation=Quaternion.Euler(0,0,t*170+phase);yield return null;}if(image!=null)Destroy(image.gameObject);}
+ void RefreshWallet(){if(walletText!=null)walletText.text=Profile.Coins.ToString();}
+ void Toast(string message){if(toast!=null)Destroy(toast.transform.parent.gameObject);var rt=UICraft.Root(effectsRoot,"Toast",0,-853,1000,130);UICraft.Box(rt,"Toast backing",0,0,1000,130,new Color(.04f,.14f,.23f,.93f));toast=UICraft.Label(rt,message,0,0,950,117,31);toastUntil=Time.unscaledTime+3.2f;}
+ public void QASetViewport(Vector2Int? value){if(!RuntimeQA.IsIsolated)return;qaViewport=value;ApplySafeArea();}
+ public void QASetSafeArea(Rect? area){if(!RuntimeQA.IsIsolated)return;qaSafe=area;ApplySafeArea();}
+ public void QADragAim(Vector2 direction){if(!RuntimeQA.IsIsolated)return;if(gameCamera==null)return;Vector2 end=gameCamera.WorldToScreenPoint(BoardDisplay.Forward(Session.LauncherPosition+direction*4));BeginAim(end+Vector2.right*24,-1);UpdateAim(end);EndAim(end);}
+ public void QABeginAim(Vector2 screen){if(!RuntimeQA.IsIsolated)return;BeginAim(screen,-1);}
+ public void QAReleaseAim(Vector2 screen){if(!RuntimeQA.IsIsolated)return;EndAim(screen);}
+ public bool QAIsAiming=>aiming;
+ public Vector2[] QALayoutCorners(){var corners=new Vector3[4];designRoot.GetWorldCorners(corners);var screen=new Vector2[4];for(int i=0;i<4;i++)screen[i]=RectTransformUtility.WorldToScreenPoint(null,corners[i]);return screen;}
+ public void QANavigate(string page){if(!RuntimeQA.IsIsolated)return;busy=false;ShowPage(page,false);}
+ public void QAStartLevel(int index){if(!RuntimeQA.IsIsolated)return;busy=false;Profile.QAAllowChapter(index);BeginLevel(index,false,true);}
+ public IEnumerator QAWaitForLevel(){float deadline=Time.realtimeSinceStartup+30;do{yield return null;}while(overlayRoot.Find("Loading")!=null&&Time.realtimeSinceStartup<deadline);if(CurrentPage!="battle")throw new InvalidOperationException("Level failed to enter battle after loading.");}
+ public void QAResult(bool win){if(!RuntimeQA.IsIsolated)return;if(Session==null)return;busy=false;if(!playing){if(currentPage!=null){Destroy(currentPage.gameObject);currentPage=null;}Session.StartLevel(0);currentLevel=0;playing=true;BuildBattleHUD();}Session.SetPaused(true);won=win;qaResult=true;ShowResult(win);}
+}
+}
+

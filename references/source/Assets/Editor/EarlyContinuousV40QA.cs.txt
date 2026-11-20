@@ -1,0 +1,23 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using BounceGarden;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+[InitializeOnLoad]public static class EarlyContinuousV40Entry {
+ static EarlyContinuousV40Entry(){EditorApplication.playModeStateChanged+=state=>{if(state==PlayModeStateChange.EnteredPlayMode&&SessionState.GetBool("Bounce.EarlyContinuous40",false))EditorApplication.delayCall+=()=>new GameObject("Early continuous physics survey").AddComponent<EarlyContinuousV40Runner>();};}
+ public static void Run(){SessionState.SetBool("Bounce.EarlyContinuous40",true);SessionState.SetBool("BounceGarden.IsolatedEditorQA",false);EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");EditorApplication.isPlaying=true;}
+}
+public sealed class EarlyContinuousV40Runner:MonoBehaviour {
+ [Serializable]public class Run {public string letter;public int shots,blue,goal,fish,toys;public bool won,valid;}
+ [Serializable]public class Report {public int errors;public string scope="Three introductory levels; simple geometric planner with continuous five-ball groups spaced 0.66 seconds apart, real production collisions, no state rollback or forced damage.";public List<Run> runs=new List<Run>();}
+ IEnumerator Start(){var dir=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/AlphabetCampaign-v40/EarlyContinuousSurvey"));Directory.CreateDirectory(dir);var report=new Report();Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){report.errors++;File.AppendAllText(Path.Combine(dir,"errors.txt"),m+"\n"+s+"\n");}};yield return null;yield return null;FindFirstObjectByType<AppUI>().QANavigate("home");yield return null;
+  var game=new GameObject("Early continuous session").AddComponent<GameSession>();game.QAIgnoreFocusLoss=true;game.enabled=false;var plannerObject=new GameObject("Read-only angle planner");plannerObject.SetActive(false);var planner=plannerObject.AddComponent<AlphabetPhysicsSurvey>();var flags=BindingFlags.NonPublic|BindingFlags.Instance;typeof(AlphabetPhysicsSurvey).GetField("g",flags).SetValue(planner,game);var choose=typeof(AlphabetPhysicsSurvey).GetMethod("Choose",flags);var prior=Physics2D.simulationMode;Physics2D.simulationMode=SimulationMode2D.Script;
+  for(int level=0;level<3;level++){game.StartLevel(level);var run=new Run{letter=AlphabetCampaign.Stage(level).letter,goal=game.JellyGoal[1],valid=true};yield return null;while(game.IsPlaying&&game.Shots>0){var direction=(Vector2)choose.Invoke(planner,new object[]{run.shots});if(!game.TryShoot(direction)){report.errors++;break;}run.shots++;for(int tick=0;tick<Mathf.CeilToInt(.66f/Time.fixedDeltaTime)&&game.IsPlaying;tick++)game.QAAdvanceOneStep();run.valid&=game.ChainGridValid(false);yield return null;}int settle=0;while(game.IsPlaying&&(game.ActiveBalls>0||game.PendingBurstBalls>0||!game.ChainGridReady||game.ChainEffectsPending)&&settle++<1800){game.QAAdvanceOneStep();if(settle%200==0)yield return null;}if(settle>=1800)report.errors++;run.won=game.CollectionWon;run.blue=game.JellyCollected[1];run.fish=game.Collected[0];run.toys=game.Collected[1];report.runs.Add(run);File.WriteAllText(Path.Combine(dir,"survey.json"),JsonUtility.ToJson(report,true));}
+  game.StopLevel();Destroy(game.gameObject);Destroy(plannerObject);Physics2D.simulationMode=prior;SessionState.SetBool("Bounce.EarlyContinuous40",false);EditorApplication.Exit(report.errors==0?0:1);
+ }
+}

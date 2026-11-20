@@ -1,0 +1,13 @@
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public static class ChainHudArt {
+ static Texture2D atlas;static readonly Sprite[] sprites=new Sprite[16];
+ public static Sprite Frame(int index){if(sprites[index]!=null)return sprites[index];if(atlas==null)atlas=Resources.Load<Texture2D>("Art/ContainerChainV12/jelly-hud");if(atlas==null)throw new System.InvalidOperationException("Missing generated jelly HUD atlas");float cell=atlas.width/4f;int col=index%4,row=index/4;Rect rect=new Rect(col*cell,atlas.height-(row+1)*cell,cell,cell);
+  if(index<3)rect=CardRect(index,atlas.width,atlas.height);
+  var sprite=Sprite.Create(atlas,rect,new Vector2(.5f,.5f),256,0,SpriteMeshType.FullRect);sprite.name="Jelly HUD/"+index;return sprites[index]=sprite;
+ }
+ static Rect CardRect(int index,float w,float h){return new Rect((index*.25f+.012f)*w,h*.79f,w*.245f,h*.12f);}
+ public static Image Image(Transform parent,string name,int frame,float x,float y,float w,float h){var image=UICraft.Box(parent,name,x,y,w,h,Color.white);image.type=UnityEngine.UI.Image.Type.Simple;image.sprite=Frame(frame);image.preserveAspect=frame>=3;image.raycastTarget=false;return image;}
+}
+}

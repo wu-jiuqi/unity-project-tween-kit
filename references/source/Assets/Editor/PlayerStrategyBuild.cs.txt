@@ -1,0 +1,31 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public static class PlayerStrategyBuild {
+ [Serializable] sealed class Result {public string status,executable,createdUtc,unityVersion;public int errors,warnings;public bool settingsRestored;public string[] defines;}
+ public static void Windows(){
+  string root=Path.GetFullPath(Path.Combine(Application.dataPath,"../../.."));
+  string output=Path.Combine(root,"Builds/PlayerStrategy-v2/Windows/BounceGardenStrategy.exe");Directory.CreateDirectory(Path.GetDirectoryName(output));
+  string company=PlayerSettings.companyName,product=PlayerSettings.productName;int width=PlayerSettings.defaultScreenWidth,height=PlayerSettings.defaultScreenHeight;
+  var backend=PlayerSettings.GetScriptingBackend(NamedBuildTarget.Standalone);var mode=PlayerSettings.fullScreenMode;bool resize=PlayerSettings.resizableWindow;
+  var report=new Result{status="failed",executable=output,createdUtc=DateTime.UtcNow.ToString("o"),unityVersion=Application.unityVersion,defines=new[]{"BOUNCE_STRATEGY_PLAYTEST"}};
+  try{
+   PlayerSettings.companyName="BounceBustersPlaytest";PlayerSettings.productName="Bounce Garden Strategy Playtest";
+   PlayerSettings.defaultScreenWidth=592;PlayerSettings.defaultScreenHeight=1280;PlayerSettings.fullScreenMode=FullScreenMode.Windowed;PlayerSettings.resizableWindow=true;
+   PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+   var result=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=BuildTarget.StandaloneWindows64,locationPathName=output,options=BuildOptions.CompressWithLz4HC,extraScriptingDefines=report.defines});
+   report.errors=(int)result.summary.totalErrors;report.warnings=(int)result.summary.totalWarnings;
+   if(result.summary.result!=BuildResult.Succeeded)throw new Exception("Player strategy build failed: "+result.summary.result);
+   report.status="built";
+  }finally{
+   PlayerSettings.companyName=company;PlayerSettings.productName=product;PlayerSettings.defaultScreenWidth=width;PlayerSettings.defaultScreenHeight=height;
+   PlayerSettings.fullScreenMode=mode;PlayerSettings.resizableWindow=resize;PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,backend);AssetDatabase.SaveAssets();
+   report.settingsRestored=PlayerSettings.companyName==company&&PlayerSettings.productName==product&&PlayerSettings.defaultScreenWidth==width&&PlayerSettings.defaultScreenHeight==height&&PlayerSettings.fullScreenMode==mode&&PlayerSettings.resizableWindow==resize&&PlayerSettings.GetScriptingBackend(NamedBuildTarget.Standalone)==backend;
+   File.WriteAllText(Path.Combine(Path.GetDirectoryName(output),"build-summary.json"),JsonUtility.ToJson(report,true));
+  }
+  Debug.Log("PLAYER_STRATEGY_WINDOWS_READY "+output);
+ }
+}

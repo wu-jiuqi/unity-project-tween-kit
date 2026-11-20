@@ -1,0 +1,15 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+public sealed class BannerJellyImporter:AssetPostprocessor {
+ void OnPreprocessTexture(){if(!assetPath.StartsWith("Assets/Resources/Art/BannerJelly/",StringComparison.Ordinal))return;var t=(TextureImporter)assetImporter;t.textureType=TextureImporterType.Sprite;t.spriteImportMode=SpriteImportMode.Single;t.spritePixelsPerUnit=100;t.alphaIsTransparency=true;t.mipmapEnabled=false;t.wrapMode=TextureWrapMode.Clamp;t.textureCompression=TextureImporterCompression.Uncompressed;t.maxTextureSize=2048;var s=new TextureImporterSettings();t.ReadTextureSettings(s);s.spriteMeshType=SpriteMeshType.FullRect;if(Path.GetFileNameWithoutExtension(assetPath)=="panel")s.spriteBorder=new Vector4(100,100,100,100);t.SetTextureSettings(s);}
+}
+public static class BannerJellyBuild {
+ public static void Windows(){Build(BuildTarget.StandaloneWindows64);}
+ public static void Android(){Build(BuildTarget.Android);}
+ static void Build(BuildTarget target){foreach(var f in Directory.GetFiles("Assets/Resources/Art/BannerJelly","*.png"))AssetDatabase.ImportAsset(f.Replace('\\','/'),ImportAssetOptions.ForceSynchronousImport|ImportAssetOptions.ForceUpdate);BuildEntry.Configure();BuildEntry.Rules();PlayerSettings.bundleVersion = BounceGarden.GameVersion.Name;PlayerSettings.Android.bundleVersionCode = BounceGarden.GameVersion.Code;
+ string path=Environment.GetEnvironmentVariable("BOUNCE_BANNER_OUTPUT");if(string.IsNullOrEmpty(path))throw new Exception("BOUNCE_BANNER_OUTPUT required");Directory.CreateDirectory(Path.GetDirectoryName(path));
+ var r=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=target,locationPathName=path,options=BuildOptions.CompressWithLz4HC,extraScriptingDefines=new[]{"BOUNCE_TEST_TOOLS"}});Debug.Log("BANNER_V16_BUILD "+r.summary.result+" errors="+r.summary.totalErrors+" warnings="+r.summary.totalWarnings);if(r.summary.result!=BuildResult.Succeeded)throw new Exception("Banner build failed");}
+}

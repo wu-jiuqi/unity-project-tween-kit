@@ -1,0 +1,26 @@
+using System;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public static class ReferenceShopStyle {
+ public static readonly Color Ink=new Color32(104,65,61,255),Muted=new Color32(159,125,111,255),Mint=new Color32(48,205,139,255);
+
+ public static TMP_FontAsset Font=>GameTypography.Font;
+ public static RectTransform Root(Transform parent,string name,float w,float h){return UICraft.Root(parent,name,0,0,w,h);}
+ public static RectTransform Rect(Transform parent,string name,float x,float y,float w,float h){var p=parent as RectTransform;return UICraft.Root(parent,name,x-p.rect.width/2,p.rect.height/2-y,w,h);}
+ public static Image Art(Transform p,string key,float x,float y,float w,float h){var rt=Rect(p,key,x,y,w,h);var holder=rt.gameObject.AddComponent<Image>();holder.color=Color.clear;holder.raycastTarget=false;
+  if(key=="lock"){UICraft.Box(rt,"Lock body",0,-h*.18f,w*.8f,h*.56f,new Color32(136,127,122,255));var outer=UICraft.Box(rt,"Lock shackle",0,h*.18f,w*.55f,h*.55f,new Color32(136,127,122,255),true);UICraft.Box(outer.transform,"Hole",0,0,w*.30f,h*.31f,new Color32(248,241,230,255),true);return holder;}
+  string native=key=="coin"?"icon_coin":key=="settings"?"icon_settings":key=="nav_shop"?"icon_shop":key=="nav_home"?"icon_home":key=="nav_rank"?"icon_ranking":key=="coins_small"?"coin_stack_small":key=="coins_large"?"coin_stack_large":"leaf_mint";
+  var info=PastelArt.Info(native);float scale=Mathf.Min(w/info.visible[2],h/info.visible[3]);var image=UICraft.Art(rt,"pastel/"+native,0,0,info.size[0]*scale,info.size[1]*scale);image.rectTransform.anchoredPosition=new Vector2((info.size[0]*.5f-info.visible[0]-info.visible[2]*.5f)*scale,(info.visible[1]+info.visible[3]*.5f-info.size[1]*.5f)*scale);return holder;}
+ public static Image Panel(Transform p,string key,float x,float y,float w,float h){var rt=Rect(p,key,x,y,w,h);var holder=rt.gameObject.AddComponent<Image>();holder.color=Color.clear;holder.raycastTarget=false;string native=key=="mint"?"button_mint":key=="lilac"?"tab_selected_lavender":key=="card"?"modal_panel":key=="panel"?"modal_panel":"button_cream";var face=UICraft.Art(rt,"pastel/"+native,0,0,w,h);if(key=="card"||key=="panel"){var info=PastelArt.Info(native);float scale=key=="card"?.24f:.40f;face.type=Image.Type.Sliced;face.preserveAspect=false;face.rectTransform.sizeDelta=new Vector2(w+(info.size[0]-info.visible[2])*scale,h+(info.size[1]-info.visible[3])*scale);face.rectTransform.anchoredPosition=new Vector2((info.size[0]*.5f-info.visible[0]-info.visible[2]*.5f)*scale,(info.visible[1]+info.visible[3]*.5f-info.size[1]*.5f)*scale);face.pixelsPerUnitMultiplier=1/scale;}else LeagueSurface.Fit(face,native,w,h);return holder;}
+ public static TMP_Text Text(Transform p,string value,float x,float y,float w,float h,int size=16,Color? color=null,bool bold=false){var rt=Rect(p,"Text "+value,x,y,w,h);var t=rt.gameObject.AddComponent<TextMeshProUGUI>();t.font=Font;t.text=value;t.fontSize=size;t.fontStyle=bold?FontStyles.Bold:FontStyles.Normal;t.color=color??Ink;t.alignment=TextAlignmentOptions.Center;t.raycastTarget=false;t.textWrappingMode=TextWrappingModes.NoWrap;t.enableAutoSizing=true;t.fontSizeMin=Mathf.Max(9,size*.7f);t.fontSizeMax=size;t.overflowMode=TextOverflowModes.Truncate;return t;}
+ public static Button Button(Transform p,string name,float x,float y,float w,float h,string skin,Action action){var rt=Rect(p,"Button "+name,x,y,w,h);var hit=rt.gameObject.AddComponent<Image>();hit.color=Color.clear;hit.raycastTarget=true;var visual=Root(rt,"Visual",w,h);if(!string.IsNullOrEmpty(skin))Panel(visual,skin,w/2,h/2,w,h);var b=rt.gameObject.AddComponent<Button>();b.targetGraphic=hit;b.transition=Selectable.Transition.None;rt.gameObject.AddComponent<UIBounce>().Target=visual;rt.gameObject.AddComponent<ShopScrollDrag>();b.onClick.AddListener(()=>{SoundService.Play("click");action?.Invoke();});return b;}
+ public static Button TextButton(Transform p,string value,float x,float y,float w,float h,string skin,Action action,int size=16){var b=Button(p,value,x,y,w,h,skin,action);Text(b.transform.Find("Visual"),value,w/2,h/2,w-10,h-6,size,null,true);return b;}
+ public static void Avatar(Transform parent,string id,float x,float y,float size){var item=CatCosmeticCatalog.Items.FirstOrDefault(i=>i.id==id)??CatCosmeticCatalog.Default;var rt=Rect(parent,"Catalog avatar "+item.id,x,y,size,size);var image=rt.gameObject.AddComponent<Image>();image.sprite=CatCosmeticCatalog.Sprite(item.avatar.resource);image.preserveAspect=true;image.raycastTarget=false;}
+ public static void Portrait(Transform parent,string avatar,string frame,float x,float y,float size){var a=CatCosmeticCatalog.Items.FirstOrDefault(i=>i.id==avatar)??CatCosmeticCatalog.Default;var f=CatCosmeticCatalog.Items.FirstOrDefault(i=>i.id==frame)??CatCosmeticCatalog.Default;var rt=Rect(parent,"Measured portrait slot",x,y,size,size);CatCosmeticCatalog.Create(rt,a.avatar.resource,f.frame.resource,0,0,size);}
+ public static RectTransform CreatePortrait(Transform parent,string avatarResource,string frameResource,float x,float y,float size){return CatCosmeticCatalog.Create(parent,avatarResource,frameResource,x,y,size);}
+ public static void Coin(Transform parent,float x,float y,float size){Art(parent,"coin",x,y,size,size);}
+}
+}

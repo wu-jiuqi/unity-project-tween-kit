@@ -1,0 +1,28 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using UnityEngine;
+namespace BounceGarden {
+public sealed class IngotFxQA:MonoBehaviour {
+ string dir;int checks,failures,errors;GameSession g;AppUI app;
+ static readonly int[] kinds={6,5,1,2,3};
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){var args=Environment.GetCommandLineArgs();if(args.Contains("--ingot-fx-qa")||args.Contains("--ingot-fx-preview"))new GameObject("Ingot dedicated skills QA").AddComponent<IngotFxQA>();}
+ void Check(bool ok,string name){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+name+"\n");}
+ void Fixture(int a,int b,int flags){g.QAThirdFixture();for(int c=0;c<9;c++){g.QAThirdNormal(c,2,c%5);g.QAThirdNormal(c,6,c%5);}var source=g.QASevenTool(a,4,4,1);source.Ingot=(flags&1)!=0;if(b!=0){var pair=g.QASevenTool(b,5,4,3);pair.Ingot=(flags&2)!=0;}g.ActivateChainTool(source,Vector2.up);}
+ string Snapshot()=>g.Score+"|"+g.ChainActivationCount+"|"+g.SevenConversions+"|"+g.SevenDoubles+"|"+string.Join(",",g.CollectionBricks.Select(b=>b.Alive?b.CurrentHealth:0));
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(Screen.width,Screen.height,24);rt.Create();var image=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,image);File.WriteAllBytes(dir+"/"+name+".png",image.EncodeToPNG());Destroy(image);rt.Release();Destroy(rt);}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();bool preview=args.Contains("--ingot-fx-preview");dir=args.Contains("--qa-out")?args[Array.IndexOf(args,"--qa-out")+1]:Application.temporaryCachePath+"/IngotFX";Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Exception||t==LogType.Error){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();g=app.Session;Physics2D.simulationMode=SimulationMode2D.Script;
+ app.QAStartLevel(20);yield return app.QAWaitForLevel();for(int i=0;i<100;i++){app.QAAdvanceAlphabetIntro();app.QAAdvanceBoosterGuide();yield return null;if(i>10&&!app.AlphabetIntroActive&&!g.IsPaused)break;}
+ foreach(var key in IngotSpecialFx.Keys)for(int f=0;f<16;f++)Check(IngotSpecialFx.Frame(key,f)!=null,"dedicated frame "+key+"/"+f);
+ if(preview){while(true)foreach(int a in kinds)foreach(int b in new[]{0,6,5,1,2,3}){Fixture(a,b,1);for(int n=0;n<105;n++){g.QAThirdStep(1f/60);yield return new WaitForSecondsRealtime(1f/60);}}}
+ foreach(int a in kinds)foreach(int b in new[]{0,6,5,1,2,3}){
+  Fixture(a,b,0);string expected=Snapshot();yield return null;
+  foreach(int flags in b==0?new[]{1}:new[]{1,2,3}){Fixture(a,b,flags);Check(Snapshot()==expected,"unchanged damage score and conversions "+a+"+"+b+" flags="+flags);var gold=g.GetComponentsInChildren<IngotSpecialFx>();Check(gold.Length>0,"dedicated effect routed "+a+"+"+b+" flags="+flags);if(b!=0)Check(gold.Any(f=>f.Key=="merge"),"gold combination fusion "+a+"+"+b+" flags="+flags);if(a==3&&b!=0&&b!=3||b==3&&a!=3)Check(g.SevenConversions>0,"flower copies retain gold release "+a+"+"+b);
+   if(flags==1&&(b==0||a==2&&b==2||a==3&&b==2||a==1&&b==2)){yield return new WaitForSecondsRealtime(.22f);yield return Capture("ingot-"+a+"-"+b);}yield return null;
+  }
+ }
+ g.QAThirdFixture();SevenWindup.Play(g,g.transform,2,1,Vector2.zero,6,3,Vector2.right,()=>{},true,true);Check(g.GetComponentsInChildren<SevenWindup>().SelectMany(w=>w.GetComponentsInChildren<SpriteRenderer>()).All(r=>r.sprite.texture==OpeningThirdArt.Frame("ingot",0).texture),"windup portraits preserve both ingot types");yield return new WaitForSecondsRealtime(.85f);Check(IngotSpecialFx.Alive(g)==0,"dedicated effects complete without blocking refill");File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failures\":"+failures+",\"errors\":"+errors+"}");Application.Quit(failures==0&&errors==0?0:3);
+ }
+}
+}

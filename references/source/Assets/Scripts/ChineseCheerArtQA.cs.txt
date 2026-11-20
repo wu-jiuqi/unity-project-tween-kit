@@ -1,0 +1,33 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class ChineseCheerArtQA:MonoBehaviour {
+ string dir;int checks,failures,errors;AppUI app;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Environment.GetCommandLineArgs().Contains("--chinese-cheer-art-qa"))new GameObject("Chinese cheer artwork audit").AddComponent<ChineseCheerArtQA>();}
+ void Check(bool ok,string name){checks++;if(!ok)failures++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+name+"\n");}
+ IEnumerator Capture(string name){yield return new WaitForEndOfFrame();var rt=new RenderTexture(540,1170,24);rt.Create();var tex=new Texture2D(540,1170,TextureFormat.RGB24,false);QARecorder.Capture(Camera.main,rt,tex);File.WriteAllBytes(dir+"/"+name+".png",tex.EncodeToPNG());Destroy(tex);rt.Release();Destroy(rt);}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s);}};
+  yield return new WaitForSecondsRealtime(8);app=FindFirstObjectByType<AppUI>();app.QASetViewport(new Vector2Int(540,1170));app.QAStartLevel(0);yield return app.QAWaitForLevel();for(int i=0;i<40&&app.AlphabetIntroActive;i++){app.QAAdvanceAlphabetIntro();yield return new WaitForSecondsRealtime(.15f);}app.Session.QAIgnoreFocusLoss=true;
+  var view=FindFirstObjectByType<ChainRatingView>();var record=typeof(GameSession).GetMethod("RecordChainRatingBreak",BindingFlags.Instance|BindingFlags.NonPublic);int breaks=0;
+  for(int tier=0;tier<4;tier++){
+   var sprite=ChineseArt.CheerArt(tier);Check(Mathf.Abs(sprite.rect.width/sprite.rect.height-3f)<.01f,"imported artwork retains source 3:1 aspect "+tier);Check(sprite!=null&&sprite.texture.width>=1000,"full resolution Chinese artwork "+tier);Check(sprite.texture.GetPixel(0,0).a<.01f&&sprite.texture.GetPixel(sprite.texture.width-1,sprite.texture.height-1).a<.01f,"transparent sprite corners "+tier);
+   while(breaks<InGameFeedbackState.Thresholds[tier]){record.Invoke(app.Session,null);breaks++;}yield return new WaitForSecondsRealtime(.08f);
+   Check(view.VisibleTier==tier&&view.IsVisible&&view.VisibleArt==sprite,"actual chain threshold displays PNG sprite "+tier);
+   var image=view.GetComponentsInChildren<Image>(true).First(i=>i.sprite==sprite);Check(image.GetComponent<TMPro.TMP_Text>()==null&&!image.raycastTarget&&image.preserveAspect,"PNG graphic preserves aspect and aim input "+tier);
+   Check(Mathf.Approximately(image.transform.lossyScale.x,image.transform.lossyScale.y),"main rating uses uniform world scale "+tier);float scale=image.transform.localScale.x;yield return new WaitForSecondsRealtime(.18f);Check(Mathf.Abs(scale-image.transform.localScale.x)>.01f,"jelly pop animation changes scale "+tier);
+   app.Session.SetPaused(true);float age=view.Age;yield return Capture("chain-tier-"+tier);yield return new WaitForSecondsRealtime(.12f);Check(view.Age==age,"pause freezes artwork animation "+tier);app.Session.SetPaused(false);
+   for(int frame=0;frame<10;frame++){yield return Capture("motion-"+tier+"-"+frame.ToString("D2"));yield return new WaitForSecondsRealtime(.08f);}yield return new WaitForSecondsRealtime(1);Check(!view.IsVisible,"artwork fades and hides "+tier);
+  }
+  var feedback=FindFirstObjectByType<InGameFeedbackView>();
+  for(int tier=0;tier<4;tier++){
+   feedback.State.Advance(3);for(int i=0;i<InGameFeedbackState.Thresholds[tier];i++)feedback.State.Break();yield return new WaitForSecondsRealtime(.3f);Check(feedback.VisibleTier==tier&&feedback.VisibleArt==ChineseArt.CheerArt(tier),"companion feedback path displays PNG "+tier);var cheer=feedback.GetComponentsInChildren<Image>(true).First(i=>i.sprite==ChineseArt.CheerArt(tier));Check(Mathf.Approximately(cheer.transform.lossyScale.x,cheer.transform.lossyScale.y),"companion cheer keeps uniform scale during pop "+tier);yield return Capture("feedback-tier-"+tier);yield return new WaitForSecondsRealtime(1.8f);
+  }
+  Check(errors==0,"zero runtime errors");File.WriteAllText(dir+"/result.json",$"{{\"checks\":{checks},\"failures\":{failures},\"errors\":{errors}}}");Application.Quit(failures+errors==0?0:1);
+ }
+}
+}

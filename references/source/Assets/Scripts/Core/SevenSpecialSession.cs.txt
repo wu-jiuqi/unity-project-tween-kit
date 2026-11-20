@@ -1,0 +1,188 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+// Keep serialized legacy IDs stable: former link=rainbow, cross=1, bomb=2.
+public static class SevenSpecialRules {
+ public static readonly int[] Kinds={5,6,1,2,3};
+ public const int Cross=1,Bomb=2,Rainbow=3,Vertical=5,Horizontal=6,Damage=10,DoubleDamage=30;
+ public static bool IsSpecial(int kind)=>kind==1||kind==2||kind==3||kind==5||kind==6;
+ public static int Priority(int kind,int color,int bound)=>kind==Rainbow?0:color==bound?1:kind==Cross?2:3;
+ public static bool Nearby(Vector2 a,Vector2 b)=>Mathf.Abs(a.x-b.x)<=CollectionLevels.Pitch*1.08f&&Mathf.Abs(a.y-b.y)<=CollectionLevels.Pitch*1.08f;
+ public static int NonFlowerPriority(int kind)=>kind==Rainbow?0:kind==Cross?1:2;
+ public static void ComboShape(int a,int b,out int rows,out int cols,out int square){
+  rows=cols=square=0;
+  if(a==Bomb&&b==Bomb){square=5;return;}
+  if(a==Cross&&b==Cross){rows=cols=5;return;}
+  if(a==Cross||b==Cross){rows=cols=3;return;}
+  if(a==Bomb||b==Bomb){int laser=a==Bomb?b:a;if(laser==Horizontal)rows=3;else cols=3;return;}
+  rows=cols=1;
+ }
+ public static int[] RewardKinds={Horizontal,Vertical,Cross,Bomb,Rainbow};
+}
+public sealed partial class GameSession {
+ public bool SevenSpecialActive=>IsChainCollection&&!FusionActive;
+ System.Random sevenRandom;
+ int sevenSpawnSerial,sevenEffectDepth;
+ int sevenPresentationPending;bool sevenAbsorbing;
+ float sevenFxUntil;
+ bool sevenRefillBarrier,sevenAwaitRefill;
+ readonly List<ChainTool> sevenWaiting=new List<ChainTool>();
+ public int SevenDoubles {get;private set;}
+ public int SevenConversions {get;private set;}
+ public int SevenCombos {get;private set;}
+ public int SevenEmptyCasts {get;private set;}
+ public int SevenWaitingCount=>sevenWaiting.Count;
+ public bool SevenSettlementPending=>SevenSpecialActive&&(sevenPresentationPending>0||SevenSuctionFx.Alive(this)>0||sevenEffectDepth>0||sevenRefillBarrier||sevenWaiting.Count>0||simulationClock<sevenFxUntil);
+ bool SevenAnimationsPending=>IngotSpecialFx.Alive(this)>0||SevenSuctionFx.Alive(this)>0||simulationClock<sevenFxUntil||chainBeams.Count>0||chainLoot.Count>0||SevenSpecialFx.Alive(this)>0||fx!=null&&fx.JellyActiveCount>0;
+ internal bool SevenFreezeBoard=>SevenSpecialActive&&(sevenPresentationPending>0||SevenSuctionFx.Alive(this)>0||sevenRefillBarrier&&!sevenAwaitRefill);
+ internal bool SevenWaitingPiece(ChainGridPiece p)=>sevenWaiting.Any(t=>t.View==p.transform);
+ public int NextSevenColor(){if(sevenRandom==null)sevenRandom=new System.Random(unchecked(Generation*15485863+LevelIndex*7919+80));return sevenRandom.Next(SevenSpecialArt.ColorCount);}
+ void ClearSevenSpecials(){ClearRefill80();sevenWaiting.Clear();sevenRandom=null;sevenSpawnSerial=sevenEffectDepth=sevenPresentationPending=0;sevenAbsorbing=false;sevenFxUntil=0;sevenRefillBarrier=sevenAwaitRefill=false;SevenDoubles=SevenConversions=SevenCombos=SevenEmptyCasts=0;}
+ int SevenAuthoredTool(int kind){if(!SevenSpecialActive||kind!=1)return kind;int n=sevenSpawnSerial++%3;return n==0?SevenSpecialRules.Horizontal:n==1?SevenSpecialRules.Vertical:SevenSpecialRules.Cross;}
+ internal bool SevenTerrain(BrickBody b)=>OpeningCopperBrick(b)||OpeningCatBrick(b)||OpeningCookieBrick(b)||OpeningYarnBrick(b)||b.Definition.kind==BrickKind.Stone;
+ public bool SevenColorTarget(BrickBody b){
+  if(!SevenSpecialActive||b==null||!b.Alive||RefillProtected(b)||SevenTerrain(b)||ChainPowerRules.IsNest(b.Definition)||b.GetComponent<ChainGridPiece>()?.Size>1)return false;
+  return true;
+ }
+ public bool SevenPlainDefinition(BrickSpawn d)=>SevenSpecialActive&&d.kind!=BrickKind.Stone&&!ChainPowerRules.IsNest(d)&&d.size.x<CollectionLevels.Pitch*1.5f&&(string.IsNullOrEmpty(d.reveal)||d.reveal=="opening-N");
+ void SevenConsume(ChainTool tool){
+  if(!tool.Consumed){OpeningCreditTool(tool);RecordRefillToolRemoval();}
+  ChainTools.Remove(tool);sevenWaiting.Remove(tool);chainMotions.RemoveAll(m=>m.View==tool.View);
+  if(tool.View!=null){tool.View.gameObject.SetActive(false);Destroy(tool.View.gameObject);}tool.Consumed=true;tool.Waiting=false;
+ }
+ void SevenWait(ChainTool tool){
+  if(tool.Consumed||tool.Waiting)return;tool.Waiting=true;StrategyWait(tool);tool.ReadyAt=float.PositiveInfinity;sevenWaiting.Add(tool);
+  // A moving flower still owns its reserved destination. Keep its route so
+  // refill can settle it there; abandoning it mid-cell creates a permanent
+  // stationary obstacle outside the logical footprint.
+  tool.View.GetComponent<SevenSpecialIdle>()?.Wait();
+ }
+ internal bool ActivateSevenSpecial(ChainTool tool,bool force=false){
+  if(VictorySettlementActive&&!VictorySpecialsReleased)return false;
+  if(!SevenSpecialActive||tool==null||!SevenSpecialRules.IsSpecial(tool.Kind))return false;
+  if(!ChainTools.Contains(tool)||tool.Consumed||tool.Waiting||(!force&&simulationClock<tool.ReadyAt))return true;
+  if(tool.Kind==SevenSpecialRules.Rainbow&&sevenRefillBarrier){SevenWait(tool);return true;}
+  PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);
+  Vector2 p=tool.Position;int kind=tool.Kind,color=tool.ColorIndex;
+  ChainTool partner=null;
+  {
+   var candidates=ChainTools.Where(t=>t!=tool&&!t.Consumed&&(!t.Waiting||!sevenRefillBarrier)&&SevenSpecialRules.IsSpecial(t.Kind)&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true&&SevenSpecialRules.Nearby(p,t.Position)).ToArray();
+   Func<ChainTool,int> rank=t=>kind==3?SevenSpecialRules.Priority(t.Kind,t.ColorIndex,color):SevenSpecialRules.NonFlowerPriority(t.Kind);
+   if(candidates.Length>0){int best=candidates.Min(rank);var top=candidates.Where(t=>rank(t)==best).ToArray();if(sevenRandom==null)NextSevenColor();partner=top[sevenRandom.Next(top.Length)];}
+  }
+  int partnerKind=partner==null?0:partner.Kind,partnerColor=partner==null?color:partner.ColorIndex;Vector2 partnerPosition=partner==null?p:partner.Position;
+  using(StrategyToolCause(tool)){
+  StrategyEmit(new StrategyEvent{kind="special",target=StrategyToolId(tool),targetKind=SevenSpecialArt.Name(kind),partner=partner==null?"":StrategyToolId(partner),earnedBy=StrategyEarned(tool)});
+  bool ingot=tool.Ingot,partnerIngot=partner!=null&&partner.Ingot;SevenConsume(tool);ChainActivationCount++;ChainKindActivations[kind-1]++;ChainDepth=Mathf.Max(ChainDepth,sevenEffectDepth+1);AddScore(ScoreRules.Damage);
+  if(partner!=null){SevenConsume(partner);ChainActivationCount++;ChainKindActivations[partnerKind-1]++;}
+  PresentSevenCast(kind,color,p,partnerKind,partnerColor,partnerPosition,ingot,partnerIngot);return true;}
+ }
+ void PresentSevenCast(int kind,int color,Vector2 p,int partnerKind,int partnerColor,Vector2 partnerPosition,bool ingot=false,bool partnerIngot=false){
+  if((Physics2D.simulationMode!=SimulationMode2D.Script||BalanceClock.Active)){int generation=Generation;sevenPresentationPending++;SevenWindup.Play(this,world,kind,color,p,partnerKind,partnerColor,partnerPosition,StrategyWrap(()=>{if(generation!=Generation)return;sevenPresentationPending=Mathf.Max(0,sevenPresentationPending-1);SevenRelease(kind,color,p,partnerKind,partnerColor,partnerPosition,ingot,partnerIngot);}),ingot,partnerIngot);return;}
+  SevenRelease(kind,color,p,partnerKind,partnerColor,partnerPosition,ingot,partnerIngot);
+ }
+ void SevenRelease(int kind,int color,Vector2 p,int partnerKind,int partnerColor,Vector2 partnerPosition,bool ingot=false,bool partnerIngot=false){
+  bool converts=(kind==3||partnerKind==3)&&partnerKind!=0&&!(kind==3&&partnerKind==3);
+  if(!converts)CombatFeel?.Power(p,partnerKind!=0?.025f:0);
+  sevenFxUntil=Mathf.Max(sevenFxUntil,simulationClock+.72f);changed=true;
+  if(ingot)IngotSpecialFx.Skill(this,world,kind,p,1.45f);else if(kind==3)SevenSpecialFx.PlaySheet(this,world,"flower-vortex",p,2.7f,0,color,partnerColor);else SevenSpecialFx.Play(this,world,kind,p,1.45f,color);if(partnerKind!=0){SoundService.Play("special_combo_release");if(kind==3||partnerKind==3)SoundService.Play(ingot||partnerIngot?"ingot_vortex_release":"flower_suction");}
+  else SoundService.Play(kind==3?(ingot?"ingot_vortex_release":"flower_suction"):ingot?(kind==2?"ingot_bomb_release":"ingot_laser_release"):kind==2?"bomb":"cross_laser");
+  long releaseBatch=BeginOpeningElimination(kind==3&&partnerKind==3?2:1);sevenEffectDepth++;
+  try {
+   OpeningEliminatedAt(p);if(partnerKind!=0)OpeningEliminatedAt(partnerPosition);
+   if(partnerKind!=0){
+    if(partnerIngot)IngotSpecialFx.Skill(this,world,partnerKind,partnerPosition,1.45f);else if(partnerKind==3&&kind!=3)SevenSpecialFx.PlaySheet(this,world,"flower-vortex",partnerPosition,2.7f,0,partnerColor,color);else if(partnerKind!=3)SevenSpecialFx.Play(this,world,partnerKind,partnerPosition,1.45f,partnerColor);
+    if(kind==SevenSpecialRules.Rainbow&&partnerKind==SevenSpecialRules.Rainbow){SevenDoubles++;sevenRefillBarrier=true;sevenAwaitRefill=false;SetRefillBallFreeze(true);ChainMessage="双五色花 · 全屏30伤害／削减两层护甲";SevenArea(p,SevenSpecialRules.Rainbow,30,2,true,color,ingot||partnerIngot);}
+    else if(kind==3||partnerKind==3){int copiedKind=kind==3?partnerKind:kind,copiedColor=kind==3?partnerColor:color;ChainMessage="五色花转化 · "+SevenSpecialArt.ColorName(copiedColor);SevenConvert(copiedColor,copiedKind,kind==3?p:partnerPosition,ingot||partnerIngot);}
+    else {SevenCombos++;ChainMessage="组合 · "+SevenSpecialArt.Name(kind)+"＋"+SevenSpecialArt.Name(partnerKind);SevenComboArea(p,kind,partnerKind,color,partnerColor,ingot||partnerIngot);}
+    if(ingot||partnerIngot){IngotSpecialFx.Play(this,world,"merge",p,1.75f,ingot?partnerColor:color);IngotSpecialFx.Beam(this,world,partnerPosition,p,.14f,ingot?partnerColor:color,.3f);}else{SevenSpecialFx.PlaySheet(this,world,"combo-merge",p,1.45f,0,color,partnerColor);SevenColoredBeam(3,partnerPosition,p,color,partnerColor,.08f,.22f);}
+   }else if(kind==SevenSpecialRules.Rainbow){
+    var targets=CollectionBricks.Where(b=>SevenColorTarget(b)&&b.Definition.colorIndex==color&&!b.GetComponent<ChainTileVisibility>().Hidden).OrderBy(b=>b.Id).ToArray();
+    // Bound-color casts also reach existing colored specials anywhere on the board.
+    // Flowers are selection markers, not ordinary colored-special targets.
+    var specials=ChainTools.Where(t=>t.Kind!=3&&SevenSpecialRules.IsSpecial(t.Kind)&&t.ColorIndex==color&&!t.Consumed&&!t.Waiting&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true).ToArray();
+    if(targets.Length==0&&specials.Length==0){SevenEmptyCasts++;ChainMessage="五色花空放";}
+    foreach(var b in targets)SevenAbsorbHit(b,10,1,p);
+    foreach(var t in specials)if(ChainTools.Contains(t)&&!t.Consumed&&!t.Waiting){t.ReadyAt=0;ActivateSevenSpecial(t,true);}
+   }
+   else {ChainMessage="特殊砖 · "+SevenSpecialArt.Name(kind);SevenArea(p,kind,10,1,false,color,ingot);}
+  }finally{sevenEffectDepth--;EndOpeningElimination(releaseBatch);ScheduleChainGravity();}
+ }
+ sealed class SevenAreaTarget{public BrickBody Brick;public ChainTool Tool;public Vector2 Position;}
+ bool SevenInArea(Vector2 origin,Vector2 point,Vector2 half,int kind,bool full){
+  if(full)return true;Vector2 d=point-origin;float pitch=CollectionLevels.Pitch;
+  bool row=Mathf.Abs(d.y)<half.y+pitch*.32f,col=Mathf.Abs(d.x)<half.x+pitch*.32f;
+  return kind==SevenSpecialRules.Cross?row||col:kind==SevenSpecialRules.Horizontal?row:kind==SevenSpecialRules.Vertical?col:Mathf.Abs(d.x)<pitch*1.5f+half.x-.01f&&Mathf.Abs(d.y)<pitch*1.5f+half.y-.01f;
+ }
+ void SevenArea(Vector2 origin,int kind,int damage,int armor,bool full,int color=0,bool ingot=false){
+  // Reserve all remaining flowers before any other full-screen hit can pair with them.
+  if(full&&sevenRefillBarrier)foreach(var waiting in ChainTools.Where(t=>t.Kind==3&&!t.Consumed).ToArray())SevenWait(waiting);
+  SevenVisitArea(origin,(point,half)=>SevenInArea(origin,point,half,kind,full),damage,armor,full);
+  if(kind==1||kind==5||kind==6){if(kind!=5)SevenSkillBeam(new Vector2(FlightGeometry.Left,origin.y),new Vector2(FlightGeometry.Right,origin.y),color,color,ingot);if(kind!=6)SevenSkillBeam(new Vector2(origin.x,ReturnLineY),new Vector2(origin.x,FlightGeometry.Top),color,color,ingot);}
+ }
+ void SevenVisitArea(Vector2 origin,Func<Vector2,Vector2,bool> contains,int damage,int armor,bool full=false){
+  var targets=new List<SevenAreaTarget>();
+  foreach(var b in CollectionBricks)if(b.Alive&&!OpeningCookieBrick(b)&&!RefillProtected(b)&&!b.GetComponent<ChainTileVisibility>().Hidden&&contains(b.GetComponent<Rigidbody2D>().position,b.GetComponent<BoxCollider2D>().size*.5f))targets.Add(new SevenAreaTarget{Brick=b,Position=b.GetComponent<Rigidbody2D>().position});
+  foreach(var t in ChainTools)if(!t.Consumed&&!t.Waiting&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true&&contains(t.Position,Vector2.one*.34f))targets.Add(new SevenAreaTarget{Tool=t,Position=t.Position});
+  // Resolve one actual entity at a time. A rainbow sees the still-present neighbors.
+  long openingBatch=openingEliminationBatch;bool ownsOpeningBatch=openingBatch==0;if(ownsOpeningBatch)BeginOpeningElimination(armor);try {
+  OpeningCookieArea(contains,armor);
+  foreach(var target in targets.OrderBy(t=>(t.Position-origin).sqrMagnitude).ThenByDescending(t=>t.Position.y).ThenBy(t=>t.Position.x)){
+   if(target.Tool!=null){if(ChainTools.Contains(target.Tool)){if(full&&target.Tool.Kind==3)SevenWait(target.Tool);else {target.Tool.ReadyAt=0;ActivateChainTool(target.Tool,Vector2.up);}}}
+   else if(target.Brick.Alive){if(full)SevenAbsorbHit(target.Brick,damage,armor,origin);else SevenHit(target.Brick,damage,armor);}
+  }
+  }finally{if(ownsOpeningBatch)EndOpeningElimination(openingBatch);}
+ }
+ void SevenComboArea(Vector2 origin,int a,int b,int colorA,int colorB,bool ingot=false){
+  SevenSpecialRules.ComboShape(a,b,out int rows,out int cols,out int square);float pitch=CollectionLevels.Pitch;
+  SevenVisitArea(origin,(point,half)=>{Vector2 d=point-origin;if(square>0)return Mathf.Abs(d.x)<pitch*square*.5f+half.x-.01f&&Mathf.Abs(d.y)<pitch*square*.5f+half.y-.01f;return rows>0&&Mathf.Abs(d.y)<half.y+pitch*(rows*.5f-.18f)||cols>0&&Mathf.Abs(d.x)<half.x+pitch*(cols*.5f-.18f);},10,1);
+  sevenFxUntil=Mathf.Max(sevenFxUntil,simulationClock+.82f);
+  if(square>0){if(ingot)IngotSpecialFx.Play(this,world,"bomb",origin,pitch*square,colorB);else SevenSpecialFx.PlaySheet(this,world,"combo-bomb",origin,pitch*square,0,colorA,colorB);return;}
+  for(int i=-rows/2;i<=rows/2&&rows>0;i++){float y=origin.y+i*pitch;if(y<=CollectionLevels.Top+.01f&&y>=ChainGridRules.Center(0,8).y-.01f)SevenSkillBeam(new Vector2(FlightGeometry.Left,y),new Vector2(FlightGeometry.Right,y),colorA,colorB,ingot);}
+  for(int i=-cols/2;i<=cols/2&&cols>0;i++){float x=origin.x+i*pitch;if(x>=ChainGridRules.Center(0,0).x-.01f&&x<=ChainGridRules.Center(8,0).x+.01f)SevenSkillBeam(new Vector2(x,ReturnLineY),new Vector2(x,FlightGeometry.Top),colorA,colorB,ingot);}
+  if(ingot){IngotSpecialFx.Play(this,world,"merge",origin,pitch*2,colorB);return;}
+  if(rows>0&&cols>0)SevenSpecialFx.PlaySheet(this,world,"combo-cross",origin,pitch*Mathf.Max(2,rows),0,colorA,colorB);
+  else SevenSpecialFx.PlaySheet(this,world,"combo-bands",origin,pitch*3,cols>0?90:0,colorA,colorB);
+ }
+ void SevenSkillBeam(Vector2 from,Vector2 to,int a,int b,bool ingot){if(ingot)IngotSpecialFx.Beam(this,world,from,to,.42f,b);else SevenColoredBeam(1,from,to,a,b);}
+ MaterialPropertyBlock sevenBeamColors;
+ void SevenColoredBeam(int kind,Vector2 from,Vector2 to,int colorA,int colorB,float width=.32f,float life=.42f){if((to-from).sqrMagnitude<.0001f)return;var view=JellyPowerArt.Beam(world,kind);JellyPowerArt.BeamPose(view,from,to,width);var image=view.GetComponent<SpriteRenderer>();image.color=Color.white;if(sevenBeamColors==null)sevenBeamColors=new MaterialPropertyBlock();SevenSpecialArt.EffectColors(image,colorA,colorB,sevenBeamColors);chainBeams.Add(new ChainBeam{View=view,Life=life,Duration=life,StartAlpha=1});}
+ public bool SevenHit(BrickBody b,int damage=10,int armor=1,Vector2? originalPosition=null){
+  if(b==null||!b.Alive||RefillProtected(b))return false;
+  if(OpeningCopperBrick(b))return OpeningDamageCopper(b,damage,true);
+  if(OpeningHitCookie(b,armor)||OpeningHitYarn(b,armor)||SevenTerrain(b))return false;
+  if(b.ShellIntact){int removed=b.DamageArmor(armor);ChainArmorBreaks+=removed;HitCount++;AddScore(ScoreRules.Damage*removed);ChainCollectionArt.SpecialDamage(b);EmitFeedback(b.transform.position,"hit",new Color(1,.76f,.3f));SoundService.Play("armor_break");changed=true;return false;}
+  return DealChainHealth(b,damage,originalPosition);
+ }
+ void SevenConvert(int color,int kind,Vector2 center,bool ingot=false){
+  var nodes=new List<Vector2>();var goldNodes=new List<bool>();var targets=CollectionBricks.Where(b=>SevenColorTarget(b)&&b.Definition.colorIndex==color&&!b.GetComponent<ChainTileVisibility>().Hidden).OrderBy(b=>b.Id).ToArray();
+  var tools=ChainTools.Where(t=>t.Kind!=3&&t.ColorIndex==color&&!t.Consumed&&!t.Waiting&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true).ToArray();
+  foreach(var b in targets){if(!b.Alive)continue;if(b.ShellIntact){SevenHit(b,10,1);continue;}Vector2 p=b.GetComponent<Rigidbody2D>().position;goldNodes.Add(ingot||OpeningIngotBrick(b));SevenConvertBrick(b);nodes.Add(p);}
+  foreach(var t in tools)if(ChainTools.Contains(t)){nodes.Add(t.Position);goldNodes.Add(ingot||t.Ingot);OpeningEliminatedAt(t.Position);SevenConsume(t);}
+  Action release=StrategyWrap(()=>{if(nodes.Count>0){CombatFeel?.Power(center,.025f);SoundService.Play(goldNodes.Any(gold=>gold)?(kind==2?"ingot_bomb_release":"ingot_laser_release"):kind==2?"bomb":"cross_laser");}for(int i=0;i<nodes.Count;i++){var p=nodes[i];bool gold=goldNodes[i];PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);long previous=BeginOpeningElimination();try{SevenConversions++;if(gold)IngotSpecialFx.Skill(this,world,kind,p,1.2f);else SevenSpecialFx.Play(this,world,kind,p,1.2f,color);SevenArea(p,kind,10,1,false,color,gold);}finally{EndOpeningElimination(previous);}}ScheduleChainGravity();});
+  if(nodes.Count>0&&(Physics2D.simulationMode!=SimulationMode2D.Script||BalanceClock.Active)){int generation=Generation;sevenPresentationPending++;SevenWindup.PlayCopies(this,world,kind,color,nodes,()=>{if(generation!=Generation)return;sevenPresentationPending=Mathf.Max(0,sevenPresentationPending-1);release();},goldNodes);}else release();
+ }
+ void SevenConvertBrick(BrickBody brick){
+  if(IsOpening){jellyTargets.Remove(brick.Id);rules.DamageTarget(brick.Id,int.MaxValue,out _);OpeningRemoved(brick,brick.GetComponent<Rigidbody2D>().position,false);brick.Remove(false);ScheduleChainGravity();return;}
+  // Keep authored collection/score accounting once, without a break or suction portrait.
+  bool before=sevenAbsorbing;sevenAbsorbing=true;try{DealChainHealth(brick,int.MaxValue);}finally{sevenAbsorbing=before;}
+ }
+ void SevenAbsorbHit(BrickBody brick,int damage,int armor,Vector2 center){if(brick==null||!brick.Alive||RefillProtected(brick))return;if(OpeningCopperBrick(brick)){OpeningDamageCopper(brick,damage,true);return;}if(OpeningHitCookie(brick,armor)||OpeningHitYarn(brick,armor)||SevenTerrain(brick))return;Vector2 originalPosition=brick.GetComponent<Rigidbody2D>().position;bool protectedBody=brick.ShellIntact;bool whole=!protectedBody&&brick.CurrentHealth<=damage;SevenSuctionFx.Pull(this,world,brick,center,whole);bool before=sevenAbsorbing;sevenAbsorbing=true;try{SevenHit(brick,damage,armor,originalPosition);}finally{sevenAbsorbing=before;}}
+ void TickSevenSpecials(){
+  if(VictorySettlementActive&&!VictorySpecialsReleased)return;
+  if(!SevenSpecialActive)return;
+  if(!sevenRefillBarrier){if(sevenWaiting.Count==0||SevenAnimationsPending)return;sevenRefillBarrier=true;sevenAwaitRefill=false;}
+  if(!sevenAwaitRefill){if(SevenAnimationsPending||sevenEffectDepth>0||sevenPresentationPending>0)return;sevenAwaitRefill=true;BeginFullRefill();return;}
+  if(!ChainGridReady||chainMotions.Count>0||SevenAnimationsPending)return;
+  sevenRefillBarrier=false;sevenAwaitRefill=false;
+  var next=sevenWaiting.FirstOrDefault(t=>ChainTools.Contains(t)&&!t.Consumed);if(next==null){sevenWaiting.Clear();return;}
+  // All waiting rainbows return to ordinary candidate selection on the new board.
+  next.Waiting=false;next.ReadyAt=0;next.View.GetComponent<SevenSpecialIdle>()?.Resume();sevenWaiting.Remove(next);
+  ActivateSevenSpecial(next,true);
+ }
+ internal int[] SevenRewards(int[] packet){if(!SevenSpecialActive)return packet;return packet.Select(kind=>kind==1?SevenSpecialRules.RewardKinds[(sevenSpawnSerial++)%3]:kind).ToArray();}
+}
+}

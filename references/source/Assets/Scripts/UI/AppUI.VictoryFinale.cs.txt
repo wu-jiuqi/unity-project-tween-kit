@@ -1,0 +1,31 @@
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ GoalCelebration victoryCelebration;bool victoryCelebrated;
+ public GoalCelebration QAGoalCelebration=>victoryCelebration;
+ void BeginGoalCelebration(){
+  CancelAim();CloseTutorialGuide();CloseAlphabetIntroduction();
+  GetComponentInChildren<ChainCollectionHUD>()?.ShowVictorySteps(Session.Shots);
+  var generation=Session.Generation;var view=viewGeneration;
+  var root=UICraft.Root(overlayRoot,"Goal complete celebration before rewards");
+  var controller=root.gameObject.AddComponent<GoalCelebration>();victoryCelebration=controller;
+  controller.Begin(this,Session,()=>{
+   if(Session.Generation!=generation||viewGeneration!=view||victoryCelebration!=controller)return;
+   victoryCelebration=null;victoryCelebrated=true;OnOutcome(true);
+  });
+ }
+ VictoryFinale victoryFinale;VictoryRoundPreparation victoryPreparation;bool victoryRoundPrepared;int victoryScoreFrom;
+ public VictoryRoundPreparation QAVictoryPreparation=>victoryPreparation;
+ void BeginVictoryPreparation(){GetComponentInChildren<ChainCollectionHUD>()?.ShowVictorySteps(Session.Shots);PrepareVictoryCounter();var generation=Session.Generation;var root=UICraft.Root(overlayRoot,"Close last volley and trigger all specials");victoryPreparation=root.gameObject.AddComponent<VictoryRoundPreparation>();victoryPreparation.Begin(Session,GetComponentInChildren<BattleHUDSummary>(),GetComponentInChildren<BattleScoreMeter>(),()=>{if(Session.Generation!=generation)return;victoryPreparation=null;victoryRoundPrepared=true;OnOutcome(true);});}
+ public VictoryFinale QAVictoryFinale=>victoryFinale;public VictoryPresentation QAVictoryPage=>victory;
+ bool UsesVictoryFinale=>Session.IsChainCollection&&!Session.IsTutorial&&!Session.IsStreakTrial;
+ void PrepareVictoryCounter(){victoryScoreFrom=Session.Score;GetComponentInChildren<BattleHUDSummary>()?.ShowVictoryScore(victoryScoreFrom);GetComponentInChildren<BattleScoreMeter>()?.CountVictoryScore(victoryScoreFrom);}
+ void BeginVictoryFinale(){
+  CloseAlphabetIntroduction();CancelAim();Clear(overlayRoot);
+  var root=UICraft.Root(overlayRoot,"Victory bombs then stars");victoryFinale=root.gameObject.AddComponent<VictoryFinale>();var current=Session.Generation;var controller=victoryFinale;
+  controller.Begin(Session,GetComponentInChildren<ChainCollectionHUD>(),GetComponentInChildren<BattleHUDSummary>(),GetComponentInChildren<BattleScoreMeter>(),victoryScoreFrom,stars=>{
+   if(Session.Generation!=current||victoryFinale!=controller)return;Session.FinishVictoryPlayback();ShowResult(true);victory.ReceiveVictoryStars(stars);victoryFinale=null;
+  });
+ }
+}
+}

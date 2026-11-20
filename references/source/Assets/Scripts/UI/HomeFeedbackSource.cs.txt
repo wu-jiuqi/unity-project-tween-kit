@@ -1,0 +1,145 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using UnityEngine;
+
+namespace BounceGarden {
+public struct HomeFeedbackSnapshot {
+ public int LoginDays,WinStreak;
+ public bool PlayedToday,Milestone,AfterLoss,Preview;
+ public string Title,Detail,Key,Day;
+}
+
+// The home screen depends on this contract, not PlayerPrefs. A server-backed source can replace it later.
+public interface IHomeFeedbackSource {
+ HomeFeedbackSnapshot Read();
+ bool Visit();
+ bool StartLevel();
+ bool RecordResult(string resultId,int level,bool win,bool progressionLevel);
+ bool ConsumeCelebration(string key);
+ bool Reset();
+}
+public interface IHomeFeedbackStorage {string Load();void Save(string json);}
+public sealed class LocalHomeFeedbackStorage:IHomeFeedbackStorage {
+ public const string Key="BounceGarden.HomeFeedback.v1";
+ readonly string storageKey;
+ public LocalHomeFeedbackStorage(string testSuffix=null){
+  storageKey=Key;if(testSuffix==null)return;
+  if(!RuntimeQA.IsIsolated||testSuffix.Length<1||testSuffix.Length>80)throw new InvalidOperationException("Invalid isolated feedback key.");
+  foreach(char c in testSuffix)if(!char.IsLetterOrDigit(c)&&c!='-')throw new InvalidOperationException("Invalid isolated feedback key.");
+  storageKey=Key+".QA."+testSuffix;
+ }
+ public string Load()=>PlayerPrefs.GetString(storageKey,"");
+ public void Save(string json){PlayerPrefs.SetString(storageKey,json);PlayerPrefs.Save();}
+}
+public sealed class MemoryHomeFeedbackStorage:IHomeFeedbackStorage {
+ public string Json="";
+ public string Load()=>Json;
+ public void Save(string json){Json=json;}
+}
+
+public sealed class LocalHomeFeedbackSource:IHomeFeedbackSource {
+ [Serializable]sealed class State {
+  public int schema=1,loginDays,totalVisitDays,winStreak;
+  public string lastVisit="",playedDay="",lastResult="";
+  public bool lastWasLoss;
+  public List<string> results=new List<string>(),celebrations=new List<string>();
+  public List<int> completedLevels=new List<int>();
+ }
+ readonly IHomeFeedbackStorage storage;readonly Func<DateTime> clock;
+ State state=new State();bool healthy=true,isPreview;
+ public bool StorageHealthy=>healthy;
+ public LocalHomeFeedbackSource(IHomeFeedbackStorage storage,Func<DateTime> clock=null){
+  this.storage=storage;this.clock=clock??(()=>DateTime.Now);
+  try{var json=storage.Load();if(!string.IsNullOrEmpty(json))state=Decode(json);}
+  catch(Exception e){healthy=false;Debug.LogWarning("Home feedback save is unavailable; keeping it intact. "+e.Message);}
+ }
+ static DateTime Date(string value)=>DateTime.ParseExact(value,"yyyy-MM-dd",CultureInfo.InvariantCulture);
+ static string Day(DateTime date)=>date.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture);
+ DateTime Today {
+  get{var date=clock().Date;return !string.IsNullOrEmpty(state.lastVisit)&&Date(state.lastVisit)>date?Date(state.lastVisit):date;}
+ }
+ static State Decode(string json){
+  var s=JsonUtility.FromJson<State>(json);
+  if(s==null||s.schema!=1||s.loginDays<0||s.totalVisitDays<s.loginDays||s.winStreak<0||s.results==null||s.celebrations==null||s.completedLevels==null)throw new InvalidOperationException("Invalid feedback data.");
+  foreach(var day in new[]{s.lastVisit,s.playedDay})if(!string.IsNullOrEmpty(day))Date(day);
+  if(new HashSet<string>(s.results).Count!=s.results.Count||new HashSet<int>(s.completedLevels).Count!=s.completedLevels.Count)throw new InvalidOperationException("Duplicate feedback ledger.");
+  return s;
+ }
+ bool Change(Action mutate){
+  if(!healthy)return false;string before=JsonUtility.ToJson(state);
+  try{mutate();storage.Save(JsonUtility.ToJson(state));return true;}
+  catch(Exception e){state=Decode(before);healthy=false;Debug.LogWarning("Home feedback could not be saved. "+e.Message);return false;}
+ }
+ void TouchDay(){
+  string day=Day(Today);if(state.lastVisit==day)return;
+  state.loginDays=!string.IsNullOrEmpty(state.lastVisit)&&Date(state.lastVisit).AddDays(1)==Today?state.loginDays+1:1;
+  state.totalVisitDays++;state.lastVisit=day;
+ }
+ public bool Visit(){if(state.lastVisit==Day(Today))return healthy;return Change(TouchDay);}
+ public bool StartLevel(){if(state.lastVisit==Day(Today)&&state.playedDay==Day(Today))return healthy;return Change(()=>{TouchDay();state.playedDay=Day(Today);});}
+ public bool RecordResult(string resultId,int level,bool win,bool progressionLevel){
+  if(string.IsNullOrWhiteSpace(resultId)||resultId.Length>200||level<0||state.results.Contains(resultId))return false;
+  return Change(()=>{
+   TouchDay();state.playedDay=Day(Today);state.results.Add(resultId);
+   // Previously completed levels cannot farm the streak, and replay failures do not break it.
+   if(!progressionLevel||state.completedLevels.Contains(level))return;
+   state.lastResult=resultId;state.lastWasLoss=!win;
+   if(win){state.winStreak++;state.completedLevels.Add(level);}else state.winStreak=0;
+  });
+ }
+ public bool ConsumeCelebration(string key){if(string.IsNullOrEmpty(key)||state.celebrations.Contains(key))return false;return Change(()=>state.celebrations.Add(key));}
+ public bool Reset(){var before=state;state=new State();healthy=true;try{storage.Save(JsonUtility.ToJson(state));return true;}catch(Exception e){state=before;healthy=false;Debug.LogWarning("Feedback reset could not be saved. "+e.Message);return false;}}
+ public HomeFeedbackSnapshot Read(){
+  var s=new HomeFeedbackSnapshot{LoginDays=state.loginDays,WinStreak=state.winStreak,PlayedToday=state.playedDay==Day(Today),Day=Day(Today),AfterLoss=state.lastWasLoss,Preview=isPreview};
+  if(s.PlayedToday){int n=s.WinStreak;s.Key="win:"+state.lastResult;
+   if(n==0){s.Title=state.lastWasLoss?"慢慢来，你可以的！":"准备好就出发吧";s.Detail=state.lastWasLoss?"每次尝试，都会更进一步。":"下一次胜利，从这里开始。";}
+   else if(n==1){s.Title="开了个好头！";s.Detail="第一场胜利，收下啦。";}
+   else if(n==2){s.Title="找到节奏啦！";s.Detail="已经连续赢了2局。";}
+   else if(n<5){s.Title="状态越来越好！";s.Detail=n+"连胜，继续加油！";}
+   else if(n<10){s.Title="好厉害！";s.Detail=n+"连胜啦！";}
+   else if(n<20){s.Title="不可思议！";s.Detail=n+"连胜，太棒啦！";}
+   else{s.Title="连胜停不下来！";s.Detail=n+"连胜，继续加油！";}
+   s.Milestone=n==3||n==5||n==10||n==20||n==50||n==100;
+  }else{int n=s.LoginDays;s.Key="visit:"+state.lastVisit;
+   if(n<=1){s.Title=state.totalVisitDays<=1?"欢迎来到喵弹拆箱！":"新的一天，新的开始";s.Detail=state.totalVisitDays<=1?"见到你真开心！":"欢迎回来！";}
+   else if(n<=3){s.Title="相伴第"+n+"天！";s.Detail="今天也很高兴见到你。";}
+   else if(n<7){s.Title=n+"天的陪伴。";s.Detail="美好正在悄悄生长。";}
+   else if(n==7){s.Title="一起度过一整周！";s.Detail="看看这一路的小小进步。";}
+   else if(n<14){s.Title=n+"天，美好继续生长。";s.Detail="每天都有小美好！";}
+   else if(n==14){s.Title="相伴14天啦！";s.Detail="两周的快乐，慢慢收藏。";}
+   else if(n<30){s.Title=n+"天的花园时光。";s.Detail="今天的你也很棒！";}
+   else if(n==30){s.Title="相伴30天啦！";s.Detail="谢谢你一直在这里。";}
+   else if(n==100){s.Title="相伴100天啦！";s.Detail="把回忆种满整座花园。";}
+   else{s.Title=n+"天的陪伴。";s.Detail="美好仍在生长。";}
+   s.Milestone=n==7||n==14||n==30||n==60||n==100;
+  }
+  return s;
+ }
+ public static LocalHomeFeedbackSource Preview(int days,int wins,bool played){
+  var source=new LocalHomeFeedbackSource(new MemoryHomeFeedbackStorage());source.isPreview=true;source.state.loginDays=days;source.state.totalVisitDays=days;source.state.lastVisit=Day(DateTime.Now);source.state.playedDay=played?source.state.lastVisit:"";source.state.winStreak=wins;source.state.lastResult="preview-"+wins;return source;
+ }
+ public static string RunSelfTests(){
+  int checks=0;Action<bool,string> check=(ok,message)=>{checks++;if(!ok)throw new InvalidOperationException("Home feedback: "+message);};
+  var now=new DateTime(2026,10,25,23,59,0);var disk=new MemoryHomeFeedbackStorage();var p=new LocalHomeFeedbackSource(disk,()=>now);
+  check(p.Visit()&&p.Read().LoginDays==1&&!p.Read().PlayedToday,"first visit");string first=disk.Json;check(p.Visit()&&disk.Json==first,"same-day visit is idempotent");
+  p.StartLevel();check(p.Read().PlayedToday&&p.Read().WinStreak==0,"start switches to play feedback without inventing a win");
+  check(p.RecordResult("a",0,true,true)&&p.Read().WinStreak==1,"first valid win");check(!p.RecordResult("a",0,true,true)&&p.Read().WinStreak==1,"duplicate result ignored");
+  check(p.RecordResult("replay",0,true,true)&&p.Read().WinStreak==1,"same completed level cannot farm wins");
+  check(p.RecordResult("replay-loss",0,false,false)&&p.Read().WinStreak==1,"replay loss ignored");
+  now=now.AddMinutes(2);p.Visit();check(p.Read().LoginDays==2&&!p.Read().PlayedToday&&p.Read().WinStreak==1,"midnight changes visit phase and preserves wins");
+  p.StartLevel();p.RecordResult("b",1,true,true);p.RecordResult("c",2,true,true);check(p.Read().WinStreak==3&&p.Read().Milestone,"three-win milestone");var key=p.Read().Key;
+  check(p.ConsumeCelebration(key)&&!p.ConsumeCelebration(key),"milestone celebrated once");
+  p=new LocalHomeFeedbackSource(disk,()=>now);check(p.Read().WinStreak==3&&p.Read().PlayedToday&&!p.ConsumeCelebration(key),"reload retains streak, daily phase and celebration ledger");
+  p.RecordResult("loss",3,false,true);check(p.Read().WinStreak==0&&p.Read().AfterLoss&&p.Read().Detail=="每次尝试，都会更进一步。","failure clears count and encourages");
+  p.RecordResult("retry",3,true,true);check(p.Read().WinStreak==1,"retry begins a fresh streak");
+  now=now.AddDays(2);p.Visit();check(p.Read().LoginDays==1&&p.Read().Title=="新的一天，新的开始","missed day resets visits, without shaming");
+  now=now.AddDays(-4);p.Visit();check(p.Read().LoginDays==1,"clock rollback cannot add visits");
+  check(p.Reset(),"scoped reset accepted");p.Visit();check(p.Read().LoginDays==1&&p.Read().WinStreak==0&&!p.Read().PlayedToday,"reset returns to first visit");
+  foreach(int n in new[]{1,2,3,5,7,10,14,20,30,60,100,101}){var daily=Preview(n,0,false).Read();check(!string.IsNullOrEmpty(daily.Title)&&!daily.PlayedToday,"daily copy tier "+n);var win=Preview(n,n,true).Read();check(win.WinStreak==n&&win.PlayedToday,"win copy tier "+n);}
+  check(Preview(7,0,false).Read().Title=="一起度过一整周！","weekly copy");check(Preview(1,10,true).Read().Title=="不可思议！","ten-win copy");
+  return "PASS: "+checks+" local feedback persistence, date, result and copy checks (memory storage only).";
+ }
+}
+public static class LocalTestTools {public static bool Available=>RuntimeQA.IsIsolated;}
+}

@@ -1,0 +1,123 @@
+using UnityEngine;
+
+namespace BounceGarden
+{
+    // One texture and sixteen immutable sprite views, shared by bricks and effects.
+    public static class JellyBrickArt
+    {
+        public const string SpriteName = "jelly_blue";
+        public const int FrameCount = 16;
+        public const float FramesPerSecond = 25f;
+        public const float Duration = FrameCount / FramesPerSecond;
+        static Sprite[] frames;
+        public static bool Enabled(int level) => level >= 0 && level < 6;
+        public static Sprite Rest => Frames[0];
+        public static Sprite[] Frames
+        {
+            get
+            {
+                if (frames != null) return frames;
+                var texture = Resources.Load<Texture2D>("Art/Jelly/blue_jelly_pop");
+                if (texture == null) throw new System.InvalidOperationException("Jelly atlas missing");
+                frames = new Sprite[FrameCount];
+                int cell = texture.width / 4;
+                for (int i = 0; i < FrameCount; i++)
+                {
+                    frames[i] = Sprite.Create(texture, new Rect(i % 4 * cell, (3 - i / 4) * cell, cell, cell),
+                        new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect);
+                    frames[i].name = i == 0 ? SpriteName : SpriteName + "_" + i;
+                }
+                return frames;
+            }
+        }
+
+        public static void Fit(SpriteRenderer face, float width, float height)
+        {
+            // Alpha footprint of the generated rest frame after atlas downsampling.
+            float sx = width / 1.21f, sy = height / 1.21f;
+            face.transform.localScale = new Vector3(sx, sy, 1);
+            face.transform.localPosition = new Vector3(.005f * sx, .005f * sy, 0);
+        }
+    }
+
+    public sealed class JellyPopPool : MonoBehaviour
+    {
+        struct Slot { public SpriteRenderer renderer; public float age; public int frame; public Sprite[] frames; }
+        Slot[] slots;
+        GameSession owner;
+        int cursor;
+        public int Capacity => slots == null ? 0 : slots.Length;
+        public int ActiveCount { get; private set; }
+        public int Peak { get; private set; }
+        public int Played { get; private set; }
+        public int Replaced { get; private set; }
+
+        public void Initialize(GameSession session, int targetCount)
+        {
+            owner = session;
+            // Prewarm enough for every target in this level, including two reveal targets.
+            slots = new Slot[Mathf.Clamp(targetCount + 2, 16, 128)];
+            var rest = JellyBrickArt.Rest;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                var obj = new GameObject("Pooled jelly pop");
+                obj.transform.SetParent(transform, false);
+                var renderer = obj.AddComponent<SpriteRenderer>();
+                renderer.sprite = rest;
+                renderer.sharedMaterial = WorldArt.BoardMaterial;
+                renderer.sortingOrder = 35;
+                slots[i].renderer = renderer;
+                slots[i].frame = -1;
+                obj.SetActive(false);
+            }
+        }
+
+        public void Play(Vector3 position, Vector3 scale, int sortingOrder, Sprite[] frames=null)
+        {
+            if (!FeedbackProfile.Active.enabledFeedback || slots == null) return;
+            int index = -1;
+            for (int n = 0; n < slots.Length; n++)
+            {
+                int candidate = (cursor + n) % slots.Length;
+                if (slots[candidate].frame < 0) { index = candidate; break; }
+            }
+            // Bounded fallback if external callers exceed the level's target count.
+            if (index < 0) { index = cursor; Replaced++; }
+            else ActiveCount++;
+            cursor = (index + 1) % slots.Length;
+            ref Slot slot = ref slots[index];
+            slot.age = 0; slot.frame = 0;
+            slot.frames=frames??JellyBrickArt.Frames;
+            slot.renderer.sprite = slot.frames[0];
+            slot.renderer.sortingOrder = sortingOrder;
+            slot.renderer.transform.position = position;
+            slot.renderer.transform.localScale = scale;
+            slot.renderer.gameObject.SetActive(true);
+            Played++; Peak = Mathf.Max(Peak, ActiveCount);
+        }
+
+        void Update() { Advance(owner!=null?owner.PresentationDelta(Time.deltaTime):Time.deltaTime); }
+        public void Advance(float deltaTime)
+        {
+            if (slots == null || (owner != null && owner.IsPaused)) return;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                ref Slot slot = ref slots[i];
+                if (slot.frame < 0) continue;
+                slot.age += deltaTime;
+                int frame = Mathf.FloorToInt(slot.age * JellyBrickArt.FramesPerSecond);
+                if (frame >= JellyBrickArt.FrameCount)
+                {
+                    slot.frame = -1;
+                    slot.renderer.gameObject.SetActive(false);
+                    ActiveCount--;
+                }
+                else if (frame != slot.frame)
+                {
+                    slot.frame = frame;
+                    slot.renderer.sprite = slot.frames[frame];
+                }
+            }
+        }
+    }
+}

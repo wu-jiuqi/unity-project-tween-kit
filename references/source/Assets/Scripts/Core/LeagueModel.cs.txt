@@ -1,0 +1,138 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden {
+public interface ILeagueClock { long UtcSeconds { get; } }
+public sealed class SystemLeagueClock:ILeagueClock {public long UtcSeconds=>DateTimeOffset.UtcNow.ToUnixTimeSeconds();}
+public interface ILeagueConfigProvider { LeagueConfig Load(); }
+public sealed class ResourceLeagueConfigProvider:ILeagueConfigProvider {
+ public LeagueConfig Load(){var text=Resources.Load<TextAsset>("LeagueConfig");var value=text==null?new LeagueConfig():JsonUtility.FromJson<LeagueConfig>(text.text);value.Validate();return value;}
+}
+public sealed class JsonLeagueConfigProvider:ILeagueConfigProvider {
+ readonly Func<string> read;public JsonLeagueConfigProvider(Func<string> reader){read=reader??throw new ArgumentNullException(nameof(reader));}
+ public LeagueConfig Load(){var c=JsonUtility.FromJson<LeagueConfig>(read());if(c==null)throw new InvalidOperationException("Empty league config");c.Validate();return c;}
+}
+[Serializable] public sealed class LeagueCopy {
+ public string title="花园联赛",rivals="{0}位对手",ends="距离结束 {0}",rewards="前{0}名奖励",rewardContents="金币、头像与头像框",rank="我的排名：{0}",medals="奖章",next="下一位对手",you="我",pass="再获{0}枚奖章，即可超过{1}",leader="暂列第一，继续加油！",start="赢得一局，开启联赛",rules="获胜+1奖章 · 失败不扣除",play="开始挑战",claim="领取奖励",equip="立即使用",owned="已拥有",test="+{0}枚奖章（测试）",total="我的奖章：{0}";
+}
+[Serializable] public sealed class LeagueLayout {
+ public float headerHeight=190,rewardsHeight=270,goalHeight=150,rowHeight=144,rowGap=10,footerHeight=390;
+ public float enterSeconds=.55f,settleSeconds=.65f;
+}
+[Serializable] public sealed class LeagueCosmetic {
+ public string avatarId="flower-cat-v1",frameId="flower-frame-v1",avatarResource="CatCosmeticsV3/avatars/02_ragdoll",frameResource="CatCosmeticsV3/frames/02_ragdoll";
+}
+[Serializable] public sealed class LeagueRewardTier {public int throughRank,coins;public bool cosmetics;public LeagueRewardTier(int r,int c,bool a){throughRank=r;coins=c;cosmetics=a;}}
+[Serializable] public sealed class LeagueRivalDefinition {public string name,portrait;public LeagueRivalDefinition(string n,string p){name=n;portrait=p;}}
+[Serializable] public sealed class LeagueConfig {
+ public string version="league-v1";
+ public bool calendarSeasons;public bool activeCompetition;public float medalSeconds=240,roundSeconds=120;
+ public int rivalCount=20,periodDays=7,offlineHours=6,maxOfflineRankLoss=3,refreshSeconds=60,topRewardCount=5,testMedals=1;
+ public int defaultWeeklyWins=14,minWeeklyWins=7,maxWeeklyWins=35;
+ public float maxPaceChange=.20f,minEventMinutes=45,lowGrowth=.10f,highGrowth=.95f;
+ public int[] initialOffsets={6,4,3,2,1,0,0,-1,-1,-2,-2,-3,-3,-4,-5,-6,-7,-8,-9,-10};
+ public LeagueRewardTier[] rewardTiers={new LeagueRewardTier(1,300,true),new LeagueRewardTier(5,220,true),new LeagueRewardTier(10,150,false),new LeagueRewardTier(21,80,false)};
+ public LeagueRivalDefinition[] rivals={new LeagueRivalDefinition("Luna","CatCosmeticsV3/avatars/02_ragdoll"),new LeagueRivalDefinition("Mochi","CatCosmeticsV3/avatars/03_siamese"),new LeagueRivalDefinition("Sunny","CatCosmeticsV3/avatars/04_maine_coon"),new LeagueRivalDefinition("Clover","CatCosmeticsV3/avatars/05_persian"),new LeagueRivalDefinition("Poppy","CatCosmeticsV3/avatars/06_bengal"),new LeagueRivalDefinition("Bamboo","CatCosmeticsV3/avatars/07_sphynx"),new LeagueRivalDefinition("Maple","CatCosmeticsV3/avatars/08_scottish_fold"),new LeagueRivalDefinition("Coco","CatCosmeticsV3/avatars/09_exotic_shorthair"),new LeagueRivalDefinition("Willow","CatCosmeticsV3/avatars/10_turkish_angora"),new LeagueRivalDefinition("Peach","CatCosmeticsV3/avatars/01_british_shorthair"),new LeagueRivalDefinition("Olive","CatCosmeticsV3/avatars/02_ragdoll"),new LeagueRivalDefinition("Miso","CatCosmeticsV3/avatars/03_siamese"),new LeagueRivalDefinition("Hazel","CatCosmeticsV3/avatars/04_maine_coon"),new LeagueRivalDefinition("Pip","CatCosmeticsV3/avatars/05_persian"),new LeagueRivalDefinition("Daisy","CatCosmeticsV3/avatars/06_bengal"),new LeagueRivalDefinition("Fern","CatCosmeticsV3/avatars/07_sphynx"),new LeagueRivalDefinition("Bean","CatCosmeticsV3/avatars/08_scottish_fold"),new LeagueRivalDefinition("Honey","CatCosmeticsV3/avatars/09_exotic_shorthair"),new LeagueRivalDefinition("Pearl","CatCosmeticsV3/avatars/10_turkish_angora"),new LeagueRivalDefinition("Mint","CatCosmeticsV3/avatars/01_british_shorthair")};
+ public LeagueCopy copy=new LeagueCopy();public LeagueLayout layout=new LeagueLayout();public LeagueCosmetic cosmetic=new LeagueCosmetic();
+ public static LeagueConfig Clone(LeagueConfig c)=>JsonUtility.FromJson<LeagueConfig>(JsonUtility.ToJson(c));
+ public void Validate(){
+  if(activeCompetition&&(float.IsNaN(medalSeconds)||float.IsInfinity(medalSeconds)||medalSeconds<90||medalSeconds>900||float.IsNaN(roundSeconds)||float.IsInfinity(roundSeconds)||roundSeconds<45||roundSeconds>900))throw new InvalidOperationException("Invalid active league pace");
+  if(string.IsNullOrEmpty(version)||rivalCount<1||rivalCount>100||periodDays<1||periodDays>90||offlineHours<0||offlineHours>24*90||maxOfflineRankLoss<0||refreshSeconds<1||testMedals<1||testMedals>1000||defaultWeeklyWins<1||minWeeklyWins<1||maxWeeklyWins<minWeeklyWins||maxPaceChange<0||maxPaceChange>1||minEventMinutes<1||lowGrowth<0||highGrowth<lowGrowth||initialOffsets==null||initialOffsets.Length==0||rivals==null||rivals.Length==0||rewardTiers==null||rewardTiers.Length==0||copy==null||layout==null||cosmetic==null)throw new InvalidOperationException("Invalid league configuration");
+  int rank=0;foreach(var t in rewardTiers){if(t.throughRank<=rank||t.coins<0)throw new InvalidOperationException("Invalid reward tiers");rank=t.throughRank;}
+  if(topRewardCount<1||topRewardCount>rivalCount+1||rewardTiers.Last().throughRank<rivalCount+1||layout.rowHeight<100||layout.rowGap<0)throw new InvalidOperationException("Invalid league coverage/layout");
+  foreach(var r in rivals)if(string.IsNullOrEmpty(r.name)||string.IsNullOrEmpty(r.portrait))throw new InvalidOperationException("Invalid rival");
+ }
+}
+[Serializable] public sealed class LeagueRival {
+ public string id,name,portrait,frame;public double chaseRate;public int initialMedals,tieOrder;public double[] events=new double[0];public int activeMedals;public double nextGainAt,shieldUntil,gainInterval,chaseProgress;
+ public int Medals(double elapsed){long count=(long)initialMedals+activeMedals;foreach(var e in events){if(e>elapsed)break;count++;}return (int)Math.Min(int.MaxValue,count);}
+}
+[Serializable] public sealed class LeaguePeriod {
+ public string id;public int seed,startMedals,pace,playerTieOrder,winCount;public bool participated;public long startsAt,endsAt,lastObserved;public double elapsed;
+ public LeagueConfig config;public LeagueRival[] rivals;
+ public int competitionVersion,returnRounds,lossRounds,lossStreak,graceUses,roundStartRank,chaseRounds,lastChaseRivals,lastChaseMedals;public long graceDay,awayAt;public bool matchSeen;public double activeElapsed,roundActiveSeconds,totalActiveSeconds;
+}
+[Serializable] public sealed class LeagueReward {
+ public string periodId,avatarId,frameId,avatarResource,frameResource;public int rank,coins;public bool eligible,claimed;
+}
+[Serializable] public sealed class LeagueState {
+ public string[] recentNames=new string[0];public long replayDay;public int[] replayLevels=new int[0];public LeaguePeriod current;public List<LeagueReward> rewards=new List<LeagueReward>();public int previousWins,previousPreviousWins,previousPace;public int completed;public float medalSeconds=240;
+}
+public sealed class LeagueEntry {public string id,name,portrait,frame;public bool player;public int medals,rank,tieOrder;}
+public sealed class LeagueSnapshot {
+ public LeagueConfig config;public string periodId;public long remaining;public LeagueEntry[] entries;public LeagueEntry player,next;public LeagueReward reward;
+}
+// Pure simulation. Persistence and time come from interfaces; UI never writes scores.
+public static partial class LeagueEngine {
+ // Local NPC names stored in older saves are localized only for display; the saved period stays intact.
+ static readonly Dictionary<string,string> LegacyNames=new Dictionary<string,string>{{"Luna","露娜"},{"Mochi","糯米"},{"Sunny","暖阳"},{"Clover","四叶草"},{"Poppy","小花"},{"Bamboo","竹子"},{"Maple","桃桃"},{"Coco","橘子"},{"Willow","奶糖"},{"Peach","泡芙"},{"Olive","可可"},{"Miso","芝麻"},{"Hazel","团子"},{"Pip","薄荷"},{"Daisy","布丁"},{"Fern","奶油"},{"Bean","星星"},{"Honey","月牙"},{"Pearl","豆包"},{"Mint","花卷"}};
+ public static string DisplayName(string name){if(LegacyNames.TryGetValue(name,out var value))return value;int split=name.LastIndexOf(' ');return split>0&&LegacyNames.TryGetValue(name.Substring(0,split),out value)?value+name.Substring(split):name;}
+
+ public static readonly long CalendarAnchor=new DateTimeOffset(2026,11,1,0,0,0,TimeSpan.FromHours(8)).ToUnixTimeSeconds();
+ public static long CalendarStart(long now,int days=7){long span=days*86400L;return CalendarAnchor+(long)Math.Floor((now-CalendarAnchor)/(double)span)*span;}
+ public static void Open(LeagueState s,LeagueConfig config,long now,int medals){
+  if(s.current!=null)return;config.Validate();var c=LeagueConfig.Clone(config);int pace=s.completed==0?c.defaultWeeklyWins:Math.Max(c.minWeeklyWins,Math.Min(c.maxWeeklyWins,s.completed==1?s.previousWins:(s.previousWins+s.previousPreviousWins)/2));
+  if(s.previousPace>0)pace=(int)Math.Round(Math.Max(s.previousPace*(1-c.maxPaceChange),Math.Min(s.previousPace*(1+c.maxPaceChange),pace)));
+  int seed=Guid.NewGuid().GetHashCode();var rng=new System.Random(seed);var p=new LeaguePeriod{id=Guid.NewGuid().ToString("N"),seed=seed,startMedals=medals,pace=pace,startsAt=now,endsAt=checked(now+c.periodDays*86400L),lastObserved=now,config=c,playerTieOrder=c.rivalCount/2,rivals=new LeagueRival[c.rivalCount]};
+  if(c.calendarSeasons){p.startsAt=CalendarStart(now,c.periodDays);p.endsAt=p.startsAt+c.periodDays*86400L;}
+  var names=c.calendarSeasons?LeagueIdentity.CreateNames(new System.Random(seed^0x13579),c.rivalCount,s.recentNames):null;
+  for(int i=0;i<c.rivalCount;i++){
+   var d=c.rivals[i%c.rivals.Length];double strength=1-i/(double)Math.Max(1,c.rivalCount-1);int count=(int)Math.Round(pace*(c.lowGrowth+(c.highGrowth-c.lowGrowth)*strength));
+   double spacing=c.minEventMinutes*60,duration=c.periodDays*86400d;count=Math.Min(count,(int)(duration/spacing));var times=new double[count];
+   for(int j=0;j<count;j++)times[j]=spacing+(duration-spacing)*(j+.15+rng.NextDouble()*.7)/Math.Max(1,count);
+   // Enforce the minimum interval without pushing events past the period.
+   for(int j=1;j<count;j++)times[j]=Math.Max(times[j],times[j-1]+spacing);
+   times=times.Where(t=>t<=duration).ToArray();
+   p.rivals[i]=new LeagueRival{id="rival-"+i,name=d.name+(i>=c.rivals.Length?" "+(i/c.rivals.Length+1):""),portrait=d.portrait,tieOrder=i<p.playerTieOrder?i:i+1,initialMedals=(int)Math.Max(0,Math.Min(int.MaxValue,(long)medals+c.initialOffsets[i%c.initialOffsets.Length])),events=times};
+  }if(c.calendarSeasons){
+   var shuffled=Enumerable.Range(0,c.rivalCount).OrderBy(_=>rng.Next()).ToArray();
+   var identityRng=new System.Random(seed^0x24680);var avatars=Enumerable.Range(0,c.rivalCount).OrderBy(_=>identityRng.Next()).ToArray();var frames=Enumerable.Range(0,c.rivalCount).OrderBy(_=>identityRng.Next()).ToArray();
+   for(int i=0;i<p.rivals.Length;i++){var r=p.rivals[i];r.name=names[i];r.portrait=c.rivals[avatars[i]%c.rivals.Length].portrait;r.frame=c.rivals[frames[i]%c.rivals.Length].portrait.Replace("/avatars/","/frames/");
+    r.initialMedals=rng.Next(s.completed==0?3:5);int type=shuffled[i];r.chaseRate=type<3?.75+rng.NextDouble()*.15:type<10?.5+rng.NextDouble()*.25:type<16?.3+rng.NextDouble()*.25:.1+rng.NextDouble()*.2;}
+   s.recentNames=names.Concat(s.recentNames??new string[0]).Take(c.rivalCount*2).ToArray();
+  }s.current=p;if(c.activeCompetition)EnableActive(p,s.medalSeconds);
+ }
+ public static LeagueEntry[] Standings(LeaguePeriod p,int medals,double? at=null){
+  var list=p.rivals.Select(r=>new LeagueEntry{id=r.id,name=DisplayName(r.name),portrait=r.portrait,frame=r.frame,medals=r.Medals(at??p.elapsed),tieOrder=r.tieOrder}).ToList();
+  list.Add(new LeagueEntry{id="you",name="我",portrait="",medals=p.config.calendarSeasons?Math.Max(0,medals-p.startMedals):medals,player=true,tieOrder=p.playerTieOrder});
+  var sorted=list.OrderByDescending(e=>e.medals).ThenBy(e=>e.tieOrder).ThenBy(e=>e.id,StringComparer.Ordinal).ToArray();for(int i=0;i<sorted.Length;i++)sorted[i].rank=i+1;return sorted;
+ }
+ public static bool Advance(LeagueState s,long now,int medals,bool offline){
+  var p=s.current;if(p==null)return false;if(offline&&p.config.activeCompetition)Return(p,now);if(now<=p.lastObserved)return false;long until=Math.Min(now,p.endsAt);double delta=Math.Max(0,until-p.lastObserved);
+  if(p.config.activeCompetition){delta=0;}
+  else if(offline){delta=Math.Min(delta,p.config.offlineHours*3600d);int start=Standings(p,medals).First(e=>e.player).rank,max=start+p.config.maxOfflineRankLoss;
+   if(Standings(p,medals,p.elapsed+delta).First(e=>e.player).rank>max){double lo=0,hi=delta;for(int k=0;k<48;k++){double mid=(lo+hi)/2;if(Standings(p,medals,p.elapsed+mid).First(e=>e.player).rank<=max)lo=mid;else hi=mid;}delta=lo;}
+  }
+  p.elapsed+=delta;p.lastObserved=Math.Max(p.lastObserved,now);
+  if(now>=p.endsAt){
+   int rank=Standings(p,medals).First(e=>e.player).rank;var tier=p.config.rewardTiers.First(t=>rank<=t.throughRank);var cosmetic=p.config.cosmetic;
+   s.rewards.Add(new LeagueReward{periodId=p.id,rank=rank,coins=tier.coins,eligible=p.participated,avatarId=tier.cosmetics?cosmetic.avatarId:"",frameId=tier.cosmetics?cosmetic.frameId:"",avatarResource=cosmetic.avatarResource,frameResource=cosmetic.frameResource});
+   if(p.config.activeCompetition&&p.competitionVersion<3&&p.winCount>=3&&p.totalActiveSeconds>0)s.medalSeconds=(float)Math.Max(p.config.medalSeconds*.8,Math.Min(p.config.medalSeconds*1.2,p.totalActiveSeconds/p.winCount));
+   s.previousPreviousWins=s.previousWins;s.previousWins=p.winCount;s.previousPace=p.pace;s.completed++;s.current=null;
+  }return true;
+ }
+ public static void Win(LeagueState s,LeagueConfig config,long now,int medalsBefore,int medalsAfter,bool realWin){
+  PrepareActive(s,config,now,medalsBefore);Advance(s,now,medalsBefore,false);Open(s,config,now,medalsBefore);s.current.participated=true;if(realWin){s.current.winCount++;FinishRound(s.current,true,medalsBefore,medalsAfter);}
+ }
+ public static void Validate(LeagueState s){
+  if(s==null||s.rewards==null||s.completed<0)throw new InvalidOperationException("Invalid league save");
+  var p=s.current;if(p!=null){p.config.Validate();if(string.IsNullOrEmpty(p.id)||p.rivals==null||p.rivals.Length!=p.config.rivalCount||p.elapsed<0||p.endsAt<=p.startsAt||p.lastObserved<p.startsAt)throw new InvalidOperationException("Invalid league period");
+   if(p.config.activeCompetition&&(p.activeElapsed<0||double.IsNaN(p.activeElapsed)||double.IsInfinity(p.activeElapsed)||p.returnRounds<0||p.returnRounds>2||p.lossRounds<0||p.lossRounds>2||p.graceUses<0||p.graceUses>2))throw new InvalidOperationException("Invalid active league state");
+   if(p.chaseRounds<0||p.lastChaseRivals<0||p.lastChaseRivals>p.rivals.Length||p.lastChaseMedals<0||p.lastChaseMedals>p.rivals.Length*2)throw new InvalidOperationException("Invalid league chase counters");
+   foreach(var r in p.rivals){if(r==null||r.initialMedals<0||r.activeMedals<0||r.events==null||r.events.Any(e=>double.IsNaN(e)||double.IsInfinity(e)||e<0)||!r.events.SequenceEqual(r.events.OrderBy(e=>e))||double.IsNaN(r.chaseProgress)||double.IsInfinity(r.chaseProgress)||r.chaseProgress<0||r.chaseProgress>=1||(p.config.activeCompetition&&(r.gainInterval<1||double.IsNaN(r.gainInterval)||double.IsInfinity(r.gainInterval))))throw new InvalidOperationException("Invalid league rival");}}
+  if(s.rewards.Any(r=>r==null||string.IsNullOrEmpty(r.periodId)||r.rank<1||r.coins<0)||s.rewards.Select(r=>r.periodId).Distinct().Count()!=s.rewards.Count)throw new InvalidOperationException("Invalid reward ledger");
+ }
+}
+public interface ILeagueSource {
+ LeagueSnapshot Read(bool offline=false);bool Claim(string periodId);bool Equip(string avatarId,string frameId);bool AddTestMedals();
+}
+public sealed class LocalLeagueSource:ILeagueSource {
+ readonly LocalProfile profile;public LocalLeagueSource(LocalProfile p){profile=p;}
+ public LeagueSnapshot Read(bool offline=false)=>profile.ReadLeague(offline);
+ public bool Claim(string id)=>profile.ClaimLeagueReward(id);
+ public bool Equip(string a,string f)=>profile.EquipLeagueCosmetics(a,f);
+ public bool AddTestMedals()=>profile.AddTestMedals();
+}
+}

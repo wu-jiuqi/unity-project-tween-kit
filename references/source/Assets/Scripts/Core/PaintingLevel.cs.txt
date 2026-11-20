@@ -1,0 +1,13 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class PaintingLevel {
+ public const int Index=12;
+ public const string Id="fox_001";
+ public const float Pitch=.60f;
+ public static readonly string[] Rows=System.Array.Empty<string>();
+ public static int ColorIndex(char code)=>code=='O'?0:code=='S'?1:code=='C'?2:3;
+ public static Vector2 Center(int col,int row)=>new Vector2((col-5.5f)*Pitch,5.25f-row*Pitch);
+ public static LevelData Create(){throw new System.InvalidOperationException("Legacy routes are archived in v37");}
+}
+}

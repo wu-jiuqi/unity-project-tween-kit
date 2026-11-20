@@ -1,0 +1,19 @@
+using System;
+using System.Collections;
+using UnityEngine;
+namespace BounceGarden {
+// Only the first timely callback can resolve an attempt. Late callbacks are ignored.
+public sealed class StartupAttempt77 {
+ public bool Succeeded {get;private set;}
+ public string Error {get;private set;}
+ bool resolved;
+ public IEnumerator Run(Action<Action,Action<string>> begin,float timeout=15){
+  float deadline=Time.realtimeSinceStartup+timeout;
+  try{
+   try{begin(()=>{if(!resolved){resolved=true;Succeeded=true;}},message=>{if(!resolved){resolved=true;Error=message;}});}catch(Exception error){resolved=true;Error=error.Message;}
+   while(!resolved&&Time.realtimeSinceStartup<deadline)yield return null;
+   if(!resolved){resolved=true;Error="初始化等待超时，请重试。";}
+  }finally{resolved=true;}
+ }
+}
+}

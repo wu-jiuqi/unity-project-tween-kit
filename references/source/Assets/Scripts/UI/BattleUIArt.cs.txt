@@ -1,0 +1,21 @@
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public static class BattleUIArt {
+ public static Sprite Sprite(string name){var s=Resources.Load<Sprite>("Art/BattleUIV42/"+name);if(s==null)throw new System.InvalidOperationException("Missing battle UI sprite: "+name);return s;}
+ public static Image Image(Transform parent,string name,float x,float y,float w,float h){var i=UICraft.Box(parent,name,x,y,w,h,Color.white);i.sprite=Sprite(name);i.type=UnityEngine.UI.Image.Type.Simple;i.preserveAspect=false;i.raycastTarget=false;return i;}
+}
+// World decoration shares the launcher's position, but never its aiming rotation.
+public sealed class LauncherCushion:MonoBehaviour {
+ public SpriteRenderer Face {get;private set;}
+ public void Initialize(GameSession game){Face=gameObject.AddComponent<SpriteRenderer>();Face.sprite=BattleUIArt.Sprite("paw-cushion");Face.sharedMaterial=WorldArt.BoardMaterial;Face.sortingOrder=46;transform.localPosition=game.LauncherPosition+Vector2.down*.02f;float width=2.55f;transform.localScale=Vector3.one*(width/Face.sprite.bounds.size.x);}
+}
+public sealed class BattleAimHint:MonoBehaviour {
+ GameSession game;CanvasGroup group;float age,activity;int shots;TMPro.TMP_Text instruction;bool wasQueued;
+ public void Initialize(GameSession owner){game=owner;shots=game.Shots;group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;group.interactable=false;BattleUIArt.Image(transform,"swipe-gesture",-184,0,40,48);var text=UICraft.Label(transform,"拖动瞄准，松手发射",28,0,450,48,25);text.font=GameTypography.Font;text.color=new Color32(155,115,81,255);text.enableAutoSizing=false;text.textWrappingMode=TMPro.TextWrappingModes.NoWrap;game.Feedback+=Feedback;}
+ void Feedback(Vector2 p,string cue){if(cue=="aim"||cue=="shoot")activity=1;}
+ void Update(){if(game==null||game.IsPaused)return;age+=Time.deltaTime;if(instruction==null)instruction=GetComponentInChildren<TMPro.TMP_Text>();bool queued=game.ChainLaunchQueued;if(wasQueued!=queued&&instruction!=null){instruction.text=queued?"下一组已准备好":"拖动瞄准，松手发射";wasQueued=queued;}if(game.Shots!=shots||age>=16)activity=1;group.alpha=game.IsPlaying?Mathf.MoveTowards(group.alpha,queued||activity==0?1:0,Time.deltaTime*2):0;}
+ void OnDestroy(){if(game!=null)game.Feedback-=Feedback;}
+}
+}
+

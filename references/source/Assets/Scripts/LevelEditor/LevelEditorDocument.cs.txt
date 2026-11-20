@@ -1,0 +1,554 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace BounceGarden.LevelEditing
+{
+    public enum ValidationSeverity { Error, Warning }
+    public sealed class ValidationIssue
+    {
+        public ValidationSeverity Severity { get; internal set; }
+        public string Code { get; internal set; }
+        public string Message { get; internal set; }
+        public int LevelNumber { get; internal set; }
+        public string PieceId { get; internal set; }
+        public bool IsError { get { return Severity == ValidationSeverity.Error; } }
+        public override string ToString() { return "第" + LevelNumber + "关 · " + Message; }
+    }
+    public sealed class OperationResult
+    {
+        public bool Success { get; internal set; }
+        public string Message { get; internal set; }
+        public string PieceId { get; internal set; }
+        public IReadOnlyList<ValidationIssue> Issues { get; internal set; }
+        internal static OperationResult Ok(string message, string pieceId = null, IReadOnlyList<ValidationIssue> issues = null) { return new OperationResult { Success = true, Message = message, PieceId = pieceId, Issues = issues ?? new ValidationIssue[0] }; }
+        internal static OperationResult Fail(string message, IReadOnlyList<ValidationIssue> issues = null) { return new OperationResult { Success = false, Message = message, Issues = issues ?? new ValidationIssue[0] }; }
+    }
+    public sealed class LevelEditorGoals
+    {
+        public int F { get; internal set; }
+        public int T { get; internal set; }
+        public int J { get; internal set; }
+        public int Total { get { return F + T + J; } }
+    }
+    public sealed class LevelEditorPiece
+    {
+        public string Id { get; internal set; }
+        public string EditorId { get { return Id; } }
+        public string LegacyId { get; internal set; }
+        public string Kind { get; internal set; }
+        public int Col { get; internal set; }
+        public int Row { get; internal set; }
+        public int Size { get; internal set; }
+        public int Hp { get; internal set; }
+        public bool Armor { get; internal set; }
+        public int Ice { get; internal set; }
+        public int Layers { get; internal set; }
+        public string Mode { get; internal set; }
+        public int[] Contents { get; internal set; }
+        public string Direction { get; internal set; }
+        public int InitialCount { get; internal set; }
+        public int HitsPerItem { get; internal set; }
+        public int HitsPerRing { get; internal set; }
+        public int RipenNeeds { get; internal set; }
+        public bool IsChest { get { return Kind == "chest"; } }
+        public bool IsTarget { get; internal set; }
+        public bool FixedTerrain { get; internal set; }
+        public bool Contains(int col, int row) { return col >= Col && col < Col + Size && row >= Row && row < Row + Size; }
+    }
+    public sealed class LevelEditorPieceEdit
+    {
+        public string Kind, Mode, Direction;
+        public int? Col, Row, Size, Hp, Ice, Layers, InitialCount, HitsPerItem, HitsPerRing, RipenNeeds;
+        public bool? Armor;
+        public int[] Contents;
+    }
+
+    public sealed partial class LevelEditorDocument
+    {
+        readonly byte[] originalBytes;
+        readonly string originalText;
+        readonly bool utf8Bom;
+        readonly EditorJson documentRoot;
+        readonly List<LevelEditorLevel> levels = new List<LevelEditorLevel>();
+        readonly List<LevelEditorLevel> originalLevels = new List<LevelEditorLevel>();
+        readonly List<int> starts = new List<int>(), ends = new List<int>();
+        string savedStructure;
+        public string Chapter { get; private set; }
+        public string RelativePath { get { return Chapter + "/campaign.json"; } }
+        public string SourcePath { get; internal set; }
+        public string SourceHash { get; internal set; }
+        public IReadOnlyList<LevelEditorLevel> Levels { get { return levels.AsReadOnly(); } }
+        public bool IsDirty { get { return Structure != savedStructure || levels.Any(l => l.IsDirty); } }
+        internal bool IsAuthoring { get; set; }
+        string Structure { get { return string.Join("|", levels.Select(l => l.EditorLevelId)); } }
+        internal LevelEditorDocument(string chapter, byte[] bytes, string sourcePath = null)
+        {
+            Chapter = chapter;
+            int offset = chapter == "Alphabet" ? 0 : chapter == "Picnic" ? 26 : chapter == "Snow" ? 52 : -1;
+            if (offset < 0) throw new ArgumentException("Unknown chapter.");
+            originalBytes = (byte[])bytes.Clone(); utf8Bom = bytes.Length >= 3 && bytes[0] == 239 && bytes[1] == 187 && bytes[2] == 191;
+            originalText = new UTF8Encoding(false, true).GetString(bytes, utf8Bom ? 3 : 0, bytes.Length - (utf8Bom ? 3 : 0));
+            documentRoot = EditorJson.Parse(originalText); var array = documentRoot.RequireArray("levels");
+            IsAuthoring = documentRoot.Text("authoringSchema") == "bouncebusters-level-authoring-v2" || array.Items.Count != 26;
+            SourcePath = sourcePath; SourceHash = Hash(bytes);
+            for (int i = 0; i < array.Items.Count; i++)
+            {
+                var node = array.Items[i]; if (node.Kind != EditorJson.Type.Object) throw new FormatException("Level must be an object.");
+                starts.Add(node.Start); ends.Add(node.End);
+                var level = new LevelEditorLevel(this, offset + i, originalText.Substring(node.Start, node.End - node.Start));
+                level.SetPosition(offset + i, i, false); levels.Add(level); originalLevels.Add(level);
+            }
+            savedStructure = Structure;
+        }
+        internal static LevelEditorDocument CreateEmpty(string chapter)
+        {
+            var root = EditorJson.Object(); root.Set("authoringSchema", "bouncebusters-level-authoring-v2");
+            root.Set("ruleset", chapter); root.Set("levels", EditorJson.Array());
+            if (chapter == "Alphabet") root.Set("introductions", EditorJson.Array());
+            return new LevelEditorDocument(chapter, new UTF8Encoding(false).GetBytes(root.ToJson(0, true) + "\n"));
+        }
+        internal LevelEditorLevel AppendBlank(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name) || name.Trim().Length > 100) throw new ArgumentException("名称需为1–100个字符。");
+            var stage = EditorJson.Object(); stage.Set("authoringSchema", "bouncebusters-level-authoring-v2"); stage.Set("name", name.Trim()); stage.Set("moves", 20); stage.Set("volleyCount", 5);
+            if (Chapter == "Alphabet")
+            {
+                stage.Set("letter", ""); stage.Set("lesson", ""); stage.Set("fish", 0); stage.Set("toy", 0); stage.Set("blueJelly", 0);
+                var glyph = EditorJson.Array(); for (int r = 0; r < 7; r++) glyph.Items.Add(EditorJson.Value("00000")); stage.Set("glyph", glyph);
+                stage.Set("cells", EditorJson.Array()); stage.Set("chests", EditorJson.Array());
+            }
+            else
+            {
+                stage.Set("id", 1); stage.Set(Chapter == "Picnic" ? "focus" : "route", "");
+                var goals = EditorJson.Object(); goals.Set("F", 0); goals.Set("T", 0); if (Chapter == "Picnic") goals.Set("J", 0);
+                stage.Set("goals", goals); stage.Set("pieces", EditorJson.Array());
+                if (Chapter == "Picnic") stage.Set("protectedCells", EditorJson.Array());
+            }
+            var level = new LevelEditorLevel(this, 0, stage.ToJson(4, true)); levels.Add(level); IsAuthoring = true; return level;
+        }
+        internal LevelEditorLevel AppendClone(LevelEditorLevel source)
+        {
+            if (source == null || source.Chapter != Chapter) throw new ArgumentException("复制来源与规则模板不一致。");
+            var stage = EditorJson.Parse(source.SnapshotJson()); string name = source.Name;
+            stage.Set("name", (name.Length > 96 ? name.Substring(0, 96) : name) + " 副本");
+            var level = new LevelEditorLevel(this, 0, stage.ToJson(4, true)); levels.Add(level); IsAuthoring = true; return level;
+        }
+        internal bool Remove(LevelEditorLevel level) { return levels.Remove(level); }
+        internal void CaptureSavedStructure() { savedStructure = Structure; }
+        public byte[] GetBytes()
+        {
+            bool sameStructure = levels.SequenceEqual(originalLevels);
+            if (sameStructure && levels.Select((level, i) => level.SnapshotJson() == originalText.Substring(starts[i], ends[i] - starts[i])).All(v => v)) return (byte[])originalBytes.Clone();
+            string outputText;
+            if (sameStructure)
+            {
+                var text = new StringBuilder(); int cursor = 0;
+                for (int i = 0; i < levels.Count; i++) { text.Append(originalText, cursor, starts[i] - cursor); text.Append(levels[i].SnapshotJson()); cursor = ends[i]; }
+                text.Append(originalText, cursor, originalText.Length - cursor); outputText = text.ToString();
+            }
+            else
+            {
+                // Structural edits replace only the levels array in a parsed copy;
+                // unknown campaign and stage fields remain available to future rules.
+                var root = EditorJson.Parse(documentRoot.ToJson()); var array = EditorJson.Array();
+                foreach (var level in levels) array.Items.Add(EditorJson.Parse(level.SnapshotJson()));
+                root.Set("levels", array); root.Set("authoringSchema", "bouncebusters-level-authoring-v2"); root.Set("ruleset", Chapter);
+                outputText = root.ToJson(0, true) + "\n";
+            }
+            byte[] body = new UTF8Encoding(false, true).GetBytes(outputText);
+            if (!utf8Bom) return body;
+            byte[] output = new byte[body.Length + 3]; output[0] = 239; output[1] = 187; output[2] = 191; Buffer.BlockCopy(body, 0, output, 3, body.Length); return output;
+        }
+        internal void MarkSaved() { foreach (var level in levels) level.MarkSaved(); savedStructure = Structure; }
+        public static IReadOnlyList<ValidationIssue> ValidateStage(int globalIndex, string stageJson)
+        {
+            try
+            {
+                if (globalIndex < 0 || globalIndex >= 78) throw new ArgumentOutOfRangeException("globalIndex");
+                return new LevelEditorLevel(null, globalIndex, stageJson).Validate();
+            }
+            catch (Exception ex) { return new[] { new ValidationIssue { Severity = ValidationSeverity.Error, Code = "JSON", Message = "关卡JSON无效：" + ex.Message, LevelNumber = globalIndex + 1 } }; }
+        }
+        internal static string Hash(byte[] bytes) { using (var sha = SHA256.Create()) return BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant(); }
+    }
+
+    public sealed partial class LevelEditorLevel
+    {
+        readonly LevelEditorDocument document;
+        EditorJson root;
+        string json, savedJson;
+        readonly Dictionary<EditorJson, string> ids = new Dictionary<EditorJson, string>();
+        readonly List<State> undo = new List<State>(), redo = new List<State>();
+        State editGroupStart;
+        string editGroupSemantic;
+        sealed class State { internal string Json; internal string[] Ids; }
+        sealed class Handle { internal EditorJson Node, Array; internal bool Chest; }
+        public int Index { get; private set; }
+        public int LocalIndex { get; private set; }
+        public int Number { get { return Index + 1; } }
+        public string Chapter { get { return document != null ? document.Chapter : Index < 26 ? "Alphabet" : Index < 52 ? "Picnic" : "Snow"; } }
+        public int RuntimeIndex { get { return (Chapter == "Alphabet" ? 0 : Chapter == "Picnic" ? 26 : 52) + Math.Min(LocalIndex, 25); } }
+        public string EditorLevelId { get; internal set; }
+        public string Name { get { return root.Text("name", "第" + Number + "关"); } }
+        public int Moves { get { return root.Int("moves", 20); } }
+        public int VolleyCount { get { return 5; } }
+        public bool IsDirty { get { return json != savedJson; } }
+        public bool IsEditGroupActive { get { return editGroupStart != null; } }
+        public bool CanUndo { get { return undo.Count > 0 || IsEditGroupActive && root.ToJson() != editGroupSemantic; } }
+        public bool CanRedo { get { return redo.Count > 0 && (!IsEditGroupActive || root.ToJson() == editGroupSemantic); } }
+        public string[] Glyph { get { var a = root.Get("glyph"); return a == null || a.Kind != EditorJson.Type.Array ? new string[0] : a.Items.Select(n => n.Kind == EditorJson.Type.String ? n.Scalar : "").ToArray(); } }
+        public IReadOnlyList<LevelEditorPiece> Pieces { get { return Handles().Select(Piece).ToList().AsReadOnly(); } }
+        public LevelEditorGoals Goals
+        {
+            get { if (IsFusion) return ComputeFusionGoals(); var g = root.Get("goals"); return Chapter == "Alphabet" ? new LevelEditorGoals { F = root.Int("fish"), T = root.Int("toy"), J = root.Int("blueJelly") } : new LevelEditorGoals { F = g == null ? 0 : g.Int("F"), T = g == null ? 0 : g.Int("T"), J = g == null ? 0 : g.Int("J") }; }
+        }
+        internal LevelEditorLevel(LevelEditorDocument document, int index, string text)
+        {
+            this.document = document; Index = index; LocalIndex = index % 26; EditorLevelId = Guid.NewGuid().ToString("N"); root = EditorJson.Parse(text);
+            if (root.Kind != EditorJson.Type.Object) throw new FormatException("Stage must be an object.");
+            json = savedJson = text; AssignIds(null);
+        }
+        internal void MarkSaved() { savedJson = json; }
+        internal void SetPosition(int index, int localIndex, bool updateStageId)
+        {
+            Index = index; LocalIndex = localIndex;
+            if (!updateStageId || Chapter == "Alphabet" || root.Int("id", -1) == Number) return;
+            root.Set("id", Number); json = root.ToJson(4, true);
+            // Renumbering a library is not an edit inside an individual stage.
+            // Keep its undo snapshots on the same identity/order as that stage.
+            foreach (var state in undo.Concat(redo)) { var node = EditorJson.Parse(state.Json); node.Set("id", Number); state.Json = node.ToJson(4, true); }
+        }
+        public string SnapshotJson() { return json; }
+        public LevelEditorPiece PieceAt(int col, int row) { return Pieces.FirstOrDefault(p => p.Contains(col, row)); }
+        List<Handle> Handles()
+        {
+            var result = new List<Handle>();
+            if (IsFusion)
+            {
+                var fusion = root.Get("fusion"); var array = fusion == null ? null : fusion.Get("pieces");
+                if (array != null && array.Kind == EditorJson.Type.Array) foreach (var node in array.Items) if (node.Kind == EditorJson.Type.Object) result.Add(new Handle { Node = node, Array = array, Chest = node.Text("kind") == "chest" });
+                return result;
+            }
+            foreach (string key in Chapter == "Alphabet" ? new[] { "cells", "chests" } : new[] { "pieces" })
+            {
+                var array = root.Get(key); if (array == null || array.Kind != EditorJson.Type.Array) continue;
+                foreach (var node in array.Items) if (node.Kind == EditorJson.Type.Object) result.Add(new Handle { Node = node, Array = array, Chest = key == "chests" });
+            }
+            return result;
+        }
+        void AssignIds(string[] restored)
+        {
+            ids.Clear(); var handles = Handles(); var seen = new HashSet<string>();
+            for (int i = 0; i < handles.Count; i++) { string id = IsFusion ? handles[i].Node.Text("id") : restored != null && i < restored.Length ? restored[i] : null; if (string.IsNullOrEmpty(id) || !seen.Add(id)) { id = Guid.NewGuid().ToString("N"); seen.Add(id); } ids[handles[i].Node] = id; }
+        }
+        internal string[] ExportIds() { return Handles().Select(h => ids[h.Node]).ToArray(); }
+        internal void RestoreIds(string[] values) { if (values != null && values.Length == Handles().Count) AssignIds(values); }
+        Handle Find(string id) { var found = Handles().FirstOrDefault(h => ids[h.Node] == id); if (found == null) throw new InvalidOperationException("所选砖块已不存在，请重新选择。"); return found; }
+        bool Stroke(int col, int row)
+        {
+            var glyph = Glyph; return !IsFusion && Chapter == "Alphabet" && col >= 2 && col <= 6 && row >= 1 && row <= 7 && glyph.Length == 7 && glyph[row - 1].Length == 5 && glyph[row - 1][col - 2] == '1';
+        }
+        LevelEditorPiece Piece(Handle handle)
+        {
+            if (IsFusion) return FusionPiece(handle.Node);
+            var p = handle.Node; string kind = handle.Chest ? "chest" : p.Text("kind"); int size = handle.Chest ? 2 : Chapter == "Snow" && kind != "O" ? 1 : p.Int("size", 1);
+            var a = p.Get("contents"); int[] contents = a != null && a.Kind == EditorJson.Type.Array ? a.Items.Select(n => { int v; return int.TryParse(n.Scalar, out v) ? v : 0; }).ToArray() : new int[0];
+            int col = p.Int("c"), row = p.Int("r");
+            return new LevelEditorPiece { Id = ids[p], LegacyId = p.Text("id"), Kind = kind, Col = col, Row = row, Size = size,
+                Hp = handle.Chest ? 30 : Chapter == "Picnic" && kind == "Q" ? 999999 : p.Int("hp", 1), Armor = handle.Chest ? p.Text("mode") == "armor" : kind == "A" || p.Bool("armor"),
+                Ice = p.Int("ice"), Layers = Chapter == "Snow" && kind == "O" ? size : p.Int("layers"), Mode = p.Text("mode", "plain"), Contents = contents,
+                Direction = p.Text("direction", "up"), InitialCount = p.Int("initialCount", 10), HitsPerItem = p.Int("hitsPerItem", 3), HitsPerRing = p.Int("hitsPerRing", 2), RipenNeeds = p.Int("ripenNeeds", 2),
+                IsTarget = handle.Chest ? contents.Any(v => v == 1 || v == 2) : kind == "F" || kind == "T" || Chapter == "Picnic" && (kind == "J" || kind == "Q") || kind == "N" && Stroke(col, row),
+                FixedTerrain = Chapter == "Alphabet" ? kind == "S" : kind == "X" || Chapter == "Snow" && (kind == "S" || kind == "O") };
+        }
+        State Capture() { return new State { Json = json, Ids = ExportIds() }; }
+        void Restore(State state) { json = state.Json; root = EditorJson.Parse(json); AssignIds(state.Ids); }
+        void PushUndo(State state) { undo.Add(state); if (undo.Count > 100) undo.RemoveAt(0); }
+        public void BeginEditGroup()
+        {
+            // Pointer re-entry or repeated begin events must not move the start
+            // of a gesture or discard its earlier successful edits.
+            if (IsEditGroupActive) return;
+            editGroupStart = Capture(); editGroupSemantic = root.ToJson();
+        }
+        public OperationResult EndEditGroup()
+        {
+            if (!IsEditGroupActive) return OperationResult.Ok("没有活动的编辑手势。");
+            var before = editGroupStart; bool changed = root.ToJson() != editGroupSemantic;
+            editGroupStart = null; editGroupSemantic = null;
+            if (!changed)
+            {
+                // Also restore original formatting and editor identities when
+                // a gesture changes a value and then puts it back.
+                Restore(before);
+                return OperationResult.Ok("手势没有净变化。", issues: Validate());
+            }
+            PushUndo(before); redo.Clear();
+            return OperationResult.Ok("已完成整次编辑手势。", issues: Validate());
+        }
+        OperationResult Edit(Action action, Func<string> affected = null)
+        {
+            State before = Capture(); string semanticBefore = root.ToJson();
+            try
+            {
+                action(); RecalculateGoals();
+                if (root.ToJson() == semanticBefore)
+                {
+                    string unchangedId = affected == null ? null : affected(); Restore(before);
+                    if (unchangedId != null && !ids.Values.Contains(unchangedId)) unchangedId = null;
+                    return OperationResult.Ok("没有变化。", unchangedId, Validate());
+                }
+                json = root.ToJson(4, true);
+                if (!IsEditGroupActive) { PushUndo(before); redo.Clear(); }
+                return OperationResult.Ok("已更新关卡。", affected == null ? null : affected(), Validate());
+            }
+            catch (Exception ex) { Restore(before); return OperationResult.Fail(ex.Message); }
+        }
+        public OperationResult Undo()
+        {
+            EndEditGroup();
+            if (!CanUndo) return OperationResult.Fail("没有可撤销的修改。"); var previous = undo[undo.Count - 1]; undo.RemoveAt(undo.Count - 1); redo.Add(Capture()); Restore(previous); return OperationResult.Ok("已撤销。", issues: Validate());
+        }
+        public OperationResult Redo()
+        {
+            EndEditGroup();
+            if (!CanRedo) return OperationResult.Fail("没有可重做的修改。"); var next = redo[redo.Count - 1]; redo.RemoveAt(redo.Count - 1); PushUndo(Capture()); Restore(next); return OperationResult.Ok("已重做。", issues: Validate());
+        }
+        public OperationResult TryRename(string name) { return Edit(() => { if (string.IsNullOrWhiteSpace(name) || name.Length > 100) throw new ArgumentException("名称需为1–100个字符。"); root.Set("name", name.Trim()); }); }
+        public OperationResult TrySetMoves(int moves)
+        {
+            return Edit(() =>
+            {
+                if (moves < 1 || moves > 999) throw new ArgumentException("步数需为1–999。");
+                root.Set("moves", moves); root.Set("authoringSchema", "bouncebusters-level-authoring-v2");
+                if (document != null) document.IsAuthoring = true;
+            });
+        }
+        public OperationResult TryFillEmpty()
+        {
+            if (IsFusion) return TryFillFusionEmpty();
+            return Edit(() =>
+            {
+                for (int row = 0; row < 9; row++) for (int col = 0; col < 9; col++)
+                {
+                    if (PieceAt(col, row) != null) continue;
+                    var node = CreatePiece("N", col, row, 1); root.EnsureArray(Chapter == "Alphabet" ? "cells" : "pieces").Items.Add(node); ids[node] = Guid.NewGuid().ToString("N");
+                }
+            });
+        }
+        public OperationResult TryClear()
+        {
+            if (IsFusion) return TryClearFusion();
+            return Edit(() =>
+            {
+                foreach (string key in Chapter == "Alphabet" ? new[] { "cells", "chests" } : new[] { "pieces" }) root.Set(key, EditorJson.Array());
+                ids.Clear();
+                if (Chapter == "Alphabet") { var glyph = EditorJson.Array(); for (int r = 0; r < 7; r++) glyph.Items.Add(EditorJson.Value("00000")); root.Set("glyph", glyph); }
+                if (Chapter == "Picnic") root.Set("protectedCells", EditorJson.Array());
+            });
+        }
+        public OperationResult NormalizeGoals() { return Edit(() => { }); }
+        public OperationResult TrySetGlyph(string[] glyph)
+        {
+            if (IsFusion) return OperationResult.Fail("融合规则使用显式目标属性，不使用旧字形遮罩。");
+            return Edit(() => { if (Chapter != "Alphabet") throw new InvalidOperationException("仅字母章节有字形目标。"); if (glyph == null || glyph.Length != 7 || glyph.Any(s => s == null || s.Length != 5 || s.Any(c => c != '0' && c != '1'))) throw new ArgumentException("字形必须为7行、每行5个0或1。"); var a = EditorJson.Array(); foreach (var row in glyph) a.Items.Add(EditorJson.Value(row)); root.Set("glyph", a); foreach (var p in Pieces) if (p.Kind != "N" && p.ContainsGlyph(this)) throw new InvalidOperationException("字形目标只能覆盖普通N砖，请先移开其他砖。"); });
+        }
+        public OperationResult TryDelete(string id) { return Edit(() => { var h = Find(id); h.Array.Items.Remove(h.Node); ids.Remove(h.Node); }); }
+        public OperationResult TryMove(string id, int col, int row)
+        {
+            return Edit(() =>
+            {
+                var source = Find(id); var piece = Piece(source); Bounds(col, row, piece.Size);
+                var overlap = Handles().Where(h => h.Node != source.Node && Overlap(Piece(h), col, row, piece.Size)).ToArray();
+                if (overlap.Length > 0)
+                {
+                    if (piece.Size != 1 || overlap.Length != 1 || Piece(overlap[0]).Size != 1) throw new InvalidOperationException("移动大块前请清空目标区域；单格砖可直接交换。");
+                    var other = Piece(overlap[0]);
+                    if (Stroke(piece.Col, piece.Row) && other.Kind != "N" || Stroke(col, row) && piece.Kind != "N") throw new InvalidOperationException("交换会遮住字形目标，请换一个位置。");
+                    overlap[0].Node.Set("c", piece.Col); overlap[0].Node.Set("r", piece.Row);
+                }
+                for (int y = row; y < row + piece.Size; y++) for (int x = col; x < col + piece.Size; x++) if (Stroke(x, y) && piece.Kind != "N") throw new InvalidOperationException("这里是字形目标，不能移入特殊砖。");
+                source.Node.Set("c", col); source.Node.Set("r", row);
+            }, () => id);
+        }
+        public OperationResult TryCloneAt(string sourceId, int col, int row)
+        {
+            if (IsFusion) return TryCloneFusionAt(sourceId, col, row);
+            string created = null;
+            return Edit(() =>
+            {
+                var source = Find(sourceId); var original = Piece(source); Bounds(col, row, original.Size);
+                var overlap = Handles().Where(h => Overlap(Piece(h), col, row, original.Size)).ToArray();
+                foreach (var h in overlap) { var p = Piece(h); if (p.Col < col || p.Row < row || p.Col + p.Size > col + original.Size || p.Row + p.Size > row + original.Size) throw new InvalidOperationException("复制不能只覆盖大块的一部分；请先清空目标区域。"); }
+                for (int y = row; y < row + original.Size; y++) for (int x = col; x < col + original.Size; x++) if (Stroke(x, y) && original.Kind != "N") throw new InvalidOperationException("复制会遮住字形目标。");
+                var clone = EditorJson.Parse(source.Node.ToJson()); clone.Set("c", col); clone.Set("r", row); if (Chapter != "Alphabet") clone.Set("id", Guid.NewGuid().ToString("N"));
+                foreach (var h in overlap) { h.Array.Items.Remove(h.Node); ids.Remove(h.Node); }
+                root.EnsureArray(Chapter == "Alphabet" ? original.IsChest ? "chests" : "cells" : "pieces").Items.Add(clone);
+                created = Guid.NewGuid().ToString("N"); ids[clone] = created;
+            }, () => created);
+        }
+        public OperationResult TryPlace(string kind, int col, int row, int size = 1)
+        {
+            if (IsFusion) return TryPlaceFusion(kind, col, row, size);
+            string created = null;
+            return Edit(() =>
+            {
+                if (kind == "Chest") kind = "chest"; size = kind == "chest" || Chapter == "Picnic" && kind == "Q" ? 2 : size;
+                CheckKindAndSize(kind, size); Bounds(col, row, size);
+                var overlapping = Handles().Where(h => Overlap(Piece(h), col, row, size)).ToArray();
+                foreach (var h in overlapping) { var old = Piece(h); if (old.Col < col || old.Row < row || old.Col + old.Size > col + size || old.Row + old.Size > row + size) throw new InvalidOperationException("不能只覆盖大块的一部分；请先删除该大块。"); }
+                for (int y = row; y < row + size; y++) for (int x = col; x < col + size; x++) if (Stroke(x, y) && kind != "N") throw new InvalidOperationException("这里是蓝色字形目标，仅可放置普通N砖。");
+                foreach (var h in overlapping) { h.Array.Items.Remove(h.Node); ids.Remove(h.Node); }
+                var node = CreatePiece(kind, col, row, size); root.EnsureArray(Chapter == "Alphabet" ? kind == "chest" ? "chests" : "cells" : "pieces").Items.Add(node);
+                created = Guid.NewGuid().ToString("N"); ids[node] = created;
+            }, () => created);
+        }
+        EditorJson CreatePiece(string kind, int col, int row, int size)
+        {
+            var p = EditorJson.Object(); if (Chapter != "Alphabet") p.Set("id", Guid.NewGuid().ToString("N")); p.Set("c", col); p.Set("r", row);
+            if (kind == "chest") { p.Set("mode", "plain"); p.Set("contents", IntArray(new[] { 1, 0, 2, 0 })); return p; }
+            p.Set("kind", kind);
+            if (Chapter == "Alphabet") { p.Set("hp", kind == "F" ? 7 : kind == "T" ? 6 : kind == "A" ? 8 : kind == "R" || kind == "S" ? 1 : kind == "L" || kind == "B" || kind == "K" ? 0 : Stroke(col, row) ? 4 : document != null && document.IsAuthoring ? 1 : Index < 3 ? 1 : Index < 5 ? 3 : 4); p.Set("armor", false); }
+            else if (Chapter == "Picnic")
+            {
+                p.Set("size", size); p.Set("hp", kind == "Q" ? 999999 : kind == "T" ? 3 : kind == "N" || kind == "J" || kind == "X" ? 4 : 1);
+                if (kind == "Q") { p.Set("content", "F"); p.Set("initialCount", 10); p.Set("remaining", 10); p.Set("hitsPerItem", 3); p.Set("hitProgress", 0); }
+                if (kind == "T") p.Set("ripenNeeds", 2); if (kind == "D") p.Set("direction", "up");
+            }
+            else { p.Set("hp", kind == "F" || kind == "T" ? 3 : kind == "S" ? 4 : 1); p.Set("size", size); p.Set("ice", kind == "F" || kind == "T" ? 1 : 0); p.Set("layers", kind == "O" ? size : kind == "S" ? 3 : 0); p.Set("hitsPerRing", 2); }
+            return p;
+        }
+        public OperationResult TryUpdate(string id, LevelEditorPieceEdit change)
+        {
+            if (IsFusion) return TryUpdateFusionLegacyEdit(id, change);
+            return Edit(() =>
+            {
+                if (change == null) throw new ArgumentNullException("change"); var h = Find(id); var old = Piece(h); var n = h.Node;
+                string kind = change.Kind ?? old.Kind; if (kind == "Chest") kind = "chest";
+                if (kind != old.Kind) throw new InvalidOperationException("更换砖型请使用画笔放置；属性修改保留原砖型。");
+                int size = change.Size ?? old.Size, col = change.Col ?? old.Col, row = change.Row ?? old.Row; CheckKindAndSize(kind, size); Bounds(col, row, size);
+                foreach (var other in Handles()) if (other.Node != n && Overlap(Piece(other), col, row, size)) throw new InvalidOperationException("目标位置已被其他砖占用；请先清空目标位置。");
+                for (int y = row; y < row + size; y++) for (int x = col; x < col + size; x++) if (Stroke(x, y) && kind != "N") throw new InvalidOperationException("这里属于字形目标，不能放置特殊砖。");
+                n.Set("c", col); n.Set("r", row); if (Chapter != "Alphabet") n.Set("size", size);
+                if (change.Hp.HasValue) { int hp = change.Hp.Value; bool touchTool = Chapter != "Snow" && (kind == "L" || kind == "B" || Chapter == "Alphabet" && kind == "K" || Chapter == "Picnic" && kind == "D"); if (h.Chest && hp != 30 || Chapter == "Picnic" && kind == "Q" && hp != 999999) throw new ArgumentException("此容器的HP由机制决定，不能通过HP字段修改。"); if (hp < 0 || hp > 999999 || hp == 0 && !touchTool) throw new ArgumentException("HP需为1–999999；字母/野餐触碰工具可为0，冬季工具仍需实体HP。"); if (!h.Chest) n.Set("hp", hp); }
+                if (change.Armor.HasValue) { if (h.Chest) n.Set("mode", change.Armor.Value ? "armor" : "plain"); else n.Set("armor", change.Armor.Value); }
+                if (change.Mode != null) { if (!h.Chest || !(new[] { "plain", "armor", "rear" }).Contains(change.Mode)) throw new ArgumentException("大箱模式必须为plain/armor/rear。"); n.Set("mode", change.Mode); }
+                if (change.Contents != null) { if (!h.Chest || change.Contents.Length != 4 || change.Contents.Any(v => v < 0 || v > 2)) throw new ArgumentException("大箱必须有4项内容：0空砖、1鱼、2玩具。"); n.Set("contents", IntArray(change.Contents)); }
+                if (change.Direction != null) { if (Chapter != "Picnic" || kind != "D" || !(new[] { "up", "down", "left", "right" }).Contains(change.Direction)) throw new ArgumentException("仅汽水可设置四向朝向。"); n.Set("direction", change.Direction); }
+                if (change.Ice.HasValue) { if (Chapter != "Snow" || change.Ice < 0 || change.Ice > 1) throw new ArgumentException("冬季冰层只支持0或1。"); n.Set("ice", change.Ice.Value); }
+                if (change.Layers.HasValue) { if (Chapter != "Snow" || kind != "S" && kind != "O" || change.Layers < 1 || change.Layers > 4) throw new ArgumentException("仅雪堆/雪球可设置1–4层。"); if (kind == "O" && change.Layers != size) throw new ArgumentException("雪球层数由占格尺寸决定，请修改尺寸。"); n.Set("layers", change.Layers.Value); }
+                if (Chapter == "Snow" && kind == "O") n.Set("layers", size);
+                if (change.HitsPerRing.HasValue) { if (Chapter != "Snow" || kind != "O" || change.HitsPerRing < 1 || change.HitsPerRing > 20) throw new ArgumentException("雪球每圈命中数需为1–20。"); n.Set("hitsPerRing", change.HitsPerRing.Value); }
+                if (change.InitialCount.HasValue && (Chapter != "Picnic" || kind != "Q" || change.InitialCount != 10)) throw new ArgumentException("首版野餐篮固定10份。");
+                if (change.HitsPerItem.HasValue && (Chapter != "Picnic" || kind != "Q" || change.HitsPerItem != 3)) throw new ArgumentException("首版野餐篮固定3击一份。");
+                if (change.RipenNeeds.HasValue) { if (Chapter != "Picnic" || kind != "T" || change.RipenNeeds < 1 || change.RipenNeeds > 4) throw new ArgumentException("草莓成熟条件需为1–4个不同邻格。"); n.Set("ripenNeeds", change.RipenNeeds.Value); }
+                if (Chapter == "Snow" && n.Bool("armor") && n.Int("ice") > 0) throw new ArgumentException("冰层和护甲不能同时存在。");
+            }, () => id);
+        }
+        static EditorJson IntArray(IEnumerable<int> values) { var array = EditorJson.Array(); foreach (int value in values) array.Items.Add(EditorJson.Value(value)); return array; }
+        static bool Overlap(LevelEditorPiece p, int col, int row, int size) { return p.Col < col + size && p.Col + p.Size > col && p.Row < row + size && p.Row + p.Size > row; }
+        static void Bounds(int col, int row, int size) { if (size < 1 || size > 9 || col < 0 || col > 8 || row < 0 || row > 8 || col > 9 - size || row > 9 - size) throw new ArgumentException("砖块必须完整位于9×9棋盘内。"); }
+        void CheckKindAndSize(string kind, int size)
+        {
+            var allowed = LevelEditorRuleCatalog.GetKinds(Chapter);
+            if (!allowed.Contains(kind)) throw new ArgumentException("当前章节不支持砖型：" + kind);
+            if (kind == "chest" || Chapter == "Picnic" && kind == "Q") { if (size != 2) throw new ArgumentException("大箱/野餐篮必须占2×2格。"); }
+            else if (Chapter == "Snow" && kind == "O") { if (size < 1 || size > 4) throw new ArgumentException("雪球占格尺寸需为1–4。"); }
+            else if (size != 1) throw new ArgumentException("此砖型只能占1格。");
+        }
+        void RecalculateGoals()
+        {
+            if (IsFusion) return; // Fusion goals derive from the complete runtime definition, including reserved contents.
+            var goals = ComputeGoals();
+            if (Chapter == "Alphabet") { root.Set("fish", goals.F); root.Set("toy", goals.T); root.Set("blueJelly", goals.J); }
+            else { var g = root.EnsureObject("goals"); if (Chapter == "Picnic") g.Set("J", goals.J); g.Set("F", goals.F); g.Set("T", goals.T); }
+        }
+        LevelEditorGoals ComputeGoals()
+        {
+            var result = new LevelEditorGoals();
+            foreach (var p in Pieces)
+            {
+                if (p.IsChest) { result.F += p.Contents.Count(v => v == 1); result.T += p.Contents.Count(v => v == 2); }
+                else if (Chapter == "Alphabet") { if (p.Kind == "F") result.F++; if (p.Kind == "T") result.T++; if (p.Kind == "N" && Stroke(p.Col, p.Row)) result.J++; }
+                else if (Chapter == "Picnic") { if (p.Kind == "Q") result.F += p.InitialCount; if (p.Kind == "T") result.T++; if (p.Kind == "J") result.J++; }
+                else { if (p.Kind == "F") result.F++; if (p.Kind == "T") result.T++; }
+            }
+            return result;
+        }
+        public IReadOnlyList<ValidationIssue> Validate()
+        {
+            if (root.Has("rulesProfile") && root.Get("rulesProfile").Kind != EditorJson.Type.String) return new[] { new ValidationIssue { Severity = ValidationSeverity.Error, Code = "RULES_PROFILE", Message = "rulesProfile必须是字符串；不能把未知档案当成旧规则运行。", LevelNumber = Number } };
+            if (IsFusion) return ValidateFusion();
+            if (RulesProfile != "legacy") return new[] { new ValidationIssue { Severity = ValidationSeverity.Error, Code = "RULES_PROFILE", Message = "运行时不支持规则档案：" + RulesProfile + "。草稿可以保存。", LevelNumber = Number } };
+            var issues = new List<ValidationIssue>();
+            Action<string, string, string, bool> add = (code, message, id, warning) => issues.Add(new ValidationIssue { Severity = warning ? ValidationSeverity.Warning : ValidationSeverity.Error, Code = code, Message = message, LevelNumber = Number, PieceId = id });
+            Action<string, string> error = (code, message) => add(code, message, null, false);
+            bool authored = document != null && document.IsAuthoring || root.Text("authoringSchema") == "bouncebusters-level-authoring-v2";
+            if (authored ? !IntegerField(root, "moves") || Moves < 1 || Moves > 999 : root.Int("moves", -1) != 20) error("MOVES", authored ? "步数需为1–999整数。" : "旧版关卡固定20步；可通过应用步数转换为新建关卡格式。");
+            if (root.Has("volleyCount") && root.Int("volleyCount", -1) != 5 || Chapter != "Alphabet" && !root.Has("volleyCount")) error("VOLLEY", "每次发射必须为5球。");
+            if (Chapter != "Alphabet" && (document == null ? root.Int("id", -1) != Number : root.Int("id", -1) < 1)) error("LEVEL_ID", "关卡id必须是有效正整数；试玩映射由规则模板决定。");
+            foreach (string key in Chapter == "Alphabet" ? new[] { "cells", "chests" } : new[] { "pieces" }) { var a = root.Get(key); if (a == null || a.Kind != EditorJson.Type.Array) error("ARRAY", "缺少有效数组：" + key); else if (a.Items.Any(n => n.Kind != EditorJson.Type.Object)) error("PIECE", "砖块数组只能包含对象。"); }
+            string[] glyph = Glyph;
+            if (Chapter == "Alphabet" && (glyph.Length != 7 || glyph.Any(s => s.Length != 5 || s.Any(c => c != '0' && c != '1')))) error("GLYPH", "字形必须为7×5的0/1矩阵。");
+            var occupied = new string[9, 9]; var legacy = new HashSet<string>(); int legacyProblems = 0;
+            foreach (var h in Handles())
+            {
+                var p = Piece(h); var n = h.Node;
+                var integerFields = new List<string> { "c", "r", "hp" };
+                if (Chapter != "Alphabet") integerFields.Add("size");
+                if (Chapter == "Snow") integerFields.AddRange(new[] { "ice", "layers", "hitsPerRing" });
+                if (Chapter == "Picnic") integerFields.AddRange(new[] { "initialCount", "hitsPerItem", "ripenNeeds" });
+                foreach (string field in integerFields) if (n.Has(field) && !IntegerField(n, field)) add("FIELD_TYPE", field + "必须是JSON整数，不能使用字符串或小数。", p.Id, false);
+                if (n.Has("armor") && n.Get("armor").Kind != EditorJson.Type.Boolean) add("FIELD_TYPE", "armor必须为JSON布尔值。", p.Id, false);
+                if (h.Chest && n.Has("mode") && n.Get("mode").Kind != EditorJson.Type.String || Chapter == "Picnic" && p.Kind == "D" && n.Has("direction") && n.Get("direction").Kind != EditorJson.Type.String) add("FIELD_TYPE", "模式/方向必须为JSON字符串。", p.Id, false);
+                try { CheckKindAndSize(p.Kind, p.Size); Bounds(p.Col, p.Row, p.Size); }
+                catch (Exception ex) { add("PLACEMENT", ex.Message, p.Id, false); continue; }
+                foreach (string coordinate in new[] { "c", "r" }) if (!IntegerField(n, coordinate)) add("COORDINATE", "坐标必须是整数：" + coordinate, p.Id, false);
+                if (Chapter == "Snow" && p.Kind != "O" && n.Int("size", 1) != 1) add("SIZE", "此冬季砖型运行时仅占1格。", p.Id, false);
+                for (int y = p.Row; y < p.Row + p.Size; y++) for (int x = p.Col; x < p.Col + p.Size; x++) { if (occupied[x, y] != null) add("OVERLAP", "砖块重叠于(" + x + "," + y + ")。", p.Id, false); occupied[x, y] = p.Id; if (Stroke(x, y) && p.Kind != "N") add("GLYPH_BLOCKED", "字形目标被其他类型覆盖。", p.Id, false); }
+                if (p.IsChest)
+                {
+                    var contents = n.Get("contents"); if (contents == null || contents.Kind != EditorJson.Type.Array || contents.Items.Count != 4 || contents.Items.Any(v => v.Kind != EditorJson.Type.Number || v.Scalar != "0" && v.Scalar != "1" && v.Scalar != "2")) add("CONTENTS", "大箱需要4项0/1/2内容。", p.Id, false);
+                    if (!(new[] { "plain", "armor", "rear" }).Contains(p.Mode)) add("MODE", "大箱模式无效。", p.Id, false);
+                }
+                else
+                {
+                    bool tool = Chapter != "Snow" && (p.Kind == "L" || p.Kind == "B" || Chapter == "Alphabet" && p.Kind == "K" || Chapter == "Picnic" && p.Kind == "D");
+                    if (!tool && !(Chapter == "Picnic" && p.Kind == "Q") && (!IntegerField(n, "hp") || p.Hp < 1 || p.Hp > 999999)) add("HP", "可伤砖HP必须为1–999999整数。", p.Id, false);
+                }
+                if (Chapter != "Alphabet" && (string.IsNullOrEmpty(p.LegacyId) || !legacy.Add(p.LegacyId))) legacyProblems++;
+                if (Chapter == "Picnic")
+                {
+                    if (p.Kind == "Q" && (p.Size != 2 || p.InitialCount != 10 || p.HitsPerItem != 3)) add("BASKET", "野餐篮必须2×2、10份、3次命中出1份。", p.Id, false);
+                    if (p.Kind == "D" && !(new[] { "up", "down", "left", "right" }).Contains(p.Direction)) add("DIRECTION", "汽水方向必须为up/down/left/right。", p.Id, false);
+                    if (p.Kind == "T" && (p.RipenNeeds < 1 || p.RipenNeeds > 4)) add("BERRY", "草莓成熟需要1–4个不同邻格。", p.Id, false);
+                }
+                if (Chapter == "Snow")
+                {
+                    if (p.Ice < 0 || p.Ice > 1 || p.Armor && p.Ice > 0) add("ICE", "冰层只能0/1，且不能与护甲共存。", p.Id, false);
+                    if (p.Kind == "S" && (p.Layers < 1 || p.Layers > 4)) add("SNOW_LAYERS", "雪堆层数需为1–4。", p.Id, false);
+                    if (p.Kind == "O" && (p.HitsPerRing < 1 || p.HitsPerRing > 20)) add("SNOW_RING", "雪球每圈命中数需为1–20。", p.Id, false);
+                    if (p.Kind == "O" && n.Int("layers") != p.Size) add("DERIVED_LAYERS", "雪球layers字段与size不同；运行时使用size。", p.Id, true);
+                }
+            }
+            int holes = 0; foreach (string cell in occupied) if (cell == null) holes++;
+            if (holes > 0) error("HOLES", "棋盘有" + holes + "个空格；草稿可保存，试玩/导出前请补齐。");
+            if (legacyProblems > 0) add("LEGACY_ID", "有" + legacyProblems + "个旧id缺失或重复；编辑器使用独立身份，不改写旧id。", null, true);
+            var expected = ComputeGoals(); var actual = Goals;
+            if (expected.F != actual.F || expected.T != actual.T || expected.J != actual.J) error("GOALS", "目标数与棋盘内容不一致，请重新计算目标。");
+            if (actual.Total <= 0) error("NO_GOALS", "关卡至少需要一个收集目标。");
+            if (Chapter == "Picnic") { var protections = root.Get("protectedCells"); if (protections == null || protections.Kind != EditorJson.Type.Array) error("PROTECTION", "缺少protectedCells数组。"); else foreach (var p in protections.Items) if (p.Kind != EditorJson.Type.Object || p.Int("c", -1) < 0 || p.Int("c", -1) > 8 || p.Int("r", -1) < 0 || p.Int("r", -1) > 8) error("PROTECTION", "保护坐标必须位于棋盘内。"); }
+            return issues.AsReadOnly();
+        }
+        static bool IntegerField(EditorJson node, string name) { var value = node.Get(name); int parsed; return value != null && value.Kind == EditorJson.Type.Number && int.TryParse(value.Scalar, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed); }
+        internal bool IsGlyph(int col, int row) { return Stroke(col, row); }
+    }
+    internal static class LevelEditorPieceExtensions
+    {
+        internal static bool ContainsGlyph(this LevelEditorPiece piece, LevelEditorLevel level) { for (int y = piece.Row; y < piece.Row + piece.Size; y++) for (int x = piece.Col; x < piece.Col + piece.Size; x++) if (level.IsGlyph(x, y)) return true; return false; }
+    }
+}

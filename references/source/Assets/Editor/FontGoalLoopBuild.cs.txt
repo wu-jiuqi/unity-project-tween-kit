@@ -1,0 +1,11 @@
+using System;using System.IO;using UnityEditor;using UnityEditor.Build;using UnityEditor.Build.Reporting;using UnityEngine;
+public static class FontGoalLoopBuild {
+ public static void Windows(){
+  BuildEntry.Configure();if(PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone).Contains("BOUNCE_STRATEGY_PLAYTEST"))throw new Exception("Strategy test build is not the normal game");
+  PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+  string path=Path.GetFullPath("../../Builds/FontGoalLoop-v1/Windows/BounceGarden.exe");Directory.CreateDirectory(Path.GetDirectoryName(path));
+  var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{"Assets/Scenes/Main.unity"},target=BuildTarget.StandaloneWindows64,locationPathName=path,options=BuildOptions.CompressWithLz4HC});
+  File.WriteAllText(Path.GetFullPath("../../Builds/FontGoalLoop-v1/build-summary.json"),"{\"result\":\""+report.summary.result+"\",\"errors\":"+report.summary.totalErrors+",\"warnings\":"+report.summary.totalWarnings+"}");
+  if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Font/goal/loop build failed");
+ }
+}

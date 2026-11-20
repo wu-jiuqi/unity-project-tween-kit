@@ -1,0 +1,64 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class LocalProfile {
+ LeagueState league=new LeagueState();List<string> ownedAvatars=new List<string>(),ownedFrames=new List<string>();
+ LeagueConfig leagueSettings;ILeagueClock leagueClock;
+ public LeagueConfig LeagueSettings=>leagueSettings??(leagueSettings=new ResourceLeagueConfigProvider().Load());
+ public ILeagueClock LeagueClock=>leagueClock??(leagueClock=new SystemLeagueClock());
+ public string EquippedAvatarId {get;private set;}="";public string EquippedFrameId {get;private set;}="";
+ public string EquippedAvatarResource {get;private set;}="";public string EquippedFrameResource {get;private set;}="";
+ public event Action Changed;
+ public System.Collections.Generic.IReadOnlyList<string> OwnedAvatarIds=>ownedAvatars.AsReadOnly();
+ public System.Collections.Generic.IReadOnlyList<string> OwnedFrameIds=>ownedFrames.AsReadOnly();
+ public void ConfigureLeague(ILeagueConfigProvider provider,ILeagueClock clock){leagueSettings=provider.Load();leagueSettings.Validate();leagueClock=clock??throw new ArgumentNullException(nameof(clock));}
+ void NotifyChanged(){if(Changed==null)return;foreach(Action handler in Changed.GetInvocationList())try{handler();}catch(Exception e){Debug.LogException(e);}}
+ void ResetLeague(){league=new LeagueState();ownedAvatars.Clear();ownedFrames.Clear();EquippedAvatarId=EquippedFrameId=EquippedAvatarResource=EquippedFrameResource="";}
+ bool LeagueTransaction(Action change,bool notify=true){
+  if(!storageHealthy)return false;string before=Serialize();try{change();LeagueEngine.Validate(league);SaveInternal();if(notify)NotifyChanged();return true;}
+  catch(Exception e){Restore(before);storageHealthy=false;Debug.LogError("League save failed; previous state preserved. "+e.Message);return false;}
+ }
+ public bool LeagueUnlocked=>AlphabetUnlocked>=10;
+ public LeagueSnapshot ReadLeague(bool offline=false){
+  if(!LeagueUnlocked)return null;
+  long now=LeagueClock.UtcSeconds;
+  // Do not keep writing unchanged snapshots every frame; view requests once per configured interval.
+  if(storageHealthy&&(offline||league.current==null||now>league.current.lastObserved||(LeagueSettings.activeCompetition&&league.current.competitionVersion<LeagueEngine.ActiveCompetitionVersion)))LeagueTransaction(()=>{LeagueEngine.PrepareActive(league,LeagueSettings,now,Badges);LeagueEngine.Advance(league,now,Badges,offline);LeagueEngine.Open(league,LeagueSettings,now,Badges);},false);
+  var p=league.current;if(p==null)return null;
+  var entries=LeagueEngine.Standings(p,Badges);var player=entries.First(e=>e.player);
+  return new LeagueSnapshot{config=p.config,periodId=p.id,remaining=Math.Max(0,p.endsAt-now),entries=entries,player=player,next=player.rank>1?entries[player.rank-2]:null,reward=league.rewards.FirstOrDefault(r=>r.eligible&&!r.claimed)};
+ }
+ public int LastLeagueMedalGain {get;private set;}
+ public int LastLeagueRankBefore {get;private set;}
+ public int LastLeagueRankAfter {get;private set;}
+ void CommitCampaignLeague(int level,bool firstClear,int oldBadges){
+  LastLeagueMedalGain=0;LastLeagueRankBefore=LastLeagueRankAfter=0;
+  if(!LeagueUnlocked)return;
+  long now=LeagueClock.UtcSeconds;
+  LeagueEngine.PrepareActive(league,LeagueSettings,now,oldBadges);LeagueEngine.Advance(league,now,oldBadges,false);LeagueEngine.Open(league,LeagueSettings,now,oldBadges);
+  var p=league.current;
+  if(!p.config.calendarSeasons){LastLeagueRankBefore=LeagueEngine.Standings(p,oldBadges).First(e=>e.player).rank;LeagueEngine.Win(league,LeagueSettings,now,oldBadges,Badges,true);LastLeagueMedalGain=1;LastLeagueRankAfter=LeagueEngine.Standings(p,Badges).First(e=>e.player).rank;return;}
+  long day=(now+8*3600)/86400;
+  if(league.replayDay!=day){league.replayDay=day;league.replayLevels=new int[0];}
+  bool eligible=firstClear||((league.replayLevels?.Length??0)<3&&!(league.replayLevels??new int[0]).Contains(level));
+  // The permanent medal counter still grows on every win. Excluded wins shift the season baseline equally.
+  if(!eligible){p.startMedals++;return;}
+  if(!firstClear)league.replayLevels=(league.replayLevels??new int[0]).Concat(new[]{level}).ToArray();
+  LastLeagueRankBefore=LeagueEngine.Standings(p,oldBadges).First(e=>e.player).rank;
+  LeagueEngine.Win(league,LeagueSettings,now,oldBadges,Badges,true);LastLeagueMedalGain=1;LastLeagueRankAfter=LeagueEngine.Standings(p,Badges).First(e=>e.player).rank;
+ }
+ public bool GrantMedals(string transactionKey,int amount){if(!ValidKey(transactionKey)||amount<=0)return false;return Commit(transactionKey+"/medals",0,amount,UnlockedLevel);}
+ public bool AddTestMedals(){return GrantMedals("medal-test/"+Guid.NewGuid().ToString("N"),LeagueSettings.testMedals);}
+ public bool ClaimLeagueReward(string periodId){
+  var reward=league.rewards.FirstOrDefault(r=>r.periodId==periodId);if(reward==null||!reward.eligible||reward.claimed||committed.Contains(periodId+"/leagueReward")||(long)reward.coins+LeagueDuplicateCoins(reward)>int.MaxValue-Coins)return false;
+  int duplicate=LeagueDuplicateCoins(reward);
+  return LeagueTransaction(()=>{Coins+=reward.coins+duplicate;if(!string.IsNullOrEmpty(reward.avatarId)&&!ownedAvatars.Contains(reward.avatarId))ownedAvatars.Add(reward.avatarId);if(!string.IsNullOrEmpty(reward.frameId)&&!ownedFrames.Contains(reward.frameId))ownedFrames.Add(reward.frameId);reward.claimed=true;committed.Add(periodId+"/leagueReward");});
+ }
+ public bool OwnsAvatar(string id)=>ownedAvatars.Contains(id);public bool OwnsFrame(string id)=>ownedFrames.Contains(id);
+ public bool EquipLeagueCosmetics(string avatarId,string frameId){return EquipShopCosmetics(avatarId,frameId);}
+ public string ExportForQA()=>Serialize();
+ public static LocalProfile ImportForQA(string json){var p=new LocalProfile();p.Restore(json);return p;}
+}
+}

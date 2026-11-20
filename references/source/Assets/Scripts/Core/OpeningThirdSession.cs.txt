@@ -1,0 +1,110 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public sealed partial class GameSession {
+ readonly List<OpeningCatView> openingCats=new List<OpeningCatView>();
+ const int CatIngotCount=5;
+ const float CatWindup=.18f,CatFlightTime=.36f,CatFlightStagger=.04f,CatTail=.10f;
+ sealed class IngotFlight {public BrickBody Brick;public BrickSpawn Definition;public ChainTool Tool;public SpriteRenderer Image,Ray;public Vector2 Start,End;public int Col,Row;public float Delay,Duration=CatFlightTime,LandAge;public bool EmptyTarget,Arrived,Cancelled;}
+ sealed class CatCast {public OpeningCatView Cat;public float Age;public bool Light;public readonly List<IngotFlight> Flights=new List<IngotFlight>();}
+ sealed class ThirdGhost {public SpriteRenderer Image;public Vector2 Start,Velocity;public float Age;public float Spin;}
+ sealed class ThirdRing {public SpriteRenderer Image;public float Age;}
+ readonly List<CatCast> openingCasts=new List<CatCast>();readonly List<ThirdGhost> openingGhosts=new List<ThirdGhost>();readonly List<ThirdRing> openingRings=new List<ThirdRing>();
+ bool openingCatWaitingForSpace;System.Random openingCatRandom;
+ // Only undelivered ingots hold settlement. Cosmetic tails never freeze play.
+ public bool OpeningCatBusy=>openingCasts.Any(c=>c.Flights.Any(f=>!f.Arrived));
+ public int OpeningThirdPending=>openingCasts.Sum(c=>c.Flights.Count(f=>!f.Arrived))+(openingCatWaitingForSpace?0:openingCats.Sum(c=>c==null?0:c.Queued+c.PendingIngots));
+ public int OpeningIngotConversions {get;private set;}
+ public bool OpeningCatBrick(BrickBody b)=>b!=null&&b.Definition.reveal=="opening-cat";
+ public bool OpeningIngotBrick(BrickBody b)=>b!=null&&b.Definition.reveal=="opening-ingot";
+ void ClearOpeningThird(){openingCats.Clear();openingCasts.Clear();openingGhosts.Clear();openingRings.Clear();openingCatWaitingForSpace=false;openingCatRandom=null;OpeningIngotConversions=0;}
+ void InitializeOpeningThird(){var director=new GameObject("Lucky cats and ingot presentation");director.transform.SetParent(world,false);director.AddComponent<OpeningThirdDirector>().Initialize(this);}
+ void SpawnOpeningCat(OpeningPiece p){CreateBrick(new BrickSpawn{position=ChainGridRules.Center(p.c,p.r),size=Vector2.one*.76f,hp=1,colorIndex=1,referenceCol=p.c,referenceRow=p.r,reveal="opening-cat",kind=BrickKind.Normal},0);var b=CollectionBricks.Last();var v=b.gameObject.AddComponent<OpeningCatView>();v.Initialize(b);openingCats.Add(v);}
+ void OpeningSetIngot(BrickBody b){b.Definition.reveal="opening-ingot";b.Definition.colorIndex=1;jellyTargets.Remove(b.Id);if(b.GetComponent<OpeningIngotView>()==null)b.gameObject.AddComponent<OpeningIngotView>().Initialize(b);}
+ bool OpeningBlockCat(BrickBody b,bool directBall,Vector2 incoming){if(!IsOpening||!OpeningCatBrick(b))return false;if(directBall)b.GetComponent<OpeningCatView>()?.Impact(incoming);ChainBlocks++;changed=true;return true;}
+ void OpeningCatAdjacent(Vector2 p,long batch){int cell=Mathf.RoundToInt(p.x/CollectionLevels.Pitch+4)+9*Mathf.RoundToInt((CollectionLevels.Top-p.y)/CollectionLevels.Pitch);foreach(var cat in openingCats)if(cat!=null&&cat.Brick.Alive){var d=(Vector2)cat.transform.position-p;float pitch=CollectionLevels.Pitch,t=pitch*.13f;if(Mathf.Abs(Mathf.Abs(d.x)-pitch)<t&&Mathf.Abs(d.y)<t||Mathf.Abs(Mathf.Abs(d.y)-pitch)<t&&Mathf.Abs(d.x)<t)cat.Add(batch*128+cell);}}
+ bool CatCandidate(BrickBody b)=>b!=null&&b.Alive&&(b.Definition.reveal=="opening-N")&&!RefillProtected(b)&&!b.ShellIntact&&b.GetComponent<ChainTileVisibility>()?.Hidden!=true;
+ bool CatCandidate(ChainTool t)=>t!=null&&!t.Consumed&&!t.Waiting&&!t.Ingot&&SevenSpecialRules.IsSpecial(t.Kind)&&t.View!=null&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true;
+ bool CatReservedCell(int c,int r,int size=1){foreach(var cast in openingCasts)foreach(var f in cast.Flights)if(!f.Arrived&&f.EmptyTarget&&f.Col>=c&&f.Col<c+size&&f.Row>=r&&f.Row<r+size)return true;return false;}
+ bool CatReservedTarget(BrickBody b,ChainTool t)=>openingCasts.Any(c=>c.Flights.Any(f=>!f.Arrived&&!f.EmptyTarget&&(b!=null?f.Brick==b&&ReferenceEquals(f.Definition,b.Definition):f.Tool==t)));
+ List<IngotFlight> CatTargets(){var targets=new List<IngotFlight>();foreach(var b in CollectionBricks.Where(CatCandidate))if(!CatReservedTarget(b,null))targets.Add(new IngotFlight{Brick=b,Definition=b.Definition,End=b.GetComponent<Rigidbody2D>().position});foreach(var t in ChainTools.Where(CatCandidate))if(!CatReservedTarget(null,t))targets.Add(new IngotFlight{Tool=t,End=t.Position});return targets;}
+ bool[,] CatOccupied(){
+  var occupied=new bool[9,9];foreach(var p in ChainPieces()){GridMark(occupied,p);int c=Mathf.RoundToInt(ChainPiecePosition(p).x/CollectionLevels.Pitch+4),r=Mathf.RoundToInt((CollectionLevels.Top-ChainPiecePosition(p).y)/CollectionLevels.Pitch);for(int y=r;y<r+p.Size;y++)for(int x=c;x<c+p.Size;x++)if(x>=0&&x<9&&y>=0&&y<9)occupied[x,y]=true;}return occupied;
+ }
+ bool CatCellOccupied(int c,int r){
+  foreach(var b in CollectionBricks)if(b.Alive&&CatPieceOccupies(b.GetComponent<ChainGridPiece>(),c,r))return true;
+  foreach(var t in ChainTools)if(t.View!=null&&CatPieceOccupies(t.View.GetComponent<ChainGridPiece>(),c,r))return true;return false;
+ }
+ bool CatPieceOccupies(ChainGridPiece p,int c,int r){
+  if(p==null)return false;if(c>=p.Col&&c<p.Col+p.Size&&r>=p.Row&&r<p.Row+p.Size)return true;
+  var position=ChainPiecePosition(p);var center=ChainGridRules.Center(c,r);float half=CollectionLevels.Pitch*(p.Size+1)*.5f-.025f;
+  return Mathf.Abs(position.x-center.x)<half&&Mathf.Abs(position.y-center.y)<half;
+ }
+ List<IngotFlight> CatEmptyTargets(){
+  var empty=new List<IngotFlight>();
+  // Do not reserve a new hole across an already committed moving route.
+  if(ChainFalling)return empty;var occupied=CatOccupied();for(int r=0;r<9;r++)for(int c=0;c<9;c++)if(!occupied[c,r]&&!FlowReserved(c,r))empty.Add(new IngotFlight{EmptyTarget=true,Col=c,Row=r,End=ChainGridRules.Center(c,r)});return empty;
+ }
+ bool TrackCatTarget(IngotFlight f){
+  if(f.EmptyTarget)return !CatCellOccupied(f.Col,f.Row);
+  if(f.Brick!=null&&ReferenceEquals(f.Definition,f.Brick.Definition)&&CatCandidate(f.Brick)){f.End=f.Brick.GetComponent<Rigidbody2D>().position;return true;}
+  if(f.Tool!=null&&CatCandidate(f.Tool)&&ChainTools.Contains(f.Tool)){f.End=f.Tool.Position;return true;}return false;
+ }
+ bool RetargetCatFlight(IngotFlight f,float age){
+  f.Brick=null;f.Definition=null;f.Tool=null;f.EmptyTarget=false;
+  var targets=CatTargets();if(targets.Count==0)targets=CatEmptyTargets();if(targets.Count==0)return false;
+  var target=targets[openingCatRandom.Next(targets.Count)];f.Brick=target.Brick;f.Definition=target.Definition;f.Tool=target.Tool;f.EmptyTarget=target.EmptyTarget;f.Col=target.Col;f.Row=target.Row;f.End=target.End;
+  // Continue from the visible projectile rather than jumping back to the cat.
+  if(age>=f.Delay){f.Start=f.Image.transform.position;f.Delay=age;f.Duration=.22f;}return true;
+ }
+ void BeginCatBatch(){
+  if(!IsOpening||openingCasts.Count>0||OpeningGoalsEarned||sevenPresentationPending>0||sevenEffectDepth>0||sevenRefillBarrier)return;
+  if(!openingCats.Any(c=>c!=null&&(c.Queued>0||c.PendingIngots>0)))return;
+  var targets=CatTargets();var empty=CatEmptyTargets();
+  if(openingCatRandom==null)openingCatRandom=new System.Random(Generation*997+LevelIndex*7919);
+  foreach(var cat in openingCats.Where(c=>c!=null&&(c.Queued>0||c.PendingIngots>0)&&c.WaveAge<0)){
+   int count=cat.PendingIngots>0?Mathf.Min(cat.PendingIngots,targets.Count+empty.Count):CatIngotCount;
+   if(count==0||targets.Count+empty.Count<count)continue;if(cat.PendingIngots>0)cat.PendingIngots-=count;else cat.Queued--;cat.WaveAge=0;var cast=new CatCast{Cat=cat};
+   for(int i=0;i<count;i++){var pool=targets.Count>0?targets:empty;int n=openingCatRandom.Next(pool.Count);var f=pool[n];pool.RemoveAt(n);f.Start=cat.transform.position;f.Delay=CatWindup+i*CatFlightStagger;f.Image=OpeningThirdArt.Draw(world,"ingot",OpeningThirdArt.Variant(f.Tool?.Kind??0),.018f,84);f.Image.transform.position=f.Start;f.Image.enabled=false;f.Ray=WorldArt.Draw(world,"Gold light leaving cat paw","brick",f.Start,Vector2.one*.01f,new Color(1,.79f,.16f,0),83);cast.Flights.Add(f);}openingCasts.Add(cast);
+  }
+  // Keep a charge if the board cannot hold five, without blocking turn settlement.
+  int available=targets.Count+empty.Count;openingCatWaitingForSpace=!openingCats.Any(c=>c!=null&&(c.PendingIngots>0&&available>0||c.Queued>0&&available>=CatIngotCount));
+  if(openingCasts.Count>0){ChainMessage="招财猫挥爪 · 五枚元宝飞出";changed=true;}
+ }
+ void IngotDisplace(IngotFlight f){
+  if(f.EmptyTarget){CreateBrick(new BrickSpawn{position=f.End,size=Vector2.one*.76f,hp=1,colorIndex=1,referenceCol=f.Col,referenceRow=f.Row,reveal="opening-ingot",kind=BrickKind.Normal},0);OpeningSetIngot(CollectionBricks.Last());OpeningIngotConversions++;SoundService.Play("ingot_transform_land");ScheduleChainGravity();changed=true;return;}
+  Transform root=f.Brick!=null?f.Brick.transform:f.Tool.View;var source=f.Brick!=null?f.Brick.Face:root.GetComponentsInChildren<SpriteRenderer>().FirstOrDefault();
+  if(source!=null&&source.sprite!=null){var sr=new GameObject("Displaced brick · fast spin and fade").AddComponent<SpriteRenderer>();sr.transform.SetParent(world,false);sr.transform.position=source.transform.position;sr.transform.localScale=source.transform.lossyScale;sr.sprite=source.sprite;sr.sharedMaterial=OpeningYarnArt.Material;sr.sortingOrder=82;float side=f.End.x>=f.Start.x?1:-1;openingGhosts.Add(new ThirdGhost{Image=sr,Start=source.transform.position,Velocity=new Vector2(side*2.3f,3.5f),Spin=side*1260});}
+  if(f.Brick!=null)OpeningSetIngot(f.Brick);else{f.Tool.Ingot=true;f.Tool.ColorIndex=1;}
+  OpeningIngotConversions++;SoundService.Play("ingot_transform_land");changed=true;
+ }
+ internal void OpeningPlayRing(Vector2 p){var sr=OpeningThirdArt.Draw(world,"ring",0,2.0f,79);sr.transform.position=p;openingRings.Add(new ThirdRing{Image=sr});}
+ public void TickOpeningThird(float dt){
+  if(!IsOpening||IsPaused||!IsPlaying&&!VictorySettlementActive||dt<=0)return;
+  foreach(var cat in openingCats)if(cat!=null)cat.TickImpact(dt);
+  if(OpeningGoalsEarned)foreach(var c in openingCats)c.Queued=c.PendingIngots=0;
+  if(openingCasts.Count==0)BeginCatBatch();
+  foreach(var cast in openingCasts.ToArray()){
+   cast.Age+=dt;cast.Cat.WaveAge=cast.Age;
+   if(!cast.Light&&cast.Age>=CatWindup){cast.Light=true;OpeningPlayRing(cast.Cat.transform.position);SoundService.Play("lucky_cat_cast");}
+   foreach(var f in cast.Flights){
+    if(f.Cancelled)continue;
+    if(!f.Arrived&&!TrackCatTarget(f)&&!RetargetCatFlight(f,cast.Age)){
+     // A live clear may temporarily exhaust all legal targets. Preserve only
+     // this undelivered ingot, without holding the board or settlement open.
+     f.Arrived=f.Cancelled=true;f.LandAge=cast.Age;cast.Cat.PendingIngots++;openingCatWaitingForSpace=true;f.Image.enabled=f.Ray.enabled=false;ScheduleChainGravity();continue;
+    }
+    float rayProgress=Mathf.Clamp01((cast.Age-CatWindup)/.10f);var rayTip=Vector2.Lerp(f.Start,f.End,rayProgress*.38f);var rayDelta=rayTip-f.Start;f.Ray.transform.position=(f.Start+rayTip)*.5f;f.Ray.transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(rayDelta.y,rayDelta.x)*Mathf.Rad2Deg);f.Ray.transform.localScale=new Vector3(rayDelta.magnitude,.045f,1);f.Ray.color=new Color(1,.79f,.16f,Mathf.Clamp01((.40f-cast.Age)/.10f));float u=Mathf.Clamp01((cast.Age-f.Delay)/f.Duration);if(cast.Age<f.Delay)continue;f.Image.enabled=true;
+    Vector2 control=f.Start+Vector2.up*(.75f+Vector2.Distance(f.Start,f.End)*.2f);f.Image.transform.position=(1-u)*(1-u)*f.Start+2*(1-u)*u*control+u*u*f.End;
+    float size=Mathf.Lerp(.018f,.76f,u*u);if(u>=1){if(!f.Arrived){IngotDisplace(f);f.Arrived=true;f.LandAge=cast.Age;}float t=Mathf.Clamp01((cast.Age-f.LandAge)/CatTail);size=.76f*(1+Mathf.Sin(t*Mathf.PI)*.13f);f.Image.color=new Color(1,1,1,1-t);}
+    OpeningThirdArt.Fit(f.Image,"ingot",OpeningThirdArt.Variant(f.Tool?.Kind??0),size);
+   }
+   if(cast.Age>=.8f&&cast.Flights.All(f=>f.Arrived&&cast.Age>=f.LandAge+CatTail)){cast.Cat.WaveAge=-1;foreach(var f in cast.Flights){if(f.Image!=null)Destroy(f.Image.gameObject);if(f.Ray!=null)Destroy(f.Ray.gameObject);}openingCasts.Remove(cast);}
+  }
+  foreach(var ghost in openingGhosts.ToArray()){ghost.Age+=dt;float t=ghost.Age/.55f;ghost.Image.transform.position=ghost.Start+ghost.Velocity*ghost.Age+Vector2.down*5*ghost.Age*ghost.Age;ghost.Image.transform.localRotation=Quaternion.Euler(0,0,ghost.Spin*ghost.Age);ghost.Image.color=new Color(1,1,1,1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.08f,.55f,ghost.Age)));if(t>=1){Destroy(ghost.Image.gameObject);openingGhosts.Remove(ghost);}}
+  foreach(var ring in openingRings.ToArray()){ring.Age+=dt;OpeningThirdArt.Fit(ring.Image,"ring",Mathf.Clamp((int)(ring.Age*24),0,15),2.0f);if(ring.Age>=16f/24){Destroy(ring.Image.gameObject);openingRings.Remove(ring);}}
+ }
+}
+}

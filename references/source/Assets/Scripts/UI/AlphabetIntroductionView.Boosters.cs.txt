@@ -1,0 +1,20 @@
+using System;
+using DG.Tweening;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+public sealed partial class AlphabetIntroductionView {
+ public string QAStoryKey {get;private set;}
+ void BuildBoosterIntroduction(){var kind=(StreakBooster)(page.id-300);QAStoryKey="booster-"+kind;var title=Caption(content,page.title,0,955,960,190,68,new Color(1,.83f,.35f));Enter(title.rectTransform,.1f,.86f);
+  var ps=new[]{new Vector2(-245,535),new Vector2(245,130),new Vector2(-245,-295),new Vector2(245,-715)};
+  for(int i=0;i<4;i++){var holder=UICraft.Root(content,"独立道具步骤 "+i,ps[i].x,ps[i].y,420,350);var sprite=i==0?ScoreSkillArt.Booster(kind):StreakBallArt.Frame(kind,4);var pic=Picture(holder,"独立强化球",sprite,Vector2.zero,new Vector2(280,280));holder.gameObject.AddComponent<BoosterStoryActor>().Build(kind,i,pic);var caption=Caption(content,page.captions[i],ps[i].x,ps[i].y-215,520,100,34,new Color(.98f,.9f,.76f));Enter(holder,.2f+i*.2f,.9f);Enter(caption.rectTransform,.35f+i*.2f,.98f);LoadedArtCount++;AnimatedElementCount+=3;}
+  for(int i=0;i<3;i++){var arrow=Picture(content,"独立箭头",ChainHudArt.Frame(4),new Vector2(i%2==0?100:-100,325-i*415),new Vector2(140,120));if(i%2==1)arrow.rectTransform.localScale=new Vector3(-1,1,1);Enter(arrow.rectTransform,.5f+i*.2f,.85f);}
+  Enter(Caption(content,page.rule,0,-1000,960,110,28,new Color(.95f,.83f,.61f)).rectTransform,1.2f,.98f);Enter(Caption(content,"点击继续",0,-1110,850,90,43,new Color(.98f,.9f,.75f)).rectTransform,1.4f,.94f);entrance.AppendInterval(.1f);entrance.OnComplete(()=>ready=true);Layout();
+ }
+}
+public sealed class BoosterStoryActor:MonoBehaviour {
+ StreakBooster kind;int step;Image image;float age;
+ public void Build(StreakBooster k,int s,Image img){kind=k;step=s;image=img;if(s==3){image.gameObject.SetActive(false);for(int i=0;i<5;i++)ChineseArt.Image(transform,"五球独立元素",StreakBallArt.Frame(k,4),-150+i*75,0,70,70);}}
+ void Update(){age+=Time.unscaledDeltaTime;if(step==0)image.rectTransform.localScale=Vector3.one*(1+Mathf.Sin(age*3)*.035f);else if(step<3){image.sprite=StreakBallArt.Frame(kind,step==2?8+(int)(age*12)%4:4+(int)(age*12)%4);image.rectTransform.anchoredPosition=new Vector2(Mathf.Sin(age*2)*70,0);}}
+}
+}

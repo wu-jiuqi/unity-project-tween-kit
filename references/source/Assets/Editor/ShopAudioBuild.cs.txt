@@ -1,0 +1,27 @@
+using System;
+using UnityEditor;
+using UnityEngine;
+using BounceGarden;
+public static class ShopAudioBuild {
+ sealed class Store:IProfileStorage {public string json;public bool fail;public bool Exists=>json!=null;public string Read()=>json;public void Write(string s){if(fail)throw new Exception("Injected write failure");json=s;}}
+ public static void Windows(){
+  int checks=0;Action<bool,string> check=(ok,message)=>{checks++;if(!ok)throw new Exception(message);};
+  var store=new Store();var p=new LocalProfile(store);p.ReadLeague();var item=CatCosmeticCatalog.Items[0];
+  check(!p.EquipShopCosmetics(item.id,""),"Reject unowned");int coins=p.Coins;
+  check(p.PurchaseCosmetic(item.id,false),"Buy avatar");check(p.Coins==coins-300,"Deduct exact avatar price");
+  check(!p.PurchaseCosmetic(item.id,false)&&p.Coins==coins-300,"Repeated purchase cannot charge");
+  check(p.PurchaseCosmetic(item.id,true),"Buy frame independently");check(p.EquipShopCosmetics(item.id,item.id),"Equip purchased pair");
+  var reload=LocalProfile.Load(store);check(reload.EquippedAvatarId==item.id&&reload.OwnsFrame(item.id)&&reload.Coins==coins-700,"Reload purchased ownership and outfit");
+  check(reload.EquipShopCosmetics("",item.id)&&reload.EquippedAvatarResource==""&&reload.EquippedFrameId==item.id,"Independent default avatar");
+  check(!reload.PurchaseCosmetic("not-a-product",false),"Reject unknown product");
+  check(!reload.PurchaseCosmetic(CatCosmeticCatalog.Items[9].id,true),"Insufficient balance");
+  check(!reload.PurchaseCosmetic("",false),"Free default never charged");
+  string before=store.json;int oldCoins=reload.Coins;store.fail=true;LogAssertExpected();bool bought=reload.PurchaseCosmetic(CatCosmeticCatalog.Items[2].id,false);
+  check(!bought&&reload.Coins==oldCoins&&!reload.OwnsAvatar(CatCosmeticCatalog.Items[2].id)&&store.json==before,"Failed save rolls back coins and ownership");
+  Debug.Log("SHOP_TESTS PASS "+checks);
+  foreach(var path in AssetDatabase.FindAssets("t:AudioClip",new[]{"Assets/Resources/Audio/Jelly/AI"})){var clip=AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(path));check(clip!=null,"Audio imported");}
+  Debug.Log("SHOP_AUDIO_TESTS PASS "+checks);Debug.Log("LEAGUE_TESTS "+LeagueSelfTests.RunAll());ReleaseBuild.Windows();
+ }
+ static void LogAssertExpected(){} // Rollback emits an intentional diagnostic; build report still validates errors separately.
+}
+

@@ -1,0 +1,10 @@
+using System;
+using UnityEngine;
+namespace BounceGarden {
+[Serializable]public sealed class MainlineRules {
+ public int heatWarmHits=4,heatBlazingHits=8,bombRadius=1,coreRadius=2,chainDamage=2,coreDirectHits=3,resonanceDamage=1;
+ public float contactCooldown=.12f,thawDistance=1.75f,hitStop=.045f;
+ static MainlineRules current;
+ public static MainlineRules Current {get {if(current==null)current=JsonUtility.FromJson<MainlineRules>(Resources.Load<TextAsset>("Mainline/rules").text);return current;}}
+}
+}

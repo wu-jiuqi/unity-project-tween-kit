@@ -1,0 +1,114 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+namespace BounceGarden {
+public static class ChainGridRules {
+ public const int Columns=9,Rows=9,Moves=20;
+ public const float FlightLimit=12f,FallSpeed=5.5f,FallDelay=2f;
+ public static readonly string[] Cat={"BBYBBBYBB","BBPYBYPBB","BYYYYYYYB","BYNYYYNYB","BYWYYYWYB","BYYYNYYYB","BBYYYYYBB","BBBYYYBBB","BBBBBBBBB"};
+ public static int Pixel(int col,int row){char p=Cat[row][col];return p=='Y'?4:p=='N'?1:p=='P'?2:p=='W'?0:3;}
+ public static Vector2 Center(int col,int row,int size=1)=>CollectionLevels.Cell(col,row)+new Vector2(1,-1)*(size-1)*CollectionLevels.Pitch*.5f;
+}
+public sealed class ChainGridPiece:MonoBehaviour {public int Col,Row,Size=1;public float FallAt=-1;public int MotionVersion;public bool RefillProtected;}
+public sealed partial class GameSession {
+ public bool ChainFalling {get;private set;}
+ public bool ChainGridReady=>!ChainFalling&&!chainGravityDirty&&!RefillPendingSettlement;
+ public int ChainRefills {get;private set;}
+ public int ChainSafeRepositions=>0; // Live gravity never teleports a ball.
+ public int ChainAutoReturns {get;private set;}
+ 
+ bool chainGravityDirty;float chainGravityDelay;
+ int chainSupplySerial;
+ // Rewards replace visible ordinary cells; they never enter the supply queue.
+ readonly Queue<int> chainReplacementRewards=new Queue<int>();
+ System.Random chainRewardRandom;
+ public int ChainPendingReplacements=>chainReplacementRewards.Count;
+ sealed class GridMotion {public Transform View;public Vector2 From,To;public bool Arrival;public List<Vector2> Path;public List<float> PathStarts,PathEnds;public int PathIndex,Version;}
+ readonly List<GridMotion> chainMotions=new List<GridMotion>();
+ readonly List<ChainGridPiece> chainSupportPieces=new List<ChainGridPiece>(96);
+ void ClearChainGravity(){ClearFlowJelly();ClearFlowBoardPlan();ChainFalling=chainGravityDirty=false;chainGravityDelay=0;ClearChainLive();ChainRefills=chainSupplySerial=ChainAutoReturns=0;chainReplacementRewards.Clear();chainRewardRandom=new System.Random(unchecked(Generation*7919+LevelIndex*397+3838));chainMotions.Clear();}
+ void RegisterChainGrid(Transform view,int size){var p=view.gameObject.AddComponent<ChainGridPiece>();p.Size=size;p.Col=Mathf.RoundToInt(view.position.x/CollectionLevels.Pitch+4-(size-1)*.5f);p.Row=Mathf.RoundToInt((CollectionLevels.Top-view.position.y)/CollectionLevels.Pitch-(size-1)*.5f);view.gameObject.AddComponent<ChainTileVisibility>().Initialize(size);}
+ void FillChainPieces(List<ChainGridPiece> pieces){pieces.Clear();foreach(var brick in CollectionBricks)if(brick.Alive){var grid=brick.GetComponent<ChainGridPiece>();if(grid!=null)pieces.Add(grid);}foreach(var tool in ChainTools){var grid=tool.View.GetComponent<ChainGridPiece>();if(grid!=null)pieces.Add(grid);}}
+ List<ChainGridPiece> ChainPieces(){var pieces=new List<ChainGridPiece>(CollectionBricks.Count+ChainTools.Count);FillChainPieces(pieces);return pieces;}
+ void StartChainGrid(){if(FusionActive){InitializeFusionGrid();return;}InitializeAlphabetGrid();}
+ void ScheduleChainGravity(){chainGravityDirty=true;chainGravityDelay=0;changed=true;}
+ static bool GridFits(bool[,] occupied,int col,int row,int size){if(col<0||row<0||col+size>ChainGridRules.Columns||row+size>ChainGridRules.Rows)return false;for(int y=row;y<row+size;y++)for(int x=col;x<col+size;x++)if(occupied[x,y])return false;return true;}
+ static void GridMark(bool[,] occupied,ChainGridPiece piece){for(int y=piece.Row;y<piece.Row+piece.Size;y++)for(int x=piece.Col;x<piece.Col+piece.Size;x++)occupied[x,y]=true;}
+ public int ChainOccupiedCells(){return ChainPieces().Sum(p=>p.Size*p.Size);}
+ public bool ChainGridValid(bool full=true){var occupied=new bool[ChainGridRules.Columns,ChainGridRules.Rows];foreach(var p in ChainPieces()){if(!GridFits(occupied,p.Col,p.Row,p.Size))return false;GridMark(occupied,p);if(!ChainFalling&&Vector2.Distance(ChainPiecePosition(p),ChainGridRules.Center(p.Col,p.Row,p.Size))>.002f)return false;}return !full||ChainOccupiedCells()==81;}
+ public int ChainSupplyCount(int kind)=>CollectionBricks.Count(b=>b.Alive&&b.Definition.juiceGroup==kind)+CollectionBricks.Where(b=>b.Alive&&ChainPowerRules.IsNest(b.Definition)&&b.Definition.chainContents!=null).Sum(b=>b.Definition.chainContents.Count(v=>v==kind));
+ int ChainMissingSupply(int kind)=>Mathf.Max(0,CollectionGoal[kind-1]-Collected[kind-1]-chainLoot.Count(l=>l.Kind==kind)-ChainSupplyCount(kind));
+ int[] SupplyNestContents(){var contents=new int[4];if(ChainMissingSupply(1)>0)contents[0]=1;if(ChainMissingSupply(2)>0)contents[3]=2;return contents;}
+ void BeginChainGravity(){
+  if(RefillActive||IsAlphabet&&!IsTutorial){BeginBoardFlowGravity();return;}
+  ChainFalling=true;chainGravityDirty=false;chainMotions.Clear();
+  RetireDeadChainBricks();
+  var occupied=new bool[ChainGridRules.Columns,ChainGridRules.Rows];
+  foreach(var anchor in ChainPieces().Where(FixedChainPiece)){GridMark(occupied,anchor);anchor.FallAt=-1;}
+  foreach(var piece in ChainPieces().OrderByDescending(p=>p.Row+p.Size).ThenByDescending(p=>p.Size).ThenBy(p=>p.Col)){
+   if(FixedChainPiece(piece))continue;
+   Vector2 from=ChainPiecePosition(piece);int row=piece.Row;while(GridFits(occupied,piece.Col,row+1,piece.Size)&&!FlowReserved(piece.Col,row+1,piece.Size))row++;
+   piece.Row=row;GridMark(occupied,piece);Vector2 to=ChainGridRules.Center(piece.Col,row,piece.Size);if(Vector2.Distance(from,to)>.001f){if(piece.FallAt<0)piece.FallAt=simulationClock+ChainGridRules.FallDelay;chainMotions.Add(new GridMotion{View=piece.transform,From=from,To=to});}else piece.FallAt=-1;
+  }
+  ChainRefills++; // Authored campaign never injects unsolicited large boxes.
+  for(int c=0;c<ChainGridRules.Columns;c++)for(int r=ChainGridRules.Rows-1;r>=0;r--)if(!occupied[c,r]){
+   // A two-cell chest can bridge a cavity. Leave it empty until its ceiling
+   // changes; generating inside it bypasses top-down gravity. A blocked cavity
+   // is a stable state, not a retry loop that could prevent last-move failure.
+   if(FlowReserved(c,r)||!ChainTopPathClear(occupied,c,r,1)||Enumerable.Range(0,r).Any(y=>FlowReserved(c,y)))continue;
+   chainSupplySerial++;SpawnChainCell(c,r,0,0,BrickKind.Normal);var piece=CollectionBricks.Last().GetComponent<ChainGridPiece>();
+   GridMark(occupied,piece);AddChainArrival(piece,occupied);
+  }
+  Physics2D.SyncTransforms();changed=true;
+ }
+ void AddChainArrival(ChainGridPiece piece,bool[,] occupied){
+  Vector2 to=ChainGridRules.Center(piece.Col,piece.Row,piece.Size);
+  float half=CollectionLevels.Pitch*piece.Size*.5f;float y=CollectionLevels.Top+half+.45f;
+  foreach(var other in ChainPieces())if(other!=piece&&other.Col<piece.Col+piece.Size&&other.Col+other.Size>piece.Col)y=Mathf.Max(y,ChainPiecePosition(other).y+CollectionLevels.Pitch*other.Size*.5f+half+.025f);
+  Vector2 from=new Vector2(to.x,y);
+  var body=piece.GetComponent<Rigidbody2D>();if(body!=null)body.position=from;else piece.transform.position=from;
+  var tool=ChainTools.FirstOrDefault(t=>t.View==piece.transform);if(tool!=null)tool.PreviousPosition=from;
+  piece.GetComponent<ChainTileVisibility>().Refresh();
+  piece.FallAt=simulationClock+ChainGridRules.FallDelay;piece.transform.localScale=Vector3.one;chainMotions.Add(new GridMotion{View=piece.transform,From=from,To=to,Arrival=true});
+ }
+ void DeliverChainReplacementRewards(){
+  var packet=CampaignChainRewards(chainRewardTier);chainRewardTier=-1;NextChainRowTools=new int[9];
+  QueueChainLiveReward(packet);
+ }
+ void TickChainGravity(float dt){
+  chainMovedThisStep.Clear();foreach(var brick in CollectionBricks)if(brick.Alive)brick.GetComponent<ChainTileVisibility>().Refresh();foreach(var tool in ChainTools)tool.View.GetComponent<ChainTileVisibility>().Refresh();
+  if(!RefillFreezeBalls)TickChainBallLifetime();foreach(var tool in ChainTools)tool.PreviousPosition=tool.Position;
+  if(chainRewardTier>=0&&ActiveBalls==0&&PendingBurstBalls==0)DeliverChainReplacementRewards();
+  TryChainReplacementRewards();
+  if(SevenFreezeBoard)foreach(var route in chainMotions){var grid=route.View!=null?route.View.GetComponent<ChainGridPiece>():null;if(grid!=null&&grid.FallAt>=0)grid.FallAt+=dt;if(route.PathStarts!=null)for(int i=0;i<route.PathStarts.Count;i++){route.PathStarts[i]+=dt;route.PathEnds[i]+=dt;}}
+  if(SevenFreezeBoard)return; // Freeze board paths while the four-neighbor snapshot propagates.
+  if(chainGravityDirty&&(!CollectionVictoryPending||SevenSpecialActive)&&(!CollectionWon||SevenSpecialActive)){chainGravityDelay-=dt;if(chainGravityDelay<=0)BeginChainGravity();}
+  bool needsSupport=false;foreach(var motion in chainMotions)if(motion.Path==null){needsSupport=true;break;}
+  if(needsSupport)FillChainPieces(chainSupportPieces);else chainSupportPieces.Clear();
+  var supportPieces=chainSupportPieces;
+  for(int motionIndex=0;motionIndex<chainMotions.Count;motionIndex++){
+   var move=chainMotions[motionIndex];
+   if(move.View==null||!move.View.gameObject.activeInHierarchy){chainMotions.RemoveAt(motionIndex--);continue;}
+   var grid=move.View.GetComponent<ChainGridPiece>();if(move.Path!=null&&move.Version!=grid.MotionVersion){chainMotions.RemoveAt(motionIndex--);continue;}if(simulationClock+.00001f<grid.FallAt)continue;
+   var body=move.View.GetComponent<Rigidbody2D>();Vector2 p=body!=null?body.position:(Vector2)move.View.position;Vector2 next;
+   if(move.Path!=null){next=AdvanceBoardFlow(move,p,dt,supportPieces);}else next=Vector2.MoveTowards(p,move.To,ChainGridRules.FallSpeed*dt);
+   // A lower piece may have a later independent deadline. Never pass through its physical body.
+   if(move.Path==null)foreach(var support in supportPieces)if(support!=grid&&support.Row>=grid.Row+grid.Size&&support.Col<grid.Col+grid.Size&&support.Col+support.Size>grid.Col){float top=ChainPiecePosition(support).y+CollectionLevels.Pitch*(support.Size+grid.Size)*.5f;next.y=Mathf.Min(p.y,Mathf.Max(next.y,top));}
+   if(Vector2.Distance(p,next)>.0001f){chainMovedThisStep.Add(move.View);FlowJellyMoving(grid,(next-p)/Mathf.Max(.0001f,dt));}
+   if(!grid.GetComponent<ChainTileVisibility>().Hidden)NotifyVineFalling(p,next,grid.Size);
+   if(body!=null){if(VictorySettlementActive)body.position=next;else body.MovePosition(next);}else move.View.position=next;
+   // MovePosition is committed by the next physics step. A reward may replace
+   // this brick inside that step's contact callback; keep its route until the
+   // body has actually arrived so the replacement can inherit the reservation.
+   bool physicallyArrived=body==null||VictorySettlementActive||Vector2.Distance(p,move.To)<.001f;
+   if(physicallyArrived&&Vector2.Distance(next,move.To)<.001f&&(move.Path==null||move.PathIndex>=move.Path.Count)&&(!grid.RefillProtected||RefillCanMaterialize(grid))){SoundService.Play("grid_settle");FlowJellyLand(grid);grid.FallAt=-1;grid.RefillProtected=false;grid.GetComponent<RefillArrival80>()?.Refresh();chainMotions.RemoveAt(motionIndex--);}
+  }
+  TickFlowJelly(dt);
+  bool falling=chainMotions.Count>0,justSettled=ChainFalling&&!falling;if(ChainFalling!=falling){ChainFalling=falling;changed=true;}
+  if(ActiveBalls>0||PendingBurstBalls>0||chainGravityDirty||ChainFalling||ChainEffectsPending||!collectionRoundPending)return;
+  collectionRoundPending=false;if(Shots==0&&!CollectionWon)collectionFailed=true;changed=true;
+ }
+ bool RefillCanMaterialize(ChainGridPiece own){var point=ChainPiecePosition(own);foreach(var other in ChainPieces())if(other!=own&&!other.RefillProtected){var delta=point-ChainPiecePosition(other);float half=CollectionLevels.Pitch*(own.Size+other.Size)*.5f-.035f;if(Mathf.Abs(delta.x)<half&&Mathf.Abs(delta.y)<half)return false;}return true;}
+}
+}
+

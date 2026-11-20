@@ -1,0 +1,97 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BounceGarden.LevelEditing {
+[Serializable] public sealed class BalanceWeights {
+ public int directions=79,hybridMaxGroups=2;
+ public float direct=1,target=2.5f,adjacent=3,special=3.5f,combo=2,noise=.15f,interval=1.17f,stableSeconds=.15f;
+ public float hybridBias=1.8f,hybridElapsed=1,hybridGroup=1.1f,hybridMoving=1.1f,hybridEffects=1.8f,hybridSpecial=2.2f,hybridReward=1.5f,hybridStagnant=.4f;
+ public void Validate(){
+  if(directions<13||directions>181||hybridMaxGroups<1||hybridMaxGroups>5)throw new ArgumentException("Invalid direction/group budget");
+  foreach(var field in GetType().GetFields().Where(f=>f.FieldType==typeof(float))){float value=(float)field.GetValue(this);if(float.IsNaN(value)||float.IsInfinity(value)||value<0||value>20)throw new ArgumentException("Invalid weight: "+field.Name);}
+  if(interval<.55f||interval>5||stableSeconds<.05f||stableSeconds>1)throw new ArgumentException("Invalid timing interval");
+ }
+}
+public struct BalanceTimingState {
+ public bool CanLaunch,Settled,Moving,Effects,Progress;
+ public int Groups,PendingRewardGroups;public float SinceShot,SpecialOpportunity;
+}
+public struct BalanceAim {public Vector2 Direction;public float Utility,SpecialOpportunity;public int Kind;}
+public static class BalanceFirePolicy {
+ public static bool ShouldFire(string mode,BalanceTimingState s,BalanceWeights w,out string reason){
+  if(!s.CanLaunch){reason="game-gate";return false;}
+  if(s.SinceShot+.0001f<w.interval){reason="cadence";return false;}
+  if(mode=="rapid"){reason=s.Groups>0?"rapid-overlap":"rapid-start";return true;}
+  if(s.Settled&&s.Groups==0){reason="settled-special-opportunity";return true;}
+  if(mode=="settled"){reason="await-full-settlement";return false;}
+  if(mode!="hybrid")throw new ArgumentException("Unknown firing mode");
+  if(s.Groups==0){reason="await-board-settlement";return false;}
+  if(s.Groups>=w.hybridMaxGroups){reason="hybrid-group-cap";return false;}
+  float wait=w.hybridGroup*s.Groups+w.hybridMoving*(s.Moving?1:0)+w.hybridEffects*(s.Effects?1:0)+w.hybridSpecial*s.SpecialOpportunity+w.hybridReward*s.PendingRewardGroups+w.hybridStagnant*(s.Progress?0:1);
+  float fire=w.hybridBias+w.hybridElapsed*Mathf.Min(3,s.SinceShot/w.interval);
+  reason=fire>wait?"hybrid-overlap":"hybrid-wait-value";return fire>wait;
+ }
+ // All three firing modes call this same visible-board heuristic with identical weights.
+ public static BalanceAim Choose(GameSession g,BalanceWeights w,System.Random random){
+  var bricks=g.CollectionBricks.Where(b=>b!=null&&b.Alive&&b.gameObject.activeInHierarchy&&b.GetComponent<BoxCollider2D>()?.enabled!=false&&b.GetComponent<ChainTileVisibility>()?.Hidden!=true).ToArray();
+  var positions=new Vector2[bricks.Length];var halves=new Vector2[bricks.Length];var gains=new Vector2[bricks.Length];
+  for(int n=0;n<bricks.Length;n++){var b=bricks[n];var body=b.GetComponent<Rigidbody2D>();positions[n]=body!=null?body.position:(Vector2)b.transform.position;var box=b.GetComponent<BoxCollider2D>();halves[n]=box!=null?box.size*.5f:Vector2.one*.38f;gains[n]=g.BalanceVisibleGains(b);}
+  var tools=g.ChainTools.Where(t=>!t.Consumed&&!t.Waiting&&t.View!=null&&t.View.gameObject.activeInHierarchy&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true).ToArray();
+  var toolValues=new float[tools.Length];
+  for(int t=0;t<tools.Length;t++){
+   var tool=tools[t];float value=0;
+   for(int n=0;n<bricks.Length;n++){
+    var d=positions[n]-tool.Position;bool covered=tool.Kind==SevenSpecialRules.Horizontal?Mathf.Abs(d.y)<.5f:tool.Kind==SevenSpecialRules.Vertical?Mathf.Abs(d.x)<.5f:tool.Kind==SevenSpecialRules.Cross?Mathf.Abs(d.x)<.5f||Mathf.Abs(d.y)<.5f:tool.Kind==SevenSpecialRules.Bomb?Mathf.Abs(d.x)<1.3f&&Mathf.Abs(d.y)<1.3f:bricks[n].Definition.colorIndex==tool.ColorIndex;
+    if(covered)value+=gains[n].x+gains[n].y;
+   }
+   int partners=tools.Count(other=>other!=tool&&SevenSpecialRules.Nearby(other.Position,tool.Position));
+   toolValues[t]=w.special*(1+Mathf.Min(3,value/8))+w.combo*Mathf.Min(2,partners);
+  }
+  var best=new BalanceAim{Direction=Vector2.up,Utility=float.NegativeInfinity};float bestTool=0;
+  for(int i=0;i<w.directions;i++){
+   float angle=Mathf.Lerp(15,165,(i+.2f+(float)random.NextDouble()*.6f)/w.directions)*Mathf.Deg2Rad;var direction=new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));var origin=g.SpawnPosition(direction);
+   int hit=-1;float nearest=100;
+   for(int n=0;n<bricks.Length;n++)if(RayBox(origin,direction,positions[n],halves[n],out float distance)&&distance<nearest){nearest=distance;hit=n;}
+   float utility=0,specialValue=0;int kind=0;
+   if(hit>=0){var first=bricks[hit];bool immune=g.OpeningYarnBrick(first)||g.OpeningCookieBrick(first)||g.OpeningCatBrick(first);float clear=immune?0:1f/Mathf.Max(1,first.CurrentHealth);
+    utility=w.direct*clear+w.target*gains[hit].x*clear;
+    if(clear>0)for(int n=0;n<bricks.Length;n++)if(n!=hit&&Adjacent(positions[hit],positions[n],halves[n]))utility+=w.adjacent*gains[n].y*clear;
+   }
+   for(int t=0;t<tools.Length;t++){var d=tools[t].Position-origin;float along=Vector2.Dot(d,direction);if(along>0&&along<nearest+.4f&&Mathf.Abs(d.x*direction.y-d.y*direction.x)<.45f){specialValue=Mathf.Max(specialValue,toolValues[t]);kind=tools[t].Kind;}}
+   bestTool=Mathf.Max(bestTool,specialValue);utility+=specialValue+(float)random.NextDouble()*w.noise;
+   if(utility>best.Utility)best=new BalanceAim{Direction=direction,Utility=utility,Kind=kind};
+  }
+  best.SpecialOpportunity=Mathf.Clamp01(bestTool/Mathf.Max(.01f,w.special*3));return best;
+ }
+ static bool Adjacent(Vector2 hit,Vector2 center,Vector2 half){
+  // Test occupied cells rather than the centre of a 2x2 container.
+  int size=half.x>.6f?2:1;float pitch=CollectionLevels.Pitch;
+  for(int r=0;r<size;r++)for(int c=0;c<size;c++){var p=center+new Vector2(c-(size-1)*.5f,(size-1)*.5f-r)*pitch;var d=hit-p;float tolerance=pitch*.16f;if(Mathf.Abs(Mathf.Abs(d.x)-pitch)<tolerance&&Mathf.Abs(d.y)<tolerance||Mathf.Abs(Mathf.Abs(d.y)-pitch)<tolerance&&Mathf.Abs(d.x)<tolerance)return true;}return false;
+ }
+ public static bool RayBox(Vector2 origin,Vector2 direction,Vector2 center,Vector2 half,out float distance){
+  float near=0,far=float.PositiveInfinity;for(int axis=0;axis<2;axis++){float p=origin[axis]-center[axis],v=direction[axis];if(Mathf.Abs(v)<.000001f){if(Mathf.Abs(p)>half[axis]){distance=0;return false;}}else{float a=(-half[axis]-p)/v,b=(half[axis]-p)/v;near=Mathf.Max(near,Mathf.Min(a,b));far=Mathf.Min(far,Mathf.Max(a,b));if(far<near){distance=0;return false;}}}distance=near;return far>0;
+ }
+}
+}
+namespace BounceGarden {
+public sealed partial class GameSession {
+ public bool BalanceFullySettled=>ActiveBalls==0&&PendingBurstBalls==0&&ChainLiveGroups==0&&ChainGridReady&&!ChainEffectsPending&&!SevenAnimationsPending&&chainMotions.Count==0&&!queuedShot.HasValue;
+ public int BalancePendingRewardGroups=>chainBursts.Values.Count(b=>b.Tier>=0&&b.Remaining>0);
+ public bool BalanceBoardMoving=>ChainFalling||chainGravityDirty||chainMotions.Count>0;
+ public bool BalanceEffectsPending=>ChainEffectsPending||SevenAnimationsPending||RefillPendingSettlement;
+ public int BalanceDeferredRewards=>chainReplacementRewards.Count;
+ public int BalanceGoalProgress=>OpeningCollected.Sum();
+ public Vector2 BalanceVisibleGains(BrickBody b){
+  float target=0,adjacent=0;bool Need(string kind,int color=-1)=>OpeningTargets.Select((g,i)=>new{g,i}).Any(x=>x.g.kind==kind&&OpeningCollected[x.i]<x.g.count&&(color<0||OpeningCampaign.Color(x.g.color)==color));
+  if(OpeningYarnBrick(b)){if(Need("yarn")&&openingYarn.TryGetValue(b.Id,out var yarn))adjacent=1f/Mathf.Max(1,yarn.Layers);}
+  else if(OpeningCookieBrick(b)){if(Need("cookie"))adjacent=1;}
+  else if(OpeningCatBrick(b)){if(Need("ingot"))adjacent=.8f;}
+  else if(OpeningCopperBrick(b)){if(Need("copper_coin")){target=1;adjacent=1;}}
+  else if(OpeningIngotBrick(b)){if(Need("ingot"))target=1;}
+  else if(b.Definition.reveal=="opening-N"&&Need("ordinary_color",b.Definition.colorIndex))target=1;
+  return new Vector2(target,adjacent);
+ }
+}
+}
