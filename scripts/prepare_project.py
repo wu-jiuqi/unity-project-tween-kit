@@ -54,21 +54,7 @@ def main():
     for name in ['ProjectVersion.txt','ProjectSettings.asset','AudioManager.asset','GraphicsSettings.asset','QualitySettings.asset','TimeManager.asset','InputManager.asset','TagManager.asset','Physics2DSettings.asset']:
         p=src/'ProjectSettings'/name
         if p.exists():shutil.copy2(p,settings/name)
-    # Include all static candidates in the gallery archive, never label them as completed samples.
-    data=json.loads((KIT/'references/source-map.json').read_text(encoding='utf-8'))
-    entries=[]
-    for f in data['families']:
-        code='\n'.join(m['source'] for m in f['methods']);tags=[]
-        if 'DOTween' in code or '.DO' in code:tags.append('DOTween')
-        if 'IEnumerator' in code or 'yield return' in code:tags.append('协程')
-        if 'Mathf.' in code or 'Vector2.Lerp' in code or 'Vector3.Lerp' in code:tags.append('数学曲线')
-        if ('spring' in code or 'velocity' in code) and 'step' in code:tags.append('弹簧')
-        if 'FrameAt' in code or 'frames[' in code:tags.append('序列帧')
-        if 'SetFloat(' in code or 'SetColor(' in code:tags.append('材质')
-        entries.append({'id':f['id'],'title':f['class']+' / '+Path(f['source']).stem,'category':f.get('category','待核对'),'status':f['usageStatus'],'galleryEntry':f.get('galleryEntry',f.get('subsetDelivery',{}).get('galleryEntry','')),'source':f['source'],'animationTypes':' '.join(tags),'description':'；'.join(m['name'] for m in f['methods'])+'。完整源码、方法指纹与候选调用位置见 source-map.json。'})
-    write(project/'Assets/Resources/ProjectTweenKit/archive.json',{'entries':entries})
-    # Metadata is stable for generated archive and canonical asset root as well.
-    for p in [generated,project/'Assets/Resources',project/'Assets/Resources/ProjectTweenKit',project/'Assets/Resources/ProjectTweenKit/archive.json']:stable_meta(p,project/'Assets')
+    write(project/'Assets/Resources/ProjectTweenKit/prompts.json',json.loads((KIT/'references/prompt-library.json').read_text(encoding='utf-8')))
     write(KIT/'references/materialization.json',{'canonical':'assets/unity-kit','generated':'assets/sample-project/Assets/ProjectTweenKit','files':{p.relative_to(kit).as_posix():sha(p) for p in sorted(kit.rglob('*')) if p.is_file()}})
     print('Prepared clean project:',project)
 if __name__=='__main__':main()

@@ -403012,8 +403012,8 @@
       "fileSha256": "78845376ec0e3e17a68c33c888fc30085dd481dd06e20ded8428232237076856",
       "snapshot": "references/source/Assets/Scripts/UI/BattleHUDSummary.cs.txt",
       "classification": "runtime-candidate",
-      "usageStatus": "requires-route-review",
-      "deliveryStatus": "source-evidence-only",
+      "usageStatus": "source-route-reviewed",
+      "deliveryStatus": "extracted-component",
       "methods": [
         {
           "owner": "BattleHUDSummary",
@@ -403270,7 +403270,13 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
-      ]
+      ],
+      "category": "文字与数值",
+      "reuseForm": "独立组件",
+      "route": "AppUI.BuildBattleHUD → BattleHUDSummary.Initialize；VictoryFinale.Advance / VictoryRoundPreparation.Update → ShowVictoryScore(impact=true)",
+      "trigger": "结算星光到达时分数变金色并放大回落",
+      "deliveredComponent": "ScoreImpact",
+      "galleryEntry": "scoreimpact"
     },
     {
       "id": "ui-battleinterfacetour-appui",
@@ -407345,8 +407351,8 @@
       "fileSha256": "2953ce988acbd87980173e979b2d0ce9f600bd19771161e61af2df2fbbc56e40",
       "snapshot": "references/source/Assets/Scripts/UI/ChainCollectionHUD.cs.txt",
       "classification": "runtime-candidate",
-      "usageStatus": "requires-route-review",
-      "deliveryStatus": "source-evidence-only",
+      "usageStatus": "source-route-reviewed",
+      "deliveryStatus": "extracted-component",
       "methods": [
         {
           "owner": "ChainCollectionHUD",
@@ -407731,7 +407737,13 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
-      ]
+      ],
+      "category": "文字与数值",
+      "reuseForm": "独立组件",
+      "route": "AppUI.BuildBattleHUD → ChainCollectionHUD.Initialize → StateChanged → Refresh → Update",
+      "trigger": "剩余步数改变时挤压；此交付只提取步数视觉",
+      "deliveredComponent": "MovesFeedback",
+      "galleryEntry": "moves"
     },
     {
       "id": "ui-chaincollectionhud-chaintaskcard",
@@ -407740,8 +407752,8 @@
       "fileSha256": "2953ce988acbd87980173e979b2d0ce9f600bd19771161e61af2df2fbbc56e40",
       "snapshot": "references/source/Assets/Scripts/UI/ChainCollectionHUD.cs.txt",
       "classification": "runtime-candidate",
-      "usageStatus": "requires-route-review",
-      "deliveryStatus": "source-evidence-only",
+      "usageStatus": "source-route-reviewed",
+      "deliveryStatus": "extracted-component",
       "methods": [
         {
           "owner": "ChainTaskCard",
@@ -408094,7 +408106,13 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
-      ]
+      ],
+      "category": "奖励与目标",
+      "reuseForm": "独立组件",
+      "route": "ChainCollectionHUD.Initialize → AddCard → ChainTaskCard.Initialize / Refresh",
+      "trigger": "实际收集值改变触发目标到达挤压；完成显示印章",
+      "deliveredComponent": "TaskArrival",
+      "galleryEntry": "taskarrival"
     },
     {
       "id": "ui-chainratingview-chainratingview",
@@ -408103,8 +408121,8 @@
       "fileSha256": "d68c815cd8652a35e0437702be0183314ec650f59109589c275d8aa8778734e0",
       "snapshot": "references/source/Assets/Scripts/UI/ChainRatingView.cs.txt",
       "classification": "runtime-candidate",
-      "usageStatus": "requires-route-review",
-      "deliveryStatus": "source-evidence-only",
+      "usageStatus": "source-route-reviewed",
+      "deliveryStatus": "extracted-component",
       "methods": [
         {
           "owner": "ChainRatingView",
@@ -408489,7 +408507,13 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
-      ]
+      ],
+      "category": "奖励与目标",
+      "reuseForm": "组合预制体",
+      "route": "ChainCollectionHUD.Initialize → ChainRatingView.Initialize；Update观察ChainRatingSerial",
+      "trigger": "连击评级变动后字图放大与星光爆发",
+      "deliveredComponent": "CheerBurst",
+      "galleryEntry": "rating"
     },
     {
       "id": "ui-chapteropening70-chapteropening70",
@@ -425340,8 +425364,8 @@
       "fileSha256": "e02ec449c21cb64354b47245aee1f660e2a05b161062dc9e25a30388c720d753",
       "snapshot": "references/source/Assets/Scripts/UI/LeagueRankingView.cs.txt",
       "classification": "runtime-candidate",
-      "usageStatus": "requires-route-review",
-      "deliveryStatus": "source-evidence-only",
+      "usageStatus": "source-route-reviewed",
+      "deliveryStatus": "extracted-component",
       "methods": [
         {
           "owner": "LeagueJelly",
@@ -425591,7 +425615,13 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
-      ]
+      ],
+      "category": "控件交互",
+      "reuseForm": "独立组件",
+      "route": "LeagueRankingView.Refresh / LeaguePodiumView.Build → LeagueJelly.Play",
+      "trigger": "首屏错峰或名次/积分更新时卡片果冻抖动",
+      "deliveredComponent": "LeagueJelly",
+      "galleryEntry": "leaguejelly"
     },
     {
       "id": "ui-leaguerankingview-leaguerankingview",
@@ -433575,8 +433605,8 @@
       "fileSha256": "2c45047e7db37e1de26351ab6a2f79f94f3f8dd9ad9418df5911d52c503da51d",
       "snapshot": "references/source/Assets/Scripts/UI/ReferenceChapterView.cs.txt",
       "classification": "runtime-candidate",
-      "usageStatus": "requires-route-review",
-      "deliveryStatus": "source-evidence-only",
+      "usageStatus": "source-route-reviewed",
+      "deliveryStatus": "extracted-component",
       "methods": [
         {
           "owner": "ChapterHomeView",
@@ -433876,7 +433906,13 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
-      ]
+      ],
+      "category": "页面与布局",
+      "reuseForm": "宿主适配配方",
+      "route": "AppUI.BuildHome → BuildChapterHome → ChapterHomeView.Build → Transition(previousTheme)",
+      "trigger": "主题改变时旧背景SmoothStep淡出；只提取Transition透明度段",
+      "deliveredComponent": "ThemeDissolve",
+      "galleryEntry": "themedissolve"
     },
     {
       "id": "ui-resultaudiotimeline-resultaudiotimeline",
@@ -436268,8 +436304,8 @@
       "fileSha256": "fbbcbadb8b375b0e23631266d4aa2f05d6002bbbb9ada8fa3476a395bf227fa4",
       "snapshot": "references/source/Assets/Scripts/UI/ScoreGainPresentation.cs.txt",
       "classification": "runtime-candidate",
-      "usageStatus": "requires-route-review",
-      "deliveryStatus": "source-evidence-only",
+      "usageStatus": "source-route-reviewed",
+      "deliveryStatus": "extracted-component",
       "methods": [
         {
           "owner": "ScoreGainPresentation",
@@ -436467,7 +436503,13 @@
         "Call sites matched by method name are candidates, not semantic resolution.",
         "Static construction does not prove that a current page enables the branch.",
         "Dynamic resource strings and serialized references require route review."
-      ]
+      ],
+      "category": "文字与数值",
+      "reuseForm": "独立组件",
+      "route": "AppUI.BuildScoreHUD（非Opening/Tutorial的ChainCollection分支） → ScoreGainPresentation.Initialize → StateChanged",
+      "trigger": "短窗口合并加分，提示放大、上移与淡出",
+      "deliveredComponent": "ScoreGain",
+      "galleryEntry": "scoregain"
     },
     {
       "id": "ui-settingsswitch77-settingsswitch77",

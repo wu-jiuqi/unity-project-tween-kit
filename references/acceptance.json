@@ -4,12 +4,12 @@
   "fullAcceptancePassed": false,
   "sourceProject": "BounceGarden/BounceGarden",
   "workingVersion": "0.4.0",
-  "deliveredGalleryEntries": 19,
+  "deliveredGalleryEntries": 26,
   "stageStatus": {
     "1": "source scan and partial semantic inventory complete; current-route audit incomplete",
     "2": "representative extraction and runnable gallery available; validation records govern passing state",
     "3": "remaining candidate extraction and host recipe work pending",
-    "4": "19-entry gallery implemented; full catalogue gallery coverage pending",
+    "4": "26-entry prompt-oriented gallery; source navigation removed; complete catalogue extraction still pending",
     "5": "independent import tested per evidence; human five-minute onboarding trial not performed",
     "6": "four preview artifacts; final full-coverage release not approved as complete"
   },
@@ -21,14 +21,14 @@
     "Run recipient onboarding and full original-scene trigger coverage; bind final packages and all evidence to the final tested build."
   ],
   "runtimeChecks": {
-    "passed": 103,
+    "passed": 175,
     "failed": 0,
     "errors": 0
   },
   "independentImport": {
     "result": "passed",
-    "scripts": 43,
-    "prefabs": 7,
+    "scripts": 50,
+    "prefabs": 9,
     "missingScripts": 0,
     "errors": []
   },
@@ -36,8 +36,8 @@
     "editor-tool": 1,
     "test-fixture": 115,
     "non-animation": 15,
-    "requires-route-review": 101,
-    "source-route-reviewed": 20,
+    "requires-route-review": 94,
+    "source-route-reviewed": 27,
     "inactive-preview": 1,
     "legacy-route-disabled": 1,
     "mixed-physics-presentation-review": 4

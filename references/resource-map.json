@@ -1080,5 +1080,113 @@
     "license": "Unity package license",
     "licenseEvidence": "assets/unity-kit/ThirdPartyLicenses/Unity-UGUI.md",
     "packagedMetaSha256": "eb63c0321658b980b138ce5f675d44689b8c7144df43976931e132e7706d1e1a"
+  },
+  {
+    "source": "Assets/Resources/Art/ScoreV65/gain_spark.png",
+    "target": "assets/unity-kit/Resources/Art/ScoreV65/gain_spark.png",
+    "sha256": "7fce229abe6d129b18865b7ee76e97db379850d05b0daf4b7dcec49c69d4ce16",
+    "sourceGuid": "483c16daad70aa44e96815dc82ec62b1",
+    "packagedMetaSha256": "31a7483da873e1dc17bff91436ebb1b758ece0b0f9f6dd3804b171fea24b39a8",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/ScoreV65/score_star.png",
+    "target": "assets/unity-kit/Resources/Art/ScoreV65/score_star.png",
+    "sha256": "314e4a95c7ff3535c13c4e2d5875997278bd36b0c652f5cdc0e84086c98898f7",
+    "sourceGuid": "bbdea95772a729c489bd228d11449662",
+    "packagedMetaSha256": "04ff5466f2dfe3b1f3c05b7faed1023f6d7613cea3626c415414615f3763ab34",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleJellyV5/goal-complete.png",
+    "target": "assets/unity-kit/Resources/Art/BattleJellyV5/goal-complete.png",
+    "sha256": "87b22b3a399c5d6bb39bc97f4b0593c28e6a3f2b741e8d349a4cb7f2b28e70ec",
+    "sourceGuid": "ebabd12ee4ec9f94ab5e1452e12d7629",
+    "packagedMetaSha256": "eef15362d5ba5ea6f8b379ce95d28d65ca4e6511de8e7ff82520c5f53c33896a",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV59/Cheers/nice.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV59/Cheers/nice.png",
+    "sha256": "6e448507bd4902c0c29132a0e662a21481144deae2a8e7671e0d9841c147cb1f",
+    "sourceGuid": "e0ae740feadc02d48b41f18f22091a8d",
+    "packagedMetaSha256": "99a9c617d683d3e7b1d9c152cce29f5c3519240de281add3f9857dd2e49f170d",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV59/Cheers/great.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV59/Cheers/great.png",
+    "sha256": "b2b3f383f978e2c08ce44f9c0214cd0a38f8a39516657c54464262026923c0d1",
+    "sourceGuid": "da4ada87fc8ef81409fab73c61843e92",
+    "packagedMetaSha256": "bd68139dcc7e3386474d1167c4c7168d822c47ccd9f6c59f977c410d0675e981",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV59/Cheers/amazing.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV59/Cheers/amazing.png",
+    "sha256": "a4c07ad6b781d78b983b165915e25ba890ed76a1d516dd95e344c5be998ca273",
+    "sourceGuid": "d5044fef6bbc6e04d831083f140b80fc",
+    "packagedMetaSha256": "aa2faf47e509e2cc29dc9003c1ce2ba292651c1562ce5e2fb6b52cb360924ba3",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/ChineseV59/Cheers/incredible.png",
+    "target": "assets/unity-kit/Resources/Art/ChineseV59/Cheers/incredible.png",
+    "sha256": "494ac494de8e70e8b8a680ddbef086d563165e6c173cbaa5feb568b6aa81d0da",
+    "sourceGuid": "8b47ec0ad878ab348a84908ac3935449",
+    "packagedMetaSha256": "fbe8fa92a34a6ae6e5f3f1c29c1cc0ea4843930b214613e1ab6e77437e32bb96",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/NativeV50/background-alphabet.png",
+    "target": "assets/unity-kit/Resources/Art/NativeV50/background-alphabet.png",
+    "sha256": "51b18b6f1349c4ecdc1cc66f45a145a3df528bd202f5e626861509c82e94678f",
+    "sourceGuid": "ab2a49c4a23c3aa45a44e7375c979d7b",
+    "packagedMetaSha256": "a6c71b1bd2bd31400687bf37ffc1508658aeca2b71b474048f4453c3924de9f9",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/NativeV50/background-picnic.png",
+    "target": "assets/unity-kit/Resources/Art/NativeV50/background-picnic.png",
+    "sha256": "14862dd34d3fe1b555ff37fbddeda1c23628bcd64ad7293ed8d8afb426372d09",
+    "sourceGuid": "115e255492c7de149bdf2f9d31bc534b",
+    "packagedMetaSha256": "a93fe68d1d220d628b20b50ed693142048b7d3abef3d85d200777dde8c811076",
+    "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleJellyV5/goal-pad-honey.png",
+    "target": "assets/unity-kit/Resources/Art/BattleJellyV5/goal-pad-honey.png",
+    "sha256": "3200279dcd06b9bcca21157a3802fad73825819bf806210076102a63589d12b0",
+    "sourceGuid": "ad11bac9e9c2f954eb38bc94d99faf33",
+    "packagedMetaSha256": "1bb48e7b8a2e26172affb8aef098d93b19ba3f7496e7a8028428fc7dab68e88c",
+    "reason": "Actual current goal card and remaining-moves artwork",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleJellyV5/moves-badge.png",
+    "target": "assets/unity-kit/Resources/Art/BattleJellyV5/moves-badge.png",
+    "sha256": "a15fff9960fb0bdcb690ce5ac40ffc3b15683f0551392943d3d668ea10a37c08",
+    "sourceGuid": "04e5cf3c93dfa8448bf26c52969b2c0a",
+    "packagedMetaSha256": "cd6d7351b81433cd6dbe0210fda66deba56ed3ab6fd322200de406b9cf281464",
+    "reason": "Actual current goal card and remaining-moves artwork",
+    "license": "Project artwork; see references/licenses.md"
+  },
+  {
+    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+    "target": "assets/unity-kit/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+    "sha256": "cd14cb55d3ef38d1b0a8d08185617c657f199f96608fc35b9c3dfe51ac82049e",
+    "sourceGuid": "7499e6b02ff5b8a41b2ec88b3122b28c",
+    "packagedMetaSha256": "12c4cedc0458b1c5abf1c4da49879644d752d7b0f85e69e866d0d44bec44ed71",
+    "reason": "ChainRatingView original star/spark image",
+    "license": "Project artwork; see references/licenses.md"
   }
 ]

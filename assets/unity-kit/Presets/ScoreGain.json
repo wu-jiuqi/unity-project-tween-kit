@@ -1,0 +1,51 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.ScoreGain",
+    "settings": [
+        {
+            "field": "MergeDelay",
+            "type": "System.Single",
+            "value": 0.07000000029802323,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Duration",
+            "type": "System.Single",
+            "value": 0.6499999761581421,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "FadeIn",
+            "type": "System.Single",
+            "value": 0.05000000074505806,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Rise",
+            "type": "System.Single",
+            "value": 32.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "Amplitude",
+            "type": "System.Single",
+            "value": 0.05999999865889549,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

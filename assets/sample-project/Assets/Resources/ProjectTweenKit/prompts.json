@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "press",
+      "body": "按钮命中根保持固定，视觉子层在悬停、按下、松开时果冻形变，拖出取消点击。",
+      "trigger": "真实指针悬停、按下、拖动、松开。",
+      "tuning": "HoverDuration=.16秒，PressDuration=.10秒，ReleaseDuration=.48秒；Magnitude=1为原幅度。IdleInterval=0可关闲置反馈。",
+      "cleanup": "禁用或失焦还原视觉；拖动不得提交点击。"
+    },
+    {
+      "id": "switch",
+      "body": "二态开关的滑块在两端平滑移动，最终位置始终对应宿主设置值。",
+      "trigger": "点击读取并改变设置一次；外部刷新只同步显示。",
+      "tuning": "SlideDuration=.16秒，OutCubic；原示例左右位置为±39设计单位，适配轨道宽度。",
+      "cleanup": "重复点击停止旧滑动；禁用对齐当前值，刷新不得写入设置。"
+    },
+    {
+      "id": "modal",
+      "body": "弹窗用透明度和轻微缩放协同入场、退场。",
+      "trigger": "显式Open/Close；保留输入门控。",
+      "tuning": "OpenDuration=.18秒，OpenScale=.96；CloseDuration=.14秒，CloseScale=.94。开OutCubic、关InCubic，比例相对绑定对象初始值。",
+      "cleanup": "反向操作中断旧补间并从当前状态继续；关闭结束释放输入。"
+    },
+    {
+      "id": "reward",
+      "body": "收集物沿二次贝塞尔飞向目标，起飞脉冲、靠近缩小并轻摆。",
+      "trigger": "宿主确认收集结果后播放；只做飞行表现。",
+      "tuning": "Duration=.6秒，SmoothStep；控制点在位移22%处并向上偏移；EndScale=.28。UnitsPerWorldUnit按宿主坐标转换。",
+      "cleanup": "重复播放先还原起点；禁用停止并归位，不重复计数。"
+    },
+    {
+      "id": "number",
+      "body": "把已确定的一段起止分值平滑滚动到终点。",
+      "trigger": "每次到达事件开启一段滚分。",
+      "tuning": "From/To为整数；Duration=.2秒；曲线1-(1-t)^3。Delay以秒计；不在组件中计算奖励。",
+      "cleanup": "重播回到From；完成精确显示To；中断可StopAndRestore。"
+    },
+    {
+      "id": "logo",
+      "body": "标题拆成独立字图错峰落下，着地挤压并衰减回弹；副文案逐字出现。",
+      "trigger": "页面首次可见时播放。",
+      "tuning": "逐帧形变使用1/30秒步长；文案每字.035秒。独立字层节奏保留，字数和字图按宿主布局适配。",
+      "cleanup": "重入清理旧字层和协程；禁用停止，避免重复生成。"
+    },
+    {
+      "id": "wordmark",
+      "body": "独立字图依次震颤，形成有间隔的标题波浪。",
+      "trigger": "页面启用后周期触发，可用门控暂停。",
+      "tuning": "LoopInterval=5.5秒；每字错开.09秒，每次震颤.48秒。保留各字原位置。",
+      "cleanup": "禁用、失焦归位；宿主CanAnimate决定是否允许。"
+    },
+    {
+      "id": "loading",
+      "body": "加载插画循环切换五个姿势，文字顶点做波浪。",
+      "trigger": "真实加载期间运行，文案由宿主提供。",
+      "tuning": "猫咪周期3.6秒；保留姿势帧序与文字相位差。此组件不负责真实加载。",
+      "cleanup": "结束时停止循环并归位；重播不再发起加载。"
+    },
+    {
+      "id": "float",
+      "body": "装饰插画在基准位置附近做轻微正弦漂浮。",
+      "trigger": "启用自动循环。",
+      "tuning": "amplitude=3本地设计单位，speed=1.4 rad/s，phase为弧度。按宿主尺寸调整距离。",
+      "cleanup": "停止或禁用回到基准位置，不累积位移。"
+    },
+    {
+      "id": "drag",
+      "body": "欢迎语可被弹性拖动，松手后软弹簧回到原位。",
+      "trigger": "真实按住、拖动和释放。",
+      "tuning": "tanh限位；弹性105、阻尼6.5，每帧四子步；这组为固定算法，修改时记录差异。",
+      "cleanup": "取消、禁用、失焦ResetPose；业务根和视觉层分离。"
+    },
+    {
+      "id": "activity",
+      "body": "卡片悬停、按下、释放产生柔软弹簧反馈，图标有轻微持续浮动。",
+      "trigger": "转发真实指针事件。",
+      "tuning": "弹性155、阻尼10、四子步；保留卡面与图标的相位关系。固定常量需代码适配。",
+      "cleanup": "停止/禁用ResetPose；导航交给宿主点击事件。"
+    },
+    {
+      "id": "hit",
+      "body": "根据来力方向挤压视觉对象，然后衰减回弹。",
+      "trigger": "命中事件传入Incoming方向。",
+      "tuning": "Duration=.45秒，Amplitude=.28；sin(4πt)×exp(-5t)。只变形视觉层。",
+      "cleanup": "重入覆盖当前表现；StopAndRestore还原初始比例，碰撞体保持独立。"
+    },
+    {
+      "id": "goal",
+      "body": "目标容器先在中央放大展示，再飞回真实HUD位置。",
+      "trigger": "开局目标已创建后播放一次。",
+      "tuning": "总长2.35秒；1.45秒开始飞回，移动.75秒SmoothStep；按真实父级做坐标换算。",
+      "cleanup": "借用真实容器；关闭和销毁覆盖层前必须Restore归还父级与姿态。"
+    },
+    {
+      "id": "charge",
+      "body": "飞光进入星星后填充材质，满星时产生脉冲。",
+      "trigger": "宿主传入0—1充能值和飞光来源。",
+      "tuning": "飞光.24秒，填充.36秒；保留透明处理、填充遮罩与随时间变化的材质参数。",
+      "cleanup": "重复值不重复触发；结束清理独立材质和飞光；不计算星级规则。"
+    },
+    {
+      "id": "victorycat",
+      "body": "用透明序列帧表现猫咪胜利动作。",
+      "trigger": "胜利表现开始时播放。",
+      "tuning": "Victory=true，16帧非均匀时长，总长1.92秒；PlaybackSpeed为倍率，Loop控制循环。不要平均化每帧时长。",
+      "cleanup": "可Play/Sample/Seek；StopAndRestore回首帧，采样静音。"
+    },
+    {
+      "id": "failurecat",
+      "body": "用透明序列帧表现猫咪失败动作。",
+      "trigger": "失败表现开始时播放。",
+      "tuning": "Victory=false，16帧非均匀时长，总长2.32秒；PlaybackSpeed为倍率。不要复用胜利帧时长。",
+      "cleanup": "停止回首帧；禁用清理；重播只播放表现。"
+    },
+    {
+      "id": "victory",
+      "body": "胜利页按层次播放光环、爆发、猫咪、星级、奖励卡和操作按钮。",
+      "trigger": "宿主先给出最终结果快照，再进入页面。",
+      "tuning": "光环96帧、爆发16帧；保留子演出相对顺序。整体固定编排，改动子时序需明确列出。",
+      "cleanup": "同实例Begin一次；重播新建表现根；业务奖励已经由宿主提交。"
+    },
+    {
+      "id": "failure",
+      "body": "失败页配合背景帧、失败猫、逐字标题和按钮入场。",
+      "trigger": "宿主确认失败后展示。",
+      "tuning": "背景96帧，猫16帧非均匀；按钮随演出入场。固定编排，可按需适配布局。",
+      "cleanup": "重播销毁旧表现根；重试、返回和继续回调由宿主去重。"
+    },
+    {
+      "id": "medal",
+      "body": "奖章飞入奖励区，同时显示名次升降。",
+      "trigger": "宿主传入前后名次和奖章数。",
+      "tuning": "入场.55秒；做父级非等比缩放补偿。数值为输入，不在表现中计算排名。",
+      "cleanup": "随页面关闭销毁；重播不更新排行榜。"
+    },
+    {
+      "id": "scoreimpact",
+      "body": "当前分数在加分到达时变成金色、放大后回落；数字变化与脉冲是独立能力。",
+      "trigger": "更新显示分数后触发一次脉冲，连续到达可重启。",
+      "tuning": "Duration=.25秒，Amplitude=.2表示峰值1.2倍；p=sin(πt)，颜色Lerp(原色,Highlight,p)；Highlight默认RGB(.85,.45,.06)。",
+      "cleanup": "完成、禁用或停止精确还原原色与原比例；不要把真实分数写在动画中。"
+    },
+    {
+      "id": "scoregain",
+      "body": "多次加分在短窗口内合并成一条+数值，轻微放大、上浮并淡出。",
+      "trigger": "每次宿主得分调用Add(正整数)，短时间连续触发累加。",
+      "tuning": "MergeDelay=.07秒，每次到达重置合并等待；Duration=.65秒，FadeIn=.05秒，Rise=32单位，Amplitude=.06。alpha=(1-t)×clamp(age/FadeIn)。",
+      "cleanup": "新一轮覆盖上一条可见提示；停止清空待合并值并隐藏。实际总分由宿主管理。"
+    },
+    {
+      "id": "taskarrival",
+      "body": "目标到达时卡片和图标反向挤压，底垫衰减晃动；完成时盖上印章。",
+      "trigger": "宿主更新目标剩余值后调用Arrive(completed)。",
+      "tuning": "IntroDuration=.48秒OutBack；PulseDuration=.38秒，RootAmplitude=.025，IconAmplitude=.1；底垫sin(27age)×exp(-8age)×.11；StampDuration=.4秒OutBack。",
+      "cleanup": "完成状态由宿主传入；中断还原姿态并保持完成或未完成的显示。"
+    },
+    {
+      "id": "moves",
+      "body": "步数显示初次轻弹入场，每次变化时横纵反向微挤压。",
+      "trigger": "宿主更新步数后调用Play。",
+      "tuning": "IntroDuration=.5秒OutBack，从.9到1且上限1.025；PulseDuration=.3秒，Amplitude=.025，sin(πt)控制挤压。",
+      "cleanup": "禁用或停止回到原比例；连续变化重启脉冲，不改变真实剩余次数。"
+    },
+    {
+      "id": "rating",
+      "body": "彩色评价字图从小放大超调后落定，周围星光按评级散开再淡出。",
+      "trigger": "宿主决定Tier(0—3)后播放。",
+      "tuning": "Duration=1.8秒；前12%从.45到1.12，随后17%回到1；4+Tier×3颗星，角度步进2.399弧度。字图可替换为宿主评价。",
+      "cleanup": "重复触发重启本轮；禁用隐藏，评级计算和声音提交归宿主。"
+    },
+    {
+      "id": "leaguejelly",
+      "body": "排行卡在积分或名次更新时轻微果冻抖动后归位。",
+      "trigger": "数据更新后Play(wait)，首屏可按序增加延迟。",
+      "tuning": "duration=.65秒；wave=sin(5πt)×exp(-4t)×(1-t)；横向+wave×.09，纵向-wave×.12，旋转wave×2.2度。",
+      "cleanup": "固定命中根，仅动画视觉子层；重入先恢复，禁用精确还原初始姿态。"
+    },
+    {
+      "id": "themedissolve",
+      "body": "下一张主页背景先置于底层，再平滑淡去旧背景，前景保持稳定。",
+      "trigger": "切换主题时触发。",
+      "tuning": "Duration=.8秒；旧图alpha=1-t²(3-2t)。保持两张图相同覆盖布局和遮罩范围。",
+      "cleanup": "重复切换先明确新旧层；结束可回收旧图，组件不执行导航。"
+    }
+  ]
+}

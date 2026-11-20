@@ -9,6 +9,13 @@ from inventory import KIT,write
 # Reviewed chains in the current 0.4.0 working tree. Runtime gallery validation
 # checks the extracted component, not proof of every original gameplay branch.
 REVIEWS={
+ 'BattleHUDSummary':('文字与数值','独立组件','AppUI.BuildBattleHUD → BattleHUDSummary.Initialize；VictoryFinale.Advance / VictoryRoundPreparation.Update → ShowVictoryScore(impact=true)','结算星光到达时分数变金色并放大回落','ScoreImpact','scoreimpact'),
+ 'ScoreGainPresentation':('文字与数值','独立组件','AppUI.BuildScoreHUD（非Opening/Tutorial的ChainCollection分支） → ScoreGainPresentation.Initialize → StateChanged','短窗口合并加分，提示放大、上移与淡出','ScoreGain','scoregain'),
+ 'ChainTaskCard':('奖励与目标','独立组件','ChainCollectionHUD.Initialize → AddCard → ChainTaskCard.Initialize / Refresh','实际收集值改变触发目标到达挤压；完成显示印章','TaskArrival','taskarrival'),
+ 'ChainCollectionHUD':('文字与数值','独立组件','AppUI.BuildBattleHUD → ChainCollectionHUD.Initialize → StateChanged → Refresh → Update','剩余步数改变时挤压；此交付只提取步数视觉','MovesFeedback','moves'),
+ 'ChainRatingView':('奖励与目标','组合预制体','ChainCollectionHUD.Initialize → ChainRatingView.Initialize；Update观察ChainRatingSerial','连击评级变动后字图放大与星光爆发','CheerBurst','rating'),
+ 'LeagueJelly':('控件交互','独立组件','LeagueRankingView.Refresh / LeaguePodiumView.Build → LeagueJelly.Play','首屏错峰或名次/积分更新时卡片果冻抖动','LeagueJelly','leaguejelly'),
+ 'ChapterHomeView':('页面与布局','宿主适配配方','AppUI.BuildHome → BuildChapterHome → ChapterHomeView.Build → Transition(previousTheme)','主题改变时旧背景SmoothStep淡出；只提取Transition透明度段','ThemeDissolve','themedissolve'),
  'UIBounce':('控件交互','独立组件','Bootstrap.Boot → AppUI.Awake → ShowPage → CSettingsArt.Button / UICraft.Button','悬停、按下、拖拽、松开；命中根保持不动','UIBounce','press'),
  'SettingsSwitch77':('控件交互','组合预制体','AppUI.Settings → OpenSettingsSheetC → SettingsSwitch77.Create；AudioSettings 复用','声音与震动开关；点击读写宿主一次','SettingsSwitch77','switch'),
  'JellyLogoIntro':('文字与数值','组合预制体','AppUI.Awake → ShowIntro → StartIntroWhenVisible → JellyLogoIntro.Begin','启动画面可见后自动演出','JellyLogoIntro','logo'),

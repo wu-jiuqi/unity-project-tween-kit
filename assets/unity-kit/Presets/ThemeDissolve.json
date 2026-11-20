@@ -1,0 +1,15 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.ThemeDissolve",
+    "settings": [
+        {
+            "field": "Duration",
+            "type": "System.Single",
+            "value": 0.800000011920929,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

@@ -10,14 +10,17 @@ def main():
         'observed':[
             'Final native UGUI three-column layout, original C artwork and Chinese labels render in the visible Windows gallery.',
             'Operation guide, stage, main action, playback controls and parameter tab have distinct fixed locations.',
-            'The final modal opens from the main action and closes with its real Done button.',
+            'Search typed through native input filters to the newly delivered score color/scale effect.',
+            'The score timeline at its midpoint shows the enlarged gold number; a real main-action click increases the demonstration from 12,000 to 12,120 and restores its original color and scale.',
+            'The Animation Prompt tab shows the matching design, trigger, baseline parameters, current parameters with explicit precedence, and cleanup rules, without source navigation.',
+            'The copy button gives visible success feedback even while the animation is paused.',
             'Visible scrollbar handles remain inside their tracks.',
         ],
-        'automatedEvidence':'runtime-verification.json covers search, archive return, parameter IO, focus-view lifecycle and input-focus rules; these are not all claimed as native-input checks.',
+        'automatedEvidence':'runtime-verification.json covers all 26 prompts, current-parameter clipboard contents, RGBA round trip, new effect curves/cleanup/reentry, parameter IO, focus-view lifecycle and input-focus rules; these are not all claimed as native-input checks.',
         'limits':[
             'Native checks sample representative entries, not all workflows or original game call sites.',
-            'Final precise numeric keyboard-entry verification was interrupted: the window became minimized and recovery repeatedly reported user input detected. No native numeric-entry pass is claimed.',
-            'Earlier v0.1.0 screenshots are preserved separately as historical evidence and are not final-build captures.',
+            'Final-build native checks exercise search text, timeline, main-action input, prompt navigation and copy acknowledgment; they do not cover every numeric field.',
+            'Earlier v0.1.0 and v0.2.0 screenshots are historical evidence and are not final-build captures.',
             'Hidden-window black screenshots are excluded.',
         ]})
     print('Indexed',len(files),'native-window captures')

@@ -3,8 +3,8 @@
     "editor-tool": 1,
     "test-fixture": 115,
     "non-animation": 15,
-    "requires-route-review": 101,
-    "source-route-reviewed": 20,
+    "requires-route-review": 94,
+    "source-route-reviewed": 27,
     "inactive-preview": 1,
     "legacy-route-disabled": 1,
     "mixed-physics-presentation-review": 4

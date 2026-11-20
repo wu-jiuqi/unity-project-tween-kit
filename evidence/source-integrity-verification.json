@@ -1,8 +1,23 @@
 {
-  "passed": 3169,
+  "passed": 3347,
   "failed": 0,
   "fullAcceptancePassed": false,
   "checks": [
+    {
+      "name": "gallery uses maintained prompt library",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "every delivered entry has one prompt",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "gallery no longer packages source archive",
+      "passed": true,
+      "detail": ""
+    },
     {
       "name": "snapshot Assets/Editor/AbilityImporter.cs",
       "passed": true,
@@ -8779,6 +8794,41 @@
       "detail": ""
     },
     {
+      "name": "extraction assets/unity-kit/Runtime/ScoreImpact.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/ScoreGain.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/TaskArrival.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/MovesFeedback.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/CheerBurst.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/LeagueJelly.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "extraction assets/unity-kit/Runtime/ThemeDissolve.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "resource assets/unity-kit/Plugins/DOTween/DOTween.dll",
       "passed": true,
       "detail": ""
@@ -11514,6 +11564,306 @@
       "detail": ""
     },
     {
+      "name": "resource assets/unity-kit/Resources/Art/ScoreV65/gain_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/ScoreV65/gain_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/ScoreV65/gain_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/ScoreV65/gain_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/ScoreV65/gain_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/ScoreV65/score_star.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/ScoreV65/score_star.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/ScoreV65/score_star.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/ScoreV65/score_star.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/ScoreV65/score_star.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/BattleJellyV5/goal-complete.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/BattleJellyV5/goal-complete.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/BattleJellyV5/goal-complete.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/BattleJellyV5/goal-complete.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/BattleJellyV5/goal-complete.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/ChineseV59/Cheers/nice.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/ChineseV59/Cheers/nice.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/ChineseV59/Cheers/nice.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/ChineseV59/Cheers/nice.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/ChineseV59/Cheers/nice.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/ChineseV59/Cheers/great.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/ChineseV59/Cheers/great.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/ChineseV59/Cheers/great.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/ChineseV59/Cheers/great.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/ChineseV59/Cheers/great.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/ChineseV59/Cheers/amazing.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/ChineseV59/Cheers/amazing.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/ChineseV59/Cheers/amazing.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/ChineseV59/Cheers/amazing.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/ChineseV59/Cheers/amazing.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/ChineseV59/Cheers/incredible.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/ChineseV59/Cheers/incredible.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/ChineseV59/Cheers/incredible.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/ChineseV59/Cheers/incredible.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/ChineseV59/Cheers/incredible.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/NativeV50/background-alphabet.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/NativeV50/background-alphabet.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/NativeV50/background-alphabet.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/NativeV50/background-alphabet.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/NativeV50/background-alphabet.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/NativeV50/background-picnic.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/NativeV50/background-picnic.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/NativeV50/background-picnic.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/NativeV50/background-picnic.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/NativeV50/background-picnic.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/BattleJellyV5/goal-pad-honey.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/BattleJellyV5/goal-pad-honey.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/BattleJellyV5/goal-pad-honey.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/BattleJellyV5/goal-pad-honey.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/BattleJellyV5/goal-pad-honey.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/BattleJellyV5/moves-badge.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/BattleJellyV5/moves-badge.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/BattleJellyV5/moves-badge.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/BattleJellyV5/moves-badge.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/BattleJellyV5/moves-badge.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource assets/unity-kit/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "original resource GUID assets/unity-kit/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource importer fingerprint assets/unity-kit/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource matches live source assets/unity-kit/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "resource import settings unchanged assets/unity-kit/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Editor.meta",
       "passed": true,
       "detail": ""
@@ -11589,6 +11939,16 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Examples/ScoreGain.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Examples/ScoreImpact.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Examples/Sequence.prefab.meta",
       "passed": true,
       "detail": ""
@@ -11600,6 +11960,11 @@
     },
     {
       "name": "valid GUID Plugins/DOTween.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/CheerBurst.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -11619,7 +11984,17 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Presets/LeagueJelly.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Presets/ModalMotion.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/MovesFeedback.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -11630,6 +12005,26 @@
     },
     {
       "name": "valid GUID Presets/RewardFlight.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/ScoreGain.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/ScoreImpact.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/TaskArrival.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Presets/ThemeDissolve.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -11674,6 +12069,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Runtime/CheerBurst.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Runtime/ExamplePrefab.cs.meta",
       "passed": true,
       "detail": ""
@@ -11699,7 +12099,17 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Runtime/LeagueJelly.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Runtime/ModalMotion.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/MovesFeedback.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -11724,7 +12134,27 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Runtime/ScoreGain.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/ScoreImpact.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Runtime/SoundService.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/TaskArrival.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Runtime/ThemeDissolve.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -12154,6 +12584,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/ChineseV59.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/ChineseV60.meta",
       "passed": true,
       "detail": ""
@@ -12184,7 +12619,17 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/NativeV50.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/Pastel.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ScoreV65.meta",
       "passed": true,
       "detail": ""
     },
@@ -12374,12 +12819,32 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/BattleJellyV5/goal-complete.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/BattleJellyV5/goal-pad-honey.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/BattleJellyV5/moves-badge.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/BattleJellyV5/vine-star-off.png.meta",
       "passed": true,
       "detail": ""
     },
     {
       "name": "valid GUID Resources/Art/BattleJellyV5/vine-star-on.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ChineseV59/Cheers.meta",
       "passed": true,
       "detail": ""
     },
@@ -12444,12 +12909,32 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/NativeV50/background-alphabet.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/NativeV50/background-picnic.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/Pastel/PastelArtData.json.meta",
       "passed": true,
       "detail": ""
     },
     {
       "name": "valid GUID Resources/Art/Pastel/Sprites.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ScoreV65/gain_spark.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ScoreV65/score_star.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -12599,6 +13084,11 @@
       "detail": ""
     },
     {
+      "name": "valid GUID Resources/Art/Pastel/Sprites/vfx/fx_spark.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "valid GUID Resources/Art/ChineseV60/Logo/chai.png.meta",
       "passed": true,
       "detail": ""
@@ -12620,6 +13110,26 @@
     },
     {
       "name": "valid GUID Resources/Art/ChineseV60/Logo/xiang.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ChineseV59/Cheers/amazing.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ChineseV59/Cheers/great.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ChineseV59/Cheers/incredible.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "valid GUID Resources/Art/ChineseV59/Cheers/nice.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -12769,6 +13279,26 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Examples/ScoreGain.prefab",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Examples/ScoreGain.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Examples/ScoreImpact.prefab",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Examples/ScoreImpact.prefab.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Examples/Sequence.prefab",
       "passed": true,
       "detail": ""
@@ -12790,6 +13320,16 @@
     },
     {
       "name": "shared implementation Plugins/DOTween.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/CheerBurst.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/CheerBurst.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -12824,12 +13364,32 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Presets/LeagueJelly.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/LeagueJelly.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Presets/ModalMotion.json",
       "passed": true,
       "detail": ""
     },
     {
       "name": "shared implementation Presets/ModalMotion.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/MovesFeedback.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/MovesFeedback.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -12850,6 +13410,46 @@
     },
     {
       "name": "shared implementation Presets/RewardFlight.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/ScoreGain.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/ScoreGain.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/ScoreImpact.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/ScoreImpact.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/TaskArrival.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/TaskArrival.json.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/ThemeDissolve.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Presets/ThemeDissolve.json.meta",
       "passed": true,
       "detail": ""
     },
@@ -12914,6 +13514,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Runtime/CheerBurst.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/CheerBurst.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Runtime/ExamplePrefab.cs",
       "passed": true,
       "detail": ""
@@ -12959,12 +13569,32 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Runtime/LeagueJelly.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/LeagueJelly.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Runtime/ModalMotion.cs",
       "passed": true,
       "detail": ""
     },
     {
       "name": "shared implementation Runtime/ModalMotion.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/MovesFeedback.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/MovesFeedback.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -13009,12 +13639,52 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Runtime/ScoreGain.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/ScoreGain.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/ScoreImpact.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/ScoreImpact.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Runtime/SoundService.cs",
       "passed": true,
       "detail": ""
     },
     {
       "name": "shared implementation Runtime/SoundService.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/TaskArrival.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/TaskArrival.cs.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/ThemeDissolve.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Runtime/ThemeDissolve.cs.meta",
       "passed": true,
       "detail": ""
     },
@@ -13814,6 +14484,11 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/ChineseV59.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/ChineseV60.meta",
       "passed": true,
       "detail": ""
@@ -13844,7 +14519,17 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/NativeV50.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/Pastel.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ScoreV65.meta",
       "passed": true,
       "detail": ""
     },
@@ -14179,6 +14864,36 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/BattleJellyV5/goal-complete.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/goal-complete.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/goal-pad-honey.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/goal-pad-honey.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/moves-badge.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/BattleJellyV5/moves-badge.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-off.png",
       "passed": true,
       "detail": ""
@@ -14195,6 +14910,11 @@
     },
     {
       "name": "shared implementation Resources/Art/BattleJellyV5/vine-star-on.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers.meta",
       "passed": true,
       "detail": ""
     },
@@ -14314,6 +15034,26 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/NativeV50/background-alphabet.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/NativeV50/background-alphabet.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/NativeV50/background-picnic.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/NativeV50/background-picnic.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/Pastel/PastelArtData.json",
       "passed": true,
       "detail": ""
@@ -14325,6 +15065,26 @@
     },
     {
       "name": "shared implementation Resources/Art/Pastel/Sprites.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ScoreV65/gain_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ScoreV65/gain_spark.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ScoreV65/score_star.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ScoreV65/score_star.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -14579,6 +15339,16 @@
       "detail": ""
     },
     {
+      "name": "shared implementation Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/Pastel/Sprites/vfx/fx_spark.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "shared implementation Resources/Art/ChineseV60/Logo/chai.png",
       "passed": true,
       "detail": ""
@@ -14625,6 +15395,46 @@
     },
     {
       "name": "shared implementation Resources/Art/ChineseV60/Logo/xiang.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/amazing.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/amazing.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/great.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/great.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/incredible.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/incredible.png.meta",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/nice.png",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared implementation Resources/Art/ChineseV59/Cheers/nice.png.meta",
       "passed": true,
       "detail": ""
     },
@@ -14704,6 +15514,11 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/CheerBurst.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Plugins/DOTween/Modules/DOTweenModulePhysics2D.cs",
       "passed": true,
       "detail": ""
@@ -14734,12 +15549,27 @@
       "detail": ""
     },
     {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/ThemeDissolve.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "exported exact component Assets/ProjectTweenKit/Plugins/DOTween/Modules/DOTweenModulePhysics.cs",
       "passed": true,
       "detail": ""
     },
     {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/Extracted/LeagueMotionArt.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/LeagueJelly.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/ScoreGain.cs",
       "passed": true,
       "detail": ""
     },
@@ -14765,6 +15595,16 @@
     },
     {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/NumberRoll.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/TaskArrival.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/MovesFeedback.cs",
       "passed": true,
       "detail": ""
     },
@@ -14835,6 +15675,11 @@
     },
     {
       "name": "exported exact component Assets/ProjectTweenKit/Runtime/Extracted/UICraft.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "exported exact component Assets/ProjectTweenKit/Runtime/ScoreImpact.cs",
       "passed": true,
       "detail": ""
     },
@@ -15634,6 +16479,11 @@
       "detail": ""
     },
     {
+      "name": "tested kit source Runtime/CheerBurst.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "tested kit source Runtime/ExamplePrefab.cs",
       "passed": true,
       "detail": ""
@@ -15789,7 +16639,17 @@
       "detail": ""
     },
     {
+      "name": "tested kit source Runtime/LeagueJelly.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "tested kit source Runtime/ModalMotion.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/MovesFeedback.cs",
       "passed": true,
       "detail": ""
     },
@@ -15814,7 +16674,27 @@
       "detail": ""
     },
     {
+      "name": "tested kit source Runtime/ScoreGain.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/ScoreImpact.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "name": "tested kit source Runtime/SoundService.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/TaskArrival.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested kit source Runtime/ThemeDissolve.cs",
       "passed": true,
       "detail": ""
     },
@@ -15825,6 +16705,16 @@
     },
     {
       "name": "tested gallery source assets/sample-project/Assets/Gallery/Gallery.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested gallery source assets/sample-project/Assets/Gallery/GalleryAdditional.cs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "tested gallery source assets/sample-project/Assets/Gallery/GalleryPrompts.cs",
       "passed": true,
       "detail": ""
     },

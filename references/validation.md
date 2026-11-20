@@ -5,6 +5,7 @@
 ```powershell
 python scripts/inventory.py --source <主Unity工程> --unity <Unity的Editor目录>
 python scripts/catalog.py
+python scripts/audit_coverage.py --source <主Unity工程>
 python scripts/extract.py --source <主Unity工程> --dotween-standard <原版DOTween1.3.045目录>
 python scripts/prepare_project.py --source <主Unity工程>
 <Unity.exe> -batchmode -nographics -quit -projectPath <仓库>/assets/sample-project -executeMethod KitBuild.Build -logFile <仓库>/work/build.log

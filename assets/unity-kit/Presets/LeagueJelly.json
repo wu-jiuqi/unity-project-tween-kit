@@ -1,0 +1,15 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.LeagueJelly",
+    "settings": [
+        {
+            "field": "duration",
+            "type": "System.Single",
+            "value": 0.6499999761581421,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

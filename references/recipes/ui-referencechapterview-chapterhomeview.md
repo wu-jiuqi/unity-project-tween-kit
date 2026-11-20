@@ -1,12 +1,15 @@
 # ChapterHomeView · ReferenceChapterView
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/ReferenceChapterView.cs`
 文件 SHA-256：`2c45047e7db37e1de26351ab6a2f79f94f3f8dd9ad9418df5911d52c503da51d`
 [原始源码快照](../source/Assets/Scripts/UI/ReferenceChapterView.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+用在哪里：AppUI.BuildHome → BuildChapterHome → ChapterHomeView.Build → Transition(previousTheme)
+触发操作：主题改变时旧背景SmoothStep淡出；只提取Transition透明度段
+导入组件：`ProjectTweenKit.ThemeDissolve`；展馆 ID：`themedissolve`。
+复用形式：宿主适配配方。绑定、调用与停止见 [接入](../integration.md) / [生命周期](../lifecycle.md)。
 
 ## 源方法、参数与曲线
 

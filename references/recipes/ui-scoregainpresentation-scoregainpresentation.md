@@ -1,12 +1,15 @@
 # ScoreGainPresentation · ScoreGainPresentation
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/ScoreGainPresentation.cs`
 文件 SHA-256：`fbbcbadb8b375b0e23631266d4aa2f05d6002bbbb9ada8fa3476a395bf227fa4`
 [原始源码快照](../source/Assets/Scripts/UI/ScoreGainPresentation.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+用在哪里：AppUI.BuildScoreHUD（非Opening/Tutorial的ChainCollection分支） → ScoreGainPresentation.Initialize → StateChanged
+触发操作：短窗口合并加分，提示放大、上移与淡出
+导入组件：`ProjectTweenKit.ScoreGain`；展馆 ID：`scoregain`。
+复用形式：独立组件。绑定、调用与停止见 [接入](../integration.md) / [生命周期](../lifecycle.md)。
 
 ## 源方法、参数与曲线
 

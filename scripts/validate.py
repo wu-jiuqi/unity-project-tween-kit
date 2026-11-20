@@ -5,6 +5,12 @@ from inventory import KIT,sha,write
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--source',type=Path);ap.add_argument('--require-full',action='store_true');a=ap.parse_args();checks=[]
     def check(name,ok,detail=''):checks.append({'name':name,'passed':bool(ok),'detail':detail})
+    prompts=json.loads((KIT/'references/prompt-library.json').read_text(encoding='utf-8'))
+    galleryPrompts=json.loads((KIT/'assets/sample-project/Assets/Resources/ProjectTweenKit/prompts.json').read_text(encoding='utf-8'))
+    check('gallery uses maintained prompt library',prompts==galleryPrompts)
+    ids=re.findall(r'\bE\("([a-z]+)"',(KIT/'assets/sample-project/Assets/Gallery/Gallery.cs').read_text(encoding='utf-8-sig'))
+    check('every delivered entry has one prompt',sorted(ids)==sorted(p['id'] for p in prompts['entries']))
+    check('gallery no longer packages source archive',not (KIT/'assets/sample-project/Assets/Resources/ProjectTweenKit/archive.json').exists())
     data=json.loads((KIT/'references/source-map.json').read_text(encoding='utf-8'))
     fingerprints=json.loads((KIT/'references/source-fingerprints.json').read_text(encoding='utf-8'))
     for path,h in fingerprints.items():

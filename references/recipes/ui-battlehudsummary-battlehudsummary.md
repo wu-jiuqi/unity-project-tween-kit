@@ -1,12 +1,15 @@
 # BattleHUDSummary · BattleHUDSummary
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/BattleHUDSummary.cs`
 文件 SHA-256：`78845376ec0e3e17a68c33c888fc30085dd481dd06e20ded8428232237076856`
 [原始源码快照](../source/Assets/Scripts/UI/BattleHUDSummary.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+用在哪里：AppUI.BuildBattleHUD → BattleHUDSummary.Initialize；VictoryFinale.Advance / VictoryRoundPreparation.Update → ShowVictoryScore(impact=true)
+触发操作：结算星光到达时分数变金色并放大回落
+导入组件：`ProjectTweenKit.ScoreImpact`；展馆 ID：`scoreimpact`。
+复用形式：独立组件。绑定、调用与停止见 [接入](../integration.md) / [生命周期](../lifecycle.md)。
 
 ## 源方法、参数与曲线
 

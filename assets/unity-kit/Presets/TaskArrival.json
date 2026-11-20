@@ -1,0 +1,60 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.TaskArrival",
+    "settings": [
+        {
+            "field": "IntroDuration",
+            "type": "System.Single",
+            "value": 0.47999998927116396,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "PulseDuration",
+            "type": "System.Single",
+            "value": 0.3799999952316284,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "StampDuration",
+            "type": "System.Single",
+            "value": 0.4000000059604645,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "RootAmplitude",
+            "type": "System.Single",
+            "value": 0.02500000037252903,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "IconAmplitude",
+            "type": "System.Single",
+            "value": 0.10000000149011612,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "PadAmplitude",
+            "type": "System.Single",
+            "value": 0.10999999940395355,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

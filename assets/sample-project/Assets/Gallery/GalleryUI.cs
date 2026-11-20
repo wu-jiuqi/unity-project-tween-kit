@@ -13,20 +13,18 @@ namespace TweenGallery {
 // Native, uniformly scaled developer exhibit, using the project's existing C artwork.
 public sealed partial class Gallery {
  static readonly Color Ink=new Color32(108,76,59,255),Muted=new Color32(153,129,108,255),Mint=new Color32(81,149,130,255),Paper=new Color32(255,251,242,255);
- RectTransform chrome,viewport,listContent,parameterContent,detailsContent,archivePanel,examplesPanel,focusRoot,focusViewport;
- Text exampleCount,selectedTitle,selectedCategory,instruction,stepLabel,stateLabel,notice,primaryLabel,pauseText,speedText,timelineLabel,parameterHint,archiveTitle,archiveBody,rightTitle,directHint;
- Button primaryButton,pauseButton,restartButton,saveButton,loadButton,resetButton,examplesTab,archiveTab,parametersTab,integrationTab,relatedExampleButton;
+ RectTransform chrome,viewport,listContent,parameterContent,detailsContent,examplesPanel,focusRoot,focusViewport;
+ Text exampleCount,selectedTitle,selectedCategory,instruction,stepLabel,stateLabel,notice,primaryLabel,pauseText,speedText,timelineLabel,parameterHint,rightTitle,directHint;
+ Button primaryButton,pauseButton,restartButton,saveButton,loadButton,resetButton,parametersTab,integrationTab;
  InputField searchField;Dropdown categoryMenu,typeMenu;Slider timeSlider;
- Toggle instantToggle,muteToggle;RectTransform timelineRow;bool uiSync,integrationVisible,hasTriggered,listArchiveMode,focusedStage;
- Text focusTitle,focusHint,focusActionText,focusPauseText,focusDirectHint;Button focusAction,locateSourceButton;
+ Toggle instantToggle,muteToggle;RectTransform timelineRow;bool uiSync,integrationVisible,hasTriggered,focusedStage;
+ Text focusTitle,focusHint,focusActionText,focusPauseText,focusDirectHint;Button focusAction,copyPromptButton,presetFolderButton;
  Action primaryAction;float triggeredAt;int uiWidth,uiHeight;
  readonly Dictionary<string,MotionPreset> defaults=new Dictionary<string,MotionPreset>();
  readonly Dictionary<int,Text> exampleLabels=new Dictionary<int,Text>();
  readonly Dictionary<int,Image> selectionBars=new Dictionary<int,Image>();
  readonly List<Action> parameterUpdates=new List<Action>();
- int relatedExample=-1;
  public int VisibleExampleCount{get;private set;}
- public bool ArchiveBrowserOpen=>archiveMode;
  public bool HasMainAction=>primaryAction!=null||!Current.interactive;
  public string OperationHint=>Instructions(Current.id);
  public RectTransform StageViewport=>focusedStage?focusViewport:viewport;
@@ -34,7 +32,7 @@ public sealed partial class Gallery {
  public Button MainActionButton=>primaryButton;
  public InputField SearchInput=>searchField;
  public string FeedbackText=>message;
- public bool StageShown=>demo!=null&&demo.activeInHierarchy&&!archiveMode;
+ public bool StageShown=>demo!=null&&demo.activeInHierarchy;
  public Button ParameterResetButton=>resetButton;
  public bool ShortcutsAvailable {get{var go=EventSystem.current!=null?EventSystem.current.currentSelectedGameObject:null;return go==null||(go.GetComponent<InputField>()==null&&go.GetComponentInParent<Dropdown>()==null&&go.GetComponent<Toggle>()==null);}}
 
@@ -44,8 +42,7 @@ public sealed partial class Gallery {
   Label(chrome,"喵弹拆箱  /  选一个效果，动手体验，再把参数带回项目",112,65,900,26,17,Muted);
   Label(chrome,"01 选择效果     02 按提示体验     03 调参复用",1000,34,576,40,18,Mint).alignment=TextAnchor.MiddleRight;
   Panel(chrome,22,112,272,862);Panel(chrome,1208,112,370,862);
-  examplesTab=Button(chrome,"效果体验",36,126,122,43,()=>SetBrowserMode(false),true,17);
-  archiveTab=Button(chrome,"来源档案",162,126,118,43,()=>SetBrowserMode(true),false,17);
+  Label(chrome,"选择动画设计",40,126,235,43,23);
   searchField=TextInput(chrome,"搜索效果 / 组件",38,181,240,39,s=>{search=s;RebuildList();},false);
   Label(chrome,"使用场景",40,230,235,22,15,Muted);categoryMenu=Menu(chrome,categories,38,256,240,37,v=>{filter=v;RebuildList();});
   Label(chrome,"动画类型",40,304,235,22,15,Muted);typeMenu=Menu(chrome,animationTypes,38,330,240,37,v=>{typeFilter=v;RebuildList();});
@@ -74,23 +71,17 @@ public sealed partial class Gallery {
   timelineRow=Rect(examplesPanel,"Timeline controls",8,790,862,64);timelineLabel=Label(timelineRow,"时间轴",0,0,862,24,15,Muted);
   timeSlider=Range(timelineRow,0,32,860,24,0,1,0,v=>{if(!uiSync)Seek(v);});
 
-  archivePanel=Rect(chrome,"Source archive",312,112,878,862);Panel(archivePanel,8,0,862,862,"card_cream_help");
-  Label(archivePanel,"来源档案",30,22,800,46,30);Label(archivePanel,"用来查实现与核对进度。未交付的来源条目不播放近似效果。",31,80,790,55,19,Muted);
-  archiveTitle=Label(archivePanel,"从左侧选择一个来源条目",32,161,790,72,25);
-  archiveBody=Label(archivePanel,"可搜索类名、组件名或源文件。\n\n已提供演示的条目可跳回效果体验。",32,252,790,450,20);
-  relatedExampleButton=Button(archivePanel,"查看相关效果 →",32,749,289,58,()=>{if(relatedExample>=0){ClearFilters();Select(relatedExample);}},true);
-
   parametersTab=Button(chrome,"调参数",1224,127,165,43,()=>ShowIntegration(false),true,18);
-  integrationTab=Button(chrome,"接入说明",1395,127,165,43,()=>ShowIntegration(true),false,18);
+  integrationTab=Button(chrome,"动画 Prompt",1395,127,165,43,()=>ShowIntegration(true),false,18);
   rightTitle=Label(chrome,"本项参数",1228,186,329,35,24);
   parameterHint=Label(chrome,"拖动滑条或精确输入；更改保留在当前效果。",1228,229,326,54,17,Muted);
   parameterContent=Scroll(chrome,"Parameter scroll",1226,295,329,438);
-  detailsContent=Scroll(chrome,"Integration notes",1226,234,329,600);
-  locateSourceButton=Button(chrome,"在来源档案中定位",1226,847,331,41,LocateCurrentSource,false,17);
+  detailsContent=Scroll(chrome,"Animation prompt",1226,234,329,600);
+  copyPromptButton=Button(chrome,"复制 Prompt 与当前参数",1226,847,331,48,CopyPrompt,true,17);
   resetButton=Button(chrome,"恢复本项默认",1226,754,331,48,ResetCurrentParameters,false,18);
   saveButton=Button(chrome,"保存本项",1226,813,161,48,SavePreset,false,18);loadButton=Button(chrome,"载入本项",1395,813,162,48,LoadPreset,false,18);
   instantToggle=Check(chrome,"即时完成对照",1231,876,207,v=>{immediate=v;Report(v?"已切到即时完成。再次触发会直接到达相同结果。":"已恢复原动画。再次触发可观察完整过程。");});
-  Button(chrome,"参数目录",1441,876,116,35,()=>{string folder=Path.GetDirectoryName(PresetPath);Directory.CreateDirectory(folder);Application.OpenURL(new Uri(folder).AbsoluteUri);},false,15);
+  presetFolderButton=Button(chrome,"参数目录",1441,876,116,35,()=>{string folder=Path.GetDirectoryName(PresetPath);Directory.CreateDirectory(folder);Application.OpenURL(new Uri(folder).AbsoluteUri);},false,15);
   notice=Label(chrome,"",1230,923,326,39,15,Muted);
   focusRoot=Rect(chrome,"Focused experience",0,104,1600,880);var focusBack=focusRoot.gameObject.AddComponent<Image>();focusBack.color=Paper;focusBack.raycastTarget=true;
   Panel(focusRoot,24,0,1552,856,"card_cream_wide");focusTitle=Label(focusRoot,"",50,14,1000,39,27);
@@ -104,73 +95,55 @@ public sealed partial class Gallery {
  }
 
  public void TriggerPrimary(){
-  if(archiveMode||!HasMainAction)return;
+  if(!HasMainAction)return;
   KitClock.Paused=false;hasTriggered=true;triggeredAt=elapsed;message="";
   if(primaryAction!=null)primaryAction();else Replay();
  }
  public void RestartExperience(){KitClock.Paused=false;Replay();}
  public void SetPaused(bool paused){KitClock.Paused=paused;}
  public void SetObservationSpeed(float value){KitClock.Speed=value;}
- public void SetStageFocused(bool value){if(archiveMode&&value)return;focusedStage=value;if(value){focusRoot.gameObject.SetActive(true);stage.SetParent(focusViewport,false);}else{stage.SetParent(viewport,false);focusRoot.gameObject.SetActive(false);}stage.anchoredPosition=Vector2.zero;ResizeStage();}
+ public void SetStageFocused(bool value){focusedStage=value;if(value){focusRoot.gameObject.SetActive(true);stage.SetParent(focusViewport,false);}else{stage.SetParent(viewport,false);focusRoot.gameObject.SetActive(false);}stage.anchoredPosition=Vector2.zero;ResizeStage();}
  public void Navigate(int direction){
   var visible=Enumerable.Range(0,Entries.Length).Where(Matches).ToList();if(visible.Count==0)return;int position=visible.IndexOf(index);if(position<0)position=direction>0?-1:0;Select(visible[(position+direction+visible.Count)%visible.Count]);
  }
- bool Matches(int i){var e=Entries[i];return(filter==0||e.category==categories[filter])&&(typeFilter==0||TypesFor(e.id).Contains(animationTypes[typeFilter]))&&(string.IsNullOrWhiteSpace(search)||(e.title+e.source+TypesFor(e.id)).IndexOf(search,StringComparison.OrdinalIgnoreCase)>=0);}
- public void SetBrowserMode(bool source){
-  if(source==archiveMode)return;if(source&&focusedStage)SetStageFocused(false);
-  if(source){archiveMode=true;foreach(var borrowed in demo.GetComponentsInChildren<CollectionGoalEntrance>(true))borrowed.Restore();demo.SetActive(false);KitClock.Paused=true;SoundService.CancelTransient();message="";relatedExample=-1;archiveTitle.text="从左侧选择一个来源条目";archiveBody.text="来源档案用于定位源码与核对状态。\n\n请选择左侧条目查看；相关效果可通过下方按钮打开。";}
-  else{ClearFilters();Select(index);return;}
-  RebuildList();RefreshInterface(false);
- }
- void ClearFilters(){search="";filter=typeFilter=0;searchField.SetTextWithoutNotify("");categoryMenu.SetValueWithoutNotify(0);typeMenu.SetValueWithoutNotify(0);}
- void LocateCurrentSource(){var entry=archive?.entries.FirstOrDefault(e=>e.galleryEntry==Current.id);if(entry==null)return;ClearFilters();SetBrowserMode(true);OpenArchive(entry);}
- void OpenArchive(ArchiveEntry entry){
-  archiveTitle.text=entry.title;relatedExample=-1;
-  if(!string.IsNullOrEmpty(entry.galleryEntry))relatedExample=Array.FindIndex(Entries,e=>e.id==entry.galleryEntry);
-  if(relatedExample<0){string path=entry.source.Replace("Assets/Scripts/","");relatedExample=Array.FindIndex(Entries,e=>e.source.Split(new[]{"::"},StringSplitOptions.None)[0]==path);}
-  archiveBody.text="核对状态\n"+StatusName(entry.status)+"\n\n源文件\n"+entry.source+"\n\n记录的实现\n"+entry.description+"\n\n完整方法、源码指纹、资源映射与生命周期见 Skill 的 references/catalog.md。";
-  relatedExampleButton.gameObject.SetActive(relatedExample>=0);
- }
+ bool Matches(int i){var e=Entries[i];return(filter==0||e.category==categories[filter])&&(typeFilter==0||TypesFor(e.id).Contains(animationTypes[typeFilter]))&&(string.IsNullOrWhiteSpace(search)||(e.title+TypesFor(e.id)).IndexOf(search,StringComparison.OrdinalIgnoreCase)>=0);}
  void RebuildList(){
-  if(listContent==null)return;listArchiveMode=archiveMode;ClearUI(listContent);exampleLabels.Clear();selectionBars.Clear();int count=0;
-  if(!archiveMode){for(int i=0;i<Entries.Length;i++){if(!Matches(i))continue;int k=i;var e=Entries[i];var row=Button(listContent,"",0,count*65,240,59,()=>Select(k));var label=Label(row.transform,e.title,14,6,215,28,17);exampleLabels[k]=label;
-    Label(row.transform,e.interactive?"动手体验  ·  "+e.category:"自动播放  ·  "+e.category,14,33,215,21,13,Muted);selectionBars[k]=Flat(row.transform,"Selection",0,11,4,37,Mint);count++;}}
-  else if(archive!=null)foreach(var entry in archive.entries){if(filter>0&&entry.category!=categories[filter])continue;if(typeFilter>0&&(entry.animationTypes==null||!entry.animationTypes.Contains(animationTypes[typeFilter])))continue;if(!string.IsNullOrWhiteSpace(search)&&(entry.title+entry.source+entry.description).IndexOf(search,StringComparison.OrdinalIgnoreCase)<0)continue;var captured=entry;var row=Button(listContent,"",0,count*65,240,59,()=>OpenArchive(captured));Label(row.transform,entry.title,11,4,218,29,15);Label(row.transform,StatusName(entry.status),11,34,218,20,13,Muted);count++;}
-  VisibleExampleCount=count;listContent.sizeDelta=new Vector2(240,Mathf.Max(1,count*65));exampleCount.text=archiveMode?"来源记录  ·  "+count+" 项":"可体验  "+count+" / "+Entries.Length+" 项";
+  if(listContent==null)return;ClearUI(listContent);exampleLabels.Clear();selectionBars.Clear();int count=0;
+  for(int i=0;i<Entries.Length;i++){if(!Matches(i))continue;int k=i;var e=Entries[i];var row=Button(listContent,"",0,count*65,240,59,()=>Select(k));var label=Label(row.transform,e.title,14,6,215,28,17);exampleLabels[k]=label;
+    Label(row.transform,e.interactive?"动手体验  ·  "+e.category:"自动播放  ·  "+e.category,14,33,215,21,13,Muted);selectionBars[k]=Flat(row.transform,"Selection",0,11,4,37,Mint);count++;}
+  VisibleExampleCount=count;listContent.sizeDelta=new Vector2(240,Mathf.Max(1,count*65));exampleCount.text="可体验  "+count+" / "+Entries.Length+" 项";
   if(count==0){Label(listContent,"没有匹配的条目\n换个关键词或恢复“全部”筛选。",9,9,222,100,18,Muted);listContent.sizeDelta=new Vector2(240,110);}
   RefreshSelection();
  }
  void RefreshSelection(){foreach(var pair in exampleLabels)pair.Value.color=pair.Key==index?Mint:Ink;foreach(var pair in selectionBars)pair.Value.gameObject.SetActive(pair.Key==index);}
  void RefreshInterface(bool parameters=true){
-  if(chrome==null)return;if(listArchiveMode!=archiveMode)RebuildList();examplesPanel.gameObject.SetActive(!archiveMode);archivePanel.gameObject.SetActive(archiveMode);
-  Tab(examplesTab,!archiveMode);Tab(archiveTab,archiveMode);relatedExampleButton.gameObject.SetActive(archiveMode&&relatedExample>=0);
+  if(chrome==null)return;
   selectedTitle.text=Current.title;selectedCategory.text=Current.category+"  /  "+(index+1).ToString("00")+" · "+Entries.Length;
   instruction.text=Instructions(Current.id);stepLabel.text=Current.interactive?"第 2 步  ·  动手体验":"第 2 步  ·  已按原场景自动播放";
-  if(parameters&&!archiveMode){RebuildParameters();RebuildIntegration();}
+  if(parameters){RebuildParameters();RebuildIntegration();}
   ShowIntegration(integrationVisible);RefreshSelection();ResizeStage();
  }
  void ShowIntegration(bool show){
-  integrationVisible=show;bool notes=show||archiveMode;parameterContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(!notes);detailsContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(notes);locateSourceButton.gameObject.SetActive(notes&&!archiveMode);
-  parameterHint.gameObject.SetActive(!notes);resetButton.gameObject.SetActive(!notes);saveButton.gameObject.SetActive(!notes);loadButton.gameObject.SetActive(!notes);instantToggle.gameObject.SetActive(!notes&&SupportsInstant);
-  rightTitle.text=notes?"如何接回项目":"本项参数";Tab(parametersTab,!notes);Tab(integrationTab,notes);
-  if(archiveMode){ClearUI(detailsContent);Label(detailsContent,"来源档案只用于查看实现与核对状态。\n\n点击中间的“查看相关效果”，可回到可操作的交付示例。\n\n未完成来源核对的条目仍会保留明确标记。",2,0,322,300,19,Muted);detailsContent.sizeDelta=new Vector2(329,320);}
+  integrationVisible=show;bool notes=show;parameterContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(!notes);detailsContent.GetComponentInParent<ScrollRect>(true).gameObject.SetActive(notes);copyPromptButton.gameObject.SetActive(notes);
+  parameterHint.gameObject.SetActive(!notes);resetButton.gameObject.SetActive(!notes);saveButton.gameObject.SetActive(!notes);loadButton.gameObject.SetActive(!notes);instantToggle.gameObject.SetActive(!notes&&SupportsInstant);presetFolderButton.gameObject.SetActive(!notes);
+  rightTitle.text=notes?"复用这项动画":"本项参数";Tab(parametersTab,!notes);Tab(integrationTab,notes);
+
  }
  void RebuildIntegration(){
-  ClearUI(detailsContent);string text="用在哪里\n"+Current.trigger+"\n\n绑定哪些对象\n"+Current.binding+"\n\n表现与时序\n"+Current.notes+"\n\n组件\nProjectTweenKit."+component.GetType().Name+"\n\n真实源码\nAssets/Scripts/"+Current.source+"\n\n停止与清理\n参见 Skill：references/lifecycle.md。\n\n来源、素材与参数\n参见 references/catalog.md 和 integration.md。";
-  var label=Label(detailsContent,text,2,0,322,1000,18);label.verticalOverflow=VerticalWrapMode.Overflow;detailsContent.sizeDelta=new Vector2(329,Mathf.Max(600,label.preferredHeight+30));
+  ClearUI(detailsContent);promptLabel=Label(detailsContent,BuildPrompt(),2,0,322,1000,18);promptLabel.verticalOverflow=VerticalWrapMode.Overflow;UpdatePrompt();
  }
- bool SupportsInstant=>new[]{"modal","reward","number","hit","charge"}.Contains(Current.id);
+
+ bool SupportsInstant=>new[]{"modal","reward","number","hit","charge","scoreimpact","themedissolve"}.Contains(Current.id);
  void UpdateInterface(){
   if(chrome==null)return;if(uiWidth!=Screen.width||uiHeight!=Screen.height)ResizeInterface();
   bool editing=!ShortcutsAvailable;
-  if(!editing&&!archiveMode){if(Input.GetKeyDown(KeyCode.Space))TriggerPrimary();if(Input.GetKeyDown(KeyCode.P))SetPaused(!KitClock.Paused);if(Input.GetKeyDown(KeyCode.R))RestartExperience();}
-  if(archiveMode)return;
+  if(!editing){if(Input.GetKeyDown(KeyCode.Space))TriggerPrimary();if(Input.GetKeyDown(KeyCode.P))SetPaused(!KitClock.Paused);if(Input.GetKeyDown(KeyCode.R))RestartExperience();}
   focusTitle.text=Current.title;focusHint.text=Instructions(Current.id);focusActionText.text=PrimaryCaption();focusAction.interactable=HasMainAction;focusAction.gameObject.SetActive(HasMainAction);focusDirectHint.gameObject.SetActive(!HasMainAction);focusPauseText.text=KitClock.Paused?"继续播放":"暂停";
   primaryButton.gameObject.SetActive(HasMainAction);directHint.gameObject.SetActive(!HasMainAction);primaryButton.interactable=HasMainAction;primaryLabel.text=PrimaryCaption();pauseText.text=KitClock.Paused?"继续播放":"暂停";
   speedText.text="观察 "+KitClock.Speed.ToString("0.##")+"×";uiSync=true;muteToggle.SetIsOnWithoutNotify(SoundService.Muted);instantToggle.SetIsOnWithoutNotify(immediate);
   timelineRow.gameObject.SetActive(Current.timeline);if(Current.timeline){timeSlider.maxValue=Mathf.Max(.001f,TimelineDuration);if(!KitClock.Paused&&hasTriggered)timeline=Mathf.Clamp(elapsed-triggeredAt,0,TimelineDuration);timeSlider.SetValueWithoutNotify(timeline);timelineLabel.text="时间轴  "+timeline.ToString("0.00")+" / "+TimelineDuration.ToString("0.00")+" s   ·   拖动后暂停，点“继续播放”续播";}
-  uiSync=false;stateLabel.text=StateDescription();notice.text=integrationVisible?"完整来源与资源映射保留在 Skill 中。":"保存的 JSON 可用于导入后的同一组件。";
-  foreach(var refresh in parameterUpdates)refresh();
+  uiSync=false;stateLabel.text=StateDescription();notice.text=integrationVisible?"复制后可交给 AI，用于你的新项目。":"保存的 JSON 可用于导入后的同一组件。";
+  foreach(var refresh in parameterUpdates)refresh();if(integrationVisible)UpdatePrompt();copyPromptButton.GetComponentInChildren<Text>().text=Time.unscaledTime<promptCopiedUntil?"已复制，可粘贴到新项目":"复制 Prompt 与当前参数";
  }
  string StateDescription(){
   if(KitClock.Paused)return "已暂停  ·  点击“继续播放”继续观察";
@@ -184,8 +157,15 @@ public sealed partial class Gallery {
   if(!Current.interactive&&elapsed-triggeredAt>=duration)return "本轮演示已完成  ·  点击“再看一次”重新观看";
   return Current.interactive?"等待你的操作  ·  "+Instructions(Current.id):"自动演示中  ·  可暂停、慢放或重新开始";
  }
- string PrimaryCaption(){if(Current.id=="modal"&&component is ModalMotion modal)return modal.IsOpen?"关闭弹窗":"打开弹窗";switch(Current.id){case "reward":return "开始收集";case "number":return "开始滚分";case "hit":return "触发受击";case "charge":return "充能 +25%";default:return Current.interactive?"请直接操作舞台":"再看一次 / 空格";}}
+ string PrimaryCaption(){if(Current.id=="modal"&&component is ModalMotion modal)return modal.IsOpen?"关闭弹窗":"打开弹窗";switch(Current.id){case "reward":return "开始收集";case "scoreimpact":return "加分并变色放大";case "scoregain":return "增加 +120";case "taskarrival":return "收集一个目标";case "moves":return "步数 -1";case "rating":return "播放连击评价";case "leaguejelly":return "更新排行卡";case "themedissolve":return "切换背景";case "number":return "开始滚分";case "hit":return "触发受击";case "charge":return "充能 +25%";default:return Current.interactive?"请直接操作舞台":"再看一次 / 空格";}}
  static string Instructions(string id){switch(id){
+  case "scoreimpact":return "点击加分，观察数字变金色、放大再回落；可调高亮颜色。";
+  case "scoregain":return "快速连点增加，看加分合并后轻微放大、上浮并淡出。";
+  case "taskarrival":return "逐次点击收集，观察卡片反馈；第三次出现完成印章。";
+  case "moves":return "点击减少步数，观察数字所在的视觉层轻微挤压。";
+  case "rating":return "选择评价等级后播放，观察彩色字图与星光爆发。";
+  case "leaguejelly":return "点击更新，观察排行卡片抖动后回到原来的姿态。";
+  case "themedissolve":return "点击切换背景，观察旧背景平滑淡出、新背景露出。";
   case "press":return "移入按钮 → 按住拖动 → 松手，看它回弹。";
   case "switch":return "直接点击舞台里的开关，观察滑块与轨道变化。";
   case "modal":return "点击下方“打开弹窗”，再点面板里的“完成”。";
@@ -205,10 +185,9 @@ public sealed partial class Gallery {
   default:return "自动展示奖章飞入与名次变化；可重新开始观看。";
  }}
  void ResizeInterface(){uiWidth=Screen.width;uiHeight=Screen.height;chrome.localScale=Vector3.one*Mathf.Min(uiWidth/1600f,uiHeight/1000f);ResizeStage();}
- void ResizeStage(){if(viewport==null)return;float height=Current.tall?2340:1250;if(new[]{"press","switch","number","float"}.Contains(Current.id))height=650;if(Current.id=="drag"||Current.id=="activity")height=800;if(Current.id=="hit"||Current.id=="wordmark")height=750;if(component is FrameSequence)height=1000;if(Current.id=="modal")height=1700;if(Current.id=="logo"||Current.id=="loading")height=1650;var view=StageViewport;stage.localScale=Vector3.one*Mathf.Min((view.rect.width-35)/1080f,(view.rect.height-28)/height);}
+ void ResizeStage(){if(viewport==null)return;float height=Current.tall?2340:1250;if(new[]{"press","switch","number","float","scoreimpact","scoregain","moves","taskarrival","rating","leaguejelly"}.Contains(Current.id))height=650;if(Current.id=="drag"||Current.id=="activity")height=800;if(Current.id=="hit"||Current.id=="wordmark")height=750;if(component is FrameSequence)height=1000;if(Current.id=="modal")height=1700;if(Current.id=="logo"||Current.id=="loading")height=1650;var view=StageViewport;stage.localScale=Vector3.one*Mathf.Min((view.rect.width-35)/1080f,(view.rect.height-28)/height);}
 
  void ResetCurrentParameters(){if(component==null||!defaults.TryGetValue(Current.id,out var preset))return;preset.Apply(component);retained[Current.id]=preset;Replay();Report("已恢复本项默认参数。");}
- static string StatusName(string value){switch(value){case "source-route-reviewed":return "已核对来源入口";case "requires-route-review":return "待核对当前入口";case "test-fixture":return "测试 / 预览记录";case "non-animation":return "业务 / 静态绘制";case "legacy-route-disabled":return "旧入口已停用";case "mixed-physics-presentation-review":return "物理与表现待拆分";default:return "来源记录 · "+value;}}
 
  // Parameter controls use curated names/ranges and edit only public component settings.
  void RebuildParameters(){
@@ -222,6 +201,10 @@ public sealed partial class Gallery {
     var slider=Range(row,0,42,252,25,spec.min,spec.max,get(),v=>{set(v);input.SetTextWithoutNotify(get().ToString(integer?"0":"0.###",CultureInfo.InvariantCulture));});
     input.SetTextWithoutNotify(get().ToString(integer?"0":"0.###",CultureInfo.InvariantCulture));input.onEndEdit.AddListener(value=>{if(float.TryParse(value,NumberStyles.Float,CultureInfo.InvariantCulture,out float n)&&!float.IsNaN(n)&&!float.IsInfinity(n))set(n);slider.SetValueWithoutNotify(get());input.SetTextWithoutNotify(get().ToString(integer?"0":"0.###",CultureInfo.InvariantCulture));});
     parameterUpdates.Add(()=>{if(target!=null&&!input.isFocused){slider.SetValueWithoutNotify(get());input.SetTextWithoutNotify(get().ToString(integer?"0":"0.###",CultureInfo.InvariantCulture));}});y+=83;
+   }else if(field.FieldType==typeof(Color)){
+    Label(parameterContent,field.Name=="Highlight"?"计分高亮色 · RGBA":"颜色 · RGBA",0,y,322,29,18);
+    var input=TextInput(parameterContent,"#RRGGBBAA",0,y+34,323,36,null,false);input.SetTextWithoutNotify("#"+ColorUtility.ToHtmlStringRGBA((Color)field.GetValue(target)));
+    input.onEndEdit.AddListener(value=>{if(target!=null&&ColorUtility.TryParseHtmlString(value,out var color))field.SetValue(target,color);if(target!=null)input.SetTextWithoutNotify("#"+ColorUtility.ToHtmlStringRGBA((Color)field.GetValue(target)));});y+=86;
    }else if(field.FieldType==typeof(bool)){
     var toggle=Check(parameterContent,ParameterName(field.Name),1,y+4,321,v=>{if(target!=null)field.SetValue(target,v);});toggle.SetIsOnWithoutNotify((bool)field.GetValue(target));y+=47;
    }else if(field.FieldType.IsEnum){
@@ -232,7 +215,7 @@ public sealed partial class Gallery {
   }
   bool any=y>0;parameterContent.sizeDelta=new Vector2(329,Mathf.Max(120,y));resetButton.interactable=saveButton.interactable=loadButton.interactable=any;
   parameterHint.text=any?"滑条实时调整，也可输入精确数值。再次触发比较效果。":"此演出保留项目固定编排。可用暂停、慢速和重新开始观察。";
-  if(!any)Label(parameterContent,"原始节奏已保留\n\n打开“接入说明”可查看触发方式、对象绑定与源文件。",2,8,319,190,20,Muted);
+  if(!any)Label(parameterContent,"原始节奏已保留\n\n打开“动画 Prompt”可复制设计要求和关键参数。",2,8,319,190,20,Muted);
  }
  struct ParameterSpec{public string title,unit;public float min,max;public ParameterSpec(string t,string u,float a,float b){title=t;unit=u;min=a;max=b;}}
  static string ParameterName(string name){switch(name){case "Loop":return "循环播放";case "Victory":return "使用胜利猫帧";case "Kind":return "轨迹类型";default:return name;}}
@@ -248,6 +231,15 @@ public sealed partial class Gallery {
   case "CloseDuration":return new ParameterSpec("关闭时长","秒",.02f,2);
   case "OpenScale":return new ParameterSpec("打开起始比例","倍",.4f,1);
   case "CloseScale":return new ParameterSpec("关闭结束比例","倍",.4f,1);
+  case "duration":return new ParameterSpec("果冻抖动时长","秒",.05f,3);
+  case "MergeDelay":return new ParameterSpec("加分合并等待","秒",0,.5f);
+  case "FadeIn":return new ParameterSpec("加分淡入","秒",.01f,.5f);
+  case "Rise":return new ParameterSpec("上浮距离","单位",0,150);
+  case "Tier":return new ParameterSpec("评价等级 · 0—3","级",0,3);
+  case "IntroDuration":return new ParameterSpec("入场时长","秒",.05f,2);
+  case "PulseDuration":return new ParameterSpec("到达脉冲时长","秒",.05f,2);
+  case "StampDuration":return new ParameterSpec("完成盖章时长","秒",.05f,2);
+  case "RootAmplitude":case "IconAmplitude":case "PadAmplitude":return new ParameterSpec(field=="RootAmplitude"?"卡片挤压幅度":field=="IconAmplitude"?"图标挤压幅度":"底垫弹性幅度","倍",0,.5f);
   case "Duration":return new ParameterSpec("播放时长","秒",.05f,3);
   case "Delay":return new ParameterSpec("触发延迟","秒",0,2);
   case "From":return new ParameterSpec("起始数值","分",0,100000);

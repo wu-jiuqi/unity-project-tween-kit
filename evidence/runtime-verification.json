@@ -1,6 +1,6 @@
 {
     "unityVersion": "6000.0.26f1",
-    "applicationVersion": "0.2.0",
+    "applicationVersion": "0.3.0",
     "platform": "WindowsPlayer",
     "checks": [
         {
@@ -232,6 +232,90 @@
             "passed": true
         },
         {
+            "name": "scoreimpact: component exists",
+            "passed": true
+        },
+        {
+            "name": "scoreimpact: pause clock",
+            "passed": true
+        },
+        {
+            "name": "scoreimpact: pause pose",
+            "passed": true
+        },
+        {
+            "name": "scoregain: component exists",
+            "passed": true
+        },
+        {
+            "name": "scoregain: pause clock",
+            "passed": true
+        },
+        {
+            "name": "scoregain: pause pose",
+            "passed": true
+        },
+        {
+            "name": "taskarrival: component exists",
+            "passed": true
+        },
+        {
+            "name": "taskarrival: pause clock",
+            "passed": true
+        },
+        {
+            "name": "taskarrival: pause pose",
+            "passed": true
+        },
+        {
+            "name": "moves: component exists",
+            "passed": true
+        },
+        {
+            "name": "moves: pause clock",
+            "passed": true
+        },
+        {
+            "name": "moves: pause pose",
+            "passed": true
+        },
+        {
+            "name": "rating: component exists",
+            "passed": true
+        },
+        {
+            "name": "rating: pause clock",
+            "passed": true
+        },
+        {
+            "name": "rating: pause pose",
+            "passed": true
+        },
+        {
+            "name": "leaguejelly: component exists",
+            "passed": true
+        },
+        {
+            "name": "leaguejelly: pause clock",
+            "passed": true
+        },
+        {
+            "name": "leaguejelly: pause pose",
+            "passed": true
+        },
+        {
+            "name": "themedissolve: component exists",
+            "passed": true
+        },
+        {
+            "name": "themedissolve: pause clock",
+            "passed": true
+        },
+        {
+            "name": "themedissolve: pause pose",
+            "passed": true
+        },
+        {
             "name": "press deforms only visual",
             "passed": true
         },
@@ -360,11 +444,7 @@
             "passed": true
         },
         {
-            "name": "source browser hides live demonstration",
-            "passed": true
-        },
-        {
-            "name": "return from source browser rebuilds experience",
+            "name": "prompt mode retains live demonstration",
             "passed": true
         },
         {
@@ -412,11 +492,219 @@
             "passed": true
         },
         {
+            "name": "score arrival peaks at original gold and 1.2 scale",
+            "passed": true
+        },
+        {
+            "name": "score arrival returns exactly to original pose and color",
+            "passed": true
+        },
+        {
+            "name": "rapid score arrivals settle without accumulated scale",
+            "passed": true
+        },
+        {
+            "name": "color preset round trip preserves RGBA",
+            "passed": true
+        },
+        {
+            "name": "prompt uses current duration and color",
+            "passed": true
+        },
+        {
+            "name": "copy prompt exports complete live settings",
+            "passed": true
+        },
+        {
+            "name": "disabling score arrival restores its target",
+            "passed": true
+        },
+        {
+            "name": "score gain waits for merge window",
+            "passed": true
+        },
+        {
+            "name": "score gain displays the merged amount once",
+            "passed": true
+        },
+        {
+            "name": "score gain pauses without drift",
+            "passed": true
+        },
+        {
+            "name": "score gain fades completely",
+            "passed": true
+        },
+        {
+            "name": "stopped score gain clears deferred inputs",
+            "passed": true
+        },
+        {
+            "name": "task arrival deforms visual and retains incomplete state",
+            "passed": true
+        },
+        {
+            "name": "completed task displays settled stamp",
+            "passed": true
+        },
+        {
+            "name": "task stop retains host completion",
+            "passed": true
+        },
+        {
+            "name": "moves uses opposing axis squash",
+            "passed": true
+        },
+        {
+            "name": "disabled moves returns to rest",
+            "passed": true
+        },
+        {
+            "name": "highest rating shows original art and thirteen sparks",
+            "passed": true
+        },
+        {
+            "name": "disabled rating hides presentation",
+            "passed": true
+        },
+        {
+            "name": "league jelly deforms only visual child",
+            "passed": true
+        },
+        {
+            "name": "league repeated jelly returns to rest",
+            "passed": true
+        },
+        {
+            "name": "theme dissolve midpoint keeps both backgrounds",
+            "passed": true
+        },
+        {
+            "name": "theme instant exposes the same new background",
+            "passed": true
+        },
+        {
+            "name": "theme normal exposes the same new background",
+            "passed": true
+        },
+        {
+            "name": "theme stop restores old layer",
+            "passed": true
+        },
+        {
+            "name": "press: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "switch: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "modal: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "reward: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "number: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "logo: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "wordmark: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "loading: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "float: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "drag: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "activity: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "hit: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "goal: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "charge: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "victorycat: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "failurecat: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "victory: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "failure: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "medal: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "scoreimpact: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "scoregain: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "taskarrival: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "moves: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "rating: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "leaguejelly: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "themedissolve: complete reusable prompt without local source navigation",
+            "passed": true
+        },
+        {
+            "name": "gallery removes source-navigation interface",
+            "passed": true
+        },
+        {
             "name": "no runtime errors",
             "passed": true
         }
     ],
     "errors": [],
-    "passed": 103,
+    "passed": 175,
     "failed": 0
 }

@@ -1335,9 +1335,9 @@
     "id": "ui-battlehudsummary-battlehudsummary",
     "class": "BattleHUDSummary",
     "source": "Assets/Scripts/UI/BattleHUDSummary.cs",
-    "status": "requires-route-review",
-    "delivery": "source-evidence-only",
-    "component": null,
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "ScoreImpact",
     "recipe": "references/recipes/ui-battlehudsummary-battlehudsummary.md"
   },
   {
@@ -1398,27 +1398,27 @@
     "id": "ui-chaincollectionhud-chaincollectionhud",
     "class": "ChainCollectionHUD",
     "source": "Assets/Scripts/UI/ChainCollectionHUD.cs",
-    "status": "requires-route-review",
-    "delivery": "source-evidence-only",
-    "component": null,
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "MovesFeedback",
     "recipe": "references/recipes/ui-chaincollectionhud-chaincollectionhud.md"
   },
   {
     "id": "ui-chaincollectionhud-chaintaskcard",
     "class": "ChainTaskCard",
     "source": "Assets/Scripts/UI/ChainCollectionHUD.cs",
-    "status": "requires-route-review",
-    "delivery": "source-evidence-only",
-    "component": null,
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "TaskArrival",
     "recipe": "references/recipes/ui-chaincollectionhud-chaintaskcard.md"
   },
   {
     "id": "ui-chainratingview-chainratingview",
     "class": "ChainRatingView",
     "source": "Assets/Scripts/UI/ChainRatingView.cs",
-    "status": "requires-route-review",
-    "delivery": "source-evidence-only",
-    "component": null,
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "CheerBurst",
     "recipe": "references/recipes/ui-chainratingview-chainratingview.md"
   },
   {
@@ -1614,9 +1614,9 @@
     "id": "ui-leaguerankingview-leaguejelly",
     "class": "LeagueJelly",
     "source": "Assets/Scripts/UI/LeagueRankingView.cs",
-    "status": "requires-route-review",
-    "delivery": "source-evidence-only",
-    "component": null,
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "LeagueJelly",
     "recipe": "references/recipes/ui-leaguerankingview-leaguejelly.md"
   },
   {
@@ -1686,9 +1686,9 @@
     "id": "ui-referencechapterview-chapterhomeview",
     "class": "ChapterHomeView",
     "source": "Assets/Scripts/UI/ReferenceChapterView.cs",
-    "status": "requires-route-review",
-    "delivery": "source-evidence-only",
-    "component": null,
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "ThemeDissolve",
     "recipe": "references/recipes/ui-referencechapterview-chapterhomeview.md"
   },
   {
@@ -1713,9 +1713,9 @@
     "id": "ui-scoregainpresentation-scoregainpresentation",
     "class": "ScoreGainPresentation",
     "source": "Assets/Scripts/UI/ScoreGainPresentation.cs",
-    "status": "requires-route-review",
-    "delivery": "source-evidence-only",
-    "component": null,
+    "status": "source-route-reviewed",
+    "delivery": "extracted-component",
+    "component": "ScoreGain",
     "recipe": "references/recipes/ui-scoregainpresentation-scoregainpresentation.md"
   },
   {

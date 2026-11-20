@@ -14,7 +14,6 @@ namespace TweenGallery {
 [DefaultExecutionOrder(-20000)]
 public sealed partial class Gallery:MonoBehaviour {
  [Serializable]public class Entry {public string id,title,category,source,trigger,binding,notes;public bool interactive,timeline,tall;}
- [Serializable]class Archive {public ArchiveEntry[] entries;}[Serializable]class ArchiveEntry {public string id,title,category,status,source,description,animationTypes,galleryEntry;}
  public static readonly Entry[] Entries={
   E("press","按钮按压与拖拽","控件交互","UI/UIBounce.cs","悬停、按住、拖出、松开","Button → ButtonVisual；Target 绑定视觉子层","命中根不移动；拖拽取消点击；禁用与失焦归位。",true),
   E("switch","设置开关","控件交互","UI/SettingsSwitch77.cs","点击轨道切换","ToggleVisual → track / knob；read/write 接宿主","±39 设计单位，0.16 秒 OutCubic；滑动重入先 Kill。",true),
@@ -34,12 +33,19 @@ public sealed partial class Gallery:MonoBehaviour {
   E("failurecat","失败猫非均匀序列帧","配套编排","UI/FailureCatAnimation.cs","进入播放16帧","FrameSequence.Victory=false；Target → Image","各帧时长原样保留，总长2.32秒；可拖动时间轴。",false,true),
   E("victory","胜利结算页面编排","奖励与目标","UI/VictoryPresentation.cs + .Stars.cs","进入自动演出；按钮仅更新本地展示状态","Begin(actionsFactory, level, first, coins, medals)","原光环96帧、爆发16帧、猫、星级与奖励卡；无奖励系统。",false,false,true),
   E("failure","失败结算页面编排","奖励与目标","UI/FailurePresentation.cs","进入自动演出；重试／广告为本地展示回调","Begin(retry, home, watch, canContinue)","原96帧背景、失败猫、逐字标题与按钮入场；不导航、不播广告。",false,false,true),
-  E("medal","联赛奖章与升降名次","奖励与目标","UI/LeagueMotionArt.cs","进入展示奖章飞入与箭头","LeagueMedalPresentation.Show(parent,before,after,medals)","0.55秒入场，保留父级非等比补偿；名次只为显示数据。")
+  E("medal","联赛奖章与升降名次","奖励与目标","UI/LeagueMotionArt.cs","进入展示奖章飞入与箭头","LeagueMedalPresentation.Show(parent,before,after,medals)","0.55秒入场，保留父级非等比补偿；名次只为显示数据。"),
+  E("scoreimpact","分数变色放大计分","文字与数值","UI/BattleHUDSummary.cs","得分星光到达时脉冲","ScoreImpact.Target → TMP；宿主单独更新真实分数","0.25秒正弦脉冲；峰值1.2倍、金色，回到原色与原比例。",true,true),
+  E("scoregain","加分合并与上浮淡出","文字与数值","UI/ScoreGainPresentation.cs","连续增加演示分值；只改变显示","ScoreGain → 数字、视觉容器、CanvasGroup","0.07秒合并窗口；0.65秒上移32单位，0.05秒淡入，6%正弦放大。",true),
+  E("taskarrival","目标到达与完成印章","奖励与目标","UI/ChainCollectionHUD.cs","点击收集，第三次完成","TaskArrival → 固定布局中的卡片视觉、图标、底垫、数字与印章","0.38秒到达脉冲；图标+10%/-8%，底垫指数衰减；0.4秒OutBack盖章。",true),
+  E("moves","剩余步数挤压反馈","文字与数值","UI/ChainCollectionHUD.cs","宿主步数改变时触发","MovesFeedback.Target → 独立步数视觉层","0.5秒OutBack入场；0.3秒正弦挤压±2.5%；不改变业务步数。",true),
+  E("rating","连击评价与星光爆发","奖励与目标","UI/ChainRatingView.cs","宿主判定评级后触发","CheerBurst → 字图、CanvasGroup与13个星光","1.8秒；0.45→1.12→1倍，按评级散开4/7/10/13颗星。",true),
+  E("leaguejelly","排行卡片果冻抖动","控件交互","UI/LeagueRankingView.cs","名次或积分更新时触发","LeagueJelly 挂视觉子层，固定点击根","0.65秒；sin(5πt)×exp(-4t)×(1-t)，横9%/纵12%，旋转2.2度。",true),
+  E("themedissolve","主页背景平滑换景","页面与布局","UI/ReferenceChapterView.cs","点击切换两张原背景","ThemeDissolve.Previous → 旧背景CanvasGroup；新背景在下层","0.8秒SmoothStep淡去旧背景；前景和命中层不跟随透明度。",true,true,true)
  };
  static Entry E(string id,string title,string cat,string source,string trigger,string binding,string notes,bool interactive=false,bool timeline=false,bool tall=false)=>new Entry{id=id,title=title,category=cat,source=source,trigger=trigger,binding=binding,notes=notes,interactive=interactive,timeline=timeline,tall=tall};
  public Entry Current=>Entries[index];public MonoBehaviour CurrentComponent=>component;
  RectTransform canvas,stage;GameObject demo;MonoBehaviour component;Action<bool> play;Action<float> sample;
- int index,filter,typeFilter;bool immediate,archiveMode;float elapsed,timeline;string search="",message="",lastCue="";Vector2 scroll,inspectorScroll;Font guiFont;Archive archive;
+ int index,filter,typeFilter;bool immediate;float elapsed,timeline;string search="",message="",lastCue="";Vector2 scroll,inspectorScroll;Font guiFont;
  readonly string[] categories={"全部","控件交互","页面与布局","文字与数值","奖励与目标","持续表现","场景表现","配套编排"};
  readonly string[] animationTypes={"全部类型","DOTween","协程","数学曲线","弹簧","序列帧","材质"};
  static string TypesFor(string id)=>id=="press"||id=="switch"||id=="modal"?"DOTween":id=="logo"?"DOTween 协程 数学曲线":id=="activity"||id=="drag"?"弹簧 数学曲线":id=="victorycat"||id=="failurecat"?"序列帧":id=="victory"||id=="failure"?"序列帧 数学曲线":id=="charge"?"材质 数学曲线":"数学曲线";
@@ -48,7 +54,7 @@ public sealed partial class Gallery:MonoBehaviour {
   if(Camera.main==null){var camera=new GameObject("Main Camera",typeof(Camera));camera.tag="MainCamera";camera.GetComponent<Camera>().clearFlags=CameraClearFlags.SolidColor;camera.GetComponent<Camera>().backgroundColor=new Color(.98f,.96f,.92f);}
   guiFont=Resources.Load<Font>("Fonts/MaokenZhuyuanTi");var go=new GameObject("Gallery canvas",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));canvas=go.GetComponent<RectTransform>();go.GetComponent<Canvas>().renderMode=RenderMode.ScreenSpaceOverlay;var scaler=go.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ConstantPixelSize;
   if(EventSystem.current==null)new GameObject("EventSystem",typeof(EventSystem),typeof(StandaloneInputModule));
-  stage=UICraft.Root(canvas,"Stage",0,0,1080,2340);var data=Resources.Load<TextAsset>("ProjectTweenKit/archive");if(data!=null)archive=JsonUtility.FromJson<Archive>(data.text);BuildInterface();Select(0);
+  stage=UICraft.Root(canvas,"Stage",0,0,1080,2340);BuildInterface();Select(0);
   if(Environment.GetCommandLineArgs().Contains("--verify-kit"))gameObject.AddComponent<GalleryVerification>();
  }
  void OnCue(string cue){lastCue=cue;}
@@ -57,7 +63,7 @@ public sealed partial class Gallery:MonoBehaviour {
   UpdateInterface();
   if(component is StarChargeView charge)charge.Advance(KitClock.Delta);
  }
- public void Select(int value){archiveMode=false;KitClock.Paused=false;message="";hasTriggered=false;primaryAction=null;if(component!=null)retained[Current.id]=MotionPreset.Capture(component);if(demo!=null){foreach(var borrowed in demo.GetComponentsInChildren<CollectionGoalEntrance>(true))borrowed.Restore();demo.SetActive(false);Destroy(demo);}SoundService.CancelTransient();index=Mathf.Clamp(value,0,Entries.Length-1);elapsed=timeline=0;lastCue="";component=null;play=null;sample=null;
+ public void Select(int value){KitClock.Paused=false;message="";hasTriggered=false;primaryAction=null;if(component!=null)retained[Current.id]=MotionPreset.Capture(component);if(demo!=null){foreach(var borrowed in demo.GetComponentsInChildren<CollectionGoalEntrance>(true))borrowed.Restore();demo.SetActive(false);Destroy(demo);}SoundService.CancelTransient();index=Mathf.Clamp(value,0,Entries.Length-1);elapsed=timeline=0;lastCue="";component=null;play=null;sample=null;
   demo=UICraft.Root(stage,"Example "+Current.id).gameObject;Build((RectTransform)demo.transform);if(component!=null)defaults[Current.id]=MotionPreset.Capture(component);if(component!=null&&retained.TryGetValue(Current.id,out var preset))preset.Apply(component);if(!Current.interactive){play?.Invoke(immediate);hasTriggered=true;triggeredAt=elapsed;}RefreshInterface();
  }
  public void Replay(){Select(index);}
@@ -81,9 +87,10 @@ public sealed partial class Gallery:MonoBehaviour {
   case "victory":{var c=root.gameObject.AddComponent<VictoryPresentation>();component=c;play=_=>c.Begin(()=>{var actions=UICraft.Root(root,"Mock actions");CSettingsArt.Button(actions,"继续","继续（展馆本地）",0,-850,750,170,()=>Report("已体验继续按钮。点击“重新开始”可再次观看结算演出。"));return actions;},12,true,40,2);break;}
   case "failure":{var c=root.gameObject.AddComponent<FailurePresentation>();component=c;play=_=>c.Begin(()=>Report("已体验重试按钮。可重新开始观看本次演出。"),()=>Report("已体验返回按钮。可从左侧选择其他效果。"),()=>Report("已体验继续按钮。这里只展示交互结果。"),true);break;}
   case "medal":{LeagueMedalPresentation.Show(root,12,8,2);component=root.GetComponentInChildren<LeagueMedalPresentation>();break;}
+ default:BuildAdditional(root);break;
  }}
- public void Seek(float seconds){if(!Current.timeline)return;KitClock.Sampling=true;try{Select(index);if(Current.id=="modal"){sample?.Invoke(seconds);}else{play?.Invoke(false);if(component is RewardFlight r)r.Seek(seconds);else if(component is NumberRoll n)n.Seek(seconds);else if(component is JellyHit j)j.Seek(seconds);else if(component is FrameSequence f)f.Seek(seconds);}timeline=seconds;hasTriggered=true;triggeredAt=elapsed-seconds;KitClock.Paused=true;RefreshInterface(false);}finally{KitClock.Sampling=false;}}
- float TimelineDuration=>component is ModalMotion m?m.OpenDuration:component is RewardFlight r?r.Duration:component is NumberRoll n?n.Duration:component is JellyHit j?j.Duration:component is FrameSequence f?f.Duration:0;
+ public void Seek(float seconds){if(!Current.timeline)return;KitClock.Sampling=true;try{Select(index);if(Current.id=="modal"){sample?.Invoke(seconds);}else{play?.Invoke(false);if(component is RewardFlight r)r.Seek(seconds);else if(component is NumberRoll n)n.Seek(seconds);else if(component is JellyHit j)j.Seek(seconds);else if(component is FrameSequence f)f.Seek(seconds);else if(component is ScoreImpact si)si.Seek(seconds);else if(component is ThemeDissolve td){td.Seek(seconds);}}timeline=seconds;hasTriggered=true;triggeredAt=elapsed-seconds;KitClock.Paused=true;RefreshInterface(false);}finally{KitClock.Sampling=false;}}
+ float TimelineDuration=>component is ModalMotion m?m.OpenDuration:component is RewardFlight r?r.Duration:component is NumberRoll n?n.Duration:component is JellyHit j?j.Duration:component is FrameSequence f?f.Duration:component is ScoreImpact si?si.Duration:component is ThemeDissolve td?td.Duration:0;
  string PresetPath=>Path.Combine(Application.persistentDataPath,"presets",Current.id+".json");
  public void SavePreset(){if(component==null)return;try{MotionPreset.Capture(component).Save(PresetPath);Report("参数已保存："+PresetPath);}catch(Exception e){Report("保存失败："+e.Message);}}
  public void LoadPreset(){try{MotionPreset.Load(PresetPath).Apply(component);Report("已载入本项参数，再次触发即可观察。");RefreshInterface();}catch(Exception e){Report("载入失败："+e.Message);}}

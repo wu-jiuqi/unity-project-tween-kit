@@ -55,7 +55,7 @@
 | [PixelPieceArt](recipes/world-pixelpieceart-pixelpieceart.md) | `Assets/Scripts/World/PixelPieceArt.cs` | source-evidence-only |
 | [WorldArt](recipes/world-worldart-worldart.md) | `Assets/Scripts/World/WorldArt.cs` | source-evidence-only |
 
-## requires-route-review · 101
+## requires-route-review · 94
 
 | 条目 | 源文件 | 交付 |
 |---|---|---|
@@ -91,15 +91,11 @@
 | [StreakRewardGlow](recipes/ui-appui-streakreward-streakrewardglow.md) | `Assets/Scripts/UI/AppUI.StreakReward.cs` | source-evidence-only |
 | [StreakRewardPresentation](recipes/ui-appui-streakreward-streakrewardpresentation.md) | `Assets/Scripts/UI/AppUI.StreakReward.cs` | source-evidence-only |
 | [AppUI](recipes/ui-appui-tutorial-appui.md) | `Assets/Scripts/UI/AppUI.Tutorial.cs` | source-evidence-only |
-| [BattleHUDSummary](recipes/ui-battlehudsummary-battlehudsummary.md) | `Assets/Scripts/UI/BattleHUDSummary.cs` | source-evidence-only |
 | [AppUI](recipes/ui-battleinterfacetour-appui.md) | `Assets/Scripts/UI/BattleInterfaceTour.cs` | source-evidence-only |
 | [BattleInterfaceTour](recipes/ui-battleinterfacetour-battleinterfacetour.md) | `Assets/Scripts/UI/BattleInterfaceTour.cs` | source-evidence-only |
 | [BattleScoreMeter](recipes/ui-battlescoremeter-battlescoremeter.md) | `Assets/Scripts/UI/BattleScoreMeter.cs` | source-evidence-only |
 | [BattleAimHint](recipes/ui-battleuiart-battleaimhint.md) | `Assets/Scripts/UI/BattleUIArt.cs` | source-evidence-only |
 | [BossHUD](recipes/ui-bosshud-bosshud.md) | `Assets/Scripts/UI/BossHUD.cs` | source-evidence-only |
-| [ChainCollectionHUD](recipes/ui-chaincollectionhud-chaincollectionhud.md) | `Assets/Scripts/UI/ChainCollectionHUD.cs` | source-evidence-only |
-| [ChainTaskCard](recipes/ui-chaincollectionhud-chaintaskcard.md) | `Assets/Scripts/UI/ChainCollectionHUD.cs` | source-evidence-only |
-| [ChainRatingView](recipes/ui-chainratingview-chainratingview.md) | `Assets/Scripts/UI/ChainRatingView.cs` | source-evidence-only |
 | [ChapterOpening70](recipes/ui-chapteropening70-chapteropening70.md) | `Assets/Scripts/UI/ChapterOpening70.cs` | source-evidence-only |
 | [AppUI](recipes/ui-collectiongoalentrance-appui.md) | `Assets/Scripts/UI/CollectionGoalEntrance.cs` | source-evidence-only |
 | [GoalCelebration](recipes/ui-goalcelebration-goalcelebration.md) | `Assets/Scripts/UI/GoalCelebration.cs` | source-evidence-only |
@@ -111,15 +107,12 @@
 | [JellyRouteRibbon80](recipes/ui-jellyjourneymotion80-jellyrouteribbon80.md) | `Assets/Scripts/UI/JellyJourneyMotion80.cs` | source-evidence-only |
 | [LeagueBannerStatus](recipes/ui-leaguebannerstatus-leaguebannerstatus.md) | `Assets/Scripts/UI/LeagueBannerStatus.cs` | source-evidence-only |
 | [LeagueMatchPresentation](recipes/ui-leaguematchpresentation-leaguematchpresentation.md) | `Assets/Scripts/UI/LeagueMatchPresentation.cs` | source-evidence-only |
-| [LeagueJelly](recipes/ui-leaguerankingview-leaguejelly.md) | `Assets/Scripts/UI/LeagueRankingView.cs` | source-evidence-only |
 | [LeagueRankingView](recipes/ui-leaguerankingview-leaguerankingview.md) | `Assets/Scripts/UI/LeagueRankingView.cs` | source-evidence-only |
 | [LessonCollectionFlight](recipes/ui-lessoncollectionflight-lessoncollectionflight.md) | `Assets/Scripts/UI/LessonCollectionFlight.cs` | source-evidence-only |
 | [AppUI](recipes/ui-openingintroduction-appui.md) | `Assets/Scripts/UI/OpeningIntroduction.cs` | source-evidence-only |
 | [OpeningRuleDemo](recipes/ui-openingintroduction-openingruledemo.md) | `Assets/Scripts/UI/OpeningIntroduction.cs` | source-evidence-only |
 | [PaintingCollectionPresentation](recipes/ui-paintingcollectionpresentation-paintingcollectionpresentation.md) | `Assets/Scripts/UI/PaintingCollectionPresentation.cs` | source-evidence-only |
 | [PlayableTutorialGuide](recipes/ui-playabletutorialguide-playabletutorialguide.md) | `Assets/Scripts/UI/PlayableTutorialGuide.cs` | source-evidence-only |
-| [ChapterHomeView](recipes/ui-referencechapterview-chapterhomeview.md) | `Assets/Scripts/UI/ReferenceChapterView.cs` | source-evidence-only |
-| [ScoreGainPresentation](recipes/ui-scoregainpresentation-scoregainpresentation.md) | `Assets/Scripts/UI/ScoreGainPresentation.cs` | source-evidence-only |
 | [TutorialMotionBoard](recipes/ui-tutorialmotionboard-tutorialmotionboard.md) | `Assets/Scripts/UI/TutorialMotionBoard.cs` | source-evidence-only |
 | [JellyButtonMesh](recipes/ui-uibounce-jellybuttonmesh.md) | `Assets/Scripts/UI/UIBounce.cs` | source-evidence-only |
 | [VictoryFinale](recipes/ui-victoryfinale-victoryfinale.md) | `Assets/Scripts/UI/VictoryFinale.cs` | source-evidence-only |
@@ -161,12 +154,16 @@
 | [StreakImpactPool](recipes/world-streakballart-streakimpactpool.md) | `Assets/Scripts/World/StreakBallArt.cs` | source-evidence-only |
 | [WorldFx](recipes/world-worldart-worldfx.md) | `Assets/Scripts/World/WorldArt.cs` | source-evidence-only |
 
-## source-route-reviewed · 20
+## source-route-reviewed · 27
 
 | 条目 | 源文件 | 交付 |
 |---|---|---|
 | [ActivityJellyMotion](recipes/ui-activityjellymotion-activityjellymotion.md) | `Assets/Scripts/UI/ActivityJellyMotion.cs` | ActivityJellyMotion |
+| [BattleHUDSummary](recipes/ui-battlehudsummary-battlehudsummary.md) | `Assets/Scripts/UI/BattleHUDSummary.cs` | ScoreImpact |
 | [CollectionFlightMotion](recipes/ui-battlejellyart-collectionflightmotion.md) | `Assets/Scripts/UI/BattleJellyArt.cs` | RewardFlight |
+| [ChainCollectionHUD](recipes/ui-chaincollectionhud-chaincollectionhud.md) | `Assets/Scripts/UI/ChainCollectionHUD.cs` | MovesFeedback |
+| [ChainTaskCard](recipes/ui-chaincollectionhud-chaintaskcard.md) | `Assets/Scripts/UI/ChainCollectionHUD.cs` | TaskArrival |
+| [ChainRatingView](recipes/ui-chainratingview-chainratingview.md) | `Assets/Scripts/UI/ChainRatingView.cs` | CheerBurst |
 | [CollectionGoalEntrance](recipes/ui-collectiongoalentrance-collectiongoalentrance.md) | `Assets/Scripts/UI/CollectionGoalEntrance.cs` | CollectionGoalEntrance |
 | [EncouragementDrag](recipes/ui-encouragementdrag-encouragementdrag.md) | `Assets/Scripts/UI/EncouragementDrag.cs` | EncouragementDrag |
 | [FailureCatAnimation](recipes/ui-failurecatanimation-failurecatanimation.md) | `Assets/Scripts/UI/FailureCatAnimation.cs` | FrameSequence |
@@ -175,8 +172,11 @@
 | [JellyGlyph](recipes/ui-jellylogointro-jellyglyph.md) | `Assets/Scripts/UI/JellyLogoIntro.cs` | JellyGlyph |
 | [JellyLogoIntro](recipes/ui-jellylogointro-jellylogointro.md) | `Assets/Scripts/UI/JellyLogoIntro.cs` | JellyLogoIntro |
 | [LeagueMedalPresentation](recipes/ui-leaguemotionart-leaguemedalpresentation.md) | `Assets/Scripts/UI/LeagueMotionArt.cs` | LeagueMedalPresentation |
+| [LeagueJelly](recipes/ui-leaguerankingview-leaguejelly.md) | `Assets/Scripts/UI/LeagueRankingView.cs` | LeagueJelly |
 | [LoadingPresentation](recipes/ui-loadingpresentation-loadingpresentation.md) | `Assets/Scripts/UI/LoadingPresentation.cs` | LoadingPresentation |
+| [ChapterHomeView](recipes/ui-referencechapterview-chapterhomeview.md) | `Assets/Scripts/UI/ReferenceChapterView.cs` | ThemeDissolve |
 | [ResultAudioTimeline](recipes/ui-resultaudiotimeline-resultaudiotimeline.md) | `Assets/Scripts/UI/ResultAudioTimeline.cs` | ResultAudioTimeline |
+| [ScoreGainPresentation](recipes/ui-scoregainpresentation-scoregainpresentation.md) | `Assets/Scripts/UI/ScoreGainPresentation.cs` | ScoreGain |
 | [SettingsSwitch77](recipes/ui-settingsswitch77-settingsswitch77.md) | `Assets/Scripts/UI/SettingsSwitch77.cs` | SettingsSwitch77 |
 | [StarChargeView](recipes/ui-starchargeview-starchargeview.md) | `Assets/Scripts/UI/StarChargeView.cs` | StarChargeView |
 | [UIBounce](recipes/ui-uibounce-uibounce.md) | `Assets/Scripts/UI/UIBounce.cs` | UIBounce |

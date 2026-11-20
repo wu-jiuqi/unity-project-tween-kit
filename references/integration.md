@@ -41,9 +41,23 @@
 
 `RewardFlight` 将原世界单位曲线放在目标父级坐标中：`UnitsPerWorldUnit` 是源世界单位到宿主设计单位的换算，默认1；展馆100。目标位置由世界坐标转入同一个父级。Source中的`.6秒 / SmoothStep / 控制点.22 / 入场脉冲 / 缩小 / 摇摆`均保留。分数组件只提取`VictoryFinale`的单个到达段，完整多弹投掷、计分分配与交接仍属于待提取的宿主编排。
 
+## 本轮新增效果
+
+| 设计 | 绑定与触发 | 关键参数与清理 |
+|---|---|---|
+| 分数变色放大 | `ScoreImpact.Target`绑定TMP；更新显示分数后`Play()` | Duration=.25秒，Amplitude=.2；Highlight为RGBA色。`StopAndRestore()`恢复原色、原比例。可直接拖入`ScoreImpact.prefab` |
+| 加分合并上浮 | `ScoreGain.Text/Target/Group`绑定数字、视觉容器、CanvasGroup；`Add(amount)` | MergeDelay=.07秒，Duration=.65秒，Rise=32；`StopAndRestore()`隐藏并清空待合并量。可拖入`ScoreGain.prefab` |
+| 目标到达/印章 | `TaskArrival.Root/Icon/Pad/Stamp/Count`；宿主更新数值后`Arrive(completed)` | .38秒到达、.4秒盖章；停止归位并保留宿主完成状态 |
+| 步数挤压 | `MovesFeedback.Target`绑定独立视觉层；数值改变后`Play()` | .5秒入场、.3秒脉冲、.025幅度；停止归位 |
+| 评价爆发 | `CheerBurst.Art/Group/Sparks/SparkImages`，最多13个星；设置Tier后`Play()` | Duration=1.8秒，Tier=0—3；禁用/停止隐藏。原字图随包 |
+| 排行卡抖动 | `LeagueJelly`挂视觉层；`Play(wait)` | duration=.65秒，wait以秒计；重入、禁用恢复原比例和旋转 |
+| 背景换景 | 新背景在下层，旧背景CanvasGroup绑定`ThemeDissolve.Previous`；`Play()` | Duration=.8秒；`StopAndRestore()`显示旧图；回收和导航归宿主 |
+
+这7项均由同一份随包组件驱动展馆。加分、任务进度与剩余步数只是输入；组件不修改业务状态。[对应Prompt与参数写法](animation-prompts.md)。
+
 ## 参数文件
 
-展馆文件在 `Application.persistentDataPath/presets/<条目>.json`。参数JSON包含schemaVersion、组件完整类型名及公开数值/布尔字段；对象引用由接收工程绑定。载入会拒绝其他类型与未知字段，先验证再整体应用。`PresetLoader`应绑定实际生成后的组件；组合预制体可在`ExamplePrefab.Build()`后调用`MotionPreset.Load(path).Apply(example.Component)`。
+展馆文件在 `Application.persistentDataPath/presets/<条目>.json`。参数JSON包含schemaVersion、组件完整类型名及公开数值/布尔/向量/RGBA颜色字段；对象引用由接收工程绑定。载入会拒绝其他类型与未知字段，先验证再整体应用。`PresetLoader`应绑定实际生成后的组件；组合预制体可在`ExamplePrefab.Build()`后调用`MotionPreset.Load(path).Apply(example.Component)`。
 
 ## 依赖与差异
 

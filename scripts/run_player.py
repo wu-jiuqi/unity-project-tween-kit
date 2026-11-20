@@ -7,7 +7,7 @@ def main():
     before={p.relative_to(folder).as_posix():sha(p) for p in sorted(folder.rglob('*')) if p.is_file()}
     out=KIT/'work/evidence';out.mkdir(parents=True,exist_ok=True);start=time.time()
     startup=subprocess.STARTUPINFO();startup.dwFlags|=subprocess.STARTF_USESHOWWINDOW;startup.wShowWindow=0
-    result=subprocess.run([str(binary),'-screen-fullscreen','0','-screen-width','1600','-screen-height','1000','--verify-kit','--evidence',str(out),'-logFile',str(KIT/'work/player.log')],startupinfo=startup)
+    result=subprocess.run([str(binary),'-screen-fullscreen','0','-screen-width','1600','-screen-height','1000','--verify-kit','--evidence',str(out),'-logFile',str(KIT/'work/player.log')],startupinfo=startup,timeout=180)
     path=out/'runtime-verification.json'
     if not path.exists() or path.stat().st_mtime<start:raise RuntimeError('Runtime verification did not produce a fresh report')
     report=json.loads(path.read_text(encoding='utf-8-sig'));after={p.relative_to(folder).as_posix():sha(p) for p in sorted(folder.rglob('*')) if p.is_file()}

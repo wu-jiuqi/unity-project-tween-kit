@@ -24,3 +24,18 @@
 钱包`CountWallet`、金币`FlyCoins/FlyCoin`、烟花`Fireworks`等在当前源码中没有确认到正常页面入口，留在旧逻辑证据中。默认交付的奖励/数值示例来自当前收集与结算，不使用这些旧方法。
 
 展馆的开关、奖励、结算按钮只更改本地演示状态；真实存档、计分、排名与导航继续由接收宿主管理。展馆不是完整游戏的替代实现。
+
+
+## 0.3.0 补入设计
+
+| 组件 | 原实现 | 提取边界与差异 |
+|---|---|---|
+| ScoreImpact | BattleHUDSummary.Update / ShowVictoryScore | 保留.25秒正弦、.2放大及金色插值；目标和时间适配，原色/比例从绑定对象捕获；增加精确归位 |
+| ScoreGain | ScoreGainPresentation.Changed / Update | 保留.07秒重新计时合并、.65秒上移32及alpha/scale原式；StateChanged改显式Add；移除GameSession，禁用清空待播值 |
+| TaskArrival | ChainTaskCard.Update | 保留卡片入场、到达脉冲、底垫衰减和盖章；拆除目标读取，宿主传完成状态；距离/比例相对宿主初始值 |
+| MovesFeedback | ChainCollectionHUD.Update | 只提取步数视觉入场/挤压，保留.5/.3秒与.025；不带目标卡工厂、低步数声音或会话 |
+| CheerBurst | ChainRatingView.Update | 保留评级字图、13星分布和1.8秒节奏；评级序号检测改显式Play；不带评级计算和声音 |
+| LeagueJelly | LeagueRankingView.LeagueJelly | 原类提取，Time换KitClock；原duration/延迟/归位规则不变。增加首次Play前等待，避免脱离原工厂立即Play的假设时把未捕获的初始比例写成零 |
+| ThemeDissolve | ChapterHomeView.Transition | 只提取.8秒SmoothStep透明度；背景创建/排序/回收及换章由宿主完成，增加采样和停止 |
+
+新设计默认值和原方程不以展馆放大显示比例代替。PresetIO额外支持Color RGBA（同schema扩展字段w，旧数值预设仍可读取）；对象引用不写进参数文件。所有新增原素材与导入设置纳入resource-map。

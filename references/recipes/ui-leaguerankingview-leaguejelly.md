@@ -1,12 +1,15 @@
 # LeagueJelly · LeagueRankingView
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/LeagueRankingView.cs`
 文件 SHA-256：`e02ec449c21cb64354b47245aee1f660e2a05b161062dc9e25a30388c720d753`
 [原始源码快照](../source/Assets/Scripts/UI/LeagueRankingView.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+用在哪里：LeagueRankingView.Refresh / LeaguePodiumView.Build → LeagueJelly.Play
+触发操作：首屏错峰或名次/积分更新时卡片果冻抖动
+导入组件：`ProjectTweenKit.LeagueJelly`；展馆 ID：`leaguejelly`。
+复用形式：独立组件。绑定、调用与停止见 [接入](../integration.md) / [生命周期](../lifecycle.md)。
 
 ## 源方法、参数与曲线
 

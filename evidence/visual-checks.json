@@ -1,31 +1,42 @@
 {
   "method": "computer-use sky native bounded-window capture, after source and runtime validation",
-  "testedPlayerRunSha256": "d02184ed655638a3abb1547729e3fbb01e0dcc339196c0c4c69b0a891a29ebed",
+  "testedPlayerRunSha256": "0f085cfd1459c2d573a42450a63f49eafb0c8bd37b30939343b76b32b6700d17",
   "images": [
     {
-      "path": "evidence/visual/modal-closed.png",
-      "sha256": "0fa6b029a8324f42179425a1abf819da38bb8d4f976d70e05b986184ddf4f85a"
-    },
-    {
-      "path": "evidence/visual/modal-open.png",
-      "sha256": "58cad94a217901777fe0bb727a03944f532324b4adebc23ac092108265e5ff30"
-    },
-    {
       "path": "evidence/visual/overview.png",
-      "sha256": "9ac1bb5622416b1933ebf15ffb23e7aefd8cb11a6a3ca0ac7e2d94d70db57ba6"
+      "sha256": "ceac84ae312c6af7f102b04096bad775f33c4917c7311849bffbdf88af7deb0d"
+    },
+    {
+      "path": "evidence/visual/prompt-copied.png",
+      "sha256": "ef341bc15ce80a9bf3fe00da382f54454d83c8537a080741cb4fa88be983ae55"
+    },
+    {
+      "path": "evidence/visual/score-complete.png",
+      "sha256": "e88439ddb5680eb6768df012b5ad6bd38e03f73e33858a15586e9030b37daceb"
+    },
+    {
+      "path": "evidence/visual/score-peak.png",
+      "sha256": "d0762fe9be88d5e21dc653117b8d9d26297e0a32f551513565e7ce5d4e7f9d40"
+    },
+    {
+      "path": "evidence/visual/score-prompt.png",
+      "sha256": "a52f70ed4d81b88784b120ca72d0012d22133cc85e46fa5dba48297adda402a0"
     }
   ],
   "observed": [
     "Final native UGUI three-column layout, original C artwork and Chinese labels render in the visible Windows gallery.",
     "Operation guide, stage, main action, playback controls and parameter tab have distinct fixed locations.",
-    "The final modal opens from the main action and closes with its real Done button.",
+    "Search typed through native input filters to the newly delivered score color/scale effect.",
+    "The score timeline at its midpoint shows the enlarged gold number; a real main-action click increases the demonstration from 12,000 to 12,120 and restores its original color and scale.",
+    "The Animation Prompt tab shows the matching design, trigger, baseline parameters, current parameters with explicit precedence, and cleanup rules, without source navigation.",
+    "The copy button gives visible success feedback even while the animation is paused.",
     "Visible scrollbar handles remain inside their tracks."
   ],
-  "automatedEvidence": "runtime-verification.json covers search, archive return, parameter IO, focus-view lifecycle and input-focus rules; these are not all claimed as native-input checks.",
+  "automatedEvidence": "runtime-verification.json covers all 26 prompts, current-parameter clipboard contents, RGBA round trip, new effect curves/cleanup/reentry, parameter IO, focus-view lifecycle and input-focus rules; these are not all claimed as native-input checks.",
   "limits": [
     "Native checks sample representative entries, not all workflows or original game call sites.",
-    "Final precise numeric keyboard-entry verification was interrupted: the window became minimized and recovery repeatedly reported user input detected. No native numeric-entry pass is claimed.",
-    "Earlier v0.1.0 screenshots are preserved separately as historical evidence and are not final-build captures.",
+    "Final-build native checks exercise search text, timeline, main-action input, prompt navigation and copy acknowledgment; they do not cover every numeric field.",
+    "Earlier v0.1.0 and v0.2.0 screenshots are historical evidence and are not final-build captures.",
     "Hidden-window black screenshots are excluded."
   ]
 }

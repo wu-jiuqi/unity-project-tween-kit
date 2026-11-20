@@ -1,12 +1,15 @@
 # ChainRatingView · ChainRatingView
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/ChainRatingView.cs`
 文件 SHA-256：`d68c815cd8652a35e0437702be0183314ec650f59109589c275d8aa8778734e0`
 [原始源码快照](../source/Assets/Scripts/UI/ChainRatingView.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+用在哪里：ChainCollectionHUD.Initialize → ChainRatingView.Initialize；Update观察ChainRatingSerial
+触发操作：连击评级变动后字图放大与星光爆发
+导入组件：`ProjectTweenKit.CheerBurst`；展馆 ID：`rating`。
+复用形式：组合预制体。绑定、调用与停止见 [接入](../integration.md) / [生命周期](../lifecycle.md)。
 
 ## 源方法、参数与曲线
 

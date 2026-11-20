@@ -1,12 +1,15 @@
 # ChainTaskCard · ChainCollectionHUD
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/ChainCollectionHUD.cs`
 文件 SHA-256：`2953ce988acbd87980173e979b2d0ce9f600bd19771161e61af2df2fbbc56e40`
 [原始源码快照](../source/Assets/Scripts/UI/ChainCollectionHUD.cs.txt)
 
-此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
+用在哪里：ChainCollectionHUD.Initialize → AddCard → ChainTaskCard.Initialize / Refresh
+触发操作：实际收集值改变触发目标到达挤压；完成显示印章
+导入组件：`ProjectTweenKit.TaskArrival`；展馆 ID：`taskarrival`。
+复用形式：独立组件。绑定、调用与停止见 [接入](../integration.md) / [生命周期](../lifecycle.md)。
 
 ## 源方法、参数与曲线
 

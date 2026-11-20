@@ -6,7 +6,8 @@
     "Plugins/DOTween/Modules/DOTweenModulePhysics2D.cs": "7f3dd38cb0ac650de48028ac3d2600c4ea3afb9452a4ccccbd1d6fbf5b7deb82",
     "Plugins/DOTween/Modules/DOTweenModuleUtils.cs": "6a21fe7335a3626180e5c5342d8a19946de647ba3666fdfc4713c84fdfcc4609",
     "Runtime/BattleJellyArt.cs": "2cef697f8d7bf0e1bf30a11acd1826f8149c887fe65a706c6c02370bd642d6c4",
-    "Runtime/ExamplePrefab.cs": "f76cb2d2c83882ec27b1ba7babfe61c7aaf6fd2acacc861a6ff2c15e44a1f33f",
+    "Runtime/CheerBurst.cs": "2134c88a6be98d26cd7a50b0ff12bd4a9ac0ec3a2b813aa6b0debcdf6532ad5f",
+    "Runtime/ExamplePrefab.cs": "b0f784d225d2c827a14472def5259219f0164b1641a62fc1223a763456c101d5",
     "Runtime/Extracted/ActivityJellyMotion.cs": "e5e7d73942062b315a4711c6bb3da4235a8ab8948243b78840377e9117d6edb5",
     "Runtime/Extracted/AlphabetTweenExtensions.cs": "462af643230e8e245e5bca3f496333a158e8e9583b0de263ab8905e8114845d6",
     "Runtime/Extracted/CollectionGoalEntrance.cs": "af18547884cfb7ae54148390d9712774ccbbefab0fdb228077848fb1b6e418ea",
@@ -37,17 +38,25 @@
     "Runtime/FrameSequence.cs": "066ede52ab232d0bf318a48d55d56dc8fc34e93540fe38c0741480605b861635",
     "Runtime/JellyHit.cs": "7770e773c815df7937aa36cab51e3f2da26bd81356d4746bab8d5ff20244be51",
     "Runtime/KitClock.cs": "9305395ce7c38ad991a7cd782c53b715d76d5b6ac9684d934f2a3dbba3e16d12",
+    "Runtime/LeagueJelly.cs": "1046b47c3fe58b22fd48de8bea6ff2e453807430115b1f7be51595a00a7c8f83",
     "Runtime/ModalMotion.cs": "807ef9c9460721da36b9273ae1adf0974f47a8b4ac415df2d7ffaba23ace59c6",
+    "Runtime/MovesFeedback.cs": "3b734873e84e6098d5f03affb9c0dab690b71ed12d9e7f0828503ff1f53e60b4",
     "Runtime/NumberRoll.cs": "ab0ff5ce14a779d5eff97d5079b4895d616c3c5c468e2324a8a065e96b4cac58",
-    "Runtime/PresetIO.cs": "c63d2ded865b3ee2732eaa43f13848fe39d2e60be782e68eec1a755deb85547f",
+    "Runtime/PresetIO.cs": "ec4b7ecef4511d04e3c11cb54f9c15b7a28d983332c8bee067492022deb8ae8d",
     "Runtime/PresetLoader.cs": "ca483d77ad7d97dc805ac44c6bd2671188f0440152ab0257610032f13da7e88f",
     "Runtime/RewardFlight.cs": "7e72c71e319d38379e3155a0d81e07deb00be04cd4e9302c37c6d19a89b34438",
+    "Runtime/ScoreGain.cs": "f52418bc501f0ca583b94c6cc3e3179388236c16a2c6f89532222f3a0d3475c9",
+    "Runtime/ScoreImpact.cs": "09b49111cf7c4d51c9506c308b4ae71664a918cd0ce1051873a061b0f9002cda",
     "Runtime/SoundService.cs": "8aefc32b3979f3e15b09bd3ec8d42e12dba1954460e262142d967272d411ac03",
+    "Runtime/TaskArrival.cs": "c6968cd7bd76aabf4eb368a0d8775bb17c870e661eac7d935236b34553a7be42",
+    "Runtime/ThemeDissolve.cs": "8176fcbb490cf6bcfe774153803bd2c8f9fd93075b474f848cd6d90c96003fc4",
     "Runtime/UIFloat.cs": "f9c40c05468706d7f0d3e4aaf5ef474018501fdc0e8f7822f054ff0cb8f16263"
   },
   "gallery": {
-    "assets/sample-project/Assets/Gallery/Gallery.cs": "67344a8f5d32e830cc729e6a80e86c5d53526514e526ceb7cbbd3306fdbc9316",
-    "assets/sample-project/Assets/Gallery/GalleryUI.cs": "cb12916438e5ba75188da19973a6ccc1aa03a7e022e641f54e4ee9960045ad38",
-    "assets/sample-project/Assets/Gallery/GalleryVerification.cs": "cd73df16fdcd0fe9a61d106379b1e682bb585d11f647d412b08dcabb44c2b777"
+    "assets/sample-project/Assets/Gallery/Gallery.cs": "776a956e96510b547f3e47658a83ad0dbef43b72c9d2625182b9dca9d59fd7ec",
+    "assets/sample-project/Assets/Gallery/GalleryAdditional.cs": "712598797c892043fbc5d3f721e48ea9b58a27e083a5bba9d0609e5ddbb67928",
+    "assets/sample-project/Assets/Gallery/GalleryPrompts.cs": "83836502afb1f2cedc030b5cd01a36443166772bb4ed72424e1a8139935332da",
+    "assets/sample-project/Assets/Gallery/GalleryUI.cs": "ccdeac797e758bb34018726ece2293165bd9c18f1ff3283a0b8dac80d5d68cb2",
+    "assets/sample-project/Assets/Gallery/GalleryVerification.cs": "6f931474f643b3ea08c92ac5079753ebe950c595320843d70fba4bcbd9f71e2e"
   }
 }
