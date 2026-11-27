@@ -4,51 +4,28 @@ using UnityEngine;
 
 namespace BounceGarden {
 public static class ChainPowerRules {
- public const int LinkCount=5, NestHealth=30, ChildHealth=5;
+ 
  public static bool IsNest(BrickSpawn d)=>d.reveal=="chain-nest";
- public static float HalfSize(BrickBody b)=>IsNest(b.Definition)?b.Definition.size.y*.5f:.38f;
+ 
 }
 public sealed class ChainBond {
- public readonly List<BrickBody> Members=new List<BrickBody>();public Transform View;public int Depth;
+ public readonly List<BrickBody> Members=new List<BrickBody>();
 }
 public sealed partial class GameSession {
  public readonly List<ChainBond> ChainBonds=new List<ChainBond>();
  public int ChainNestSplits {get;private set;}
  int chainBondSerial;
  void ClearChainPowers(){ClearChainPowerPreview();ChainBonds.Clear();ChainNestSplits=chainBondSerial=0;}
- public BrickBody SpawnChainNest(Vector2 position,int[] contents=null,bool armored=true,bool rearLocked=false){
-  CreateBrick(new BrickSpawn{position=position,size=Vector2.one*(CollectionLevels.Pitch*2-.06f),hp=ChainPowerRules.NestHealth,kind=rearLocked?BrickKind.RearWeak:armored?BrickKind.Armor:BrickKind.Normal,juiceGroup=0,reveal="chain-nest",colorIndex=3,chainContents=(contents??new[]{1,0,2,0}).Take(4).Select(k=>Mathf.Clamp(k,0,2)).ToArray()},0);
-  return CollectionBricks.Last();
- }
- void SplitChainNest(BrickBody nest){
-  SoundService.Play("large_box_split");ChainNestSplits++;Vector2 p=nest.GetComponent<Rigidbody2D>().position;float half=CollectionLevels.Pitch*.5f;
-  int i=0;for(int y=-1;y<=1;y+=2)for(int x=-1;x<=1;x+=2){int food=nest.Definition.chainContents!=null&&i<nest.Definition.chainContents.Length?nest.Definition.chainContents[i]:0;i++;CreateBrick(new BrickSpawn{position=p+new Vector2(x,y)*half,size=Vector2.one*.76f,hp=food==1?ChainCollectionBalance.JarHealth:food==2?ChainCollectionBalance.BoxHealth:ChainPowerRules.ChildHealth,juiceGroup=food,kind=food>0&&i%2==1?BrickKind.Armor:BrickKind.Normal,colorIndex=nest.Definition.colorIndex},0);var child=CollectionBricks.Last().GetComponent<ChainGridPiece>();var parent=nest.GetComponent<ChainGridPiece>();child.FallAt=parent.FallAt;child.Col=parent.Col+(x>0?1:0);child.Row=parent.Row+(y>0?0:1);}
-  ChainMessage="BIG BLOCK OPENED · FOUR SMALL BLOCKS";if(nest.Definition.kind==BrickKind.RearWeak)ChainVisualArt.Effect(this,3,2,p,2.1f);else ChainCubeArt.Burst(this,p,2.15f);changed=true;
- }
+ 
+ 
  void PowerLine(Vector2 a,Vector2 b,Color color,float width=.10f,float life=.32f,int art=0){
   if(art==3){DrawJellyPowerBeam(3,a,b,width,life);return;}
   Vector2 delta=b-a;if(delta.sqrMagnitude<.00001f)return;
   var view=WorldArt.Draw(world,"Chain power trail","brick",(a+b)*.5f,new Vector2(delta.magnitude,width),color,72).transform;
   view.rotation=Quaternion.Euler(0,0,Mathf.Atan2(delta.y,delta.x)*Mathf.Rad2Deg);chainBeams.Add(new ChainBeam{View=view,Life=life,Duration=life,StartAlpha=color.a});
  }
- void PowerCell(Vector2 p,Color color,float size=.78f){var view=WorldArt.Draw(world,"Blast cell","brick",p,Vector2.one*size,color,71).transform;chainBeams.Add(new ChainBeam{View=view,Life=.34f,Duration=.34f,StartAlpha=color.a});}
- void ActivateChainPower(ChainTool tool,Vector2 incoming,int depth){
-  CombatFeel?.Power(tool.Position);
-  Vector2 p=tool.Position;Destroy(tool.View.gameObject);ChainKindActivations[tool.Kind-1]++;ChainActivationCount++;ChainDepth=Mathf.Max(ChainDepth,depth);changed=true;
-  ChainMessage=depth>1?"POWER CHAIN × "+depth:tool.Kind==1?"CROSS LASER · ROW + COLUMN":tool.Kind==2?"BOMB · 3 × 3":"LINK FIVE · BREAK ONE, BREAK ALL";
-  SoundService.Play(tool.Kind==1?"cross_laser":tool.Kind==2?"bomb":"link_mark");PlayJellyPowerFx(tool.Kind,p,tool.Kind==2?CollectionLevels.Pitch*3:1.3f);EmitFeedback(p,"break",ChainCubeArt.ToolColor(tool.Kind));
-  if(tool.Kind==1){foreach(Vector2 d in new[]{Vector2.up,Vector2.right,Vector2.down,Vector2.left})FireCrossRay(p,d,depth);}
-  else if(tool.Kind==2){
-   float radius=CollectionLevels.Pitch*1.5f;
-   foreach(var b in CollectionBricks.Where(b=>b.Alive&&!b.GetComponent<ChainTileVisibility>().Hidden).ToArray()){
-    var half=b.GetComponent<BoxCollider2D>().size*.5f;Vector2 delta=(Vector2)b.transform.position-p;
-    if(Mathf.Abs(delta.x)>=radius+half.x-.005f||Mathf.Abs(delta.y)>=radius+half.y-.005f)continue;
-    Vector2 d=delta.sqrMagnitude>.001f?delta.normalized:Vector2.up;ChainRayEntry(b,p,d,24,out _,out Vector2 point);
-    ApplyChainImpact(b,ChainPowerRules.IsNest(b.Definition)?12:int.MaxValue,d,point,false);
-   }
-   foreach(var other in ChainTools.ToArray())if(Mathf.Abs(other.Position.x-p.x)<=radius&&Mathf.Abs(other.Position.y-p.y)<=radius)ActivateChainTool(other,other.Position-p,depth+1);
-  }else FormChainBond(p,depth);
- }
+ 
+ 
  void FireCrossRay(Vector2 p,Vector2 d,int depth,bool soda=false,StreakBooster skin=StreakBooster.None){
   float limit=d.x!=0?((d.x>0?FlightGeometry.Right:FlightGeometry.Left)-p.x)/d.x:((d.y>0?FlightGeometry.Top:ReturnLineY)-p.y)/d.y;limit=Mathf.Max(0,limit);
   var hits=new List<ChainRayTarget>();foreach(var b in CollectionBricks)if(b.Alive&&!b.GetComponent<ChainTileVisibility>().Hidden&&ChainRayEntry(b,p,d,limit,out float entry,out Vector2 point))hits.Add(new ChainRayTarget{Brick=b,Distance=entry,Point=point});
@@ -61,25 +38,8 @@ public sealed partial class GameSession {
   if(skin==StreakBooster.Super)DrawStreakBeam(p,p+d*limit);else if(soda){PowerLine(p,p+d*limit,new Color(.7f,.92f,.4f,.85f),.23f);PowerLine(p,p+d*limit,new Color(.95f,1,.85f,.95f),.045f);}else DrawJellyPowerBeam(1,p,p+d*limit);
   foreach(var other in ChainTools.ToArray())if(!float.IsPositiveInfinity(Along(other.Position,p,d,limit,.39f)))ActivateChainTool(other,d,depth+1);
  }
- void FormChainBond(Vector2 p,int depth){
-  var random=new System.Random(AlphabetCampaign.LinkSeed(LevelIndex,++chainBondSerial,(EditorDraft!=null?EditorDraft.RandomSeed:Generation*397)+chainBondSerial*7919,this));
-  var candidates=CollectionBricks.Where(b=>b.Alive&&b.transform.position.y<=CollectionLevels.Top+.5f&&(b.Definition.kind==BrickKind.Normal||b.Definition.kind==BrickKind.Armor&&!b.ShellIntact)&&!ChainPowerRules.IsNest(b.Definition)&&!ChainBonds.Any(g=>g.Members.Contains(b))).OrderBy(b=>b.Id).ToList();
-  for(int i=candidates.Count-1;i>0;i--){int j=random.Next(i+1);var swap=candidates[i];candidates[i]=candidates[j];candidates[j]=swap;}
-  var bond=new ChainBond{Depth=depth};bond.Members.AddRange(candidates.Take(ChainPowerRules.LinkCount));
-  if(bond.Members.Count==0){ChainMessage="LINK · NO AVAILABLE BLOCKS";return;}
-  var root=new GameObject("Linked square group").transform;root.SetParent(world,false);bond.View=root;root.gameObject.AddComponent<ChainBondView>().Initialize(this,bond);ChainBonds.Add(bond);
-  foreach(var b in bond.Members)PowerLine(p,b.transform.position,new Color(.76f,.52f,1,.65f),.045f,.42f,3);
- }
- void BreakChainBond(BrickBody trigger){
-  foreach(var bond in ChainBonds.Where(g=>g.Members.Contains(trigger)).ToArray()){
-   SoundService.Play("link_collapse");ChainBonds.Remove(bond);if(bond.View!=null)Destroy(bond.View.gameObject);Vector2 start=trigger.transform.position;int visualOrder=0;
-   foreach(var b in bond.Members){Vector2 p=b.transform.position;PowerLine(start,p,new Color(.86f,.57f,1,.9f),.065f,.4f,3);PlayJellyPowerFx(3,p,1.25f,visualOrder++*.035f);if(b.Alive)DealChainHealth(b,int.MaxValue);
-    // A collapsing marked block releases a short pulse into neighboring power blocks.
-    foreach(var tool in ChainTools.ToArray())if(Vector2.Distance(tool.Position,p)<=CollectionLevels.Pitch*1.06f)ActivateChainTool(tool,tool.Position-p,bond.Depth+1);
-   }
-   ChainMessage="LINK COLLAPSE · "+bond.Members.Count+" BLOCKS";changed=true;
-  }
- }
+ 
+ 
 }
 }
 

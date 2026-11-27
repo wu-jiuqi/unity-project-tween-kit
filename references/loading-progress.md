@@ -25,3 +25,8 @@ progress.Complete();
 完整启动页保留已有猫五姿态、字标、浮岛、箱子和轮播文案。安全区适配交给宿主，示例按自身RectTransform尺寸等比适配。原始图来自同项目已导出的StartupLoading资源目录，PNG和meta逐项映射；没有使用参考仓库美术。
 
 维护证据见[supplemental-deliveries.json](supplemental-deliveries.json)，任务宿主HomeContentStartup的源码快照仅用于确认SetProgress/Complete的真实调用顺序，不随运行组件引入微信SDK或业务系统。
+
+
+## 游戏0.5.1同步
+
+新版接口、时间驱动、共享Loading、五页资源等待、八帧结果页、原生遮罩充星及新增清理合同见[当前补充说明](current-051.md)。旧章节的3.6秒加载猫与旧材质充星说明属于0.4.0历史实现；当前charge条目和结果页以本轮代码为准，独立旧LoadingPresentation仍保留。

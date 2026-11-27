@@ -3,13 +3,13 @@
   "releaseState": "preview-partial-coverage",
   "fullAcceptancePassed": false,
   "sourceProject": "BounceGarden/BounceGarden",
-  "workingVersion": "0.4.0",
-  "deliveredGalleryEntries": 36,
+  "workingVersion": "0.5.1",
+  "deliveredGalleryEntries": 44,
   "stageStatus": {
     "1": "source scan and partial semantic inventory complete; current-route audit incomplete",
     "2": "representative extraction and runnable gallery available; validation records govern passing state",
     "3": "remaining candidate extraction and host recipe work pending",
-    "4": "36-entry gallery with parameter display/export; all 96 reference recipes dispositioned; project-wide extraction remains partial",
+    "4": "44-entry gallery with current 0.5.1 slices, compatible parameter export and versioned legacy references; project-wide coverage remains partial",
     "5": "independent import tested per evidence; human five-minute onboarding trial not performed",
     "6": "four preview artifacts; final full-coverage release not approved as complete"
   },
@@ -21,26 +21,23 @@
     "Run recipient onboarding and full original-scene trigger coverage; bind final packages and all evidence to the final tested build."
   ],
   "runtimeChecks": {
-    "passed": 247,
+    "passed": 401,
     "failed": 0,
     "errors": 0
   },
   "independentImport": {
     "result": "passed",
-    "scripts": 62,
-    "prefabs": 11,
+    "scripts": 79,
+    "prefabs": 19,
     "missingScripts": 0,
     "errors": []
   },
   "sourceReviewCounts": {
-    "editor-tool": 1,
-    "test-fixture": 115,
-    "non-animation": 15,
-    "requires-route-review": 94,
-    "source-route-reviewed": 27,
-    "inactive-preview": 1,
-    "legacy-route-disabled": 1,
-    "mixed-physics-presentation-review": 4
+    "test-fixture": 2,
+    "non-animation": 9,
+    "requires-route-review": 67,
+    "source-route-reviewed": 33,
+    "mixed-physics-presentation-review": 2
   },
   "reference96Comparison": {
     "covered": 26,
@@ -48,5 +45,16 @@
     "added": 12,
     "excluded": 34,
     "pending": 11
+  },
+  "kitVersion": "0.5.0-preview",
+  "currentScope": {
+    "date": "2026-11-27",
+    "sourceWorkingTreeFingerprintsSha256": "3d33404cee9718a880eba005c3e820c4b60d15b5f82f483cd736b411eef1ec33",
+    "sourceMappings": "current-051-deliveries.json",
+    "runtimeEvidence": "../evidence/runtime-verification.json",
+    "independentImportEvidence": "../evidence/clean-import-result.json",
+    "fullProjectCoverage": false,
+    "automatedPassed": true,
+    "visualReview": "partial-user-stopped; see evidence/current-051-visual-review.json"
   }
 }

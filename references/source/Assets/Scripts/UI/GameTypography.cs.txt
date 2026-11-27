@@ -2,10 +2,10 @@ using TMPro;
 using UnityEngine;
 namespace BounceGarden {
 public static class GameTypography {
- static TMP_FontAsset font,heavy;static Material outline,heading;
+ static TMP_FontAsset font,heavy;
  public static TMP_FontAsset HeadingFont {get{if(heavy==null){heavy=TMP_FontAsset.CreateFontAsset(Resources.Load<Font>("Fonts/MaokenZhuyuanTi"),48,5,UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,1024,1024);heavy.name="Maoken Zhuyuan Ti Heading SDF";heavy.atlasPopulationMode=AtlasPopulationMode.Dynamic;heavy.isMultiAtlasTexturesEnabled=true;heavy.fallbackFontAssetTable=new System.Collections.Generic.List<TMP_FontAsset>{Font};}return heavy;}}
- public static Material Outline {get{if(outline==null){outline=new Material(Font.material);outline.EnableKeyword("OUTLINE_ON");outline.SetFloat(ShaderUtilities.ID_OutlineWidth,0f);outline.SetColor(ShaderUtilities.ID_OutlineColor,new Color(.18f,.12f,.09f,1));}return outline;}}
- public static Material Heading {get{if(heading==null){heading=new Material(Font.material);heading.EnableKeyword("OUTLINE_ON");heading.SetFloat(ShaderUtilities.ID_OutlineWidth,0f);heading.SetColor(ShaderUtilities.ID_OutlineColor,new Color(.58f,.035f,.18f,1));}return heading;}}
+ 
+ 
 
  public static TMP_FontAsset Font {get{if(font==null){
   font=TMP_FontAsset.CreateFontAsset(UICraft.Font,48,5,UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,2048,2048);

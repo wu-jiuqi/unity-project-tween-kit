@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/AppUI.PlayerSettings71.cs`
-文件 SHA-256：`4777de407e634ec748d4adc4b27c38f77665d29eb0feab786c8cf05f3e8fb66f`
+文件 SHA-256：`f3c6a6aae18d2ea4d5a1507f4ed1f4b86e248813043eb97290e6e615f3d9b398`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.PlayerSettings71.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

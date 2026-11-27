@@ -7,36 +7,13 @@ public partial class AppUI {
  void LateUpdate(){if(feedbackRefreshPending&&HomeMotionAllowed){RefreshHomeFeedback(true);feedbackRefreshPending=false;}}
  void RefreshHomeFeedback(bool animate){
   if(feedback==null||!pages.TryGetValue("home",out var home)||home==null)return;
-  var view=home.GetComponentInChildren<HomeFeedbackView>();if(view==null)return;
-  var data=feedback.Read();bool celebrate=animate&&data.Milestone&&feedback.ConsumeCelebration(data.Key);view.Present(data,animate,celebrate);
+  var view=home.GetComponentInChildren<HomeFeedbackView>();var approved=home.GetComponentInChildren<HomeAFeedback>();if(view==null&&approved==null)return;
+  var data=feedback.Read();bool celebrate=animate&&data.Milestone&&feedback.ConsumeCelebration(data.Key);if(approved!=null)approved.Present(data,animate,celebrate);else view.Present(data,animate,celebrate);
  }
- void OpenTestTools(){
-  if(!LocalTestTools.Available)return;OpenModal("测试工具",UICraft.Blue,900,1600);
-  UICraft.Button(modal,"重置连胜与签到",0,390,740,120,UICraft.Blue,()=>ConfirmLocalReset(false),39);
-  UICraft.Button(modal,"重置全部游戏存档",0,240,740,120,new Color32(239,153,161,255),()=>ConfirmLocalReset(true),39);
-  UICraft.Button(modal,"预览连续登录7天",0,90,740,120,UICraft.Green,()=>PreviewFeedback(7,0,false),39);
-  UICraft.Button(modal,"预览5连胜",0,-60,740,120,UICraft.Green,()=>PreviewFeedback(1,5,true),39);
-  UICraft.Button(modal,"预览下一天",0,-210,740,120,UICraft.Green,()=>PreviewFeedback(feedback.Read().LoginDays+1,feedback.Read().WinStreak,false),39);
-  UICraft.Button(modal,"恢复真实存档",0,-360,740,120,UICraft.Blue,UseSavedFeedback,39);
-  var data=feedback.Read();UICraft.Label(modal,(feedback==savedFeedback?"真实存档":"临时预览")+"  /  登录天数 "+data.LoginDays+"  /  连胜 "+data.WinStreak+"\n预览不会覆盖真实存档。",0,-515,790,110,28);
-  UICraft.Button(modal,"完成",0,-690,500,100,UICraft.Blue,CloseModal,39);
- }
- void PreviewFeedback(int days,int wins,bool played){
-  if(!LocalTestTools.Available)return;feedback=LocalHomeFeedbackSource.Preview(days,wins,played);ShowPage("home",false);
- }
- void UseSavedFeedback(){if(!LocalTestTools.Available)return;feedback=savedFeedback;feedback.Visit();ShowPage("home",false);Toast("已恢复真实存档。");}
- void ConfirmLocalReset(bool all){
-  if(!LocalTestTools.Available)return;OpenModal(all?"重置全部存档？":"重置连胜与签到？",UICraft.Blue,900,960);
-  UICraft.Label(modal,all?"将清除本游戏的本地进度、\n金币、奖章、声音设置与连胜记录。":"将清除登录天数与连胜记录。\n关卡进度、金币与声音设置会保留。",0,160,780,180,34);
-  UICraft.Label(modal,"下次进入从第1天、0连胜开始。\n此操作无法撤销。",0,-12,780,110,29);
-  UICraft.Button(modal,"重置",-200,-210,350,120,new Color32(239,153,161,255),()=>ResetLocalTestData(all),43);
-  UICraft.Button(modal,"取消",200,-210,350,120,UICraft.Blue,OpenTestTools,43);
- }
- void ResetLocalTestData(bool all){
-  if(!LocalTestTools.Available)return;
-  if(all&&!Profile.ResetForTesting()){Toast("进度重置失败。");return;}
-  if(!savedFeedback.Reset()){Toast("连胜记录重置失败。");return;}
-  feedback=savedFeedback;feedback.Visit();SoundService.SetMuted(!Profile.SoundEnabled);ClearPages();ShowPage("home",false);Toast(all?"存档已重置：第1天，0连胜。":"连胜已重置，关卡进度已保留。");
- }
+ 
+ 
+ 
+ 
+ 
 }
 }

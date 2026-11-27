@@ -1,0 +1,41 @@
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+// Visual-only, fixed allocation. Positions are already in BoardDisplay space.
+public sealed class PetalField050:MonoBehaviour {
+ const int Columns=12,Rows=20;public const int Capacity=Columns*Rows,AirborneLimit=32;
+ const float Left=-4.2f,Bottom=-9.5f,DX=8.4f/Columns,DY=16.6f/Rows;
+ sealed class Petal {public SpriteRenderer face,shadow;public Vector2 home,drift;public float width,angle,spin,age,life,height,cooldown;public bool flying;}
+ struct Track {public Vector2 position;public int frame;}
+ readonly Petal[] petals=new Petal[Capacity];readonly Dictionary<int,Track> tracks=new Dictionary<int,Track>(128);
+ GameSession game;int frame,budget;float clock;Material material;
+ public int ActivePetals{get;private set;}public int PeakAirborne{get;private set;}public int LiftCount{get;private set;}public int LandCount{get;private set;}public int SampledBalls{get;private set;}public float Clock=>clock;
+ public void Initialize(GameSession owner){game=owner;material=new Material(Shader.Find("Sprites/Default"));var rng=new System.Random(4418);
+  for(int row=0;row<Rows;row++)for(int col=0;col<Columns;col++){int i=row*Columns+col;var p=new Petal();petals[i]=p;p.home=new Vector2(Left+(col+.5f)*DX+((float)rng.NextDouble()-.5f)*DX*.5f,Bottom+(row+.5f)*DY+((float)rng.NextDouble()-.5f)*DY*.5f);p.width=Mathf.Lerp(.19f,.34f,(float)rng.NextDouble());p.angle=(float)rng.NextDouble()*360;p.life=Mathf.Lerp(.8f,1.4f,(float)rng.NextDouble());p.height=Mathf.Lerp(.24f,.5f,(float)rng.NextDouble());p.spin=Mathf.Lerp(-120,120,(float)rng.NextDouble());
+   var sprite=BattleGardenArt050.Get("petal-"+(i%3));p.shadow=Draw("Petal ground shadow "+i,sprite,-25);p.face=Draw("Reusable petal "+i,sprite,-24);Render(p);}
+ }
+ SpriteRenderer Draw(string name,Sprite sprite,int order){var node=new GameObject(name);node.transform.SetParent(transform,false);var r=node.AddComponent<SpriteRenderer>();r.sprite=sprite;r.sharedMaterial=material;r.sortingOrder=order;return r;}
+ bool Blocked(Vector2 p){foreach(var b in game.CollectionBricks){if(b==null||!b.Alive)continue;var q=BoardDisplay.Forward(b.transform.position);var size=b.Definition.size;float width=Mathf.Max(game.Board.CellWidth,size.x)*.5f;float height=Mathf.Max(game.Board.CellWidth,size.y*BoardDisplay.Parameters.y)*.5f;if(Mathf.Abs(q.x-p.x)<width+.06f&&Mathf.Abs(q.y-p.y)<height+.06f)return true;}return false;}
+ public void ObserveBall(int id,Vector2 position,Vector2 velocity){SampledBalls++;Vector2 from=position;if(tracks.TryGetValue(id,out var t)&&t.frame==frame-1)from=t.position;tracks[id]=new Track{position=position,frame=frame};if(velocity.sqrMagnitude>.1f)Sweep(from,position,velocity);}
+ void Sweep(Vector2 from,Vector2 to,Vector2 velocity){if(budget<=0||ActivePetals>=AirborneLimit)return;const float reach=.48f;Vector2 delta=to-from;float length=delta.sqrMagnitude;
+  int x0=Mathf.Clamp(Mathf.FloorToInt((Mathf.Min(from.x,to.x)-reach-Left)/DX)-1,0,Columns-1),x1=Mathf.Clamp(Mathf.CeilToInt((Mathf.Max(from.x,to.x)+reach-Left)/DX)+1,0,Columns-1);
+  int y0=Mathf.Clamp(Mathf.FloorToInt((Mathf.Min(from.y,to.y)-reach-Bottom)/DY)-1,0,Rows-1),y1=Mathf.Clamp(Mathf.CeilToInt((Mathf.Max(from.y,to.y)+reach-Bottom)/DY)+1,0,Rows-1);int lifted=0;
+  for(int row=y0;row<=y1;row++)for(int col=x0;col<=x1;col++){var p=petals[row*Columns+col];if(p.flying||p.cooldown>clock)continue;float u=length>.00001f?Mathf.Clamp01(Vector2.Dot(p.home-from,delta)/length):0;if((p.home-(from+delta*u)).sqrMagnitude>reach*reach||Blocked(p.home))continue;
+   p.flying=true;p.age=0;float sign=Vector2.Dot(p.home-(from+delta*u),new Vector2(-velocity.y,velocity.x))>=0?1:-1;var direction=velocity.normalized;p.drift=direction*.25f+new Vector2(-direction.y,direction.x)*sign*.16f;ActivePetals++;LiftCount++;PeakAirborne=Mathf.Max(PeakAirborne,ActivePetals);budget--;if(++lifted>=2||budget<=0||ActivePetals>=AirborneLimit)return;}
+ }
+ void Render(Petal p){float u=p.flying?Mathf.Clamp01(p.age/p.life):0;float arc=p.flying?Mathf.Sin(u*Mathf.PI):0;Vector2 ground=p.home+p.drift*arc;float height=arc*p.height;float flutter=p.flying?Mathf.Sin(u*15+p.angle)*arc:0;
+  p.face.transform.localPosition=ground+Vector2.up*height+Vector2.right*flutter*.035f;p.face.transform.localRotation=Quaternion.Euler(0,0,p.angle+(p.flying?p.spin*u+flutter*14:0));float scale=p.width/p.face.sprite.bounds.size.x;p.face.transform.localScale=new Vector3(scale*(p.flying?Mathf.Lerp(.35f,1,Mathf.Abs(Mathf.Cos(u*9))):1),scale*(1+arc*.12f),1);p.face.color=new Color(1,1,1,p.flying?.86f:.22f);
+  p.shadow.transform.localPosition=ground-Vector2.up*.015f;p.shadow.transform.localRotation=Quaternion.Euler(0,0,p.angle);p.shadow.transform.localScale=new Vector3(scale*(1+arc*.3f),scale*.45f,1);p.shadow.color=new Color(.46f,.36f,.49f,p.flying?Mathf.Lerp(.13f,.045f,arc):.015f);
+ }
+ void Update(){if(game==null||game.IsPaused)return;float dt=game.PresentationDelta(Time.deltaTime);if(dt<=0)return;clock+=dt;frame++;budget=8;SampledBalls=0;if(game.IsPlaying&&FeedbackProfile.Active.enabledFeedback)game.VisitPetalBalls(this);
+  for(int i=0;i<petals.Length;i++){var p=petals[i];if(!p.flying)continue;p.age+=dt;if(p.age>=p.life){p.flying=false;p.cooldown=clock+.75f;ActivePetals--;LandCount++;}Render(p);}
+ }
+ public void QASweep(Vector2 a,Vector2 b){if(!RuntimeQA.IsIsolated)return;budget=8;Sweep(a,b,(b-a).normalized*12);}
+ public Vector2 QAPosition(int i)=>petals[i].face.transform.position;
+ void OnDestroy(){if(material!=null)Destroy(material);}
+}
+public sealed partial class GameSession {
+ // No first-N sample cap: every live ball is observed, even during long volleys.
+ public void VisitPetalBalls(PetalField050 field){foreach(var pair in active){var ball=pair.Value;if(ball==null||!ball.Active)continue;field.ObserveBall(pair.Key,BoardDisplay.Forward(ball.Body.position),ball.Body.linearVelocity);}}
+}
+}

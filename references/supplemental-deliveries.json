@@ -5,7 +5,7 @@
       "component": "LoadingProgress",
       "owner": "StartupLoadingView86",
       "source": "../../Tools/Platform/WeChat/StartupLoadingView86.cs",
-      "sourceSha256": "1da7019f48954f4d6c6ec555a3f16ce61dcd2c50e2012ef1f6fa1271f40c6d0b",
+      "sourceSha256": "98ab00cd00168c579a81dd26e023401398d5239d6efbc2b88abb4b43f81a2715",
       "snapshot": "references/source/Platform/StartupLoadingView86.cs.txt",
       "target": "assets/unity-kit/Runtime/LoadingProgress.cs",
       "targetSha256": "016e726586fb29c1e9402097465ea572a6678416f751201f890148a6cf34ef23",
@@ -22,7 +22,7 @@
       "component": "StartupLoadingPresentation",
       "owner": "StartupLoadingView86",
       "source": "../../Tools/Platform/WeChat/StartupLoadingView86.cs",
-      "sourceSha256": "1da7019f48954f4d6c6ec555a3f16ce61dcd2c50e2012ef1f6fa1271f40c6d0b",
+      "sourceSha256": "98ab00cd00168c579a81dd26e023401398d5239d6efbc2b88abb4b43f81a2715",
       "snapshot": "references/source/Platform/StartupLoadingView86.cs.txt",
       "target": "assets/unity-kit/Runtime/StartupLoadingPresentation.cs",
       "targetSha256": "52719e27f53a94c26a800c278c1ebc44a5ac9a380d8e58805d4c5fe4989a5bf3",
@@ -39,7 +39,7 @@
       "component": "PageSlide",
       "owner": "AppUI",
       "source": "Assets/Scripts/UI/AppUI.cs",
-      "sourceSha256": "d3a8c4c850781f1a9e0e4dd2cab54ac95920856ba9b6cb331efd181c8f0183f4",
+      "sourceSha256": "01d6a79a5fb77b7488867b897ebb97b392e85a23b80b4c0562b2f9f9418f3ebe",
       "snapshot": "references/source/Assets/Scripts/UI/AppUI.cs.txt",
       "target": "assets/unity-kit/Runtime/PageSlide.cs",
       "targetSha256": "16793e95dcefbf9dc7a52077bc702d70303b1960fadb49036d575bfbcf3b6b64",
@@ -54,7 +54,7 @@
       "component": "GroupStagger",
       "owner": "AppUI",
       "source": "Assets/Scripts/UI/AppUI.Shop.cs",
-      "sourceSha256": "524b27ee4444ddff4e0e47f8edaee9e1c4d9d28fbf5513c2db5601d0494b386f",
+      "sourceSha256": "148b9ec953a41ffdf8b8ac7c1db4ad1a755264c2e1a3dc796217fd44f1079faa",
       "snapshot": "references/source/Assets/Scripts/UI/AppUI.Shop.cs.txt",
       "target": "assets/unity-kit/Runtime/GroupStagger.cs",
       "targetSha256": "ef2a61f8319d27c5e1467b98ccc7dd9c0ed0cda876c48a2725118d10a74c9aa6",
@@ -69,7 +69,7 @@
       "component": "RankReorder",
       "owner": "LeagueRankingView",
       "source": "Assets/Scripts/UI/LeagueRankingView.cs",
-      "sourceSha256": "e02ec449c21cb64354b47245aee1f660e2a05b161062dc9e25a30388c720d753",
+      "sourceSha256": "04143f33f8a659d50a1c82925fad238eeb83aaeb08bbf1345da6910054f29356",
       "snapshot": "references/source/Assets/Scripts/UI/LeagueRankingView.cs.txt",
       "target": "assets/unity-kit/Runtime/RankReorder.cs",
       "targetSha256": "94035bf549e7a7f57393be80078e004ef684e83118e14ce9cad07b040e9c490f",
@@ -92,7 +92,8 @@
         "Update"
       ],
       "adaptation": "提取手势/触点/目标框曲线；起终点由宿主输入，移除游戏瞄准、存档和教学完成业务",
-      "usageStatus": "source-presentation-slice-reviewed"
+      "usageStatus": "historical-reference",
+      "sourceStatus": "frozen-0.4.0-reference"
     },
     {
       "galleryEntry": "hintfade",
@@ -114,7 +115,7 @@
       "component": "HomeLayeredFeedback",
       "owner": "HomeFeedbackView",
       "source": "Assets/Scripts/UI/HomeFeedbackView.cs",
-      "sourceSha256": "aef2773f232632afb25debb34374b5036bed8d539969d3cc5c3fcd029ea9b6b5",
+      "sourceSha256": "1d0c3caa645fd0767b86945562348d968b962c57cc21101a3dea41273823340f",
       "snapshot": "references/source/Assets/Scripts/UI/HomeFeedbackView.cs.txt",
       "target": "assets/unity-kit/Runtime/HomeLayeredFeedback.cs",
       "targetSha256": "9331e134c8fe2a1c65dfce40f02ab006da3f2cf6b43aee80922e55513971e076",
@@ -130,7 +131,7 @@
       "component": "PendantSwing",
       "owner": "BattleScoreMeter",
       "source": "Assets/Scripts/UI/BattleScoreMeter.cs",
-      "sourceSha256": "ebe6d6a89afdedf69eb5408b3d7b3868911ef4524e835afba8ef8176b049da52",
+      "sourceSha256": "700779743353107445b65ee85a9be138e307085e6cc488dce0592869ab574c29",
       "snapshot": "references/source/Assets/Scripts/UI/BattleScoreMeter.cs.txt",
       "target": "assets/unity-kit/Runtime/PendantSwing.cs",
       "targetSha256": "03ded46eeb526f30c5af62048b499b008b38e866a850cb6003510d0a1e1a9587",
@@ -146,7 +147,7 @@
       "component": "DecorativeBreath",
       "owner": "LeagueMatchPresentation",
       "source": "Assets/Scripts/UI/LeagueMatchPresentation.cs",
-      "sourceSha256": "6d2a42eadf7cf4f89ff9cef546194f4e43e340075f37e9c88fcc163ba8b3f9d1",
+      "sourceSha256": "8f190d6f0afc9eb44da7ada484fac1995192782bef0bef50bba6cffe1d46af45",
       "snapshot": "references/source/Assets/Scripts/UI/LeagueMatchPresentation.cs.txt",
       "target": "assets/unity-kit/Runtime/DecorativeBreath.cs",
       "targetSha256": "24caa4076cd396516a44d4c7c1e05cb8938bb1ef87853f12fb559e275c0a7ba3",
@@ -160,7 +161,7 @@
   "platformHostEvidence": {
     "source": "../../Tools/Platform/WeChat/HomeContentStartup.cs",
     "snapshot": "references/source/Platform/HomeContentStartup.cs.txt",
-    "sha256": "bdc12907adea80d3c7bddb992234013a9274888c5f1c02061da701029b316b75",
+    "sha256": "610c3bec40cab10c911afe2182cb92794a25b61327bef067bef19b4b40bea4af",
     "route": "HomeContentStartup.Build → StartupLoadingView86.Build；Load的真实阶段SetProgress → 首页首帧准备完成后Complete；Failure/Resume保持进度"
   }
 }

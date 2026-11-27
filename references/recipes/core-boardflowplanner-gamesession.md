@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/Core/BoardFlowPlanner.cs`
-文件 SHA-256：`d144c1cc9961981dc5aad2f21d029d479833b18b9a074b8e4464a14e94064807`
+文件 SHA-256：`1555cb813a5f808ce108bf6ce9e6707118fca21bf5dfff50922dc80040149300`
 [原始源码快照](../source/Assets/Scripts/Core/BoardFlowPlanner.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

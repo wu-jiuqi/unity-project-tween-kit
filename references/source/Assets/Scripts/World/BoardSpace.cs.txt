@@ -6,30 +6,14 @@ namespace BounceGarden {
 public sealed class BoardSpace {
  public readonly Vector2 Origin,U,V;public readonly int Columns,Rows,Phase;public readonly string Status;
  public float CellWidth=>U.magnitude;public float CellHeight=>V.magnitude;
- public bool Square=>Mathf.Abs(CellWidth-CellHeight)<.0001f;
+ 
  public BoardSpace(Vector2 firstCenter,Vector2 u,Vector2 v,int columns,int rows,int phase,string status){U=u;V=v;Origin=firstCenter-(u+v)*.5f;Columns=columns;Rows=rows;Phase=phase;Status=status;}
  public Vector2 CellToLocal(float col,float row)=>Origin+(col+.5f)*U+(row+.5f)*V;
  public Vector2 LocalToCell(Vector2 p)=>new Vector2((p.x-Origin.x)/U.x-.5f,(p.y-Origin.y)/V.y-.5f);
  public Vector2Int Nearest(Vector2 p){var a=LocalToCell(p);return new Vector2Int(Mathf.RoundToInt(a.x),Mathf.RoundToInt(a.y));}
- public int Checker(Vector2 p){var a=LocalToCell(p);return (Mathf.FloorToInt(a.x+.5f)+Mathf.FloorToInt(a.y+.5f)+Phase)&1;}
- public static Vector2 SourceTutorial(int col,int row)=>new Vector2((col-4)*.94f,4.65f-row*.86f);
- public static Vector2 Fit(Vector2 p)=>new Vector2(p.x*.86f,p.y*1.23f+.44f);
- public static Vector2 Source27(int col,int row){float x=78+col*40,y=329+row*40;return new Vector2(((x/592f-.5f)*10.8f)/.86f,((.5f-y/1280f)*23.4f-.44f)/1.23f);}
- public static BoardSpace ForLevel(int index,LevelData fitted){
-  if(fitted.alphabetCampaign)return new BoardSpace(CollectionLevels.Cell(0,0),Vector2.right*CollectionLevels.Pitch,Vector2.down*CollectionLevels.Pitch,9,9,0,"Alphabet collection mainline");
-  if(index>=CollectionLevels.First)return new BoardSpace(CollectionLevels.Cell(0,0),Vector2.right*CollectionLevels.Pitch,Vector2.down*CollectionLevels.Pitch,9,12,0,"Collection station");
-  if(fitted.pixelDrop)return new BoardSpace(fitted.bricks[0].position,Vector2.right*PixelDropLevels.Pitch,Vector2.down*PixelDropLevels.Pitch,11,12,0,"Pixel drop square lattice");
-  if(fitted.mainline)return new BoardSpace(new Vector2(-3.3f,5.25f),Vector2.right*.60f,Vector2.down*.60f,12,12,0,"Mainline square lattice");
-  if(fitted.juiceMechanic!=JuiceMechanic.None)return new BoardSpace(JuiceLevels.Center(0,0),Vector2.right*JuiceLevels.Pitch,Vector2.down*JuiceLevels.Pitch,9,7,0,"Juice garden square lattice");
-  if(fitted.bossTrial)return new BoardSpace(BossLevel.Cell(0,0),Vector2.right*BossLevel.Pitch,Vector2.down*BossLevel.Pitch,9,9,0,"Pudding boss square lattice");
-  if(fitted.paintingId==PaintingLevel.Id)return new BoardSpace(PaintingLevel.Center(0,0),Vector2.right*PaintingLevel.Pitch,Vector2.down*PaintingLevel.Pitch,12,12,0,"Fox painting square lattice");
-  if(fitted.colorMatch)return new BoardSpace(ColorMatchLevel.Center(0,0),Vector2.right*ColorMatchLevel.Pitch,Vector2.down*ColorMatchLevel.Pitch,9,7,0,"Color garden square lattice");
-  if(fitted.abilityRoute)return new BoardSpace(Fit(new Vector2(-4*.94f,4.7f)),Vector2.right*(.94f*.86f),Vector2.down*(.94f*.86f),9,6,0,"Ability chapter square lattice");
-  if(index==2){var p=Fit(Source27(0,0));return new BoardSpace(p,Fit(Source27(1,0))-p,Fit(Source27(0,1))-p,12,12,0,"Round27 original 40px lattice; inherited world-axis aspect difference about 0.21%, unchanged physics");}
-  if(index==0){var p=Fit(SourceTutorial(0,0));return new BoardSpace(p,Fit(SourceTutorial(1,0))-p,Fit(SourceTutorial(0,1))-p,9,4,0,"Legacy Level1 rectangular pitch retained; square-cell target not passed");}
-  float firstY=index==0?4.65f:index==3?4.8f:index==5?4.85f:4.7f;
-  float rawY=index==1||index==4?.88f:.86f;int rows=index==0||index==4?4:index==1?5:3;
-  return new BoardSpace(new Vector2(-4*.94f*.86f,firstY*1.23f+.44f),Vector2.right*(.94f*.86f),Vector2.down*(rawY*1.23f),9,rows,0,"Legacy rectangular pitch retained; square-cell target not passed");
- }
-}
+ 
+ 
+ 
+ 
+ public static BoardSpace ForLevel(int index,LevelData fitted){return new BoardSpace(CollectionLevels.Cell(0,0),Vector2.right*CollectionLevels.Pitch,Vector2.down*CollectionLevels.Pitch,9,9,0,"Opening 45-stage lattice");}}
 }

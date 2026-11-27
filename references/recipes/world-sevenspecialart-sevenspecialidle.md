@@ -3,14 +3,14 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/SevenSpecialArt.cs`
-文件 SHA-256：`27e81783a35de093faa96cba51fed1f8ee7dcaa0bfe508d9e00b45f7a80ad03e`
+文件 SHA-256：`2d36491873ecc5e803d76a0591aa6c9fb15cd8e3c01055eca399d9e0550d5c72`
 [原始源码快照](../source/Assets/Scripts/World/SevenSpecialArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Update · L61
+### Update · L72
 
 方法 SHA-256：`900fa4d4c8d5cb15bd20a48d52a443f3fd6b93851dae135f3060434d7f0d4790`
 时间来源：PresentationDelta, Time.deltaTime

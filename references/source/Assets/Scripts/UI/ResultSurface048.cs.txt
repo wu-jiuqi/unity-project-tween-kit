@@ -1,0 +1,34 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+// Reuse page 02's complete panel, preserving its original aspect and safe-area fit.
+public sealed class ResultSurface048:MonoBehaviour {
+ public RectTransform Content{get;private set;}
+ public RectTransform Panel{get;private set;}
+ public bool LayoutFits{get;private set;}
+ AppUI app;
+ public static ResultSurface048 Create(Transform parent,string name){var s=parent.gameObject.AddComponent<ResultSurface048>();s.Build(name);return s;}
+ void Build(string name){
+  app=FindFirstObjectByType<AppUI>();UICraft.Box(transform,"Result dimmer",0,0,10000,10000,new Color(.15f,.20f,.17f,.5f),false,true);
+  Content=UICraft.Root(transform,name,0,0,1080,1920);Panel=LevelLoadingArt.Image(Content,"panel",0,5,1000);Panel.name="02 shared cream result panel";Layout();
+ }
+ public static TMP_Text Text(Transform parent,string text,float x,float y,float w,float h,int size,bool muted=false){var t=UICraft.Label(parent,text,x,y,w,h,size,muted?CSettingsArt.Muted:CSettingsArt.Ink);t.fontStyle=FontStyles.Normal;return t;}
+ public static Image Image(Transform parent,string name,Sprite sprite,float x,float y,float w,float h){var i=UICraft.Box(parent,name,x,y,w,h,Color.white);i.sprite=sprite;i.type=UnityEngine.UI.Image.Type.Simple;i.preserveAspect=true;i.raycastTarget=false;return i;}
+ void LateUpdate(){Layout();}
+ void Layout(){
+  if(Content==null)return;var canvas=GetComponentInParent<Canvas>().rootCanvas;
+  var viewport=app!=null?app.MenuAvoidanceViewport:new Vector2Int(Screen.width,Screen.height);var safe=app!=null?app.LoadingSafeArea:Screen.safeArea;
+  var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;
+  // Use projected pixels as in the 047 overlay: parent scale alone does not
+  // include the battle camera's fixed 1080:2340 projection on a shorter display.
+  Vector2 origin=RectTransformUtility.WorldToScreenPoint(camera,transform.TransformPoint(Vector3.zero));
+  float px=Vector2.Distance(origin,RectTransformUtility.WorldToScreenPoint(camera,transform.TransformPoint(Vector3.right)));
+  float py=Vector2.Distance(origin,RectTransformUtility.WorldToScreenPoint(camera,transform.TransformPoint(Vector3.up)));
+  float unit=Mathf.Min(safe.width/1080f,safe.height/1920f);
+  Content.localScale=new Vector3(unit/Mathf.Max(.0001f,px),unit/Mathf.Max(.0001f,py),1);
+  if(RectTransformUtility.ScreenPointToWorldPointInRectangle((RectTransform)transform,safe.center,camera,out var center))Content.position=center;
+  LayoutFits=1080*unit<=safe.width+.1f&&1920*unit<=safe.height+.1f;
+ }
+}
+}

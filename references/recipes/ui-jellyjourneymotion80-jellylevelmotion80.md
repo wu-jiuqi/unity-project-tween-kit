@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/JellyJourneyMotion80.cs`
-文件 SHA-256：`2f0ec3a0621f8caee7a79ea09238457dbe6459196c3b66f0297732337db992bd`
+文件 SHA-256：`03c5ac68c7c3f15a1d9602399a3b064b6ae514ff746384240e55b113f6f2162b`
 [原始源码快照](../source/Assets/Scripts/UI/JellyJourneyMotion80.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -99,10 +99,6 @@ void Apply(float time,bool audit){if(Body==null)return;float age=time-kickAt;flo
 素材完整路径、原始 GUID 与包内映射见 [resource-map.json](../resource-map.json)。未解析的动态路径仍留在 source-map.json 的 resourceEvidence；不能猜测为已打包。
 
 ## 生命周期证据
-
-```csharp
-public void RestoreAuditPose(){press=0;kickAt=-100;ResetPose();}
-```
 
 ```csharp
 void ResetPose(){if(Body!=null){Body.localScale=Vector3.one;Body.anchoredPosition=Vector2.zero;Body.localRotation=Quaternion.identity;}if(Island!=null){Island.localScale=Vector3.one;Island.anchoredPosition=Vector2.zero;Island.localRotation=Quaternion.identity;}if(Cat!=null){Cat.localScale=Vector3.one;Cat.localRotation=Quaternion.identity;Cat.anchoredPosition=new Vector2(154,-15);}if(Tag!=null){Tag.anchoredPosition=new Vector2(0,188);Tag.localScale=Vector3.one;}if(Halo!=null){Halo.localScale=Vector3.one;Halo.anchoredPosition=Vector2.zero;Halo.localRotation=Quaternion.identity;}}

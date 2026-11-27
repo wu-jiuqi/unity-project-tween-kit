@@ -1,0 +1,68 @@
+using System;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using A44=BounceGarden.DressingShopArt044;
+namespace BounceGarden {
+public partial class AppUI {
+ RectTransform dressingPage044;DressingShopLayout044 shopLayout044,dressingLayout044;
+ public RectTransform QADressing044=>dressingPage044;public int QAShopCategory044=>shopCategory;
+ RectTransform MakeComposition044(RectTransform page,string title,out DressingShopLayout044 layout){
+  Clear(page);layout=page.GetComponent<DressingShopLayout044>()??page.gameObject.AddComponent<DressingShopLayout044>();
+  var bg=UICraft.Box(page,"044 courtyard",0,0,1080,menuHeight,Color.white);bg.sprite=BrandSplashArt.Get("Garden/courtyard");bg.raycastTarget=false;layout.Background=bg.rectTransform;
+  var root=UICraft.Root(page,"044 approved composition",0,0,720,1130);layout.Content=root;
+  layout.Panel=A44.Image(root,"panel",360,585,676,1040,true).rectTransform;
+  A44.Text(root,title,360,207,600,48,35);A44.Text(root,"把花园里的小美好，装进口袋",360,246,620,30,17,A44.Muted);
+  layout.Layout(menuHeight,WeChatPageTopReserve(),HomeNavigationReserve);return root;
+ }
+ void BuildCosmeticShop(RectTransform page){DrawShop044(page);}
+ void DrawShop(){if(!pages.TryGetValue("shop",out var page)||page==null){if(currentPage!=null&&CurrentPage=="shop")DrawShop044(currentPage);return;}DrawShop044(page);}
+ void DrawShop044(RectTransform page){
+  shopCategory=Mathf.Clamp(shopCategory,0,2);shopBody=MakeComposition044(page,"喵喵小铺",out shopLayout044);referenceShopHeight=1130;
+  A44.Image(shopBody,"banner",360,343.5f,606,129);A44.BannerText(shopBody,"发现小美好",205,324,290,48,35,true);A44.BannerText(shopBody,"道具 · 头像 · 头像框",205,360,290,31,20,false);
+  A44.Button(shopBody,"044 open dressing","更换装扮",179.5f,452,235,52,()=>OpenDressing(),"secondary",21);
+  var wallet=A44.Card(shopBody,"044 wallet",466,425,193,54);A44.Image(wallet,"coin",32,27,34,34);referenceWallet=A44.Text(wallet,Profile.Coins.ToString("N0"),115,27,112,36,24);referenceWalletTarget=wallet;walletText=referenceWallet;walletTarget=wallet;
+  for(int i=0;i<3;i++){int tab=i;A44.Button(shopBody,"044 category "+i,new[]{"道具","头像","头像框"}[i],153+i*207,531.5f,192,63,()=>{shopCategory=tab;DrawShop();},i==shopCategory?"selected":"secondary",24);}
+  if(shopCategory==0)DrawTools044();else DrawShopCosmetics044(shopCategory==2);
+ }
+ void Price044(Transform parent,string name,int price,float x,float y,float w,float h,Action action,bool enabled=true){var b=A44.Button(parent,name,"",x,y,w,h,action);b.interactable=enabled;var v=b.transform.Find("ButtonVisual");A44.Image(v,"coin",w*.32f,h*.48f,h*.55f,h*.55f);A44.Text(v,price.ToString("N0"),w*.61f,h*.48f,w*.45f,h*.8f,Mathf.RoundToInt(h*.5f));}
+ void DrawTools044(){
+  for(int i=0;i<3;i++){var kind=(StreakBooster)(i+1);float y=577+i*145;var card=A44.Card(shopBody,"044 booster "+kind,57,y,606,133);
+   var icon=UICraft.Box(card,"044 live booster "+kind,-216,0,130,112,Color.white);icon.sprite=ScoreSkillArt.Booster(kind);icon.preserveAspect=true;icon.raycastTarget=false;
+   A44.Text(card,new[]{"穿透球","爆炸球","超级光球"}[i],259,27,255,38,25);A44.Text(card,i==0?"穿过普通砖，固定砖会阻挡":i==1?"撞击后触发范围爆炸":"十字激光造成2点伤害",363,62,410,27,17,A44.Muted);A44.Text(card,"拥有 "+Profile.BoosterStock(kind),237,104,160,27,18,A44.Muted);
+   bool unlocked=Profile.BoosterUnlocked(kind);if(unlocked)Price044(card,"044 buy booster "+kind,LocalProfile.BoosterPrice(kind),496.5f,105,177,36,()=>OpenBoosterOffer(kind));else A44.Button(card,"044 locked booster "+kind,"第"+LocalProfile.BoosterUnlockLevel(kind)+"关解锁",496.5f,105,177,36,()=>Toast("第"+LocalProfile.BoosterUnlockLevel(kind)+"关解锁"),"secondary",17);
+  }
+  A44.Button(shopBody,"044 economy guide","金币获取与道具说明",360,1038.5f,502,45,OpenEconomyGuide,"secondary",21);
+ }
+ void DrawShopCosmetics044(bool frame){for(int i=0;i<6;i++){var item=CatCosmeticCatalog.Items[i];float x=57+i%3*207,y=577+i/3*214;var card=A44.Card(shopBody,"044 cosmetic "+item.id+(frame?" frame":" avatar"),x,y,192,202);if(frame)CatCosmeticCatalog.Create(card,Profile.EquippedAvatarResource,item.frame.resource,0,34,120);else A44.Avatar(card,item.avatar.resource,96,67,120);
+   A44.Text(card,frame?A44.FrameNames[i]:A44.Names[i],96,143,184,28,20);bool owned=Profile.OwnsShopCosmetic(item.id,frame);if(owned)A44.Button(card,"044 owned "+item.id,"已拥有",96,179,158,32,()=>OpenCosmeticOffer(item.id,frame),"secondary",16);else Price044(card,"044 buy cosmetic "+item.id+(frame?" frame":" avatar"),LocalProfile.CosmeticPrice(item.id,frame),96,179,158,32,()=>OpenCosmeticOffer(item.id,frame));
+  }A44.Text(shopBody,"挑一份喜欢，把好心情带回花园",360,1038,620,30,20,A44.Muted);}
+ void BuildDressingPage044(RectTransform page){dressingPage044=page;DrawDressing();}
+ public void OpenLeagueCosmetics044(){ShowPage("league-prizes");}
+ void BuildLeagueCosmetics044(RectTransform page){var root=MakeComposition044(page,"联赛专属装扮",out var layout);for(int i=0;i<3;i++){float y=286+i*252;var card=A44.Card(root,"044 league prize "+i,57,y,606,234);A44.RewardPortrait(card,i,-193,0,182);A44.Text(card,A44.RewardNames[i],391,38,340,45,31);var set=LeagueExclusiveCosmetics.Items[i];var current=Profile.LeagueUnlocked?LeagueSource.Read():null;bool collected=Profile.OwnsShopCosmetic(set.id,false)&&Profile.OwnsShopCosmetic(set.id,true);A44.Text(card,collected?"已收集 · 联赛专属":current!=null&&LeagueExclusiveCosmetics.ByResource(current.config.cosmetic.avatarResource)?.id==set.id?"本期联赛奖励":"联赛专属 · 按期轮换",391,75,340,28,18,A44.Muted);string suffix=(i+1).ToString("D2");A44.Avatar(card,"DressingShop044/league-avatar-"+suffix,326,140,84);A44.Image(card,"league-frame-"+suffix,465,140,84,84);A44.Text(card,"头像",326,206,130,27,18);A44.Text(card,"头像框",465,206,150,27,18);}}
+ public void OpenDressing(bool frames=false){dressingFrames=frames;previewAvatar=Profile.EquippedAvatarId;previewFrame=Profile.EquippedFrameId;ShowPage("dressing");DrawDressing();}
+ string AvatarResource044(string id){if(string.IsNullOrEmpty(id))return CatCosmeticCatalog.Default.avatar.resource;return Profile.CosmeticResource044(id,false);}
+ string FrameResource044(string id){if(string.IsNullOrEmpty(id))return CatCosmeticCatalog.Default.frame.resource;return Profile.CosmeticResource044(id,true);}
+ string CosmeticName044(string id,bool frame){var exclusive=LeagueExclusiveCosmetics.ById(id);if(exclusive!=null)return exclusive.name;var list=CatCosmeticCatalog.Items;int index=Array.FindIndex(list,it=>it.id==id);if(index<0)return "联赛专属";return index<6?(frame?A44.FrameNames[index]:A44.Names[index]):frame?FrameNames[index]:CatNames[index];}
+ void DrawDressing(){if(dressingPage044==null)return;
+  var root=MakeComposition044(dressingPage044,"更换装扮",out dressingLayout044);var card=A44.Card(root,"044 current preview",57,281,606,165);CatCosmeticCatalog.Create(card,AvatarResource044(previewAvatar),FrameResource044(previewFrame),-204,0,143);A44.Text(card,"当前预览",377,27,300,27,18,A44.Muted);A44.Text(card,CosmeticName044(string.IsNullOrEmpty(dressingFrames?previewFrame:previewAvatar)?CatCosmeticCatalog.Default.id:(dressingFrames?previewFrame:previewAvatar),dressingFrames),377,69,320,42,28);A44.Button(card,"044 dressing to shop","前往小铺",382.5f,126.5f,235,49,()=>OpenShopCategory(dressingFrames?2:1),"secondary",20);
+  for(int i=0;i<2;i++){bool frame=i==1;A44.Button(root,"044 dressing tab "+i,frame?"头像框":"头像",204+i*312,505,294,66,()=>{dressingFrames=frame;DrawDressing();},frame==dressingFrames?"selected":"secondary",25);}
+  // Fixed footer is rebuilt on both avatar and frame tabs, outside the scroll mask.
+  var saveFooter=A44.Rect(root,"045 fixed dressing footer",360,1022,606,82);saveFooter.SetAsLastSibling();
+  A44.Button(saveFooter,"044 save dressing","保存装扮",303,41,528,64,()=>{if(!Profile.EquipShopCosmetics(previewAvatar,previewFrame)){SoundService.Play("ui_unavailable");Toast("装扮保存失败，请重试。");return;}SoundService.Play("cosmetic_equip");RefreshLeagueViews();DrawDressing();Toast("装扮已保存");},"primary",29);
+  var ids=CatCosmeticCatalog.Items.Take(6).Select(it=>it.id).Concat(LeagueExclusiveCosmetics.Items.Select(it=>it.id)).Concat((dressingFrames?Profile.OwnedFrameIds:Profile.OwnedAvatarIds).Where(id=>!LeagueExclusiveCosmetics.Items.Any(set=>set.id==id)&&!CatCosmeticCatalog.Items.Take(6).Any(it=>it.id==id))).Distinct().ToArray();
+  A44.Text(root,"下滑查看联赛专属装扮",360,977,606,22,17,A44.Muted);
+  var viewport=A44.Rect(root,"044 dressing viewport",360,756.5f,606,417);viewport.gameObject.AddComponent<Image>().color=new Color(1,1,1,.001f);viewport.gameObject.AddComponent<RectMask2D>();var scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.horizontal=false;scroll.movementType=ScrollRect.MovementType.Clamped;scroll.inertia=true;scroll.scrollSensitivity=28;scroll.viewport=viewport;float gridHeight=Mathf.Max(417,Mathf.Ceil(ids.Length/3f)*215-13);var grid=UICraft.Root(viewport,"044 dressing grid",0,0,606,gridHeight);grid.anchorMin=grid.anchorMax=new Vector2(.5f,1);grid.pivot=new Vector2(.5f,1);grid.anchoredPosition=Vector2.zero;scroll.content=grid;
+  for(int i=0;i<ids.Length;i++){string id=ids[i];bool f=dressingFrames,owned=Profile.OwnsShopCosmetic(id,f);string current=f?previewFrame:previewAvatar;bool selected=(string.IsNullOrEmpty(current)?CatCosmeticCatalog.Default.id:current)==id;float x=i%3*207,y=i/3*215;
+   var tile=A44.Card(grid,"044 dressing card "+id,x,y,192,202);if(selected){var rim=tile.GetComponentInChildren<Image>().gameObject.AddComponent<Outline>();rim.effectColor=new Color32(112,173,112,255);rim.effectDistance=new Vector2(2,-2);}
+   var hit=CSettingsArt.Button(tile,"044 select "+id,"",0,0,192,202,()=>{if(!owned){SoundService.Play("ui_unavailable");Toast(LeagueExclusiveCosmetics.ById(id)!=null?"联赛专属装扮，参与联赛获奖后解锁。":"尚未解锁，去小铺看看吧。");return;}if(f)previewFrame=id;else previewAvatar=id;DrawDressing();},null);hit.gameObject.AddComponent<ShopScrollDrag>();var v=hit.transform.Find("ButtonVisual");if(f)CatCosmeticCatalog.Create(v,AvatarResource044(previewAvatar),FrameResource044(id),0,27,128);else A44.Avatar(v,AvatarResource044(id),96,74,128);
+   A44.Text(v,CosmeticName044(id,f),96,156,183,29,21);string equipped=f?Profile.EquippedFrameId:Profile.EquippedAvatarId;bool usingIt=(string.IsNullOrEmpty(equipped)?CatCosmeticCatalog.Default.id:equipped)==id;A44.Text(v,selected?(usingIt?"使用中":"已选择"):owned?"已拥有":LeagueExclusiveCosmetics.ById(id)!=null?"联赛专属":"未拥有",96,184,180,26,18,A44.Muted);
+  }
+
+ }
+}
+public sealed partial class LocalProfile {
+ public string CosmeticResource044(string id,bool frame){var historical=league.rewards.LastOrDefault(it=>it.claimed&&(frame?it.frameId:it.avatarId)==id);if(historical!=null)return frame?historical.frameResource:historical.avatarResource;var exclusive=LeagueExclusiveCosmetics.ById(id);if(exclusive!=null)return frame?exclusive.frame:exclusive.avatar;var item=CatCosmeticCatalog.Items.FirstOrDefault(i=>i.id==id);if(item!=null)return frame?item.frame.resource:item.avatar.resource;var r=league.rewards.LastOrDefault(it=>it.claimed&&(frame?it.frameId:it.avatarId)==id);if(r!=null)return frame?r.frameResource:r.avatarResource;return frame?CatCosmeticCatalog.Default.frame.resource:CatCosmeticCatalog.Default.avatar.resource;}
+}
+}

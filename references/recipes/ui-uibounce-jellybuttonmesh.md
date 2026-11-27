@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/UIBounce.cs`
-文件 SHA-256：`9b21795211036a85c7f5d6c6c771108b2798cb2c2a7d5e09637809174be3d34f`
+文件 SHA-256：`1b77e68db3f5fe0713dd8c7a69cc2cd591fb3efc528f41a6fad970b27c2cadc3`
 [原始源码快照](../source/Assets/Scripts/UI/UIBounce.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

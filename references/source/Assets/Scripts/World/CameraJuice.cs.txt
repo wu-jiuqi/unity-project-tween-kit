@@ -7,7 +7,7 @@ public sealed class CameraJuice:MonoBehaviour {
  float left,duration=.20f,amplitude,episodeUntil;
  Vector3 rest;Camera cameraView;
  public Vector3 WorldOffset=>transform.parent==null?transform.localPosition-rest:transform.parent.TransformVector(transform.localPosition-rest);
- public bool Active=>left>0;
+ 
  void Awake(){rest=transform.localPosition;cameraView=GetComponent<Camera>();}
  public void ImpactScreen(float screenHeightFraction,float seconds){Impact(screenHeightFraction*cameraView.orthographicSize*2,seconds);}
  public void Impact(float strength=.12f,float seconds=.20f){

@@ -26,7 +26,7 @@ public sealed partial class GameSession {
   }
 
  }
- bool FlowReservedAbove(int c,int r){for(int y=0;y<r;y++)if(FlowReserved(c,y))return true;return false;}
+ 
  bool FlowShortcutSafe(GridMotion own,Vector2 from,Vector2 to,float start,float end,Dictionary<Transform,int> sizes,ChainGridPiece[] stationary,Dictionary<Transform,Rect> sweepBounds){
   int size=sizes[own.View];foreach(var p in stationary)if(FlowSegmentBox(from,to,ChainPiecePosition(p),CollectionLevels.Pitch*(size+p.Size)*.5f-.035f))return false;
   Vector2 lo=Vector2.Min(from,to),hi=Vector2.Max(from,to);

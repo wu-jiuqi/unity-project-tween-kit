@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/InGameFeedbackView.cs`
-文件 SHA-256：`48566b028a2c6e9acf0b086315d96ad25416aa07fa89a52ac855629d4977e0b5`
+文件 SHA-256：`97bc7bd8a05fc343ccf25284b924a083a5c725b13d850144eb56c4ed4d18393e`
 [原始源码快照](../source/Assets/Scripts/UI/InGameFeedbackView.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

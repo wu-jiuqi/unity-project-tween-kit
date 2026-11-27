@@ -4,56 +4,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 namespace BounceGarden {
-public static class ChapterSceneArt {
- public static string Theme(int level)=>level<26?"alphabet":"picnic";
- public static string Title(int chapter)=>chapter==0?"字母花园":chapter==1?"猫咪野餐":"冰雪花园";
- public static string Range(int chapter)=>chapter==0?"第1—26关":chapter==1?"第27—52关":"第53—78关";
-}
-public static class ReferenceChapterArt {
- public struct Slice {public string key;public Rect box;public Slice(string k,float x,float y,float w,float h){key=k;box=new Rect(x,y,w,h);}}
- public static readonly Slice[] Chapters={new Slice("back",20,62,97,98),new Slice("info",713,62,97,98),new Slice("alphabet",32,245,758,294),new Slice("reward",280,547,274,99),new Slice("picnic",32,664,758,744),new Slice("toy",32,1408,758,249)};
- public static Image Image(RectTransform root,string key,Rect b,float width,float height){var i=UICraft.Art(root,"ReferenceV49/"+key,b.center.x-width*.5f,height*.5f-b.center.y,b.width,b.height);if(i==null)throw new InvalidOperationException("Missing reference slice "+key);if(key=="chapters-toy"){var s=i.sprite;var r=s.textureRect;r.height-=6;i.sprite=Sprite.Create(s.texture,r,Vector2.one*.5f,100,0,SpriteMeshType.FullRect);}i.preserveAspect=false;return i;}
- public static void DrawChapter(RectTransform root){
- var backing=Image(root,"chapters-base",new Rect(0,0,830,1774),830,1774);
- // Reuse the clean original backing. Stretch blank ribbon/pill strips over English letters only.
- CoverTitle(root,backing.sprite,new Rect(220,78,10,54),new Rect(280,78,275,54));
- CoverTitle(root,backing.sprite,new Rect(286,166,10,30),new Rect(298,166,245,30));
- var heading=UICraft.Label(root,"章节之旅",0,887-105,420,70,48);heading.color=Color.white;
- UICraft.Label(root,"喵弹拆箱",3,887-181,270,42,29);
- foreach(var slice in Chapters)Image(root,"chapters-"+slice.key,slice.box,830,1774);
- }
- static void CoverTitle(RectTransform root,Sprite source,Rect sample,Rect target){
- var tr=source.textureRect;float sx=tr.width/830,sy=tr.height/1774;
- var region=new Rect(tr.x+sample.x*sx,tr.y+(1774-sample.yMax)*sy,sample.width*sx,sample.height*sy);
- var strip=Sprite.Create(source.texture,region,Vector2.one*.5f,100,0,SpriteMeshType.FullRect);
- var img=UICraft.Box(root,"Native localized title backing",target.center.x-415,887-target.center.y,target.width,target.height,Color.white);img.sprite=strip;img.type=UnityEngine.UI.Image.Type.Simple;
- }
 
-}
+
 public sealed class ChapterHomeView:MonoBehaviour {
- RectTransform frame,bounds,background,oldBackground,avatarWidget,footer,quote;JellyChapterOrb orb;string theme,avatarResource,frameResource;static string previousTheme;bool initialized;
- public bool TransitionActive{get;private set;}
- public static void SetThemeImmediately(int chapter){previousTheme=chapter==0?"alphabet":chapter==1?"picnic":"snow";}
- public void Build(int next,Action chapters,Action start,Action avatar,Action settings,Action league,Action shop,Action<string> notify){
-  theme=ChapterSceneArt.Theme(next);background=CreateBackground(transform,theme,"Live theme background");frame=UICraft.Root(transform,"Native home composition",0,0,853,1844);
-  RefreshAvatar();var avatarHit=UICraft.Button(frame,"",-351,630.5f,140,146,UICraft.Green,avatar);avatarHit.name="Profile avatar";avatarHit.transform.Find("ButtonVisual").gameObject.SetActive(false);
-  HeaderMedallions.Settings(frame,344,630.5f,settings);frame.Find("Settings medallion").localScale=Vector3.one*.9f;
-  var logo=PastelLogo.Create(frame,0,630.5f,350,130);logo.name="Header wordmark";logo.gameObject.AddComponent<HomeWordmarkWiggle>();
-  var carousel=ActivityCarousel.Create(frame,notify,route=>{if(route=="ranking")league();else if(route=="shop")shop();});var carouselRect=(RectTransform)carousel.transform;carouselRect.anchoredPosition=new Vector2(10,312);carouselRect.localScale=Vector3.one*.78f;
-  var dots=frame.Find("Activity page indicators") as RectTransform;dots.anchoredPosition=new Vector2(0,67);dots.localScale=Vector3.one*.78f;
-  footer=HomeProgress.PlayButton(frame,next,start).GetComponent<RectTransform>();footer.anchoredPosition=new Vector2(0,-788);footer.localScale=Vector3.one*.76f;
-  
-  quote=HomeFeedbackView.Create(frame).GetComponent<RectTransform>();quote.localScale=Vector3.one*.72f;quote.anchoredPosition=new Vector2(0,-104);
-  bounds=UICraft.Root(transform,"Chapter orb safe bounds");orb=JellyChapterOrb.Create(bounds,chapters);
-  if(previousTheme!=null&&previousTheme!=theme)StartCoroutine(Transition(previousTheme));previousTheme=theme;
- }
- static readonly Dictionary<string,Sprite> compressedBackgrounds=new Dictionary<string,Sprite>();
- RectTransform CreateBackground(Transform parent,string key,string name){
-  var root=UICraft.Root(parent,name);var image=UICraft.Art(root,"NativeV50/background-"+key,0,0,853,1844);
-  if(image==null){if(!compressedBackgrounds.TryGetValue(key,out var sprite)){var texture=Resources.Load<Texture2D>("Art/NativeV50/background-"+key);if(texture==null)throw new InvalidOperationException("Missing clean theme background "+key);sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);compressedBackgrounds.Add(key,sprite);}image=UICraft.Box(root,"NativeV50/background-"+key,0,0,853,1844,Color.white);image.sprite=sprite;image.type=Image.Type.Simple;}
-  image.preserveAspect=false;var fit=image.gameObject.AddComponent<AspectRatioFitter>();fit.aspectMode=AspectRatioFitter.AspectMode.EnvelopeParent;fit.aspectRatio=853f/(key=="alphabet"?1843f:1844f);var canvas=GetComponentInParent<Canvas>();root.SetParent(canvas.transform,false);root.SetSiblingIndex(1);root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.offsetMin=root.offsetMax=Vector2.zero;return root;
- }
- IEnumerator Transition(string oldTheme){TransitionActive=true;oldBackground=CreateBackground(transform,oldTheme,"Theme dissolve background only");oldBackground.SetSiblingIndex(background.GetSiblingIndex()+1);var group=oldBackground.gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;float time=0;while(time<.8f){time+=Time.unscaledDeltaTime;float t=Mathf.Clamp01(time/.8f);group.alpha=1-t*t*(3-2*t);yield return null;}Destroy(oldBackground.gameObject);oldBackground=null;TransitionActive=false;orb?.Pulse();}
+ RectTransform frame,bounds,background,oldBackground,avatarWidget,footer,quote;JellyChapterOrb orb;string avatarResource,frameResource;bool initialized;
+ 
+ 
+ 
+ 
+ 
+ 
  public void Layout(float h,float reserve){var root=(RectTransform)transform;root.sizeDelta=new Vector2(1080,h);root.anchoredPosition=Vector2.zero;
   // The large settings medallion may tuck behind the capsule at its top;
   // keep its lower half visible instead of reserving an entire empty row.
@@ -69,6 +29,6 @@ public sealed class ChapterHomeView:MonoBehaviour {
  void RefreshAvatar(){var owner=GetComponentInParent<AppUI>();if(owner==null)return;var p=owner.Profile;if(avatarWidget!=null&&avatarResource==p.EquippedAvatarResource&&frameResource==p.EquippedFrameResource)return;avatarResource=p.EquippedAvatarResource;frameResource=p.EquippedFrameResource;if(avatarWidget!=null){avatarWidget.gameObject.SetActive(false);Destroy(avatarWidget.gameObject);}HeaderMedallions.Avatar(frame,-351,630.5f,p);avatarWidget=(RectTransform)frame.GetChild(frame.childCount-1);avatarWidget.localScale=Vector3.one*.72f;}
 }
 public sealed class ChapterRouteView:MonoBehaviour {
- JellyJourney80 route;public void Build(LocalProfile profile,Action back,Action<int> select,Action<string> notify){route=gameObject.AddComponent<JellyJourney80>();route.Build(profile,back,select,notify);}public void Layout(float h,float reserve,float topInset=0,float bottomInset=0){route?.Layout(h,reserve,topInset,bottomInset);}
+ JellyJourney80 route;public void Build(LocalProfile profile,Action back,Action<int> select,Action<string> notify){route=gameObject.AddComponent<JellyJourney80>();route.Build(profile,back,select,notify);}public void Layout(float h,float reserve,float topInset=0,float bottomInset=0,float bottomReserve=0){route?.Layout(h,reserve,topInset,bottomInset,bottomReserve);}
 }
 }

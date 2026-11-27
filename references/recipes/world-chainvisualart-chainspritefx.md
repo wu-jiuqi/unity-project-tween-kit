@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/ChainVisualArt.cs`
-文件 SHA-256：`7c8976dbc75db1f453ce6734776ff2bb08298e8b2a4c598c1aba6c4cfd6cd66c`
+文件 SHA-256：`3216758c0bb59dd3d908eb91db07591ed3ccd04436ede61f83099533e6530bfa`
 [原始源码快照](../source/Assets/Scripts/World/ChainVisualArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

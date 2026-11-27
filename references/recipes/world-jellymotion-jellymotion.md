@@ -54,8 +54,6 @@ public static Vector2 FloatOffset(float age,int index)=>new Vector2(Mathf.Sin(ag
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/JellyBalanceR2QA.cs:15` · `JellyBalanceR2QA.Start` → `JellyMotion.FloatScale(.2f,i)`
-- `Assets/Scripts/JellyBalanceR2QA.cs:15` · `JellyBalanceR2QA.Start` → `JellyMotion.FloatScale(.35f,i)`
 - `Assets/Scripts/UI/VictoryFinale.cs:37` · `VictoryFinale.Advance` → `JellyMotion.FloatScale(hold,i)`
 - `Assets/Scripts/UI/VictoryPresentation.Stars.cs:9` · `VictoryPresentation.RenderHeaderStars` → `JellyMotion.FloatScale(idle,i)`
 

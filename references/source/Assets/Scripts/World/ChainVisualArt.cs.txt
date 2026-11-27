@@ -19,32 +19,8 @@ public sealed class ChainGlint:MonoBehaviour {
  public void Initialize(GameSession game,SpriteRenderer sprite){owner=game;generation=game.Generation;image=sprite;}
  void Update(){if(owner==null||owner.Generation!=generation){Destroy(gameObject);return;}if(owner.IsPaused)return;age+=Time.deltaTime;image.color=new Color(1,1,1,Mathf.Clamp01(1-age/.24f));transform.localRotation=Quaternion.Euler(0,0,age*80);if(age>=.24f)Destroy(gameObject);}
 }
-public sealed class ChainIdleSprite:MonoBehaviour {
- GameSession owner;SpriteRenderer image;int row,generation;float age;
- public int VisibleFrame {get;private set;}
- public void Initialize(GameSession game,SpriteRenderer renderer,int animation){owner=game;generation=game.Generation;image=renderer;row=animation;}
- public void Tick(float dt){if(owner==null||generation!=owner.Generation||owner.IsPaused||!owner.IsPlaying)return;age+=dt;VisibleFrame=Mathf.FloorToInt(age*10)%6;image.sprite=ChainVisualArt.Frame(0,row,VisibleFrame);image.transform.localPosition=Vector3.up*(Mathf.Sin(age*3)*.025f);}
- void Update(){Tick(Time.deltaTime);}
-}
-public sealed class ChainBrickView:MonoBehaviour {
- GameSession owner;BrickBody brick;SpriteRenderer image;int kind;bool previousShell;float age,hitAge=10,blockCooldown;Vector3 baseScale;
- public int VisibleFrame {get;private set;}
- public void Initialize(BrickBody body,GameSession game,int role,float footprint=1f){brick=body;owner=game;kind=role;previousShell=body.ShellIntact;image=ChainVisualArt.Draw(transform,"Painted sprite",ChainVisualArt.Frame(kind==3?2:0,kind==3?0:kind-1,0),(kind==3?.93f:1f)*footprint,61);if(kind==3)image.transform.localScale=Vector3.Scale(image.transform.localScale,new Vector3(1,1.12f,1));baseScale=image.transform.localScale;Refresh();}
- public void Refresh(){
-  if(brick==null)return;
-  if(kind==1||kind==2){int lost=brick.Definition.hp-brick.CurrentHealth;int frame=kind==1?Mathf.RoundToInt(lost*5f/Mathf.Max(1,brick.Definition.hp-1)):lost==0?0:1+Mathf.RoundToInt((lost-1)*4f/Mathf.Max(1,brick.Definition.hp-2));image.sprite=ChainVisualArt.Frame(0,kind-1,Mathf.Clamp(frame,0,5));}
-  if(previousShell&&!brick.ShellIntact){ChainVisualArt.Effect(owner,3,1,brick.transform.position,1.05f);previousShell=false;}
- }
- public void Hit(bool rear=false){hitAge=0;if(rear&&kind==3)image.sprite=ChainVisualArt.Frame(2,1,0);else Refresh();}
- public void Block(Vector2 point){if(blockCooldown>0)return;blockCooldown=.07f;ChainVisualArt.Glint(owner,point,4,.25f);}
- public void Tick(float dt){if(owner==null||image==null||owner.IsPaused||!owner.IsPlaying)return;age+=dt;hitAge+=dt;blockCooldown=Mathf.Max(0,blockCooldown-dt);if(kind==3){bool hit=hitAge<6f/18;VisibleFrame=hit?Mathf.Min(5,Mathf.FloorToInt(hitAge*18)):Mathf.FloorToInt(age*9)%6;image.sprite=ChainVisualArt.Frame(2,hit?1:0,VisibleFrame);}float bump=Mathf.Sin(Mathf.Clamp01(hitAge/.16f)*Mathf.PI)*.065f;image.transform.localScale=Vector3.Scale(baseScale,new Vector3(1+bump,1-bump,1));}
- void Update(){Tick(Time.deltaTime);}
-}
-public sealed class ChainStoneView:MonoBehaviour {
- GameSession owner;BrickBody brick;SpriteRenderer image;float age=1;
- public void Initialize(GameSession game,BrickBody body){owner=game;brick=body;image=ChainVisualArt.Draw(transform,"Stone contact frames",ChainVisualArt.Frame(3,0,0),1.25f,60);image.enabled=false;}
- public void Hit(){age=0;brick.Face.enabled=false;image.enabled=true;image.sprite=ChainVisualArt.Frame(3,0,0);}
- void Update(){if(owner==null||image==null||owner.IsPaused||!owner.IsPlaying)return;age+=Time.deltaTime;if(age<6f/24){image.sprite=ChainVisualArt.Frame(3,0,Mathf.Min(5,Mathf.FloorToInt(age*24)));}else if(image.enabled){image.enabled=false;brick.Face.enabled=true;}}
-}
+
+
+
 }
 

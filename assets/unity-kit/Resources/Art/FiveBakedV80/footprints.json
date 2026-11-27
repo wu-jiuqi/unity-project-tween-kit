@@ -1,0 +1,44 @@
+{
+  "entries": [
+    {
+      "key": "bomb-five-colors",
+      "fraction": 0.78
+    },
+    {
+      "key": "cross-five-colors",
+      "fraction": 0.684
+    },
+    {
+      "key": "flower-five-colors",
+      "fraction": 0.716
+    },
+    {
+      "key": "horizontal-five-colors",
+      "fraction": 0.78
+    },
+    {
+      "key": "ordinary-blue",
+      "fraction": 0.48243
+    },
+    {
+      "key": "ordinary-lilac",
+      "fraction": 0.48562
+    },
+    {
+      "key": "ordinary-mint",
+      "fraction": 0.46965
+    },
+    {
+      "key": "ordinary-pink",
+      "fraction": 0.47923
+    },
+    {
+      "key": "ordinary-yellow",
+      "fraction": 0.47923
+    },
+    {
+      "key": "vertical-five-colors",
+      "fraction": 0.72
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/OpeningThirdArt.cs`
-文件 SHA-256：`304b2893caf9388132abefacf9d5d803aaeeedced7a043ab67f28a8fcef8459c`
+文件 SHA-256：`18a62aaee2aa40e8a034894b9c497fcf840718696c0be5821f8d0c3abb7f81f7`
 [原始源码快照](../source/Assets/Scripts/World/OpeningThirdArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

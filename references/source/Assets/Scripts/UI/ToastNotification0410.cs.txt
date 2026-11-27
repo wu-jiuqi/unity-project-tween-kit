@@ -1,0 +1,81 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using DG.Tweening;
+
+namespace BounceGarden {
+public enum ToastKind0410 { Info, Success, Coins, Failure }
+
+// One non-interactive toast. Its layout root compensates the battle canvas;
+// only the inner visual participates in the shared C-style modal tween.
+public sealed class ToastNotification0410:MonoBehaviour {
+ AppUI owner;RectTransform root,visual;CanvasGroup group;Image board,icon;TMP_Text label;
+ Sequence motion;string pending;float holdUntil;bool initialized;
+ public string Message{get;private set;}
+ public ToastKind0410 Kind{get;private set;}
+ public string Phase{get;private set;}="idle";
+ 
+ 
+ 
+ 
+ public float Height{get;private set;}=180;
+ public static ToastKind0410 Classify(string message){
+  if(message.Contains("金币不足"))return ToastKind0410.Coins;
+  if(message.Contains("失败")||message.Contains("未能")||message.Contains("未找到"))return ToastKind0410.Failure;
+  if(message.Contains("已保存")||message.Contains("保存成功")||message.Contains("购买成功")||message.Contains("领取成功"))return ToastKind0410.Success;
+  return ToastKind0410.Info;
+ }
+ public static float Hold(ToastKind0410 kind)=>kind==ToastKind0410.Success?2.2f:kind==ToastKind0410.Coins?2.8f:3.2f;
+ public void Initialize(AppUI app){
+  owner=app;root=(RectTransform)transform;visual=UICraft.Root(root,"Toast visual",0,0,900,180);
+  group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;group.interactable=false;group.alpha=0;
+  board=UICraft.Box(visual,"Cream toast panel",0,0,900,180,Color.white);board.sprite=ToastArt0410.Get("toast-panel");board.type=Image.Type.Sliced;
+  icon=UICraft.Box(visual,"Toast state icon",-362,0,100,100,Color.white);icon.type=Image.Type.Simple;icon.preserveAspect=true;
+  label=UICraft.Label(visual,"",50,5,630,140,47);label.color=new Color32(113,75,44,255);label.fontSizeMin=32;label.fontSizeMax=47;
+  label.enableWordWrapping=true;label.overflowMode=TextOverflowModes.Overflow;label.richText=false;
+  initialized=true;
+ }
+ public void Show(string message){
+  if(string.IsNullOrWhiteSpace(message))return;
+  if(Phase!="idle"){
+   if(message==Message&&Phase!="exiting"){pending=null;holdUntil=Time.unscaledTime+Hold(Kind);return;}
+   pending=message;if(Phase!="exiting")Exit();return;
+  }
+  Message=message;Kind=Classify(message);label.text=message;
+  icon.sprite=Kind==ToastKind0410.Info?CSettingsArt.Get("decor_paw"):ToastArt0410.Get(Kind==ToastKind0410.Success?"icon-saved":Kind==ToastKind0410.Coins?"icon-coins":"icon-retry");
+  // Keep long existing business messages complete instead of baking/shortening them.
+  var preferred=label.GetPreferredValues(message,630,1000);Height=Mathf.Clamp(preferred.y+50,180,400);
+  root.sizeDelta=visual.sizeDelta=new Vector2(900,Height);board.rectTransform.sizeDelta=new Vector2(900,Height);
+  board.pixelsPerUnitMultiplier=board.sprite.rect.height/Height;label.rectTransform.sizeDelta=new Vector2(630,Height-40);
+  owner.LayoutToast0410(this);transform.SetAsLastSibling();Phase="entering";visual.localScale=Vector3.one*.96f;group.alpha=0;
+  motion=DOTween.Sequence().SetUpdate(true).SetId(this);
+  motion.Append(visual.DOScale(Vector3.one,.18f).SetEase(Ease.OutCubic));motion.Join(group.DOFade(1,.18f).SetEase(Ease.OutCubic));
+  motion.OnComplete(()=>{motion=null;Phase="holding";holdUntil=Time.unscaledTime+Hold(Kind);});
+ }
+ void Exit(){
+  motion?.Kill(false);motion=null;Phase="exiting";
+  // Vector multiplication also remains correct when the entry tween is interrupted.
+  motion=DOTween.Sequence().SetUpdate(true).SetId(this);
+  motion.Append(visual.DOScale(visual.localScale*.94f,.14f).SetEase(Ease.InCubic));motion.Join(group.DOFade(0,.14f).SetEase(Ease.InCubic));
+  motion.OnComplete(()=>{motion=null;var next=pending;pending=null;Phase="idle";if(next!=null)Show(next);else Dismiss();});
+ }
+ public void Dismiss(){pending=null;motion?.Kill(false);motion=null;Phase="idle";if(group!=null)group.alpha=0;gameObject.SetActive(false);Destroy(gameObject);}
+ void Update(){if(Phase=="holding"&&Time.unscaledTime>=holdUntil)Exit();}
+ void LateUpdate(){if(initialized&&owner!=null)owner.LayoutToast0410(this);}
+ void OnDisable(){pending=null;motion?.Kill(false);motion=null;Phase="idle";if(group!=null)group.alpha=0;}
+ void OnDestroy(){motion?.Kill(false);}
+ void OnApplicationFocus(bool focus){if(!focus&&initialized)Dismiss();}
+ void OnApplicationPause(bool paused){if(paused&&initialized)Dismiss();}
+}
+
+public static class ToastArt0410 {
+ static readonly System.Collections.Generic.Dictionary<string,Sprite> sprites=new System.Collections.Generic.Dictionary<string,Sprite>();
+ public static Sprite Get(string name){
+  if(sprites.TryGetValue(name,out var sprite))return sprite;
+  var texture=Resources.Load<Texture2D>("Art/Toasts0410/"+name);if(texture==null)throw new InvalidOperationException("Missing toast art: "+name);
+  var border=name=="toast-panel"?new Vector4(220,150,220,150):Vector4.zero;
+  sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,border);sprite.name="Toasts0410/"+name;return sprites[name]=sprite;
+ }
+}
+}

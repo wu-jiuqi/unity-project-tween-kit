@@ -1,0 +1,36 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+// The platform loader owns preparation; this host reuses the SAME brand view.
+// It replaces the old loading illustration without adding a second logo intro.
+public class BrandStartupHost:MonoBehaviour {
+ RectTransform safe,content;JellyLogoIntro intro;float pending;bool complete,failed;string failure;
+ public RectTransform ContentRoot=>content;
+ public int Percent=>intro==null?0:intro.Loading.Percent;
+ public bool IsComplete=>intro!=null&&intro.CanDismiss&&intro.Elapsed>=JellyLogoIntro.HoldDuration;
+ public void Build(){
+  var cover=UICraft.Box(transform,"Brand launch backdrop",0,0,6000,6000,Color.white,false,true);BrandSplashArt.Background(cover);
+  safe=UICraft.Root(transform,"Brand safe area");safe.anchorMin=Vector2.zero;safe.anchorMax=Vector2.one;safe.sizeDelta=Vector2.zero;
+  content=UICraft.Root(safe,"Brand startup content");Layout();StartCoroutine(BeginWhenVisible());
+ }
+ IEnumerator BeginWhenVisible(){
+  while(!UnityEngine.Rendering.SplashScreen.isFinished)yield return null;yield return null;
+  intro=content.gameObject.AddComponent<JellyLogoIntro>();intro.Begin(false);intro.Loading.SetProgress(pending);
+  if(failed)intro.Loading.Failure(failure);
+ }
+ public void SetProgress(float value){pending=Mathf.Max(pending,Mathf.Clamp01(value));if(intro!=null)intro.Loading.SetProgress(pending);}
+ public void Complete(){complete=true;}
+ public void Failure(string message){failed=true;failure=message;if(intro!=null)intro.Loading.Failure(message);}
+ public void Resume(){failed=false;if(intro!=null)intro.Loading.Resume();}
+ protected virtual void Update(){if(intro!=null&&complete&&!failed&&intro.PresentationReady)intro.Loading.Complete();}
+ void Layout(){
+  if(safe==null)return;var root=(RectTransform)transform;var viewport=new Vector2Int(Screen.width,Screen.height);
+  var area=WeChatLayoutMetrics.ContentSafeArea(Screen.safeArea,viewport);
+  safe.anchorMin=new Vector2(area.x/viewport.x,area.y/viewport.y);safe.anchorMax=new Vector2(area.xMax/viewport.x,area.yMax/viewport.y);
+  safe.offsetMin=safe.offsetMax=Vector2.zero;float scale=Mathf.Max(.001f,root.rect.width*area.width/viewport.x/1080f);
+  content.localScale=Vector3.one*scale;content.sizeDelta=new Vector2(1080,root.rect.height*area.height/viewport.y/scale);
+ }
+ protected virtual void LateUpdate(){Layout();}
+}
+}

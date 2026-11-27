@@ -3,18 +3,19 @@ using UnityEngine;
 namespace BounceGarden {
 // Compact left column; only presentation, never alters level or score state.
 public sealed class BattleHUDSummary:MonoBehaviour {
- GameSession game;int generation;TMP_Text level,score;int? shownScore;float victoryPulse=2;
+ GameSession game;int generation;TMP_Text level,score;Material scoreMaterial;static readonly Color ScoreInk=new Color32(85,47,27,255);int? shownScore;float victoryPulse=2;
  public void ShowVictoryScore(int value,bool impact=false){shownScore=value;score.text=value.ToString("N0");if(impact)victoryPulse=0;}
- void Update(){victoryPulse+=game!=null?game.PresentationDelta(Time.unscaledDeltaTime):Time.unscaledDeltaTime;float p=Mathf.Sin(Mathf.Clamp01(victoryPulse/.25f)*Mathf.PI);if(score!=null){score.transform.localScale=Vector3.one*(1+p*.2f);score.color=Color.Lerp(UICraft.Ink,new Color(.85f,.45f,.06f),p);}}
+ void Update(){victoryPulse+=game!=null?game.PresentationDelta(Time.unscaledDeltaTime):Time.unscaledDeltaTime;float p=Mathf.Sin(Mathf.Clamp01(victoryPulse/.25f)*Mathf.PI);if(score!=null){score.transform.localScale=Vector3.one*(1+p*.2f);score.color=Color.Lerp(ScoreInk,new Color(.85f,.45f,.06f),p);}}
  public TMP_Text LevelLabel=>level;public TMP_Text ScoreLabel=>score;
  public void Initialize(GameSession g){game=g;generation=g.Generation;
-  level=UICraft.Label(transform,g.IsTutorial?"教学关":"第"+(g.LevelIndex+1)+"关",-405,1090,210,48,38,UICraft.Ink);level.name="Battle level number";BattleRoundTypography.Style(level,true);
-  var caption=UICraft.Label(transform,"分数",-405,932,200,36,27,UICraft.Ink);BattleRoundTypography.Style(caption,false);
-  score=UICraft.Label(transform,"",-405,882,210,50,36,UICraft.Ink);score.name="Battle current score";BattleRoundTypography.Style(score,true);score.enableAutoSizing=true;score.fontSizeMin=22;score.fontSizeMax=36;
+  var title=UICraft.Root(transform,"Garden level plaque",-397,1118,218,58);title.gameObject.AddComponent<BattleHudAspect050>();BattleGardenArt050.Image(title,"level-plaque-v19",0,0,218,58);
+  level=UICraft.Label(title,"第"+(g.LevelIndex+1)+"关",0,3,200,48,31,BattleGardenArt050.Ink);level.name="Battle level number";BattleRoundTypography.Style(level,true);level.gameObject.AddComponent<CurvedBattleLevel050>();
+  var scoreRow=UICraft.Root(transform,"Score below settings",-356,980,290,60);scoreRow.gameObject.AddComponent<BattleHudAspect050>();scoreRow.gameObject.AddComponent<BattleScorePlacement050>();var caption=UICraft.Label(scoreRow,"得分",-85,0,80,34,25,BattleGardenArt050.Ink);BattleRoundTypography.Style(caption,false);caption.gameObject.SetActive(false);
+  score=UICraft.Label(scoreRow,"",0,0,290,60,36,BattleGardenArt050.Ink);score.name="Battle current score";BattleRoundTypography.Style(score,true);score.enableAutoSizing=true;score.fontSizeMin=34;score.fontSizeMax=40;score.fontStyle=FontStyles.Bold;score.alignment=TextAlignmentOptions.Left;score.textWrappingMode=TextWrappingModes.NoWrap;scoreMaterial=new Material(score.fontSharedMaterial){name="Private battle score outlined material"};scoreMaterial.EnableKeyword("OUTLINE_ON");scoreMaterial.SetFloat("_OutlineWidth",.3f);scoreMaterial.SetColor("_OutlineColor",new Color32(255,253,242,255));scoreMaterial.SetFloat("_FaceDilate",.045f);score.fontSharedMaterial=scoreMaterial;score.extraPadding=true;score.UpdateMeshPadding();
   game.StateChanged+=Refresh;Refresh();
  }
  void Refresh(){if(game!=null&&game.Generation==generation)score.text=(shownScore??game.Score).ToString("N0");}
- void OnDestroy(){if(game!=null)game.StateChanged-=Refresh;}
+ void OnDestroy(){if(game!=null)game.StateChanged-=Refresh;if(scoreMaterial!=null)Destroy(scoreMaterial);}
 }
 // Fit only the right badge between the native capsule and the real top vine.
 // The child owns the squash animation; this stable parent owns safe positioning.
@@ -22,14 +23,14 @@ public sealed class BattleMovesPlacement:MonoBehaviour {
  RectTransform rect,visual;UnityEngine.UI.Image plate;TMP_Text number,caption;Vector2 origin;GameSession game;int generation;readonly Vector3[] corners=new Vector3[4];
  public void Initialize(GameSession g){game=g;generation=g.Generation;rect=(RectTransform)transform;origin=rect.anchoredPosition;}
  public void Bind(RectTransform face,UnityEngine.UI.Image background,TMP_Text value,TMP_Text label){visual=face;plate=background;number=value;caption=label;}
- void Compact(bool compact){if(visual==null)return;var size=new Vector2(170,compact?72:128);rect.sizeDelta=visual.sizeDelta=plate.rectTransform.sizeDelta=size;number.rectTransform.anchoredPosition=compact?new Vector2(26,0):new Vector2(0,-13);number.rectTransform.sizeDelta=compact?new Vector2(112,72):new Vector2(150,76);number.fontSize=compact?72:64;number.textWrappingMode=TextWrappingModes.NoWrap;caption.text=compact?"剩余\n步数":"剩余步数";caption.rectTransform.anchoredPosition=compact?new Vector2(-49,0):new Vector2(0,35);caption.rectTransform.sizeDelta=compact?new Vector2(56,64):new Vector2(160,34);caption.fontSize=compact?22:26;caption.enableAutoSizing=false;caption.lineSpacing=compact?-5:0;}
- void LateUpdate(){if(rect==null||game==null||game.Generation!=generation||Camera.main==null)return;rect.anchoredPosition=origin;rect.localScale=Vector3.one;Compact(false);
+ void Compact(bool compact){if(visual==null)return;var size=compact?new Vector2(155,112):new Vector2(170,128);rect.sizeDelta=visual.sizeDelta=plate.rectTransform.sizeDelta=size;plate.preserveAspect=true;number.rectTransform.anchoredPosition=new Vector2(0,0);number.rectTransform.sizeDelta=new Vector2(140,75);number.fontSize=(compact?38:44)*(game.Shots<=5?1.25f:1);number.textWrappingMode=TextWrappingModes.NoWrap;caption.text="";caption.gameObject.SetActive(false);caption.rectTransform.anchoredPosition=new Vector2(0,27);caption.rectTransform.sizeDelta=new Vector2(155,34);caption.fontSize=compact?16:18;caption.enableAutoSizing=false;caption.lineSpacing=0;}
+ void LateUpdate(){if(rect==null||game==null||game.Generation!=generation||Camera.main==null)return;rect.anchoredPosition=origin;float correction=rect.parent.lossyScale.x/Mathf.Max(.0001f,rect.parent.lossyScale.y);rect.localScale=new Vector3(1,correction,1);Compact(false);
   var app=GetComponentInParent<AppUI>();Rect blocked;if(!WeChatLayoutMetrics.TryGetBlockedRect(app!=null?app.MenuAvoidanceViewport:new Vector2Int(Screen.width,Screen.height),out blocked))return;
   var canvas=GetComponentInParent<Canvas>();var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;rect.GetWorldCorners(corners);
   var lo=RectTransformUtility.WorldToScreenPoint(camera,corners[0]);var hi=RectTransformUtility.WorldToScreenPoint(camera,corners[2]);if(hi.x<=blocked.xMin||lo.x>=blocked.xMax)return;
   float floor=Camera.main.WorldToScreenPoint(BoardDisplay.Forward(new Vector2(0,JellyWallFrame.TopCenter))).y+6;
   float ceiling=blocked.yMin+16*WeChatLayoutMetrics.LogicalPixelScale(app!=null?app.MenuAvoidanceViewport:new Vector2Int(Screen.width,Screen.height));if(hi.y<=ceiling&&lo.y>=floor)return;
-  float available=ceiling-floor;if(available<=0)return;if(available/((hi.y-lo.y)*1.05f)<.9f&&visual!=null){Compact(true);rect.GetWorldCorners(corners);lo=RectTransformUtility.WorldToScreenPoint(camera,corners[0]);hi=RectTransformUtility.WorldToScreenPoint(camera,corners[2]);}float fit=Mathf.Min(1,available/((hi.y-lo.y)*1.05f));rect.localScale=Vector3.one*fit;
+  float available=ceiling-floor;if(available<=0)return;if(available/((hi.y-lo.y)*1.05f)<.9f&&visual!=null){Compact(true);rect.GetWorldCorners(corners);lo=RectTransformUtility.WorldToScreenPoint(camera,corners[0]);hi=RectTransformUtility.WorldToScreenPoint(camera,corners[2]);}float fit=Mathf.Min(1,available/((hi.y-lo.y)*1.05f));rect.localScale=new Vector3(fit,correction*fit,1);
   float half=(hi.y-lo.y)*fit*.5f;float cy=Mathf.Clamp((lo.y+hi.y)*.5f,floor+half,ceiling-half);Vector2 a,b;
   RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)rect.parent,(lo+hi)*.5f,camera,out a);RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)rect.parent,new Vector2((lo.x+hi.x)*.5f,cy),camera,out b);rect.anchoredPosition=origin+b-a;
  }

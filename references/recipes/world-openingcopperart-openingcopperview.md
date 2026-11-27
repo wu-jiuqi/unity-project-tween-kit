@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/OpeningCopperArt.cs`
-文件 SHA-256：`ed09cfd557c70bd1a483965b03ae24bcfc1939043dc4a02e27b648be628b103d`
+文件 SHA-256：`7ce8bef6518c7d599f30c6b642cdc5200c65fdbdde402373c824cdc207029a9d`
 [原始源码快照](../source/Assets/Scripts/World/OpeningCopperArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

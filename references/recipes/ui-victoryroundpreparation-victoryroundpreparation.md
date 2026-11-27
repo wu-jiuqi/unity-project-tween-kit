@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/VictoryRoundPreparation.cs`
-文件 SHA-256：`332f90d5c28e75181f031f33083ddfc8892ceef7cc3d1ba46c981a52f2527950`
+文件 SHA-256：`3d9ae94e1b9c716edf5cf1711788134f9679bcf36c9f289490b0e5671eb1bd2f`
 [原始源码快照](../source/Assets/Scripts/UI/VictoryRoundPreparation.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

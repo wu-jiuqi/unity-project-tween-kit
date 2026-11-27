@@ -2,9 +2,6 @@ using System;
 namespace BounceGarden {
 public static class RuntimeQA {
  public static bool IsIsolated {get{
- #if !BOUNCE_WECHAT
- if(LevelEditing.LevelEditorRuntime.Enabled)return true;
- #endif
  if(Array.IndexOf(Environment.GetCommandLineArgs(),"--qa")>=0)return true;
  #if UNITY_EDITOR
  return UnityEditor.SessionState.GetBool("BounceGarden.IsolatedEditorQA",false);

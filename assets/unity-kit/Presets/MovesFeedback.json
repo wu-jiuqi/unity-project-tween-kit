@@ -28,6 +28,42 @@
             "y": 0.0,
             "z": 0.0,
             "w": 0.0
+        },
+        {
+            "field": "WarningCycle",
+            "type": "System.Single",
+            "value": 0.47999998927116396,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "WarningAmplitude",
+            "type": "System.Single",
+            "value": 0.10000000149011612,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "WarningLoops",
+            "type": "System.Int32",
+            "value": 3.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "WarningColor",
+            "type": "UnityEngine.Color",
+            "value": 0.0,
+            "x": 0.7921568751335144,
+            "y": 0.2078431397676468,
+            "z": 0.1764705926179886,
+            "w": 1.0
         }
     ]
 }

@@ -1,0 +1,46 @@
+using System;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using LeagueStyle046=BounceGarden.DressingShopArt044;
+using LeagueDraw046=BounceGarden.LeagueArt046;
+namespace BounceGarden {
+public partial class AppUI {
+ string leagueDetail046="rules";LeagueReward leagueReward046;int leagueDuplicate046;
+ public float LeagueTopReserve046=>WeChatPageTopReserve();public float LeagueNavigationHeight046=>HomeNavigationReserve;
+ public void QARebuildLeague046(){if(!RuntimeQA.IsIsolated)return;ClearPages();ShowPage("ranking",false);}
+ public void NavigateLeague046(int tab){if(leagueFlowRoot!=null){leagueFlowRoot.gameObject.SetActive(false);Destroy(leagueFlowRoot.gameObject);leagueFlowRoot=null;}leagueFlowPoll=Time.unscaledTime+30;switch(tab){case 0:ShowPage("chapters");break;case 1:OpenShopCategory();break;case 2:ShowPage("home");break;case 3:ShowPage("ranking");break;default:OpenDressing();break;}}
+ public RectTransform BuildLeagueOverlay046(RectTransform parent,string title,string sub,Action<int> navigate){
+  Canvas.ForceUpdateCanvases();var blocker=parent.GetComponent<Image>()??parent.gameObject.AddComponent<Image>();blocker.color=Color.clear;blocker.raycastTarget=true;var page=UICraft.Root(parent,"046 overlay page",0,0,1080,parent.rect.height);var root=LeagueDraw046.Surface(page,title,sub);
+  var nav=UICraft.Root(parent,"046 overlay five-tab navigation").gameObject.AddComponent<HomeANavigation>();nav.Build(navigate);nav.Layout(parent.rect.height);nav.Select(3);var responsive=parent.gameObject.AddComponent<LeagueOverlayLayout046>();responsive.Page=page;responsive.Navigation=nav;return root;
+ }
+ void OpenLeagueDetail046(string kind,LeagueReward reward=null,int duplicate=0){leagueDetail046=kind;leagueReward046=reward;leagueDuplicate046=duplicate;ShowPage("league-detail",false);}
+ void BuildLeagueLocked046(RectTransform page){var r=LeagueDraw046.Surface(page,"花园联赛","通关第10关，开启一段新的花园旅程");LeagueDraw046.Banner(r,new LeagueSnapshot(),true);LeagueDraw046.Card(r,"046 locked card",82,473,556,390);LeagueDraw046.Icon(r,"nav-league",360,610,190);LeagueDraw046.Text(r,"花园伙伴正在等你",360,767,620,48,32);LeagueDraw046.Text(r,"通关第10关后解锁花园联赛",360,817,610,36,22,LeagueStyle046.Muted);LeagueDraw046.Text(r,"赢取奖章，收集喜欢的头像与头像框",360,936,620,38,23,LeagueStyle046.Muted);LeagueDraw046.Button(r,"046 locked play","继续闯关",360,1030,528,64,()=>BeginLevel(Mathf.Clamp(Profile.AlphabetUnlocked,0,LevelCatalog.Count-1)),"primary",29);LeagueDraw046.Button(r,"046 locked home","返回首页",360,1120,402,44,()=>ShowPage("home"),"secondary",22);}
+ void DrawLeagueDetail046(RectTransform page){
+  var s=LeagueSource.Read();if(s==null){BuildLeagueLocked046(page);return;}
+  bool rules=leagueDetail046=="rules",records=leagueDetail046=="records",claimed=leagueDetail046=="claimed";
+  var r=LeagueDraw046.Surface(page,records?"积分纪录":rules?"联赛奖励":claimed?"奖励已领取":"领取奖励",records?"本地个人纪录 · 联赛仍按奖章排名":rules?"每一枚奖章，都让小美好更近一步":claimed?"小美好已经加入你的收藏":"这一期的努力，值得一份小奖励");
+  if(records){DrawRecords046(r);return;}if(!rules){DrawReward046(r,leagueReward046??s.reward,claimed,false,leagueDuplicate046);return;}
+  LeagueDraw046.RewardPair(r,Profile,s.config.cosmetic.avatarResource,s.config.cosmetic.frameResource,290,true);var limited=LeagueExclusiveCosmetics.ByResource(s.config.cosmetic.avatarResource);LeagueDraw046.Button(r,"046 exclusive collection","本期："+(limited?.name??"联赛专属")+" · 查看轮换奖品",360,478,570,27,OpenLeagueCosmetics044,"secondary",18);LeagueDraw046.Text(r,"排名",173,530,220,30,19,LeagueStyle046.Muted);LeagueDraw046.Text(r,"金币与装扮奖励",447,530,390,30,19,LeagueStyle046.Muted);
+  for(int i=0;i<s.config.rewardTiers.Length;i++){var tier=s.config.rewardTiers[i];int first=i==0?1:s.config.rewardTiers[i-1].throughRank+1;float y=557+i*78;var row=LeagueDraw046.Card(r,"046 reward tier "+i,65,y,590,69);LeagueStyle046.Text(row,first==tier.throughRank?"第"+first+"名":"第"+first+"—"+tier.throughRank+"名",107,30,185,36,23);LeagueStyle046.Image(row,"coin",252,30,32,32);LeagueStyle046.Text(row,tier.coins.ToString(),320,30,90,36,25);LeagueStyle046.Text(row,tier.cosmetics?"头像 + 头像框":"金币奖励",473,30,205,32,19,LeagueStyle046.Muted);}
+  string[] lines={"本期获章即可参与领奖 · 北京时间每7天一期","主线首通 +1 奖章；每日重玩最多 3 枚","新一期奖章重置；重复装扮按规则转换为金币"};for(int i=0;i<lines.Length;i++)LeagueDraw046.Text(r,lines[i],360,913+i*36,625,30,19,LeagueStyle046.Muted);
+  LeagueDraw046.Button(r,"046 reward dressing","更换装扮",360,1030,528,64,OpenLeagueCustomization,"primary",29);LeagueDraw046.Button(r,"046 return ranking","返回联赛",360,1120,402,44,()=>ShowPage("ranking"),"secondary",22);
+ }
+ void DrawRecords046(RectTransform r){LeagueDraw046.Card(r,"046 total score",67,294,586,140);LeagueDraw046.Text(r,"总积分",360,330,500,30,19,LeagueStyle046.Muted);LeagueDraw046.Text(r,Profile.BestScoreTotal.ToString("N0"),360,391,600,60,45);LeagueDraw046.Text(r,"每关仅计最高通关积分，重玩取更高值",360,474,620,34,21,LeagueStyle046.Muted);LeagueDraw046.Text(r,"关卡",172,535,230,30,19,LeagueStyle046.Muted);LeagueDraw046.Text(r,"最高通关积分",515,535,250,30,19,LeagueStyle046.Muted);
+  var scores=Enumerable.Range(0,AlphabetCampaign.Count).Where(i=>Profile.BestScore(i)>0).OrderByDescending(i=>Profile.BestScore(i)).ThenBy(i=>i).ToArray();
+  var content=LeagueScroll046(r,"046 score",67,LeagueDraw046.Y(563),586,371,Mathf.Max(371,scores.Length*62));if(scores.Length==0)LeagueStyle046.Text(content,"通关后，这里会记录你的积分。",293,90,565,60,23,LeagueStyle046.Muted);
+  for(int n=0;n<scores.Length;n++){int level=scores[n];var card=LeagueStyle046.Card(content,"046 record "+level,0,n*62,586,54);LeagueStyle046.Text(card,"第"+(level+1)+"关",108,27,200,34,23);LeagueStyle046.Text(card,Profile.BestScore(level).ToString("N0"),448,27,225,34,26);}
+  LeagueDraw046.Text(r,"向下滑动，查看更多关卡纪录",360,1021,620,30,19,LeagueStyle046.Muted);LeagueDraw046.Button(r,"046 return ranking","返回排行榜",360,1080,528,64,()=>ShowPage("ranking"),"primary",29);
+ }
+ public static RectTransform LeagueScroll046(Transform parent,string name,float x,float y,float w,float h,float contentHeight){var viewport=LeagueStyle046.Rect(parent,name+" viewport",x+w*.5f,y+h*.5f,w,h);viewport.gameObject.AddComponent<Image>().color=new Color(1,1,1,.001f);viewport.gameObject.AddComponent<RectMask2D>();var scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.horizontal=false;scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=28;scroll.inertia=true;var content=UICraft.Root(viewport,name+" rows",0,0,w,contentHeight);content.anchorMin=content.anchorMax=new Vector2(.5f,1);content.pivot=new Vector2(.5f,1);scroll.content=content;return content;}
+ void DrawReward046(RectTransform r,LeagueReward reward,bool claimed,bool automatic,int duplicate=0){if(reward==null){LeagueDraw046.Text(r,"当前没有待领取的奖励",360,600,620,60,28);LeagueDraw046.Button(r,"046 return ranking","返回联赛",360,1040,528,64,()=>NavigateLeague046(3),"primary",29);return;}
+  LeagueDraw046.Card(r,"046 reward ranking",82,294,556,95);LeagueDraw046.Icon(r,"nav-league",150,341,65);LeagueDraw046.Text(r,(automatic?"最终第":"本期排名 · 第")+reward.rank+"名",405,341,400,45,29);
+  LeagueDraw046.RewardPair(r,Profile,string.IsNullOrEmpty(reward.avatarId)?null:LeagueExclusiveCosmetics.ById(reward.avatarId)?.avatar??reward.avatarResource,string.IsNullOrEmpty(reward.frameId)?null:LeagueExclusiveCosmetics.ById(reward.frameId)?.frame??reward.frameResource,416);LeagueDraw046.Card(r,"046 coins",135,731,450,110);LeagueDraw046.Text(r,claimed?"已到账":"金币奖励",360,758,440,30,19,LeagueStyle046.Muted);LeagueStyle046.Image(r,"coin",265,LeagueDraw046.Y(804),43,43);LeagueDraw046.Text(r,"+"+(reward.coins+duplicate).ToString("N0")+" 金币",387,804,360,45,31);
+  bool cosmetics=!string.IsNullOrEmpty(reward.avatarId)||!string.IsNullOrEmpty(reward.frameId);LeagueDraw046.Text(r,claimed?(cosmetics?"装扮已加入收藏":"金币已到账"):cosmetics?"头像与头像框奖励":"金币奖励",360,903,620,45,29);LeagueDraw046.Text(r,claimed?"随时换上喜欢的新装扮":automatic?"新一期花园伙伴正在等你":duplicate>0?"含重复装扮补偿 "+duplicate+" 金币":"重复装扮按规则转换为金币",360,958,630,36,21,LeagueStyle046.Muted);
+  bool committed=false;LeagueDraw046.Button(r,"046 reward primary",claimed?(cosmetics?"立即装扮":"完成"):automatic?"领取并继续":"领取奖励",360,1040,528,64,()=>{if(claimed){if(cosmetics){if(!LeagueSource.Equip(reward.avatarId,reward.frameId)){Toast("装扮保存失败，请重试。");return;}RefreshLeagueViews();OpenDressing();}else NavigateLeague046(3);return;}if(committed)return;int compensation=Profile.LeagueDuplicateCoins(reward);if(!LeagueSource.Claim(reward.periodId)){Toast("奖励保存失败，请重试。");return;}committed=true;SoundService.Play("reward_claim");if(automatic){if(leagueFlowRoot!=null){leagueFlowRoot.gameObject.SetActive(false);Destroy(leagueFlowRoot.gameObject);leagueFlowRoot=null;}leagueFlowPoll=Time.unscaledTime+.5f;}RefreshLeagueViews();OpenLeagueDetail046("claimed",reward,compensation);},"primary",29);
+  if(claimed)LeagueDraw046.Button(r,"046 reward done","完成",360,1130,402,40,()=>NavigateLeague046(3),"secondary",22);
+ }
+ void ShowLeagueAutomaticReward046(LeagueSnapshot s){leagueFlowRoot=UICraft.Root(safeRoot,"Automatic league season reward");leagueFlowRoot.anchorMin=Vector2.zero;leagueFlowRoot.anchorMax=Vector2.one;leagueFlowRoot.sizeDelta=Vector2.zero;var r=BuildLeagueOverlay046(leagueFlowRoot,"上期花园联赛已结束","感谢这一路的陪伴，新一期继续出发",NavigateLeague046);DrawReward046(r,s.reward,false,true,Profile.LeagueDuplicateCoins(s.reward));}
+}
+}

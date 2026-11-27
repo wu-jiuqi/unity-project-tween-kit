@@ -86,3 +86,8 @@
 “一键复制参数导出”会复制并写入当前条目的JSON，文件路径与“保存本项”相同。导出保留schemaVersion=1、component和settings，附带entryId、title、timeSource、referenceParameterNotes；原MotionPreset读取器会忽略额外说明字段，只应用settings。固定参数说明不会覆盖用户调好的字段值。
 
 公开数组中的Unity对象引用、运行状态与展馆观察速度不会导出。固定编排没有公开字段时，settings为空，参考参数只供核对；不能把修改说明文本当成已经修改运行算法。
+
+
+## 游戏0.5.1同步
+
+新版接口、时间驱动、共享Loading、五页资源等待、八帧结果页、原生遮罩充星及新增清理合同见[当前补充说明](current-051.md)。旧章节的3.6秒加载猫与旧材质充星说明属于0.4.0历史实现；当前charge条目和结果页以本轮代码为准，独立旧LoadingPresentation仍保留。

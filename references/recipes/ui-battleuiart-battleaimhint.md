@@ -1,6 +1,6 @@
 # BattleAimHint · BattleUIArt
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/BattleUIArt.cs`
 文件 SHA-256：`5c921778acbeb37724d2a7c3296581b48c6e0619d3f53502e227f9cd6077cd50`

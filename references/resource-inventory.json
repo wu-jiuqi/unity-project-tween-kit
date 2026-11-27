@@ -48,6 +48,14 @@
     "redistribution": "consult-license-evidence"
   },
   {
+    "source": "Assets/Plugins/WebGL/BounceBrowserHaptic.jslib",
+    "sha256": "3410d2c3431ff53b6b756608458f01324aad8226217b16eaa573d0b6e7e91288",
+    "bytes": 221,
+    "guid": "8de14b84f7653604dbdcb3649d2cf3a9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
     "source": "Assets/Plugins/WebGL/BounceTouch.jslib",
     "sha256": "00b5337f7028d9b37b888d0783ade3736ef039b3e8844ac51217f1341ef8f348",
     "bytes": 2516,
@@ -56,58 +64,98 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Alphabet/campaign.json",
-    "sha256": "49e4adb20a04a59171ee91626824ecf7328ae35314860be5158d1a631ee6defb",
-    "bytes": 287357,
-    "guid": "04d4f399443ea214a8c94b973e291489",
+    "source": "Assets/Resources/Art/BattleGarden050/break-petals-atlas.png",
+    "sha256": "2d8126aa8be22bbb8574d891b85c3caa8b7e331302bde2375aa534575b44d537",
+    "bytes": 1316071,
+    "guid": "bc8d6fb0cea94874a00222032ca58483",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/AlphabetV38/blue.png",
-    "sha256": "45783dfd2967570b31f0cfc8f408c98eaeeb9e48f1395ddd1b7c5e545ba594a0",
-    "bytes": 35479,
-    "guid": "f0fa4664d0f61d944ad4692e02df999c",
+    "source": "Assets/Resources/Art/BattleGarden050/hud-panel.png",
+    "sha256": "abcebacf0eebc0e851c9bda88a3e1918c99414ca36f40811301e4d9ea6dfaa09",
+    "bytes": 52018,
+    "guid": "c57aaa9d6f9a488d9ffd254a5de488a8",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/AlphabetV38/ivory.png",
-    "sha256": "fda1c39f26975e2d34b9b3c4ac9aa63707f837af5ab560f9c3bf526002842b9f",
-    "bytes": 27356,
-    "guid": "e8b655986599dea428dcba08ff4ab118",
+    "source": "Assets/Resources/Art/BattleGarden050/petal-0.png",
+    "sha256": "76282a0e996acd5576ccbd6cd788a48f915e48fdbcd7e29c673f3d54f2efe594",
+    "bytes": 142639,
+    "guid": "bc943b1d7c404625ad086184d2ac8e0b",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/BannerJelly/chest.png",
-    "sha256": "eafcb0038d4d0d2610e43615884bc8b805a3761b8ecfce53691e4f3b11c01fe7",
-    "bytes": 1436799,
-    "guid": "6f29658532150a64a8904f8ccd1950aa",
+    "source": "Assets/Resources/Art/BattleGarden050/petal-1.png",
+    "sha256": "f28fa4826ee1d61af844e1dfd1bcadb893561807d0de5a4714d6b24bd17a5efb",
+    "bytes": 144759,
+    "guid": "ddb062965772499a8380bc15785eb037",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/BannerJelly/medal.png",
-    "sha256": "a33c7def3ca7d05afe8156ecbb944ad681fbe7bff217ad3ece5d22fdd3786cf2",
-    "bytes": 1251972,
-    "guid": "8c014028579e89f4080dfd6a9f32d6a0",
+    "source": "Assets/Resources/Art/BattleGarden050/petal-2.png",
+    "sha256": "d8870b09dc8f91450b67e9d134fe0d7a6f352ef3f84f2e1513ba982bc8a0af9a",
+    "bytes": 140801,
+    "guid": "312dd15d53914abe98f9d4ba62af3945",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/BannerJelly/panel.png",
-    "sha256": "d181b2d1f78275870a696ed661796a1f4e9bd3445ae6f86580722445e50a4aab",
-    "bytes": 1702809,
-    "guid": "8e83bf73644831a4483833d3933e49ec",
+    "source": "Assets/Resources/Art/BattleGarden050/petal-garden-v22.png",
+    "sha256": "5b826e114d34bfe52a1b5807c367dc8c2d1ad8939ec5e67e3313b9e23dbedeaa",
+    "bytes": 1700960,
+    "guid": "c10519df17e9428fbf987565a9dbbd65",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/BannerJelly/trophy.png",
-    "sha256": "08e2c8f7f9d41022a1bba06e683eb6456db449b2a77d106a5e4bbc00e060d64b",
-    "bytes": 1109370,
-    "guid": "52f5ff565670fc446ae0dda0e63a8dd3",
+    "source": "Assets/Resources/Art/BattleGarden050/settings.png",
+    "sha256": "8742544a3079edc49465f99d9c08487cd5b1234bf7e8917817c07feb3a6c9836",
+    "bytes": 65834,
+    "guid": "21e22bd03f0f4341b068fba8a587b828",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleGarden050/star-empty-v22.png",
+    "sha256": "4171ce18c65e54effae8a9d8c3df7b68cc5ee9ad5a99ddaa67372c74c03fdda9",
+    "bytes": 224745,
+    "guid": "acb47112b83a418faf094536be3f0e61",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleGarden050/star-gold-v18.png",
+    "sha256": "5f78bdafffc740fad6a255030df19720575be4b4fe80e582dbea8f76cfa74a57",
+    "bytes": 231503,
+    "guid": "5a5d4a24c86b476db3b1cdc5717b945c",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleHUD051/goal-panel.png",
+    "sha256": "ddd0873fe9d428f2b103657da86fd615f6512b67a3d7b4d2879d75b8b0038cc1",
+    "bytes": 1818534,
+    "guid": "5bd64f34336e494a8fec9e9930382e7d",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleHUD051/level-plaque.png",
+    "sha256": "7bd61572e5419c90d12752710c2efef5ca7339edc4926721005d23f7c36114c3",
+    "bytes": 1454418,
+    "guid": "b10b628659d04d7aaf6655326fc0430e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleHUD051/moves-medallion.png",
+    "sha256": "5d50eaf87dbea370dd2309ed2b7c2258604062072632fd4cca7e6185924581a4",
+    "bytes": 1120551,
+    "guid": "25126bf3261e4afbbbd185e54ac00044",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -392,6 +440,278 @@
     "redistribution": "consult-license-evidence"
   },
   {
+    "source": "Assets/Resources/Art/BrandSplashV1/cat.png",
+    "sha256": "cc95700c2b9be13ecc65bde7a5e21e9c480f1f98a12c148ebc2d3ac8dc776559",
+    "bytes": 200394,
+    "guid": "1e26d4a2e8684e540af4bd97f85547ad",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/courtyard.png",
+    "sha256": "35d49d7d6356cc3013b84a0672028bce5ba9a225c8a07c939ab350dca3d9c107",
+    "bytes": 1769814,
+    "guid": "fd50d6978e7875c438140f643c471a87",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/butterfly-fold.png",
+    "sha256": "822c903286cf748837370342e0c5ecd2f30514f06173dd92ff7882e474e694ad",
+    "bytes": 63327,
+    "guid": "8a8bc17eaa153b24287d8498bfdbf73c",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/butterfly-open.png",
+    "sha256": "19b692c78bd8ce9ea5548d16552aa542fe089d7570a3d3175339e24e4b64c8d0",
+    "bytes": 84264,
+    "guid": "e65db91d94416ec409e299fdebef200b",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-0.png",
+    "sha256": "f9394fb50b5ec743895dd8fcaec0a5285c1469f8be82fe88b6c8288e6ffb4df4",
+    "bytes": 112776,
+    "guid": "7d8fb6debc0d83b44a2a352226c8a62c",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-1.png",
+    "sha256": "506a4458c72fd93dba25c8388377ad6df59292e1781c2beeb3f045072ee4fa8d",
+    "bytes": 113324,
+    "guid": "97d8663d5959bb841a538bfcc4c43291",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-2.png",
+    "sha256": "c5766634941fb5740b989323dce12468da5e967f9f760b830ef76fb6e067039f",
+    "bytes": 112340,
+    "guid": "4015b4f478e507d4289536e55de2fd65",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-3.png",
+    "sha256": "ed88440b3556e3d450d32a4721ee2748fe9ff73cafa08e8158bce39de76d2cf8",
+    "bytes": 108433,
+    "guid": "b8980bdb0f5430f479dc4a7ab755205e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-4.png",
+    "sha256": "69391aba64ed46e0636458d7fb1c4781be3f78b3e547a901958ba1e3ab9a1bea",
+    "bytes": 117162,
+    "guid": "4bf82d71b5ea9db4982ecf0dba7c32a3",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-5.png",
+    "sha256": "1477adf2b918639663cc39ac9ce155a0c3fdb2594cab8be8258cf1dcf96d89c5",
+    "bytes": 116938,
+    "guid": "c6f693fb2be7b0d41aadcd0e2105a48f",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-6.png",
+    "sha256": "bc27e50f4674021a7ea5bce95c55282a57951fc6f59607a94a32359edceaff18",
+    "bytes": 124237,
+    "guid": "bc737a27c6aa23d44a707279af45367a",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/cat-7.png",
+    "sha256": "d3f07ae8c2a4a7c8f6efa107326faf3112ba490549115b1ea1a31bbd5a2bfc07",
+    "bytes": 120949,
+    "guid": "d1dc2e3196de96a4d8ab4b63b12a9b14",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/courtyard.png",
+    "sha256": "e6de778c308b03e6eed6ebdcfcea12180c60edd857aef4c7830c97a3efac8e16",
+    "bytes": 1681827,
+    "guid": "119f2a18d5d96ee4b99c915c8082bbdd",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/flower-0.png",
+    "sha256": "3423fd9cc03152689d37b9ecb7c17580fbc2fb985c4009d0c66e967330f087e7",
+    "bytes": 63773,
+    "guid": "875376fce28a687469293922443bfaaf",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/flower-1.png",
+    "sha256": "4961b57cc0b9b9b16d6ae6d58d561433e07ee6736ab774a84730ae7ebee9f40c",
+    "bytes": 70007,
+    "guid": "16d7448e0f5bd6f4a8e3c3b74c61bddf",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/flower-2.png",
+    "sha256": "e7035b550a276a083a67bd3f07d5c1ac3815898109d21c630ea6e8f4aa1cd30d",
+    "bytes": 48454,
+    "guid": "3403decb1fe734149917a3bf9494dd24",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/hedge-0.png",
+    "sha256": "5b18980143166548f4f41eeff816c260790e3b849631b5fde7dfb86ab982b4cf",
+    "bytes": 75908,
+    "guid": "e4999daf8170d28458987eee9c221499",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/hedge-1.png",
+    "sha256": "303b316184b4f7b0e91ceedc26ceb1123620388a33bd57d310e981d63de64937",
+    "bytes": 81227,
+    "guid": "9a7185ed2aaa09b4e9c8f71f78041ae9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/hedge-2.png",
+    "sha256": "b1430f3b8b68429dcb7a02159d6d6dfc7357f880c5052cde7da048fbf932a175",
+    "bytes": 87074,
+    "guid": "64594927b4bd5ad41bf6321a5e250a0e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/planter-front.png",
+    "sha256": "a5890fbeb7092a45ba84530fd1687a84ce068d1779bd32e15fd4f7d97678d7b9",
+    "bytes": 201168,
+    "guid": "a3dca0308852349418734c1a7fd53d3c",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/Garden/planter.png",
+    "sha256": "7e43988c936e399a2f681f270e05c33f5726e9a3312a2ec7ef6f74ec92414895",
+    "bytes": 518017,
+    "guid": "b2013962e212c544493888aa17155207",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/jelly-blue.png",
+    "sha256": "7b3b57778a8a95571f58c6ff5f11ffa53bf33a42a8a76fcc0a43123ca24fd806",
+    "bytes": 116034,
+    "guid": "feec4c4d32f6cd143a43a6c286a17708",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/jelly-mint.png",
+    "sha256": "40181c2c3f54e82663f058ddc55590603cfb0b08b7230ee034c0d93bed3a01fb",
+    "bytes": 128513,
+    "guid": "5db4fcdeed33263419333a301fcc9f7a",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/jelly-pink.png",
+    "sha256": "13ead2a6a22609ea9f4fd8c81eb92104ba03e03bbacf763f5b0c2cf9bff1ba45",
+    "bytes": 117579,
+    "guid": "943905b4892d27b46a98d63d20832204",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/jelly-purple.png",
+    "sha256": "7b20b79dddfb0e5418afc9d714cc42f0ad3fe605688406dc8daf9e9996a4fefc",
+    "bytes": 125772,
+    "guid": "7149ad82442b4ae45bae21094c7ebcb0",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/jelly-yellow.png",
+    "sha256": "1475f0380969085b457eb0be2b8025cca5cf2195d99393b6c263ceecad955d59",
+    "bytes": 127402,
+    "guid": "129f3799dd4c5a849823b72ceb01b007",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/letter-chai.png",
+    "sha256": "8ac413abb0a5f853c136c414eb576a6b547e100371580c0bcd74f5905496d39d",
+    "bytes": 275014,
+    "guid": "f8a7a1986e62c814bb9932bc058db0c5",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/letter-dan.png",
+    "sha256": "943cb18ecb9320e527f5b3e526585def7fa6864b6d3539925e3232206b93bf45",
+    "bytes": 271277,
+    "guid": "0ed11c5182abd1148850c8d33ca73f30",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/letter-miao.png",
+    "sha256": "b45fb9cbfb685063934eeeba553948e0a5de73c903274a698b61eac1743ae1cd",
+    "bytes": 265155,
+    "guid": "d3b168189cf562a4f937b13330d7b61d",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/letter-xiang.png",
+    "sha256": "b76eb0479390a9db13247729bbeffe6a89f1e67c0a525bf546261f335403e97f",
+    "bytes": 284685,
+    "guid": "e1987c0aea0045747b67fcf815b0038a",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/loading-fill.png",
+    "sha256": "cae8094c83a83d18de3ddf6e8d07837f42d832c3477a9155c8cb7b1f607f076b",
+    "bytes": 171955,
+    "guid": "47d2ac1ae70913246b77ad3bfafe4406",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/loading-paw.png",
+    "sha256": "24c7706a103468df708525cdbbcafb89e7927ef82747b58253ac780b09241813",
+    "bytes": 121728,
+    "guid": "e7b28ce52a3d55142a7cf76dd6ce218e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/loading-topper.png",
+    "sha256": "a1c035cff5fc25834fa590b11d9f92697098504a4fa54f5d87f4d3dd8217f58a",
+    "bytes": 205479,
+    "guid": "9b61ccd7e2f308d48a9ba9e0bd212d8e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/BrandSplashV1/loading-track.png",
+    "sha256": "0189a615fcda9d52dc8c257c360b4cef8faf846b2b4d0723007cb5219b331034",
+    "bytes": 328734,
+    "guid": "582dca4be19027140b462bc1b18da4a5",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
     "source": "Assets/Resources/Art/CatCosmeticsV3/avatars/01_british_shorthair.png",
     "sha256": "c9bd9b40f5f5118d087a33b0f93cd2e06fdf2fb4135623903437ca0837e3de1b",
     "bytes": 1689987,
@@ -640,22 +960,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/CatGardenWalls/vine-strip.png",
-    "sha256": "afec0f69e2645d582d91c0152f6fda4900481891271f9891321018023b31ff08",
-    "bytes": 463875,
-    "guid": "e06b7846f487466cb5aaea4e18e03004",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ChapterOrbV51/chapter-orb.png",
-    "sha256": "1a8b410e8165b162e497346d92babd7ddbebdf847490ec06038bf3703af4e141",
-    "bytes": 1553664,
-    "guid": "6a69f6754efba8944b05770e5590d691",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Art/ChineseV59/Cheers/amazing.png",
     "sha256": "a4c07ad6b781d78b983b165915e25ba890ed76a1d516dd95e344c5be998ca273",
     "bytes": 1331741,
@@ -752,17 +1056,265 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/FailureCatV26/cat-atlas.png",
-    "sha256": "69b6b4c77c67647b84b9f628bc981efe7cf864539474e39211e48571fc6e7c26",
-    "bytes": 2954378,
-    "guid": "c09ac69eb2a1535478b7f9c2808cde88",
+    "source": "Assets/Resources/Art/CommonButtonsA/primary-normal.png",
+    "sha256": "97328461738afede343ae53fb76ee998a7b1e5e0cd02200ee39dc2681e625b3d",
+    "bytes": 123891,
+    "guid": "58d39e831d7698c45a1cbdb9aab14f6a",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/primary-pressed.png",
+    "sha256": "73f481e43e8d455d2a3c0efa1196b4aaf10d29fbfbc8ba506031edcf8dbdfa82",
+    "bytes": 124159,
+    "guid": "4764b1088d63f2144b46e8b1a698db76",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/round-normal.png",
+    "sha256": "a93efad5c22c6fdbaf2ec98f3363b64dab9a4b91ac785d5c0652ab64d9deca58",
+    "bytes": 78103,
+    "guid": "a1c7ece705949b44f942f0a3494200e5",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/round-pressed.png",
+    "sha256": "c135463ed7585b9ac89e26f60ce123cfa72478e1907cdb30b48c3233ba02207f",
+    "bytes": 75900,
+    "guid": "6edfa52691b13e346abaa7e9bf5b1438",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/secondary-normal.png",
+    "sha256": "80dae9254f3260b87cddd38a2ca9645ab665f93e8b4b4754126ae1c8f6082e43",
+    "bytes": 108972,
+    "guid": "7b7b1022902b8c64e91070a72b9cd61e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/secondary-pressed.png",
+    "sha256": "48f1618a79db43d0f4913f19bcca926028654f507c706d10b4d20027159aac9c",
+    "bytes": 104409,
+    "guid": "a761403378e3a7f41ba8a24915a37571",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/selected-normal.png",
+    "sha256": "6a5183730976a404cac7a2640a600a09ea98a14671e0e3b250910d3c1c3f89a1",
+    "bytes": 109640,
+    "guid": "d2e2496aad2d0b24594ae866a2882c90",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/selected-pressed.png",
+    "sha256": "1b08e3cec3752aeea2eb07179febf000e25edfefaf396e95a5280637f3e76be0",
+    "bytes": 106707,
+    "guid": "dec2beb3b5bc51e4bb527b7bc0d09be9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/avatar-01.png",
+    "sha256": "690f38c4a6923c943508e5f46d5b6bfe51525bd717e6030c2145dabf35810ad8",
+    "bytes": 348355,
+    "guid": "463c0caf065f5ce4ba6b02c7a2948b7e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/avatar-02.png",
+    "sha256": "e655f8b30a8ccfde45a1c2c42ccc8b284a09dc76168475811085528e885dd38d",
+    "bytes": 354960,
+    "guid": "cac2fc8c5c3a8ec4197102d923860529",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/avatar-03.png",
+    "sha256": "e3d6f6fb858a31b3f5d414b7f46963e4cee2d85cfb3cf28e3651b120c3098555",
+    "bytes": 365557,
+    "guid": "673e03747e4998149adc90ea5319ebf2",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/avatar-04.png",
+    "sha256": "c5d5f556d278fd1f90ff6e2356b02a537778839951f1f81959f09f188018f1dc",
+    "bytes": 343009,
+    "guid": "c443a5a092b12a44ab1463ba63c8b7d4",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/avatar-05.png",
+    "sha256": "52e4795010e86a2f0ebbff4ba56ff99ac643d78515a4774bc55a5b97c3cb6629",
+    "bytes": 343019,
+    "guid": "6071908b2b1295440b54b3906d3ac9c5",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/avatar-06.png",
+    "sha256": "7022588a348c82a7a092c7075c9a16bb54b630188567aa7855bf651d68583d3e",
+    "bytes": 358170,
+    "guid": "a485ecdb0aecbc744ad14d6a794999d9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/banner.png",
+    "sha256": "b3f0af87546110f902b7d991c045e88967b1a485969f222417cf441178c8594d",
+    "bytes": 1483956,
+    "guid": "f8ba67b1f3085d2409ed43f74457dfb9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/coin.png",
+    "sha256": "5481fd36c467d1e14d6c15a7153c6b5ff0509205d90adb3a944ded71f405653b",
+    "bytes": 96607,
+    "guid": "5a517f38e708b5e4aa2e4939a8f3aedb",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/frame-01.png",
+    "sha256": "ebe5ecb8016c3356155f12bf84f9a7bd67f99e24c3022f41887877483357c443",
+    "bytes": 263027,
+    "guid": "a1a45640c5553e6448fac626e398a112",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/frame-02.png",
+    "sha256": "fa96bc7b3af1363f387646a4b6953ac51513df9c6044e8155a930e82ce000e12",
+    "bytes": 259105,
+    "guid": "6968e2c66a01edb4d815cb3d4a01208d",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/frame-03.png",
+    "sha256": "bf908339774cd648599fa106e75bc8eddda7e15a7abb225c01aa95afa6b03627",
+    "bytes": 243520,
+    "guid": "abeacec13ce08624dadb62118984a494",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/frame-04.png",
+    "sha256": "00c114a0badbffa0301fdfda241efbe0b9cda8528714bd492b72447dc617ec56",
+    "bytes": 255505,
+    "guid": "f92412cebe873cc4b9870dd9b3c78802",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/frame-05.png",
+    "sha256": "25fbff9a62225ebb1e8372202c285ec8c794c8f1b79c530435479bb47caa9b40",
+    "bytes": 252687,
+    "guid": "b296967d042ecca4bac55d36585c1b8f",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/frame-06.png",
+    "sha256": "7ca7eb39502fadfd392a033e89fbbd932adc96398f9f672d3d272e82f37423bc",
+    "bytes": 269563,
+    "guid": "07b8a3e5a66561e489913cbfcec7c48a",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/inset.png",
+    "sha256": "9fcf648737afb8222d3333081a1be14e1a05dd4542b1f2b09736961a71db1f00",
+    "bytes": 6461,
+    "guid": "aa86d750f8e4ddd40a86334cce4ffee3",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/layouts.json",
+    "sha256": "712298dbb22f28ef8ce3a3796cc047e42f7691e6d1d4cc5d187e0b2ea1f3a43c",
+    "bytes": 1293,
+    "guid": "e82b66f2cbf629e4a8826f1967516376",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/league-avatar-01.png",
+    "sha256": "37f95bb33048659050c6c9ba3ff7e9bac86163fef0a24599d1ed793eb9e83465",
+    "bytes": 270286,
+    "guid": "2249f2f071136b84e81d04b7bbb700e5",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/league-avatar-02.png",
+    "sha256": "aed3feb4259e711b2f7408c7255858997f7d0e73b05c5c8e4eb2adb29d6573be",
+    "bytes": 261191,
+    "guid": "6637bf617b82b5e4ca630728236978b9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/league-avatar-03.png",
+    "sha256": "96cddbf6d9670dbed0eeea887bee873ed4305941de7b46159ec4030755a8b467",
+    "bytes": 272866,
+    "guid": "011be707d21218642948e0cb269478b4",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/league-frame-01.png",
+    "sha256": "2aeb52e474d874df2bba5a63106061f9417874343837ee7e72c77593868039c8",
+    "bytes": 337995,
+    "guid": "21aee79cb4be2a84cb5a4fa905fc63f3",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/league-frame-02.png",
+    "sha256": "debf34ab374de170fc7c62bda69890fcacb220a6e33e1ca84ff41ad54bc633ad",
+    "bytes": 313946,
+    "guid": "d01dcc3066bfaf2478221c92285f8087",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/league-frame-03.png",
+    "sha256": "6ca37d6d8c5e70f9eb369c0765d1c1062111e4de08c1d2a85dad49693e97ab57",
+    "bytes": 304371,
+    "guid": "93cbaf0325489e7418aded089e914b12",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/panel.png",
+    "sha256": "0dce94ddb0aee38b504b058ffbf18b3767385ebaa53cc5de11ab6d276175dc5b",
+    "bytes": 1236166,
+    "guid": "0b520f9ccf972084db90d9dcb3f1a74f",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/DressingShop044/sprout045.png",
+    "sha256": "3368bb5c8ac737c8fc00fe34dd1fd34e80ec23447c48654ce0eb03e3851efd6f",
+    "bytes": 42657,
+    "guid": "12cac551a867b184a9dfc59bd04c83f6",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
     "source": "Assets/Resources/Art/FailureV25/atlases.json",
-    "sha256": "52a1ed99c7b99068c94cb8d7e54c7e9e37a2de411101759d805cc57d2433149f",
-    "bytes": 15809,
+    "sha256": "37a5ccbd4f176cfcb2ea9e902588612bb3d91b6c0fe9f71a36ad3c89e072827c",
+    "bytes": 15648,
     "guid": "131531d95a1aec84fad16426db8b0d3a",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
@@ -772,14 +1324,6 @@
     "sha256": "d607b9de1009de3cf787e9a8c2e0fa0ad874840ea8f22e50a0666e2802a41144",
     "bytes": 5858097,
     "guid": "cd77180310737b64f92297e678e700d0",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/FailureV25/glyphs.png",
-    "sha256": "3080edf97de4cd3e2d50e74b3a00e93286ba0f0602d69d0f6f6078063df1953a",
-    "bytes": 602882,
-    "guid": "0cc440979ccd8ea4697ded50a63dcfab",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -860,6 +1404,14 @@
     "sha256": "4c1d23c9112194ea3d9dfe81472f6351511a144cf2e0118222cbb0e4e1662401",
     "bytes": 834177,
     "guid": "e34c0657142793542a5bf1e0b7f7d687",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/sequence-layout.json",
+    "sha256": "ef3a8393f763e248f2b2effe21d341608fccd753096954f9fbe0836d0a20bdb4",
+    "bytes": 5379,
+    "guid": "5d2dded418695fb692cb07448523e83d",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -968,6 +1520,46 @@
     "redistribution": "consult-license-evidence"
   },
   {
+    "source": "Assets/Resources/Art/GoalCelebration047/cat-atlas.png",
+    "sha256": "4217bc8c12503e4e8f6790eab26a511af36ae4ec4c1647585b00f7305bd79351",
+    "bytes": 1974339,
+    "guid": "e93c63ccbb7342519eae24749a700adc",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/flowers-left.png",
+    "sha256": "2b63ae69ea3dbc4c55963a9a84313f15757a392083a4d5c9da33116e3b0e61c0",
+    "bytes": 69801,
+    "guid": "1d314744edd24a4db082dc9fd5f80d0d",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/flowers-right.png",
+    "sha256": "1107087d098ea76755240c857033c419c34b7783e2101cd55beb45b1be431f88",
+    "bytes": 70678,
+    "guid": "ad0a557b97464198a891af1d7847d85d",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/sparkles.png",
+    "sha256": "47e291e00b5794631a7c36e2f641d08ae8a74172bf7e39fa7a4560b4395f8bb5",
+    "bytes": 48798,
+    "guid": "ed42481bad504c8290c298820a33e03e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/title.png",
+    "sha256": "539150f8bbcc5e8a50a3350b71303d17dc578f0486f98d1b37a3a55ac3e8a338",
+    "bytes": 827780,
+    "guid": "843f184cb066444db69bfa707795c9d9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
     "source": "Assets/Resources/Art/GoalCelebrationV1/confetti.png",
     "sha256": "cf9db3462ec146baa828942528a2daf9b97967cd04b9c8df8bb5dcd0721e3b8f",
     "bytes": 180884,
@@ -996,6 +1588,134 @@
     "sha256": "10838058ec4134ced53740008fda2c834cba4f0a2d468524e32450ecdd373679",
     "bytes": 272809,
     "guid": "b6581378433407c4c98365d4254ae9ad",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/avatar-cat.png",
+    "sha256": "a8f0b4417f579b2f8fed4ae170ef549aa815c38115ea56b7f0655ad60f0053fa",
+    "bytes": 113227,
+    "guid": "6d06560f70c01e8479dab9098df0b2ff",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/avatar-frame.png",
+    "sha256": "d8f5f2e350a5e2ee12e92c59f3c333d564dae73e68f2c85406de690f503790a2",
+    "bytes": 103039,
+    "guid": "4409510c1e70763418cbb0b47f15d648",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/background-courtyard.png",
+    "sha256": "c98c367f6c2501e2a2e9d3f19f3100bfbf0dcd3c0cbc585059f2c05d43498c8f",
+    "bytes": 1831500,
+    "guid": "6c80293a6ca751b4094eb4fee4351b24",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/encourage-left.png",
+    "sha256": "103968c1d01a28d7361993f86efca5dda01fae72a40a2f3f6555e2c0fcd4cb07",
+    "bytes": 64680,
+    "guid": "d1ad3df01109ba04c9934f803256b9d2",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/encourage-right.png",
+    "sha256": "8f710a3377c33ba55f1c23e5683b84042e63b2fec4433ef5c1c821190fdc340e",
+    "bytes": 64873,
+    "guid": "914483b94fc452b4f8e400772f01cc3b",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/level-badge.png",
+    "sha256": "b603d16f5ce73778a6b02f4b2a35dca897ca2b07fb4e19e38a6d6abde4215194",
+    "bytes": 47157,
+    "guid": "ad1fd3949471ce040a8d78695e0002dc",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/level-panel.png",
+    "sha256": "a375c832d56fa26accb1ad5c0b982ab22f5a6bf36b264318e7d44e486b093972",
+    "bytes": 70428,
+    "guid": "4381b2aecef09084ab6291af4f4e5395",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-dock.png",
+    "sha256": "ee37d7877dbef454138655ea66b1bb4b4aa2545a3b31081b12660f259ba2c58e",
+    "bytes": 51621,
+    "guid": "047d4b2c6db90694ca4590e63f2533c3",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-dressing.png",
+    "sha256": "7db90c0c64c91c70a5a27205d00d968e3a616cdb9f49979d8cfc49487d9f9373",
+    "bytes": 86727,
+    "guid": "72adba949582b9045b086aa90a47a108",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-home.png",
+    "sha256": "d255cc38fbe65771b18cff56c1bad225a8ceb3d5dea716338430fd44b2500be6",
+    "bytes": 130198,
+    "guid": "9b4fcede57a9dd14bbcc5a6009f75dde",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-league.png",
+    "sha256": "c0a10cc701a6e0d9bb5ede00d626002626b14e5a48d5da52a0abc279dce53f10",
+    "bytes": 290539,
+    "guid": "1e5bc4a95a8104e42839ef2b2ae3d2fa",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-map.png",
+    "sha256": "ffef133a908d1e3eb3c04b9cdd238ffea25140ae610dec6f313b0ccfd94b72ae",
+    "bytes": 89684,
+    "guid": "154712f6ad284034f93e3e7005a40ecf",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-paw.png",
+    "sha256": "461b341b08ffa9166b215c4597a386c15af648946da5ee84733f218ace966965",
+    "bytes": 7640,
+    "guid": "e9521591fef4f5e40933480018834487",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-selected.png",
+    "sha256": "a0c226379d43baac39f5c9a2886c8ad584132e9ab77c41416187d137f76a8465",
+    "bytes": 80355,
+    "guid": "6ec382afb3586a343b93b07641ec52b6",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/nav-shop.png",
+    "sha256": "006ef181b23f1760aaecf12d3f61940ceb9a24df8ecc5aa8c1ff424453303ccd",
+    "bytes": 72277,
+    "guid": "c7e96284d802d574fb16233802309aee",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/HomeA/settings-gear.png",
+    "sha256": "2300f35db97630ebb14a9690f0c6d40c8b6324ade90bb04f5e3427c4f1002012",
+    "bytes": 54284,
+    "guid": "311de58de9971a94c84eb6fabf73eacc",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -1068,14 +1788,6 @@
     "sha256": "08297f8bc4c1c43403e353394e03c2b84c4c2387a0f0899dd7b6f2856888fc12",
     "bytes": 2577191,
     "guid": "6185486a84082544294e7d0b86a2689a",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Jelly/blue_jelly_pop.png",
-    "sha256": "7bced95af426f91fb71ba70faeaf373539e283fd01e24154684db7dfeebdc370",
-    "bytes": 404916,
-    "guid": "c3131c716f3795f478b51468da2d08cd",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -1392,6 +2104,174 @@
     "redistribution": "consult-license-evidence"
   },
   {
+    "source": "Assets/Resources/Art/JourneyGarden043/background-left.png",
+    "sha256": "2fccf498b88de8980c112e625c1595183d13acdb2c8a99a9010226ab24870864",
+    "bytes": 695980,
+    "guid": "5437bc8f5630ee74f8cc3d5d3f9fabb6",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/background-right.png",
+    "sha256": "56159bf384599f2d6785580cfc95a54937f620f03c8ff945a6cde093a308a4cf",
+    "bytes": 794702,
+    "guid": "78568afa1c9da1d428f218bf977522e9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/cat-guide.png",
+    "sha256": "695e904c1f86124b69944401d837d0cbd6cea822abac16bf86ea74f58a44b756",
+    "bytes": 217680,
+    "guid": "72aa39371911b7f479eee7ae4dffb13e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/ground-base.png",
+    "sha256": "25b8a76f3c87274baefc4a3596b5d4d969c5e5ebe9670c9e7b3e0e14ccc6f42b",
+    "bytes": 591598,
+    "guid": "7369e9d20210459438b69ce1b45a3b83",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/icon-locate.png",
+    "sha256": "b8919c19ace862a0788af44da47b5e9ebf909df5da8578b01d3ba34b303ce15c",
+    "bytes": 46008,
+    "guid": "543ca301f9edcb44b8cc725d52db4840",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/island-current.png",
+    "sha256": "320b4531d266cab119e6ccdb7a6c4a3629e598c9c939936cd10c8255a7150407",
+    "bytes": 142250,
+    "guid": "cf0788b2bf9fa014c805e51a32b89c1f",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/island-left.png",
+    "sha256": "bf9c6447f30a2128bed2a80ad73d27648fc6ebf44b5c4029cceb8797a8e5fd91",
+    "bytes": 94937,
+    "guid": "b54b9e679cc165b4792871da6b21485d",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/island-right.png",
+    "sha256": "018770a8f183d516c00079310573f9667b5d131b3ed57a049caa39a7090abbc3",
+    "bytes": 95494,
+    "guid": "f65a2cd2cde4e00459d4c13ca1631ed9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-blue-pressed.png",
+    "sha256": "d5a61d216796f929a33664930079340472be34d7c9faabddc0c2e6f7a0e1f42b",
+    "bytes": 113100,
+    "guid": "de7386a309bcd55409049206e8923e24",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-blue.png",
+    "sha256": "806e2a3100569b022f050b7a9c98699a41504aa22d9ab802ac52a2e998b090a0",
+    "bytes": 140673,
+    "guid": "808f9bb943233474c9163ecb70a988f9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-lilac-pressed.png",
+    "sha256": "d3e76d248382c1aa319acb95839b2fa5514366d361dd131b461f6a4432c31343",
+    "bytes": 111684,
+    "guid": "a811114c4baacc3449fa3431124581c1",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-lilac.png",
+    "sha256": "5a273f9ceeb045be517f819394f808ec98b36d263921f92e37886625bf4ef24a",
+    "bytes": 140439,
+    "guid": "b11b2f7fba0f2644181b756724641d00",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-mint-pressed.png",
+    "sha256": "448c50c8bd4d9a27f1b034194abf0b0386da58806c154abd9ae5f67172f8e9b1",
+    "bytes": 111785,
+    "guid": "da81a152457c876489e72c3cda3fee03",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-mint.png",
+    "sha256": "bd2401afcb34f556a7c7b53740713491698d5d56961ed4a87ac3a89e2507edff",
+    "bytes": 141817,
+    "guid": "1aae664898ae92240b5f4c3776c09d10",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-pink-pressed.png",
+    "sha256": "580834d486e4f7e310d5ddd244f368069f6c81998d63d86604551fc5614448e3",
+    "bytes": 109075,
+    "guid": "1ec650931613eec4c819b813302f2ed8",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-pink.png",
+    "sha256": "4b35c10047644c887f3a8d45a415be162be2d68a1a8f152262b3b97de28ad18a",
+    "bytes": 138682,
+    "guid": "f8cfa834f10854a4299f154ec73e1c8e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-yellow-pressed.png",
+    "sha256": "06d5d45ea10c8f4425a66e89ed88aedf6a870fd95455efcc9811eb7c587a046f",
+    "bytes": 110284,
+    "guid": "87fcec7a3db140f4592c2b00972ba274",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/node-yellow.png",
+    "sha256": "728128bd43de8043c58afb8b2b0d67d9fac30953c08ad4529b50fdd6b9bba9d0",
+    "bytes": 139801,
+    "guid": "c156cfd3ffa5ba24d97ccfd7104f3117",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/provenance.json",
+    "sha256": "4391246bf9283ce0247aefa0061279c048d4b36de45896f2aeef5f979454d19b",
+    "bytes": 5196,
+    "guid": "05868d4cc76bb7a4ea720d94a552866e",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/route-material.png",
+    "sha256": "cca071ed0645f91e332da5f6c5b57da3d4e204b392a524c791d63f8cc47f1b0e",
+    "bytes": 4159,
+    "guid": "a6889cc6d4415534eb2c308ad8e5961a",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/JourneyGarden043/tag-current.png",
+    "sha256": "78ae5360006a492c0cae134c4df41c736fd9bf1600cdedda58fde0949b13b558",
+    "bytes": 124143,
+    "guid": "6dac35a9291f4444c8e27aaac7807603",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
     "source": "Assets/Resources/Art/JourneyV69/booster-lock.png",
     "sha256": "9a855174d6f9a11ca000f0b9d4941d85497e5f8f458c6d3aa53f10bc9b2946dc",
     "bytes": 579826,
@@ -1440,6 +2320,22 @@
     "redistribution": "consult-license-evidence"
   },
   {
+    "source": "Assets/Resources/Art/League046/friends.png",
+    "sha256": "3b3259a38696334080cb015d5a1bbbbb01cb9fcd04d5b71f82b753872c70aa87",
+    "bytes": 1537852,
+    "guid": "4d8e1aa157c84f14fb7cf3790d79bb88",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/League046/season.png",
+    "sha256": "9754589f6235b84181824af947d8c5af1477cad0870969638f96f7781bc16519",
+    "bytes": 1167874,
+    "guid": "73093d5c6a4f1db41b2675131ec620fa",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
     "source": "Assets/Resources/Art/LeagueCalendarV1/league-motion-atlas.png",
     "sha256": "3809ab63691da61ac730040df7b9c02a54cb7ecb4c1e1966d575c719a151061e",
     "bytes": 1263178,
@@ -1448,154 +2344,314 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/avatar_clover.png",
-    "sha256": "f32f94145b0c1c6335eae6debc6c456297a567a337ba9c809f10999b24a5e7c8",
-    "bytes": 135809,
-    "guid": "04cd60b748a411b40a3194273f3ab5a8",
+    "source": "Assets/Resources/Art/LevelLoadingC/box-back.png",
+    "sha256": "d9b2010daceb72981fd164f003d36117507c0064fdace7c47ad6abc8369924f2",
+    "bytes": 84781,
+    "guid": "a94b41f16874e8b408062f71e405474e",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/avatar_luna.png",
-    "sha256": "11ab434fca69016869470dd320772e6d1d2883184da1fe0f854bd8ebeaf9d2ec",
-    "bytes": 144332,
-    "guid": "dc7efd337f8013f4eabb4e468db0c6dd",
+    "source": "Assets/Resources/Art/LevelLoadingC/box-foreground.png",
+    "sha256": "add11816933ec0b6cfed34a7ecfc1b5759ec25547abca4c130f0209d391b3efe",
+    "bytes": 216721,
+    "guid": "7ae48cb8514262a43881a8aa87b177c9",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/avatar_mochi.png",
-    "sha256": "bc37f618d9fadcbc11cf90c1aaf6c2aa3feb136c8e1a76d6db8b79ebfdba3dbc",
-    "bytes": 141334,
-    "guid": "7647897b9fc1ade4cb59e34d2f7772d7",
+    "source": "Assets/Resources/Art/LevelLoadingC/box-front.png",
+    "sha256": "ac5325730d764190d2c281c397e112f72a0a3a97a8f65853c83f56b2e8df7d20",
+    "bytes": 127041,
+    "guid": "97abe11f449ffc144866bb356f5dc0f9",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/avatar_poppy.png",
-    "sha256": "a9b68a788d18489dc65b0f6034487ddee4e619b3cc54f7d105f89bcbe2f369a6",
-    "bytes": 138570,
-    "guid": "8cf8fdf2dc8e0de4c9f308476695e396",
+    "source": "Assets/Resources/Art/LevelLoadingC/box-rear.png",
+    "sha256": "c2570fced9d95388bbe233d2ce4ba23bd3ed630b5a62ce8502c2bd0856f843d0",
+    "bytes": 252233,
+    "guid": "f7fe2162c7553fc4c92e973bce965cb1",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/avatar_sunny.png",
-    "sha256": "d95f747d140ea6a76a51066342e438d17a95972d6eaf11d4cc00fe295f915815",
-    "bytes": 143884,
-    "guid": "55b70e7d7d7d6964aa3f283185f0363e",
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-blue.png",
+    "sha256": "c6f9ec78b8a394b449f49f351a30cd87723e5d57c49b8525596219257b69353f",
+    "bytes": 85319,
+    "guid": "c295dcb1c83e2094dbac41b823b380db",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/mascot_medal.png",
-    "sha256": "f33310a63226909c6ef2285f9b03fede0202d655b829348d09b24c0896a3d78a",
-    "bytes": 155810,
-    "guid": "c865cc370d174f349b2a3842a7a55299",
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-coral.png",
+    "sha256": "0571709e75204bea53121fea002ca520de30fff5da3154bb5585b5bfa2299c6d",
+    "bytes": 83924,
+    "guid": "6c68da53f9687cc4d9a4434c1d5ab676",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/reward_avatar.png",
-    "sha256": "c6d92cca32bd9d4c3107be514e62f9d949adabc4f7526a37f8803d457d1df203",
-    "bytes": 168644,
-    "guid": "00b54738997ce1b45b339743c9359dd2",
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-green.png",
+    "sha256": "13e18dfc26a440799ef20c6e216cb92cb3808f709c67ecaad2a59106a58d4832",
+    "bytes": 87703,
+    "guid": "190712a645dfd5d42a6fbf3de3c233ed",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/reward_coins.png",
-    "sha256": "2ade5e2767fb2cce559fa146cf4d708d4871a583631ca968a955c7cfc9614fc6",
-    "bytes": 123094,
-    "guid": "80be171d9db20774cb88e2b4113e1f4b",
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-purple.png",
+    "sha256": "84d6a0651eb00b05bec33c5d51d30df4069dde92d47593ab24f8642233fb0b11",
+    "bytes": 84318,
+    "guid": "58f9495a2c12f104f9357e4fdee0a450",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/LeagueV1/reward_frame.png",
-    "sha256": "29a7458c28c5adc7a9c5ae268ed4279afaf80f3056512f4bc55cab19bd942ef3",
-    "bytes": 135088,
-    "guid": "d149a7e92de4f1c4daa73a65638cf087",
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-yellow.png",
+    "sha256": "3a2520f2792e1936c55f3822156708317afab83cd622a3e7091b01bdea2ae4bf",
+    "bytes": 83876,
+    "guid": "bf2d8b8b2106d284f9bd6c0f7feebd54",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/NativeV50/background-alphabet.png",
-    "sha256": "51b18b6f1349c4ecdc1cc66f45a145a3df528bd202f5e626861509c82e94678f",
-    "bytes": 2152612,
-    "guid": "ab2a49c4a23c3aa45a44e7375c979d7b",
+    "source": "Assets/Resources/Art/LevelLoadingC/cat-body.png",
+    "sha256": "5c499a70fef4d367935728924345278fe64092d517288393844a968f58cfa900",
+    "bytes": 271342,
+    "guid": "b24d7d23f417731498d82c969b329791",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/NativeV50/background-picnic.png",
-    "sha256": "14862dd34d3fe1b555ff37fbddeda1c23628bcd64ad7293ed8d8afb426372d09",
-    "bytes": 1985025,
-    "guid": "115e255492c7de149bdf2f9d31bc534b",
+    "source": "Assets/Resources/Art/LevelLoadingC/cat-paws.png",
+    "sha256": "2cf61b86a56b374fc71ec16de1ddd1297c8842c090b2ce24688b6cb1bec864a5",
+    "bytes": 80322,
+    "guid": "f5af0f4ef66f41e4fa8b018b8c1dbfc4",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/01-common-ui-atlas.png",
-    "sha256": "e646d816aa957430bc88207348af06e67d9e3159ae9655543befe3d99e59829e",
-    "bytes": 1190279,
-    "guid": "2fdcdb2e08201564ca3604b496af8eca",
+    "source": "Assets/Resources/Art/LevelLoadingC/cat.png",
+    "sha256": "8893b0c7409de58a1a9372784b7ee81e2d3994c6594ffcf4e86859534d432ef7",
+    "bytes": 163679,
+    "guid": "056c7fa02a7fa634ea3083054642ec11",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/02-gesture-atlas.png",
-    "sha256": "12a9eef36a7a69d93ed79a243d07f929b8e02c73c17a1edc330e1a3a72154272",
-    "bytes": 1705427,
-    "guid": "52d90b2134d91114f8ce953c0e73f797",
+    "source": "Assets/Resources/Art/LevelLoadingC/complete-layout.json",
+    "sha256": "a9bb87140420077c581f7fc62c9274c7039b3136523016bf8a77808e31a6a869",
+    "bytes": 3239,
+    "guid": "17108228a4d95b84d8de908d6c533683",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/03-goal-moves-atlas.png",
-    "sha256": "83a3ffc52f825c811d460d552d3b0a870bb9d7fd0ac69d65870b835a466b22b8",
-    "bytes": 1696801,
-    "guid": "0c3a369d02a6f654eaf9cd4c047a7e58",
+    "source": "Assets/Resources/Art/LevelLoadingC/panel.png",
+    "sha256": "0dce94ddb0aee38b504b058ffbf18b3767385ebaa53cc5de11ab6d276175dc5b",
+    "bytes": 1236166,
+    "guid": "bd3dd3696d41d814c8cb753ac07ec034",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/04-yarn-lesson-atlas.png",
-    "sha256": "175efa13a3c2065cd99e708ed010e834400be3fa4fdaceb3b97f5ddc4fa2ed60",
-    "bytes": 2239984,
-    "guid": "26b857dff97a82e449e279b4ad48e0c4",
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-box-foreground.png",
+    "sha256": "a583085271ba0a4377ddc3e4133808840781bd56830209cd90af48ca0f68123c",
+    "bytes": 197871,
+    "guid": "308660c1c805ee848b5b261e160af3cd",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/05-box-lesson-atlas.png",
-    "sha256": "027d6e43a464b519817a1602e30bd1c7e82d14e3569a1258945124143376f292",
-    "bytes": 1439312,
-    "guid": "439c9622139598d4dbb4d857c53ab73e",
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-box-rear.png",
+    "sha256": "ede13fb39e649a11c43a721ee7c32667454dba939cff04d757f9eee411d38ff4",
+    "bytes": 185598,
+    "guid": "b685f43843d79f24986ea76ac19a0834",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/06-lucky-cat-lesson-atlas.png",
-    "sha256": "0c661aa468e97500b4d3e8142ea13311de35056a039b1944269c6f1cf5cc50d0",
-    "bytes": 1213957,
-    "guid": "71a3b3ae8be04234295d6cac9c86666c",
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-blue.png",
+    "sha256": "2e7c1e9434fdb1d2fc6bda018c5c69226f8a33ec4c82c251754b3aa13f6a5bb6",
+    "bytes": 39155,
+    "guid": "ad13ed0263279794b8a3be2528ea9d12",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/07-copper-lesson-atlas.png",
-    "sha256": "4c9f0f6c943e2428e2f9b1fec89d35f1d5b84ce8cb41379154a2ff0f69b8f8ef",
-    "bytes": 1316243,
-    "guid": "942dfcc24d563514693542035fe2e098",
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-coral.png",
+    "sha256": "83374114455c69e8c43b3af250ba59e30ae897827d29e4b05fd7a482868e9df5",
+    "bytes": 50902,
+    "guid": "bd3df01b13f668849977034f8d811f0e",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/OnboardingV1/layout.json",
-    "sha256": "7d0ef0338ca6d11dbad9c75e5e171f400b0a905470d12f5e5c5d6b77eba6243a",
-    "bytes": 6053,
-    "guid": "c461f3a1e95134642b2186da8ffd227c",
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-green.png",
+    "sha256": "722443e8134968ee14f255ae0343b0103c976c00b63ee14051cdbeef3bea07f5",
+    "bytes": 45384,
+    "guid": "ecfcbaeb32325fa418fcf6d674552394",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-purple.png",
+    "sha256": "9cfd9066ace84c56bdd6cb548ff373569ee4d8a9d5e89caa8894b3ba9947994a",
+    "bytes": 34702,
+    "guid": "5d5e6e14d7820874182df73b8bee4954",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-yellow.png",
+    "sha256": "4c39f905e6c728ecbaed9d095c21d97c6c0241230ce82d22c667b81a6b3e89fd",
+    "bytes": 48325,
+    "guid": "8f77faf5d4c0c224ea6ff0a1716f5706",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-cat-body.png",
+    "sha256": "3aea1317690827621e0385a74286024a8b8676fbad1e3a587e98abae9dc8e40c",
+    "bytes": 125343,
+    "guid": "a9da525bbc4aa2b48941c372e680d70b",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-cat-paws.png",
+    "sha256": "02316dd2aa3079ceab0b099f99524d370eb3a0d8a042f7845cabc26ded62e76d",
+    "bytes": 20953,
+    "guid": "ca9abfe93db0e674a9cc1a72c38c9a04",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-sprout.png",
+    "sha256": "a1b3e4baf8cb57899b757a452ad2ac7e7edaf6a7b8d8a058e77dc12619028626",
+    "bytes": 21938,
+    "guid": "199f580ec6042d24d81815339c249103",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/prototype-layout.json",
+    "sha256": "cca045a0570b1dc89d8fd597815134ebb98d2ece5243f77ea932441b39daa2bb",
+    "bytes": 1354,
+    "guid": "611216cd588ee2e49b89f8ef59cde3b3",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/shadow.png",
+    "sha256": "946b6bd73e81a08a79c8f578aec88b476822b1137c1f5d93341a8bdfb89cadb5",
+    "bytes": 24832,
+    "guid": "04b8141e55c2f4e439d63cb0cd54cfc1",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/sprout.png",
+    "sha256": "a8115194883ca23f748c653b48941c5d25ff7f6b9430d98cf4fc08756393a0c0",
+    "bytes": 59848,
+    "guid": "04a223664ddfe2e4383d96bc0736c169",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-box-front.png",
+    "sha256": "be5abe90634e9e59854d30a4eddf8ecb8c47227c2a20448272c0bb4b2377093d",
+    "bytes": 1156450,
+    "guid": "f88acbd89f4db704bb4c5562cafa60eb",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-box-rear.png",
+    "sha256": "c4d112ffe672fee6db20036dd01448e6b9882e330a54bc649915b50c1f8c706d",
+    "bytes": 229900,
+    "guid": "c034f1d54d4fe8f47902aec7d048fcea",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-blue.png",
+    "sha256": "4c2036af2d1516128b86b587e90fc9f15bce1e3f0abee3119ca08ff65362c0ff",
+    "bytes": 74217,
+    "guid": "4858ca5afd9b2e84589eec6c24c6830b",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-coral.png",
+    "sha256": "c8406be1d9c0fbda5b3edf9aec9852685aeb4467ab79c7e4905edb1fef986b17",
+    "bytes": 73624,
+    "guid": "3a2d9d75b04289c4cbce4b3a217b06ba",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-green.png",
+    "sha256": "61f26b490eb20c197909d10197dddffed920e52c47a3677f3fee202287a88fa7",
+    "bytes": 77470,
+    "guid": "88775234c266ac84cabda5bfdd3302e6",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-purple.png",
+    "sha256": "4ca84d74dd64deb9e104590f3bcf978bb12550e26db3c5d1c49d687423fdedf6",
+    "bytes": 73547,
+    "guid": "a8fb484551d898243a0b2862bc00bc9f",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-yellow.png",
+    "sha256": "601135c284342b7032d58d509862659b89e317669b804a49cd4e562a24efbfa3",
+    "bytes": 73209,
+    "guid": "b04ffb316a535044d99cab819fa1a8f9",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-cat-body.png",
+    "sha256": "cdd63b1008b997684f94c095d0c49aa9cb322d9015049c3646c49b7f6aa8e98b",
+    "bytes": 1021491,
+    "guid": "3d0497447ef7bcb42a9c96b37d08f3aa",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-cat-paw-left.png",
+    "sha256": "c60c689019ff590d6a2fa219d49a3ccc580f82145301f6c604c30f5c3e37b70a",
+    "bytes": 38173,
+    "guid": "68d203e6bd412ab4ebe0093afcc2b3f7",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-cat-paw-right.png",
+    "sha256": "78c2175ccb798e2263ba15f2f2738ddc32d6c47614c36791c57ac003d66ef1ea",
+    "bytes": 38324,
+    "guid": "86838fad2d93e9a459a5bbd31b487aae",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-shadow.png",
+    "sha256": "b6bc20ed30e1fa15e06e3599d7c8a60ed53d664ac3312bc1154d1cf499aa7152",
+    "bytes": 9995,
+    "guid": "761f861780c7622469b95efe017516a2",
+    "usage": "unresolved-until-resource-closure",
+    "redistribution": "consult-license-evidence"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-sprout.png",
+    "sha256": "3368bb5c8ac737c8fc00fe34dd1fd34e80ec23447c48654ce0eb03e3851efd6f",
+    "bytes": 42657,
+    "guid": "50d15e5289a61d341b46ab4eac68350d",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -1609,145 +2665,9 @@
   },
   {
     "source": "Assets/Resources/Art/Pastel/PastelArtData.json",
-    "sha256": "7bfb0f5cab76db10ad7e3fc3593dec3148b65caf49379280ebcdf1b10aec723e",
-    "bytes": 22886,
+    "sha256": "244ad7282fc1225e622d61a942b042027d97bdaca6ecea863c3d40e7dd3dddc5",
+    "bytes": 2333,
     "guid": "523024ea921be664daf7f4bf1f06dfdc",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_anticipate.png",
-    "sha256": "a295add702bcf0f91fe9c9d946cd80efe3047933ac8e70d9bb8c84b64e1c52cc",
-    "bytes": 149511,
-    "guid": "1e49b3a433891504eb0d03f63ad50d7d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_celebrate.png",
-    "sha256": "65fae42266bfa74c747980220d8fbfd3573b0952728b2860b3fb08a336aba664",
-    "bytes": 179999,
-    "guid": "6e4eaef2f5658ba4aa96b0eed8e3221b",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_idle.png",
-    "sha256": "d214ef1b259f24e6607712525098c716283237b0d5f41a8a97dcafcf73c00da6",
-    "bytes": 161335,
-    "guid": "233f824adb770c54494660b858663b0d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_sad.png",
-    "sha256": "1a07ba7b4dfb789e25cf946c99473b9f925b69fdc6bd8a1ec3b25d26a696b697",
-    "bytes": 144638,
-    "guid": "ed17687910152e043acc082b5fb192fc",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_settle.png",
-    "sha256": "a3361899d6fe963641bc57541237d4ee746f6b7c8f1aea4727c85210743529a0",
-    "bytes": 153590,
-    "guid": "e7f4d0ff7ee10ff46b6d4046ca4cb569",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_wave.png",
-    "sha256": "9d3f65b726333a4c3cf4ffd6651e88a210923782b1389bbff242c2a9c328119f",
-    "bytes": 162295,
-    "guid": "ddb5a1d3f757ce84693a4c6fe2465ade",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_back.png",
-    "sha256": "0464012679c71ec5222ad95d5bae993649ed701c7641227add239661ddc29e1d",
-    "bytes": 26403,
-    "guid": "2dba8635065573d498cbe19f5fbea092",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_close.png",
-    "sha256": "1f6b9245406627bd577b3204c628f49a0d206975dc007a33128ab2968ff9f001",
-    "bytes": 42660,
-    "guid": "e5c1cd0f858e1854b9b5fb07a62a5c6e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_coin.png",
-    "sha256": "b72e66191a5459c1967364e8c139aca6e97cb3702d31cb91682ec5bddadb574d",
-    "bytes": 66418,
-    "guid": "10139ef72e025d74ca025ea04a99886b",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_heart.png",
-    "sha256": "623345d534d434c7a749635f6450eae86cfc3aa7adaf9d2e5a9fc06c94a655d6",
-    "bytes": 46383,
-    "guid": "73ba7e17920397b4090257da049465b6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_home.png",
-    "sha256": "032315e3af46ae91f74a7560aafb30436d5fefd5eb465bf22f89bb0b863f800a",
-    "bytes": 61202,
-    "guid": "e33eb303ceadd7a4386721fcd6a1e11c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_medal.png",
-    "sha256": "c0d95491c94d60ad09763222f96384b3ceb327af759c3fd9a0077774d456c111",
-    "bytes": 65930,
-    "guid": "2a7fcc72b898c0a47977ccfe8e1d90c2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_pause.png",
-    "sha256": "db5d1227dc044d46ccb1395f57a59bfff729425723726b046d41ea5faca18fec",
-    "bytes": 36100,
-    "guid": "f75e44a1b5e8945468af3c2034ac5355",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_play.png",
-    "sha256": "874fe379e9cac3fe1659579c553d55480de7b67b5286f172227fb2295a20d2b8",
-    "bytes": 31720,
-    "guid": "4b33328c15344dd4fae0042679822033",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_plus.png",
-    "sha256": "fc35a8c21c020d0dd25a2dda22336e77125d02928c54280ce5cb08b4f4a8a047",
-    "bytes": 36706,
-    "guid": "dfab0e1410e74684dafff7681a929914",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_ranking.png",
-    "sha256": "84003a2d114e440804b4c4a2740caa4f2219d3d05c54ebc8b2a13867609a6bbe",
-    "bytes": 56702,
-    "guid": "5a4849c9ce5d63949b2c640459fda0ad",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_restart.png",
-    "sha256": "ffdd848873d0ad7cb26dbdbc6bd39c56149742dd9dbf3615205e3bab14985085",
-    "bytes": 40954,
-    "guid": "8ece0b7e4d6d05e458930158c596bc82",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -1760,514 +2680,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_shop.png",
-    "sha256": "c5a5312d2f86e6ca8dc055f6eae709780ec9ef1488d1f89709364f48f442925a",
-    "bytes": 60494,
-    "guid": "5b47c06315bf82a46833497513858e9a",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_sound_off.png",
-    "sha256": "aa49cba6b86c9adf91172198832e949b0a0414f0d70a7a0d437186b15f1e002c",
-    "bytes": 37618,
-    "guid": "782a8117671a86044a7dd4bff911991d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_sound_on.png",
-    "sha256": "20af4c7d380c50fa434415cfa694719f5ab015983bf8f37445633d64dd572a2b",
-    "bytes": 43932,
-    "guid": "5aa64d03416dcc242953ac910852a795",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_video.png",
-    "sha256": "08fee43b4dd158ef12e8ff587c8efe328008917d1aa3d10eccb783660b30833d",
-    "bytes": 55055,
-    "guid": "65818823a9cb7524285008c9a4effc16",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/aim_dot.png",
-    "sha256": "e2f81c61ee442c3011e3c951aa8ec2a8a549da99b8709d4da5992d06456dbed5",
-    "bytes": 7784,
-    "guid": "f42cc9df9ba050942b7ede696feaddc9",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/ball_blue.png",
-    "sha256": "10e36cb8b985a175be4a7f9bd04c3484070d1a6d8ad73510a30663ca8bf396b5",
-    "bytes": 38716,
-    "guid": "fb78e5218923c0b4684e341640806c02",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_blank_blue.png",
-    "sha256": "922ef3ffd5664026ec4f98b86c2b4236cb9eb92eafb4bb3956846226b0344022",
-    "bytes": 60717,
-    "guid": "7cfbd238a7949324886181f1a84a30a0",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_blank_blush.png",
-    "sha256": "07649478bfcc47e9ce799678d5a355743f5bde48cf2834b0fc13b1c459166fb7",
-    "bytes": 59927,
-    "guid": "9f98b349067afc54d9bbb0af5ea12e57",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_blank_lavender.png",
-    "sha256": "18bd2b73c0c28f1a9eed3b0c981abc44cd6fada106a3e6dc049bd721c976e1c2",
-    "bytes": 59324,
-    "guid": "808c2f9a7b2a39b459df95e0d8c76c16",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_blank_mint.png",
-    "sha256": "fb5c4005ea13461964b226fa949a9b6af317ee2089bea7df63daa6b32bdcc826",
-    "bytes": 60314,
-    "guid": "d49aaf497161c6e4ca4f2056fff4347d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_blank_yellow.png",
-    "sha256": "582b43e166edcda6507aaf4e388f4b418c20e04d80527baa26115c4602400d8c",
-    "bytes": 61401,
-    "guid": "1c0c6d74ee0e98341a16dae575713cf5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_blue.png",
-    "sha256": "40066673138e8f86c4ba07ba0240836ec78dd33b1b1d0abb46f094e87826b339",
-    "bytes": 63687,
-    "guid": "f0738c946fc252541b8a64306bfced02",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_blush.png",
-    "sha256": "1c495d3e3e5dcd0350174e59c5636767d549bc2e9f0a5264186c13e24cd607bd",
-    "bytes": 67911,
-    "guid": "58d94c9d19ddf3647a2946f6ca3a60cc",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_lavender.png",
-    "sha256": "ee5a9a40e09e6c4415fe268fd726fb9ba6d973a5a5c721335fb567528fcc392f",
-    "bytes": 65007,
-    "guid": "586ffa304b52cbd4ba65caad109e63a2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_mint.png",
-    "sha256": "53dbbe723512acbf78d1630c76037041852a9a3d18fa1a4adc3b9357a8fd9310",
-    "bytes": 65967,
-    "guid": "e2e5e1b45ca12b24ca47f70342f90c8c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_yellow.png",
-    "sha256": "c051b7c4556602fcec1f2a5d4461469935009b66cc8970dba7ec58d6a838efac",
-    "bytes": 68880,
-    "guid": "2ad56b4131d86fa4f8eaea2bda8146ad",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/circuit_node.png",
-    "sha256": "24afd33416b2532b6ec5714c579c9b5a623cc63949d96f018f28c53460758831",
-    "bytes": 27726,
-    "guid": "dde405c8e97e22c4c89f6adf60944700",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/launcher_empty.png",
-    "sha256": "0545c642ef7a00b1e7ed48a74eab71d2c9a539e899e7ba365d33337f07b193b2",
-    "bytes": 80775,
-    "guid": "17e0a86a42d4deb49901ea43e7aeda14",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/launcher_front.png",
-    "sha256": "1aecf558100e94cbca77b581429cfe308fad838bf9a8f38badd321a387598bd2",
-    "bytes": 31884,
-    "guid": "2c1472ce49c294e4ebc25168ce896755",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/launcher_rear.png",
-    "sha256": "82a57366b7cb917562782b4ef723fa84de848e99b619f5b9c8cd3a8b7c67ff38",
-    "bytes": 50806,
-    "guid": "feb5ecab975b2a846902d438da9a215f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/reflector_cream.png",
-    "sha256": "6bfde129ee8e632f33ccb06e3935d519bec4cabfbcbcfc5bb989606d3e592990",
-    "bytes": 39406,
-    "guid": "6af9b9559e2a8dd4f98866c8ac72c1af",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/shadow_soft.png",
-    "sha256": "44ebbf053271b822c696d57a4ca01cad44ee4e2086dffd515dfee982455d4e86",
-    "bytes": 21013,
-    "guid": "904435e2a9b29ae4da2015877a7c462b",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_A.png",
-    "sha256": "f96ff7fe9eb7e478245bedadb2da7ebce8f7de7e50a78078933a8c773512ea94",
-    "bytes": 79551,
-    "guid": "06fc4f2c3d5a1a04aa321e8b1c85ab0e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_B.png",
-    "sha256": "afc09fbf8b94cf07225fdbfffff1b424363b03c1771ca220fb4f0305f0f88388",
-    "bytes": 87372,
-    "guid": "82b8230d57fbc68459e7506d430b28bf",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_C.png",
-    "sha256": "da3494e1071bb24c64c6c1fabb23ab81c7cdd0797f345fd5516f1a5b74cbb3b8",
-    "bytes": 75700,
-    "guid": "5eb6a092de4d0724791278a089bdd1af",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_D.png",
-    "sha256": "cd7b6e39f2bc97ef6926c3aa2845b35c85b8ccc6d6ae754b515671dcc01b0e89",
-    "bytes": 79582,
-    "guid": "78d32ac077ade03458c066929991ef60",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_E1.png",
-    "sha256": "4a4697bd235c35e0e62991aea1c71932a89592b549ca3107171436de0e4c0e57",
-    "bytes": 73315,
-    "guid": "18e51d05d8cd729429a743e0f4ed781c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_E2.png",
-    "sha256": "17687aa33b2fc92582d5a45ed95ea366baa4badcfcb4c813dc9e77a5748a38fa",
-    "bytes": 71878,
-    "guid": "e4a97773abe7c84438dcad23b0b5c670",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_G.png",
-    "sha256": "480df6db2c3c434ad14a1c0f4c7e0bd314747fc40a57c010e28ca1fd38973f60",
-    "bytes": 88364,
-    "guid": "315771cd85b450c4493023640cebd60f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_N1.png",
-    "sha256": "04c76bb1808301b01897729e6a242edc1149ef4ca97cefbd845b0b5598d6e8cc",
-    "bytes": 87252,
-    "guid": "5e229936650533a418ecbf3fe3c533cf",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_N2.png",
-    "sha256": "349ad8b096c5a1d29d97d770bbf867dcb9f7e08c7db4db81b5aba3a70670118f",
-    "bytes": 84678,
-    "guid": "6ec2475d86189f746885ab465c6ae252",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_O.png",
-    "sha256": "7897ae2fc11814a2988baf8783a3d5f1a825ab58f0459be5954a444dc4132fe7",
-    "bytes": 99637,
-    "guid": "9ed2fe40334a3aa4cb2b4d051321387d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_R.png",
-    "sha256": "84ecdbb43217f59f851abb5ec516591631b556a7f4418c60906df1c245702f03",
-    "bytes": 82942,
-    "guid": "6bdc95a38ef967542ba1fee717e42a57",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/logo-letters/logo_U.png",
-    "sha256": "8882efde05831e032393aeab0d8102a4a46674ea9c02443e34d253468d9ff552",
-    "bytes": 80540,
-    "guid": "595251d6cd3d26649bf93da2ca78c53e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/electric_post.png",
-    "sha256": "da323e0866123f9025ff5904f8c6dbe399a4aae5af55e9321b6ffce4d2bd1466",
-    "bytes": 58710,
-    "guid": "271f5680a3f93af44adbd185fd9ccdf6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/paddle_cream.png",
-    "sha256": "488738abf141bb0ebbb9f744f77aa0a499a4978031691db72df83842e54b4d1e",
-    "bytes": 71710,
-    "guid": "602b77edf8641154b9292cc2e9abf841",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/rotor_blades.png",
-    "sha256": "abfcfe4661052df924b1c1a1034f255f86e0567bd13cb01f4ebd2824bf1f8ed4",
-    "bytes": 129372,
-    "guid": "026ded279ccd4974ba6e477341cf97be",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/rotor_hub.png",
-    "sha256": "de802ed9b5aa96203537a067b6383dd9c3123027a89afa9fafde55d7f657e6b7",
-    "bytes": 77621,
-    "guid": "7e9a30cbd853e5146bd539b2f6df73fd",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/shutter_door_left.png",
-    "sha256": "161a2885818c4ec73c0a48df122e6852b8c81ea0534ac65e4945745bb59d83ce",
-    "bytes": 91222,
-    "guid": "3d23f0e5fb10a7a40ac43b901181e899",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/shutter_door_right.png",
-    "sha256": "8473533432138b9d2a96318fa373fefae635306a5770cfcfd0cf6d687e17ad54",
-    "bytes": 85806,
-    "guid": "f12fc087a843e2c48ace1f5fc5640c50",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/shutter_frame.png",
-    "sha256": "9ae342473320ca3354c42e3829071bd015e31344e0e6eb101df6e695f4115b69",
-    "bytes": 92063,
-    "guid": "42c842262a98d6548826f329f34d6b98",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/mechanisms/wall_short.png",
-    "sha256": "561be5a0d07ac7ad9582dc766d23d19d8219af17558aaa98e209f5d3dae9ea09",
-    "bytes": 59422,
-    "guid": "debeed01a2f70a14297ba782ed088dce",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/cat_avatar.png",
-    "sha256": "ac9cabf8d88c3d962b7b93f4ad8409ec0be736328ae9aa48139ab8cd1ae01977",
-    "bytes": 78355,
-    "guid": "4edd833e25160ec41854fe24b08e9656",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/chest_blue.png",
-    "sha256": "d76177723a0fcc808e9a057194928b636b03841c0b99d096d35503a7cfc8eedf",
-    "bytes": 77408,
-    "guid": "3be3c4bba8df8fa459f28d090d7a2843",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/chest_blush.png",
-    "sha256": "c02fdc5899f83dc57159bf95fa273348d0c40d903fa56df6412e8c6664fa0777",
-    "bytes": 74135,
-    "guid": "bc32d8abc464e514398c63223393728e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/chest_lavender.png",
-    "sha256": "5dff9a1c736c30ca13153532448d8e613be68192f5a86fb07afd9d20ffdfd1af",
-    "bytes": 76414,
-    "guid": "3046d20c517d0994ba0ba70794161d05",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/coin_stack_large.png",
-    "sha256": "911ffccebf682bcd356d989eb294a89b5639e677db7327c66dd01d473ba230cf",
-    "bytes": 74236,
-    "guid": "2476eb82b24bd754dbfa38387300e4b2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/coin_stack_small.png",
-    "sha256": "4d8cc03117906d55e34943618f5daac15c7f942f0dd2f36a443aa4a746adb1d3",
-    "bytes": 56630,
-    "guid": "9cd250fb01973de438128fe58d90e3e3",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_check.png",
-    "sha256": "533dca5ae0e330b5033fa3756e07f19af040283081ee6ac0088e639efdddaca7",
-    "bytes": 39568,
-    "guid": "274f7dfa7ac725f49b77ff5000b144ca",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_clock.png",
-    "sha256": "7df9ac5a6fda2bfaecc7e72fa5be56e647a774a6b5f805471a83d9d976ea5a68",
-    "bytes": 63078,
-    "guid": "4f93f83f6bac273409c588dcbe094cd6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_crown.png",
-    "sha256": "983815fa8afd02e8232815510852d0b342c5eb8fb146a83170e51b2e892935a7",
-    "bytes": 51958,
-    "guid": "02b7e650093f11d4194e76197a15d7da",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_error.png",
-    "sha256": "5c5bc6b47837f2a13b0656ac15e5210c06fbe734c69c7bff471f03732b86463e",
-    "bytes": 43788,
-    "guid": "292b2185d1324464fa327a341345f996",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_global.png",
-    "sha256": "12fc1af1da0a19b03e11b0d21a218d7c1507c4e2775eb174c62ca31fb997b276",
-    "bytes": 56407,
-    "guid": "d76cabd6e5799de448ac599645a56d46",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_hint.png",
-    "sha256": "b724ba65edc9b05733a69495217e68d1b766feb3ed18c793fa4b8aaf04973aa3",
-    "bytes": 44720,
-    "guid": "722d2cb2660a16d449d6ef162694a9cb",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_next.png",
-    "sha256": "daf8d90bf62967f62822b834ed1b20edb06decb0e77f7f92516662a9bc3dec64",
-    "bytes": 25859,
-    "guid": "f240bcd0892e20c4fbc6e2ae955ca473",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_players.png",
-    "sha256": "32066e5ee83abb7f0a961f718c96372a977a945fe1d2a63eda0bf34eefa56a3c",
-    "bytes": 46486,
-    "guid": "94a22ad14503e8c45b400284db7016c6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/icon_region.png",
-    "sha256": "c5cb42dfa7ecc01c0c6da35191e9c58be4d980d2d80fd506fab5b862d19b5a47",
-    "bytes": 40083,
-    "guid": "05e7e71d21b21aa4487940dfb20eb3db",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/support-icons/leaf_mint.png",
-    "sha256": "a9a3b39263cb1f2793db1ce3ba9ca98720f807550797910759d22700ce8626e7",
-    "bytes": 32459,
-    "guid": "a99570c7ac1bcef4cbcdb20a10a16c55",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/avatar_ring.png",
-    "sha256": "39fffa85ae81a29172fd2cba1e5b215e0204c615b57cf2c3b9bdf733023bb676",
-    "bytes": 60482,
-    "guid": "1c0baa1ec4ef3244d8c163a4934b6024",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/bottomnav_rail.png",
-    "sha256": "870ba913e2a0dfc3eb80b517faaffd73144a8b7d7adf415be06e4cc26f4f79bd",
-    "bytes": 53366,
-    "guid": "db62d1e8dac659247829db5aef8c4642",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/button_blush.png",
-    "sha256": "2d6fa4e738fdb848d9e0d607fbc5554c05d49c1016b08ea8ca543c9de27e7bcd",
-    "bytes": 59003,
-    "guid": "ecfc2622d7e843640a09e52e6c7cb387",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/button_circle_cream.png",
     "sha256": "efa58cb96cbff2f0c2b3f526b818301dc91fcf8c2ba2cd1007987c11ab2c2da6",
     "bytes": 42086,
     "guid": "4f6ff03950fe88e46ad86593d5847c7d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/button_cream.png",
-    "sha256": "58cc9d24e301aedfbfa06a6cd46d5e433aed0a0d94c8026e611e491c2ae455f1",
-    "bytes": 59981,
-    "guid": "efe2e517750f2d24093a138db4ddc5ea",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/button_disabled.png",
-    "sha256": "cd102bbee61b816b3d79b261d8f396be41f43392c2d489dd7733f59998789363",
-    "bytes": 53964,
-    "guid": "9a446fe44b61ba44b8b90682009bd4dd",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -2280,194 +2696,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/button_mint.png",
-    "sha256": "1baeca321e2858a8cf14208e5162f1e5b25d8e97e369cbdbf757901665ac2206",
-    "bytes": 61374,
-    "guid": "65c9bad439b0627429049546730b74e8",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/button_yellow.png",
-    "sha256": "b4c4ed3318102dc54bfe8fe3fe1e61b70170be21453f18c2533df8f41ac5b250",
-    "bytes": 62446,
-    "guid": "e30a2d071a785da4b9a04a3aa41c32b6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/list_row_cream.png",
-    "sha256": "6d4e181bd9a82e1c4c6ffc20145c99bbcc2eee8c91cc69a241ec0e68d0dd7395",
-    "bytes": 44114,
-    "guid": "a18cd5b76c635c94c93e2478dd861590",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/list_row_mint.png",
-    "sha256": "35428821056d8d8e76568381853c54a1caee133c2171639f7a93c7c3b648f136",
-    "bytes": 48773,
-    "guid": "3c75e5501a00c084bb8770354d041344",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/modal_panel.png",
-    "sha256": "02b103bf8701fff94df3cc87198221ab51b95e11b65123131ed3ca095e43f0e7",
-    "bytes": 94223,
-    "guid": "aca35012a2a538a44b8f5a172553eacd",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/progress_fill_mint.png",
-    "sha256": "5d69cdb36602b764a3e34090720a8e397dba09412913844b3451603ece456c70",
-    "bytes": 27042,
-    "guid": "a12703d19960c6c4da11d14a9376a0ca",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/progress_trough.png",
-    "sha256": "503efcf021050b084d1c261e58eed071ade7d3f5e72d304b1030673853ea708e",
-    "bytes": 43375,
-    "guid": "ef8819e224a1f71459c6780f042b77f0",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/resource_capsule.png",
-    "sha256": "e0eda3529eba1313441d8ddf2194f9e5960ec7e7293c41c5cbb7891d866de374",
-    "bytes": 59303,
-    "guid": "b99c9161a4a1d354cb3799c777f92ab4",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/tab_selected_lavender.png",
-    "sha256": "14bf5ebc7957bb9c767375737bf68baf7577bc1f4ac7b38bc4ce7668be3fcd79",
-    "bytes": 42688,
-    "guid": "74c937a52a00dab4f889ca79895608e9",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_arc_long.png",
-    "sha256": "92f678c8c8e5804c3de9a8455d011609042a108fd31a47893c0ce260c97692ac",
-    "bytes": 69434,
-    "guid": "e1d7aad9cca035f45a6743bf8f5b36ea",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_arc_short.png",
-    "sha256": "476210032fd4fdf2265d1d0ba08b4a46f0708e631b15cc5a4140b7b003b8fbc4",
-    "bytes": 36822,
-    "guid": "9fd91011222de9b4dab88695ce92c121",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_confetti_blush.png",
-    "sha256": "254f306d004dfaa600cbbae1978d2a1221025dda5485ddc3b5160bb5ab75d45e",
-    "bytes": 25749,
-    "guid": "a111082a90982384d86bf8acbf8891db",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_confetti_lavender.png",
-    "sha256": "cf34df61dc8294fc0ace238fb4ee6bd6b6e7749a97736ce7c67324d3772e95c3",
-    "bytes": 27657,
-    "guid": "ec1b7020cbfeae542b8eaca01583896f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_confetti_mint.png",
-    "sha256": "e32954473a1810d2e55d6ffe2cbebfcc61cdad37cbb314d12d7b752194d2418e",
-    "bytes": 28729,
-    "guid": "834a5849ae10b6f43b5462f3dab6cb34",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_confetti_yellow.png",
-    "sha256": "6f00ce2deac4950f20a5688fe8e174c489e1567bf434c9a81ef9347b9f869eec",
-    "bytes": 25852,
-    "guid": "3c8efc35001d9ad4a89e28d9546a78b2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_glow_soft.png",
-    "sha256": "bc399ce420ff4f3b8d5724e49a1ebe774a5e33d377f828fa3bb6139bdfd6d242",
-    "bytes": 65661,
-    "guid": "c9c3fdacf54816543865d85ddf72e326",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_hit_ring.png",
-    "sha256": "961cd133d6b854e957854c7856431b6683544f4c92b19d9508de1ec9f8fa47b8",
-    "bytes": 41598,
-    "guid": "292314d508bcc144f9078a1fb1853f63",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_hit_star.png",
     "sha256": "cc28e2e19761c02753221cc7063cd50a50469484a36261d3036567dba82b87eb",
     "bytes": 38449,
     "guid": "4665c11d423fab44c8fae37ce70adcc5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_shard_blue.png",
-    "sha256": "cf19dfff497ea6f63867b219266085327e18df6578438b6298b34baad1dd52d5",
-    "bytes": 35981,
-    "guid": "2355d5603fc7965458a975a171ea514d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_shard_blush.png",
-    "sha256": "127946860a586c4f197fe17f96b0144e6d09f8eb9faaa2fdd18266e30e208f5f",
-    "bytes": 38221,
-    "guid": "182c9391ddd4ee346b1d89e2dfb7ded0",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_shard_lavender.png",
-    "sha256": "012d7c73d1e0a7d0fd5916909fb63955303d5722d2ddb4144ba730ede41b9fb4",
-    "bytes": 33029,
-    "guid": "619fedd300f93774c8e2480bd167ffc8",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_shard_mint.png",
-    "sha256": "dff66c6a99af46cdfa03fec4043f516525c4eb3df189965cc24aa8a8dff76ada",
-    "bytes": 31325,
-    "guid": "5dbd1d8f81a84884d9fc19b3b6bdc490",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_shard_yellow.png",
-    "sha256": "02c61d90bb5cf928b086c4329bbb1ef9da7e38d4abf359a149ce6d57e6070337",
-    "bytes": 37972,
-    "guid": "fab8bc778469654409bff1fced628d9e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_smoke_puff.png",
-    "sha256": "8c5cb84b4fef4babdd1d5d4fb5adf440ad7f8a8fee5fb47c3d7e1067a68a4ed2",
-    "bytes": 46342,
-    "guid": "0e77afd6c35ce1e40a3c43b47386326b",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -2496,186 +2728,42 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/PropsV65/blast.png",
-    "sha256": "f3b0b6809185850fbacbfb874180770bab278ac60c74e1b9ab788802c5ff4898",
-    "bytes": 204086,
-    "guid": "21a3cd93c9878f847aaf1f5c4bebb487",
+    "source": "Assets/Resources/Art/ResultsC048/coin.png",
+    "sha256": "5481fd36c467d1e14d6c15a7153c6b5ff0509205d90adb3a944ded71f405653b",
+    "bytes": 96607,
+    "guid": "a208eb6dbf3a4a979bae683d421c13df",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/PropsV65/bomb.png",
-    "sha256": "a5bd51e91a2bdf45dbb710904e00c16c145282bd62f1f2f9723669d66645cab3",
-    "bytes": 291173,
-    "guid": "281ad357347850b41818eb0c73a3e1d6",
+    "source": "Assets/Resources/Art/ResultsC048/failure-cat-atlas.png",
+    "sha256": "f7464b9acae6b252480bdff932c5313d238753f4e5f3b538604b64c349aa52f4",
+    "bytes": 1302899,
+    "guid": "b7eff262b87449ccab3341c3ebcbc5a2",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/PropsV65/cross.png",
-    "sha256": "6f5e76438fb0516cfc896cf738b217467837c0bb85d9e819211f4e111ae4fe7a",
-    "bytes": 204842,
-    "guid": "681921de7d3ac4147b2808ba8d61bf2f",
+    "source": "Assets/Resources/Art/ResultsC048/medal.png",
+    "sha256": "c0d95491c94d60ad09763222f96384b3ceb327af759c3fd9a0077774d456c111",
+    "bytes": 65930,
+    "guid": "fe4c16b62e9540189a913d8d66b04ed3",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/PropsV65/link.png",
-    "sha256": "b96734c2ace64f5d6087a173391e5d71a73ea5329f6c0e783485d67202fd2cd9",
-    "bytes": 222290,
-    "guid": "c37f1203dd1def94b8ffed97f8c34070",
+    "source": "Assets/Resources/Art/ResultsC048/score-star.png",
+    "sha256": "da6d6cdebc564901f923df9dd4008a36a220d6a9f9358f5b020c7de82a755175",
+    "bytes": 63827,
+    "guid": "b309fba4bc0d467a8a7a5f1502d34ad3",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/PropsV65/pierce.png",
-    "sha256": "b8b8b718641b3138df76067f52a19fca1902a0cd36b621f3692a44e6b7513585",
-    "bytes": 267309,
-    "guid": "998feca984fa36445a546ee76bd4842c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/PropsV65/super.png",
-    "sha256": "880ab262e6db7644f76029cb58502addb3f336227ce5e1b6149dcf2a483887f0",
-    "bytes": 202382,
-    "guid": "596a361910e45aa46841873b6fe25f13",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/chapters-alphabet.png",
-    "sha256": "2e22f48eab4eb2912e0aa60e517ecff326fce10df8856328d4497d109200e436",
-    "bytes": 1385925,
-    "guid": "248837bbfcae9e548a284dcb375e3a0f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/chapters-back.png",
-    "sha256": "04e3722470ee1041ee34145c1bee79fb2832ebd6ea30668731d250136100d0c0",
-    "bytes": 389,
-    "guid": "61fb1ffe30d71854398e0679a25d2ede",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/chapters-base.png",
-    "sha256": "b76bce8bd81f7bf85a23d88d8261e4107bf68307d3bfe6a7ab8ade5539caf626",
-    "bytes": 406517,
-    "guid": "369e47196a7622347990555e9d19b11e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/chapters-info.png",
-    "sha256": "3d113953b6128bce98eb9d13719a91b61dd5deffdac9dc526f86be8bbd72f564",
-    "bytes": 396,
-    "guid": "4a9e147a7b7881148bc43f1275714f91",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/chapters-picnic.png",
-    "sha256": "ffb9071196ab922cb2e1019e0df2c1d40bf8a4aa0dff7b2a7a0f62c2579e0acd",
-    "bytes": 1625595,
-    "guid": "f099de6204d518446bce18c22243cd12",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/chapters-reward.png",
-    "sha256": "76e8e6762757960139840f292fca727f27799bb7c6edcc20ff585d563708b21f",
-    "bytes": 36467,
-    "guid": "7a6a616fe85c8ce4aad245446d6556a0",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/chapters-toy.png",
-    "sha256": "d58ae63c218b72c0b27f50c9a5140b7c67721b5eb7bf95ff045c50c19123c775",
-    "bytes": 1425578,
-    "guid": "e3b3ee9ea3ddab64fa0bee620939b884",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/progress-empty.png",
-    "sha256": "e870980417027e266219074cb3b2df1cfd75e17cf85160f4416f4d58a065d66a",
-    "bytes": 3919,
-    "guid": "8e975b713db9a32408eaf3c9c7e2bfda",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/progress-mint.png",
-    "sha256": "cee50d39cc8de3481076675dcfaec68c8762faf29567d80bf659a5789ef3e35c",
-    "bytes": 2458,
-    "guid": "6343d925a1b4b9a44a83f0b52cc17ed6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ReferenceV49/slices.json",
-    "sha256": "70d0e1e0a97c813947cde9f904c2aaab4ceb2a56f1f33e912f56ac28febfdd50",
-    "bytes": 3662,
-    "guid": "d4c04c5d19c31a844b4e932cc6bb3ff2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/Round5/grass_uniform_albedo.png",
-    "sha256": "b62c3674a8af4405447d16a8d6d12471b668544250bdaab3fea55faa3ce908a8",
-    "bytes": 3579122,
-    "guid": "7095f84722ffe754fa7d5db57e3465bb",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ScoreV65/best_capsule.png",
-    "sha256": "3217a8b64b03abd457a8d08030b394e55ec1f5d9c61ad9a1fbbd945fd0884c93",
-    "bytes": 120731,
-    "guid": "e51b958f88617b645afd2b017d6b44d4",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ScoreV65/gain_spark.png",
-    "sha256": "7fce229abe6d129b18865b7ee76e97db379850d05b0daf4b7dcec49c69d4ce16",
-    "bytes": 212247,
-    "guid": "483c16daad70aa44e96815dc82ec62b1",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ScoreV65/record_badge.png",
-    "sha256": "31657de79b8aa0c05f12af4f2d49b7bf2fce2330a0e859cce42ae345c55598a6",
-    "bytes": 309162,
-    "guid": "58aa143be0f66e54fadbe2859aa6bc71",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ScoreV65/result_card.png",
-    "sha256": "cb5db20819cd0a4b337c2a53930548650757248fe314d880b14ad6b2ae51f0de",
-    "bytes": 190090,
-    "guid": "e1ccced19db41f043b4648b4b870c747",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ScoreV65/score_capsule.png",
-    "sha256": "7558fef3d02bd5999995d008e9a2a3aff2a0c8d4b7506dc8cf31a3a51fca4790",
-    "bytes": 116944,
-    "guid": "744de433c59d6eb4daa70ba4cc071f54",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ScoreV65/score_star.png",
-    "sha256": "314e4a95c7ff3535c13c4e2d5875997278bd36b0c652f5cdc0e84086c98898f7",
-    "bytes": 253066,
-    "guid": "bbdea95772a729c489bd228d11449662",
+    "source": "Assets/Resources/Art/ResultsC048/victory-cat-atlas.png",
+    "sha256": "0eef03e8eb7ab56458eb6a3b6645800ff2dba5ad9dae5bdd43579cfe9a6fedc5",
+    "bytes": 1198571,
+    "guid": "fb4c1459fabc41cc902c5924908d7c73",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -2856,330 +2944,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/ShopV31/avatar_0.png",
-    "sha256": "2b0e48d64b99615b74a240509e9cf7b1c415b31b7a8ef14cde5bb3d33796313c",
-    "bytes": 68372,
-    "guid": "2cbc0e5f60b91594baf1ecab71e2cf9f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_1.png",
-    "sha256": "9c72fda27f21ea0a40b55290828ba4ad1dce0eb0a1d02facafa7b299e09e7b8e",
-    "bytes": 73332,
-    "guid": "18faa6afa96c95a4b9b937a3bb183bd8",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_2.png",
-    "sha256": "a2c149e93abce150ab10ff709d7522dd67aba1e3d5bfd7490fb23b85e2178359",
-    "bytes": 74725,
-    "guid": "d1d24792bb9175d42a1a52744b089e36",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_3.png",
-    "sha256": "99c8f7a9ed64018f9c109598c6db1aad6ad7ea84c5ea2e9e4e969bb9f65eab9d",
-    "bytes": 70494,
-    "guid": "792531ada90cd6140a03fdf5ae305960",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_4.png",
-    "sha256": "03103253e40921e3fc0d0ebb65d9e2b4bfdc048b080f6afb3f62cef4affccf65",
-    "bytes": 58392,
-    "guid": "3298120835114f44b9a64af1b2107f6c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_5.png",
-    "sha256": "b537ad3995287f6e460b918687fefa3869a98a517bd12d489790a7f979bc4de7",
-    "bytes": 75372,
-    "guid": "c821512d7ca5de64282f68a504531885",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_6.png",
-    "sha256": "318d155ad1261262bfdebad2657ccf0786b795f31f54e79a4e3a2ee8e748872f",
-    "bytes": 69666,
-    "guid": "f1335a1fc0388b244b2b925611203a81",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_7.png",
-    "sha256": "318d155ad1261262bfdebad2657ccf0786b795f31f54e79a4e3a2ee8e748872f",
-    "bytes": 69666,
-    "guid": "5c0ae6ae13794f642b14afe8c616315e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_8.png",
-    "sha256": "2b926307d1062e659278a7af33569c593d26b6cdc514fc0bfa8c099446fb595c",
-    "bytes": 78871,
-    "guid": "82b98dd960ce0154183f10fb937f1ce4",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_9.png",
-    "sha256": "03103253e40921e3fc0d0ebb65d9e2b4bfdc048b080f6afb3f62cef4affccf65",
-    "bytes": 58392,
-    "guid": "78758b5b7b366594898f3c7aa87ddc62",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/avatar_default.png",
-    "sha256": "0d8403f9433edadcce65f37f6c9f4e06af10aa34c5620634fb02daa3587d42a2",
-    "bytes": 66582,
-    "guid": "e557a25a73b4fc5429152b35930a7e00",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/banner.png",
-    "sha256": "deeda0f92084d7bbc953183d7b6a86875a0d163e518df5c47d77f4d218fdd2ea",
-    "bytes": 246159,
-    "guid": "9e9d11105abc2d84d8b61254b650a041",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/card.png",
-    "sha256": "f13dd49a377e83b2326ff25d6f9e21dcd57a6c18c68add5a511bc1a78e78eecc",
-    "bytes": 3031,
-    "guid": "39c79c98b6fc1284f9ae82de7b117b82",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/coin.png",
-    "sha256": "6c56b0ea8334cb8cac97700eac93852b3d6965313a3628796d2f94676b5c1a20",
-    "bytes": 4337,
-    "guid": "82f1b6443f667994bae4a7bace9cc9de",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/coins_large.png",
-    "sha256": "90fa0625fe52211a792bd0a81c21e25edc92a8b9c6f0cd2e4a0d3b62b8512b92",
-    "bytes": 9896,
-    "guid": "9488ac7031c5889408bd41ac135503e2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/coins_small.png",
-    "sha256": "be3bb9cef1be2d05070d5db0e5c0bae7dfc62aa5549258137317461c5fa47af1",
-    "bytes": 9790,
-    "guid": "b74229dc44b5b2f4099a68432798098b",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/cream.png",
-    "sha256": "28cc180453f7ef2f652bcb450ec7f58fabd8a23eb96099f76755d459d385e895",
-    "bytes": 2730,
-    "guid": "7ad8a20ba7d77c8409e39a4d58b75337",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_0.png",
-    "sha256": "c90a0c70bf3bfb0d5e3597d13db7f52fad1651332d78308d07fbd63d0a7c3dff",
-    "bytes": 253620,
-    "guid": "c0dda7fc9726f59488076c6f73412b04",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_1.png",
-    "sha256": "4b5354b7434378584e5bb8df0c3aa1e73b0b558ebfacb322c849100a33e91222",
-    "bytes": 254041,
-    "guid": "4ac0e30d8f0bb5941b77876a67a650c5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_2.png",
-    "sha256": "375ecea1c1a3b016ab3a6fe5fca5387df534a8170e77f21c78aea78a67f172d9",
-    "bytes": 239793,
-    "guid": "458ec23a039f4c848aa551b045b46e7c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_3.png",
-    "sha256": "6d3904061dce70b0bb412901147d01e4821c7dde3f3f95bc5766e76f02bb3193",
-    "bytes": 231905,
-    "guid": "383bc74f75a5ef24a9b4c6c0d0004b2c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_4.png",
-    "sha256": "d08c891ebea75a6e501e03ec95c51acd0cbba048605d0c20e2fe25ee3622fa78",
-    "bytes": 234887,
-    "guid": "d75c7dca1477af045b59c048cf5b8457",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_5.png",
-    "sha256": "8df3e1617f12d84bdc48954636826c2801abe1ce09c67e54a287cfcb1f882537",
-    "bytes": 231422,
-    "guid": "80e6e9773d52a4240bd0bf4c1311ba80",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_6.png",
-    "sha256": "a9d8ebc3c6250e1d52f222b30c56d47cd6a8c852f895418afe47ae135693255a",
-    "bytes": 228857,
-    "guid": "58f8d6750b80b7e4891fdc5f4dfd5f1c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_7.png",
-    "sha256": "2acf94380e37930ddb68f1125044dda54cb68d61d10689755d5941475adc111d",
-    "bytes": 245094,
-    "guid": "a5479f22a96c8f34295c8db27efb1b13",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/frame_8.png",
-    "sha256": "2be7221bd0b04808eb488c8460edcfd23a76831e79b751f8142cbe79e73420d0",
-    "bytes": 191875,
-    "guid": "a43ac4d343158214198f3680ac87c8f5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/lilac.png",
-    "sha256": "de395bdbe15d8fd6df3101abdea7f4cbef8aa48a8d4df92bb08f6a85463f43d3",
-    "bytes": 2898,
-    "guid": "8e50dc0d1948aff46b81ffd7771d1222",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Art/ShopV31/lock.png",
     "sha256": "4e0b409a392627015cd28bb72c0ea9a89df496e8c7776b32198dcd75caaa94f3",
     "bytes": 1304,
     "guid": "0fafe4eccefa8634db0f295336fe3c37",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/mint.png",
-    "sha256": "5496dc93e0b02066e76cdc0cfafcd605c181f52fc9a5b096a7f7bc815697282b",
-    "bytes": 3212,
-    "guid": "599ebd0daab00bb49abbe17126a15de5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/nav_home.png",
-    "sha256": "828b14e586100df59b9159b7d1862ce676814a7c0d506aab20dd1f259fe165fe",
-    "bytes": 3986,
-    "guid": "1b96e3ba37103494d96a94ae751d5d62",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/nav_rank.png",
-    "sha256": "25641bb1a968ecde95fcf04ad9e1ab567aab024bfb0b07f920acc32efad132b8",
-    "bytes": 4287,
-    "guid": "f4cea53e48840bb42834a00e617dfcf3",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/nav_shop.png",
-    "sha256": "11be544bb2f32e1d126777cee446596be9f0b85984c81e33243a47471b363809",
-    "bytes": 4472,
-    "guid": "b85daac70cb3270469685202f0b3f464",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/panel.png",
-    "sha256": "8ae24b8322694640744432796b095fb9727115177b79b557a602921f9dcd960a",
-    "bytes": 2837,
-    "guid": "f3e5f4c61a803cb44ac2229fe11cf9fd",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/paw.png",
-    "sha256": "3059ed24208ada96918a2feb1fae3dd897971016d9a78da492d90337126ce096",
-    "bytes": 2116,
-    "guid": "5d1e3442abae389478e6b53ed7c29864",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/ShopV31/settings.png",
-    "sha256": "c4579b2c46e3d639e5fbb3eaf649352fde97338a1baa6f289ff67d954018092c",
-    "bytes": 3071,
-    "guid": "77a4c8796d7d94a4698dd4119898a526",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/SkillPanelV65/disabled.png",
-    "sha256": "0127d8b11cc3ec312783a3aca7f258df083e0a111543b911c4802a03a22eff70",
-    "bytes": 302178,
-    "guid": "7298584ebd9bd9b45af2309907356a9d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/SkillPanelV65/normal.png",
-    "sha256": "c4df5f2d650e59f5d4d1ed4ea24307b5eceed9f67de70df81721dea838d8f41f",
-    "bytes": 315190,
-    "guid": "beac40128fd7a394987206e5a12b399c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/SkillPanelV65/quantity.png",
-    "sha256": "402bf17896d008ee4e74b15168050c4c5199d47fd95b6a535a169eb0dd84f42f",
-    "bytes": 92824,
-    "guid": "1fb26118c2a620d49bcbe38b9ac19b65",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/SkillPanelV65/ready.png",
-    "sha256": "e5ef67e772a0fd700c69679809d4c9c186e5aaaf7e6187e0d6827a65f08070b1",
-    "bytes": 20512,
-    "guid": "4f3c805edf87d714c813afc48bf8c960",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/SkillPanelV65/selected.png",
-    "sha256": "96b541b04920fec2de1db5dc0ce99bfe370cf3a09b38183535f76623fc977878",
-    "bytes": 349669,
-    "guid": "9ab6d3cdd0faa234d9276a1c4d09c178",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/SkillPanelV65/tray.png",
-    "sha256": "1b3c4eb937eaa0a8848200a5a16a1bc74372af1fc8ab39fce7d73f911c4db240",
-    "bytes": 548069,
-    "guid": "c211096338d0d894c8bb00b6c0ebce7f",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -3257,8 +3025,8 @@
   },
   {
     "source": "Assets/Resources/Art/ThirdGroup/layout.json",
-    "sha256": "e9ca0af2d256ddc0bb1a94ea25997e495d755c45f46d2512a57167b954796b10",
-    "bytes": 7625,
+    "sha256": "a694de2562edf2be5a4986213cd811d01e3527004b6ff4afba97a043345a87ef",
+    "bytes": 6453,
     "guid": "9c719365180c91340873c57e2fc353eb",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
@@ -3272,98 +3040,34 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/ThirdGroup/shimmer.png",
-    "sha256": "65c527b7703a900752de90ac07cbb02c52c1868173b9a4d17f964e811fc4d50c",
-    "bytes": 1320704,
-    "guid": "2fd42371d552fac4ca396b8d0ebe87ba",
+    "source": "Assets/Resources/Art/Toasts0410/icon-coins.png",
+    "sha256": "32ff85ebbd90d2a0fbfcdd326bd2fe4cd3bd52cf20ee890738274df61ce23459",
+    "bytes": 146466,
+    "guid": "78430674ab934fe2abeb85defa5b1adf",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/TutorialV41/blue-jelly.png",
-    "sha256": "d51f5f2dfe44854de94268df46433caf264fd2e3715c190fd5e2c71b8ccff17c",
-    "bytes": 245094,
-    "guid": "ede5e198d24fb4a42847dbc7d74a7b2c",
+    "source": "Assets/Resources/Art/Toasts0410/icon-retry.png",
+    "sha256": "40d9e47ce61b66ddc5bf8f584e63441219a7a12d719d1d74652c632834ef6545",
+    "bytes": 5348,
+    "guid": "9f20f819d43b499f9c782449ad488643",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/TutorialV41/curved-arrow.png",
-    "sha256": "06e168a060cb2dd6e37bde4d7874f675b3336b8384fea55bdbde30bcd36ee77c",
-    "bytes": 264904,
-    "guid": "6d3385625906cbf46a2ed768b19e0e71",
+    "source": "Assets/Resources/Art/Toasts0410/icon-saved.png",
+    "sha256": "38488acfcbebc1386289614f03f59a97ceaf8293b4cdadda1bec0259ac3b1611",
+    "bytes": 2992,
+    "guid": "f1a73c4321ae4db9808c8185f34f1d39",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Art/TutorialV41/drag-trail.png",
-    "sha256": "37d90bfd17f731d32b29893193c31d538e1c3103124e101ba3c29d89d397d95c",
-    "bytes": 238382,
-    "guid": "9c074698c7b465a4fb953da05b967a43",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/TutorialV41/hand-drag.png",
-    "sha256": "205d6581acb9542fe6e5d4bdd984062eead352ef8de830d9a76480bf7b05b729",
-    "bytes": 245506,
-    "guid": "299cfb230644a774bb5be1507acddab2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/TutorialV41/hand-press.png",
-    "sha256": "ebe828d89f6e9ca9d7f9ed2dd804e09eeb58e23d8138d282828c1d73a094b5af",
-    "bytes": 239588,
-    "guid": "d61b80d8e6bbc9a4aa909befafb256dc",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/TutorialV41/hand-ready.png",
-    "sha256": "906a6deafb57491dc92c531716fce12cf50dd6862b659363b2310eb5918ac12e",
-    "bytes": 242476,
-    "guid": "dc017cd9fcf71874b8c87b00f1bb518a",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/TutorialV41/hand-release.png",
-    "sha256": "5b4604ba5f07a69eaa514e3efae2b900e059db40b69c8098c86debf50e5b5cd3",
-    "bytes": 254701,
-    "guid": "3ba578524b19f6b4ebac6814625aa667",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/TutorialV41/reward-sparkles.png",
-    "sha256": "c7b589f24ae932d6021327fd842ca52babcf34ba742ae4a3f367163402a09b42",
-    "bytes": 260819,
-    "guid": "543a3cd7384bbba43bd411b149b82bca",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/TutorialV41/target-outline.png",
-    "sha256": "1716b2972121fda411cecb9fe0bebe8be465949c9bb4b949b70bfa22d43c5b5f",
-    "bytes": 267809,
-    "guid": "285f9ff9a81dde64bbabbae4913e9796",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/TutorialV41/touch-rings.png",
-    "sha256": "3e0196ed9d04e342361a18ca99bbefc7f92fc09536c310be8d87cc2bbc7caf54",
-    "bytes": 303628,
-    "guid": "d3eca3be3c5036341a59be007c010c01",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/VictoryCatV23/cat-atlas.png",
-    "sha256": "6aff8b70ff1624c8432496bd20757329c1c253f39021c4a2d309c8c8de89c0dd",
-    "bytes": 2278651,
-    "guid": "f4717097579d7b44294b2f6bedcfad07",
+    "source": "Assets/Resources/Art/Toasts0410/toast-panel.png",
+    "sha256": "8edd67ef5feb5da3a4d478c2caa505cfac30dba691037e224a2e2e2a6d1e0446",
+    "bytes": 670547,
+    "guid": "082ab3890df34e17945c211f6a2d44b9",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -3401,8 +3105,8 @@
   },
   {
     "source": "Assets/Resources/Art/VictoryV23/atlases.json",
-    "sha256": "462dfef586b7512b52b9ecd12c3983b0b1f80b46cdc058bf7007a30745b545ba",
-    "bytes": 16975,
+    "sha256": "e090a6e1baac456f9a13480320f6573652266b5cf80b30fad0eb30cc53ef0007",
+    "bytes": 16847,
     "guid": "dcc3f192eb15b2741aaa7501505b79ae",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
@@ -3412,14 +3116,6 @@
     "sha256": "b4863d0aa6758e3ec79b4d8dff2a0c418e36c9bd5a13d99002d365d2204c8428",
     "bytes": 587940,
     "guid": "6b4bbc93d0f0a5647802ec5230dc9341",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Art/VictoryV23/glyphs.png",
-    "sha256": "30581b35c9d9f4f947feac272a8f7014555a3c26221248a557933a2282230c87",
-    "bytes": 685221,
-    "guid": "fefe597eb2a7e094389c0d9172aad264",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -3529,8 +3225,8 @@
   },
   {
     "source": "Assets/Resources/Art/YarnV19/cat_fixed_pivot_atlas.png",
-    "sha256": "d45877fb9c7decfb5df5d473234b8313212257a0603ceee0e9711e6c11617f29",
-    "bytes": 2444375,
+    "sha256": "8998ed56250e7386d23abe7e82655c0fa2d1cc63323cd5713e22ae5d27ef0d4a",
+    "bytes": 2155176,
     "guid": "98417f706ca06924abbd9cd9711c9b78",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
@@ -3584,74 +3280,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/DeliveryV65/manifest.json",
-    "sha256": "887dad9d42c7b40ec1a35fcea7c88c4bd5f3838e317b5562543c61fdd5b7e8f7",
-    "bytes": 10336,
-    "guid": "9131ce42c15f3804796f2d29a8392b42",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/bomb_ball.wav",
-    "sha256": "f5d2bfa4f243cda347cdc672a9a2e169fd261e66fdc805cbe1720507b38e5ef2",
-    "bytes": 70844,
-    "guid": "4c5fa39e72c12824591ee98e5ae1860b",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/book_close.wav",
-    "sha256": "3b45dcfac6a155f599baaac8faf61fc7ebaa16be24974e5ad4528c23cee3f4bb",
-    "bytes": 69244,
-    "guid": "46d256a7e26937d489737e070c13e587",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/book_open.wav",
-    "sha256": "2cc4084c62326c09ec2cfd8af5cf2abfb67af39eca2541cdf036cb13f1875cad",
-    "bytes": 69244,
-    "guid": "84d3193123630b640adce60490b2d45f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/book_page_flip.wav",
-    "sha256": "b3ee42ed96c66b8cb8a78e3d16a430d2a408f8d771b0246563e137bacd22b198",
-    "bytes": 60444,
-    "guid": "568c38f3d4ffc8a489ef49252d3a71c1",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/boss_hit.wav",
-    "sha256": "96bf05ea1d1e8134d839bdbd5f554b05ddb217e4ccecbbec59edf6a4f79724e7",
-    "bytes": 70844,
-    "guid": "31005ce3575343341b28af516499f0c5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/brush_stroke.wav",
-    "sha256": "7f993110d46e65b1d350093c8e9d7d7b43cb42fb54764a998ea214f75d533fc7",
-    "bytes": 70044,
-    "guid": "c4612e189b0155d4dad57157851dcfae",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_cheer_chirp_a.wav",
-    "sha256": "7882ebb230e0cd9de163edfe8df421ad78e3b6c859329b0b3327285b0ccdbba2",
-    "bytes": 63644,
-    "guid": "8eeac6a7c4faf4344923601f18381c85",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_cheer_chirp_b.wav",
-    "sha256": "a09833051fbe4ed72a198b54af5f90f8d3d4bd6c15549c3d595544a7b441aa0e",
-    "bytes": 70844,
-    "guid": "d861ceea9aebb1843940394f5aa0c3b2",
+    "source": "Assets/Resources/Audio/Current051/manifest.json",
+    "sha256": "5c74fc5faf99376109710736cf6f460719b9d6e1569b01b9da3e3ec175d47ede",
+    "bytes": 17193,
+    "guid": "f848ead3805adc34eabf904b9ddecc82",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -3676,14 +3308,6 @@
     "sha256": "800923c5a66bfb3de74393a7954b5b37a82dc09ca59000ef0dd467e52c66ebbc",
     "bytes": 71644,
     "guid": "1fe726d7c20101a4fae609763d37170c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_contented_sigh.wav",
-    "sha256": "b5db4b4113afe32973c031f38bf06cb0c0aff2f54b9523975576e9d5558ba258",
-    "bytes": 69244,
-    "guid": "a9dde5364c798214c85c5cb0bade0eb1",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -3744,30 +3368,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_paw_tap.wav",
-    "sha256": "9d655dafdfcad1c2f7fffb8bf7072e0f04a4536aeb1d787572912a241ea05952",
-    "bytes": 69244,
-    "guid": "43272a3c0160688419438be889dab1a2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_purr_a.wav",
-    "sha256": "c3fdafdbd4d0578a1edd74aa2cbf81936cecb859f357dd8dff39b5ba7f3fc621",
-    "bytes": 70044,
-    "guid": "53ead6e27be116140ab3fe2aa5a5fa7c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_purr_b.wav",
-    "sha256": "19a8426298717ef68e3291ccdd95de9d858a2e28cbdb5e7290f574b41dbcd787",
-    "bytes": 70044,
-    "guid": "b45bb4c4d46102947b339891b95d637a",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/DeliveryV68/cat_satisfied_chirp.wav",
     "sha256": "00576945504128bc6c31100273fe87839ff643f4677e21c3fc6c84a9ee0dc95b",
     "bytes": 69244,
@@ -3784,66 +3384,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_surprise_trill_a.wav",
-    "sha256": "8c971c52be7a4b7f6b277d445ea5bbfe605576227d4a314d597c8cafa39381a0",
-    "bytes": 68444,
-    "guid": "22fe91ac5c13a9b4fa3a0372313f823f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cat_surprise_trill_b.wav",
-    "sha256": "4435fb624b1c5f00a90f1ea108c2041c8e9cb19f17b9f9cb5382348c5d7531ba",
-    "bytes": 62844,
-    "guid": "8296caf4f59a5c94b88ee1193097eb58",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/chapter_complete.wav",
-    "sha256": "9a8cd29c37de085434b64b5ac612782acfd8d22b9a4fd871bd791e34d68fc70c",
-    "bytes": 138044,
-    "guid": "3e919541fffe1fd419cccff867514c55",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/chapter_unlock.wav",
-    "sha256": "9610c6b69a42bf9518cf977a6becae4d32f5edb428403eebb53daa2b1c28df6c",
-    "bytes": 149244,
-    "guid": "fff2583cf5328994a898a8036e06b064",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/DeliveryV68/continue_success.wav",
     "sha256": "c5fe1f270448834b735a3c6110be56daceb17f00776694c8368cd5eec9c76441",
     "bytes": 70844,
     "guid": "124a6a917d715f94a8a3e06d59176662",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cookie_break_a.wav",
-    "sha256": "7fb47769999bae6f0e05ac9bf0ac8d63391a37926df78aa09b7d81a3571110ef",
-    "bytes": 62844,
-    "guid": "e4abc8854798a374787bf3f49337ba98",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cookie_break_b.wav",
-    "sha256": "23b6c71c6c1b47d3ffee542cd819c436b28bc1b0367d0e8b4b41e31664e0186b",
-    "bytes": 65244,
-    "guid": "57deaab185f8d004b985706388aa2823",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/cookie_break_c.wav",
-    "sha256": "2086a16406a6237f887decb16ffcb7752d1a4b59f6d537f0354fd6daa835c9a4",
-    "bytes": 69244,
-    "guid": "a08cb54a16c40a749a94ab1956971848",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -3856,58 +3400,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/DeliveryV68/ice_slide_block.wav",
-    "sha256": "2724479b5161afdeeb3c46cbc25150ee5aee1c5e5ca0b6fd738cbfa16fd3596c",
-    "bytes": 69244,
-    "guid": "a5d65838117447a4eb194b8a83eb0fa5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/key_pickup.wav",
-    "sha256": "d3c778ef0462e088168b732cd54cd7f19f08d8e12d19436846a3fbaa6cedf715",
-    "bytes": 59644,
-    "guid": "8aea14de328f5c246b8c27417e75a167",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/DeliveryV68/laser_beam.wav",
     "sha256": "24902d2e946380627ca7edd8ce9f326de1a84014b1897d074f89482cbd7e2314",
     "bytes": 70044,
     "guid": "921090c1fb2f618439614777990fa472",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/LegacyFallback/boss_defeat.wav",
-    "sha256": "09da4ee989e9a153b2088a20f033b8494d6729645341f4807766eab3093b2777",
-    "bytes": 88246,
-    "guid": "0541c17afd3f2434dbde51a5b0d52e85",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/lemon_dessert.wav",
-    "sha256": "e5564947bdb595638ddca8c4d722172d6a94c25f819aeaafc59e09bf57ba9f7e",
-    "bytes": 46844,
-    "guid": "a0250f1e516c2964c88826b5ab18216c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/lemon_freeze.wav",
-    "sha256": "eaa613d3a6e60a1da4d653e590127fa6317bb4fe42eb7166764ed6889cca62bd",
-    "bytes": 69244,
-    "guid": "af08e74e4fc10f948a2bc29c82e2ddf2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/lemon_slide.wav",
-    "sha256": "976b72aec7160f32b5574515d0cf28a5da6e3aaa8979a71b294dfce1e6b85e41",
-    "bytes": 66044,
-    "guid": "f814c77a2b5aea24aa0fa53631af27cd",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -3920,34 +3416,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/DeliveryV68/manifest.json",
-    "sha256": "47135c11f699d16de9e17936a3e576262df564da99e51fe85352fad3aa9ae395",
-    "bytes": 20781,
-    "guid": "50c60a74141ca4040a3b11ae2a145eca",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/DeliveryV68/medal_award.wav",
     "sha256": "6878d642c01ca2c32ac53aa6ff71dd7d1ab8192095734ba85daca7d47f4c4791",
     "bytes": 70044,
     "guid": "4c197dd53060dec45827ca7c8321d7ee",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/picnic_basket.wav",
-    "sha256": "8795634664433672fe2b94495345652faa9cdcacd26b415eb3f6e94ff6222d64",
-    "bytes": 68444,
-    "guid": "497cbbeab4cdbef4ea141c370dd14403",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/picnic_bonus.wav",
-    "sha256": "c7e3dae7a8b4a70aa82814aaf476c98b8148e05e59420f35acb8de7194b01c49",
-    "bytes": 71644,
-    "guid": "bb91d3725eb2c4a46813dfe451cf7515",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4048,50 +3520,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/DeliveryV68/soda_activate.wav",
-    "sha256": "658c63056e87f078f86a2048a8ee755efaa9b57850e6e46b895de049df9b827d",
-    "bytes": 70844,
-    "guid": "14f331c94bb241845b6c3d1f5ece9dc1",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/strawberry_collect.wav",
-    "sha256": "3707984af2df869b05bdc4e87c2f04bab6ccf889b75d80ff1f0d8f9fc30cc2d9",
-    "bytes": 60444,
-    "guid": "aa6dd8eafb66c424d84b6f0d155759f5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/strawberry_hit.wav",
-    "sha256": "2b39d245a88f1e5b12db2087d4b5e79fa9239fcb43a89c9f496b0bfcdff0f1c3",
-    "bytes": 70044,
-    "guid": "fd5545cad894e334983607a0c4ebd83b",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/strawberry_ripen.wav",
-    "sha256": "6c428201bece9fc830c337020c968d9e8ba68e27ceeb8d53f281a9c1f072d251",
-    "bytes": 70844,
-    "guid": "8df5377bb8748d944ba1be29885b5142",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/DeliveryV68/streak_reward.wav",
     "sha256": "5c9ba47127d4532d38d6fb7a653fb3c294422a6a39221b77e6c0c11fbd7bcab3",
     "bytes": 62044,
     "guid": "3a8995eff5b450845b5518cf899780e7",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/super_ball.wav",
-    "sha256": "58818ca9544eb287757b85eafe60c30f9aac09fb29e09951bf407c61cc6cbe64",
-    "bytes": 71644,
-    "guid": "90842f63ed6a7704a9376ede95ce4794",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4184,50 +3616,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/DeliveryV68/vo_streak_10_zh.wav",
-    "sha256": "e2c4498ed1b166bd8b6e0371b2fc2654e464f6bd71db162c1c493208943ab502",
-    "bytes": 149244,
-    "guid": "4ac61893bc92ce3429de5e22b4ad1291",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/vo_streak_3_zh.wav",
-    "sha256": "ee92ffd0441dfc227566a4a698ba2ae56439749f8764f7a2903ac49c7bfdc5c1",
-    "bytes": 130044,
-    "guid": "528984244dfd0534299160d0ff46fae3",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/vo_streak_5_zh.wav",
-    "sha256": "1b1e84a320a5ef0a7463dfc65ab2a4152be5fbafc35a5e8b36e28a5e6b9444d1",
-    "bytes": 55644,
-    "guid": "ea793a440c801e4429517c559a065b6a",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/vo_tutorial_launch_zh.wav",
-    "sha256": "a5a9d7b7e138788329cd490c8c8e2ffdd5ae3040a5001489f9ddbd53b9bf1147",
-    "bytes": 190844,
-    "guid": "e9ca668a0eee5414f9865ad0220cb0da",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/DeliveryV68/vo_win_zh.wav",
     "sha256": "21260781a5fc22b5485f27e8efd561271575a173acaaded108043cdb9782e4d5",
     "bytes": 103644,
     "guid": "5141b76dd0ceb62449f33efc86be8b2f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV68/zipper_pull.wav",
-    "sha256": "34cc387ae42ca0c50b76086c333a611e8f8d934b46dbda62e4c3fed4696b6acf",
-    "bytes": 66044,
-    "guid": "0da7aca7c8b3e254696665ecb90b5add",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4356,14 +3748,6 @@
     "sha256": "6a08e890c4bceaa72daa3773fa39e7770bbd7c56a9c731c8999f77ff1757b3fb",
     "bytes": 17644,
     "guid": "4818c731633484186b7afd98101fd9b1",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/DeliveryV87/manifest.json",
-    "sha256": "a2d1f36d9cc67c87a86570d44e4eb0148f3c54b20ebb723fd7dfb9f3df88dc02",
-    "bytes": 5050,
-    "guid": "eaffd58661ad5829c67f46cb4b697e39",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4512,14 +3896,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/AI/bgm/bgm_boss.wav",
-    "sha256": "d74627b9128d5371f800adfd750d6a16462fe27ffa2f5b307fb3eef58d66a5f2",
-    "bytes": 11030444,
-    "guid": "6f518d0c02ecdc9479e52b6ceaea3ec0",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/Jelly/AI/bgm/bgm_gameplay.wav",
     "sha256": "090aa4e4e51567424fe9edece190483d266d8b5d38b258cb50a6043809db21ea",
     "bytes": 11830444,
@@ -4544,30 +3920,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/AI/manifest.json",
-    "sha256": "6209f7b239457ef166a54cadb9a7cbb262647c829a49437fad314969292b737e",
-    "bytes": 11269,
-    "guid": "377b87445b7e8a04a8c00e6bec7d8c9f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/armor_break.wav",
-    "sha256": "b129cf1aafc612d967d22f57262c18f0646b0297b4261415ebafb655adca77c8",
-    "bytes": 28044,
-    "guid": "6acc0bc99258bf4408d87fcd680cf8f3",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/bank_charge.wav",
-    "sha256": "457730486a3f5e57c0da8ab25d5fb9b09f4b75721a5414bd53cbe3acd1387580",
-    "bytes": 24044,
-    "guid": "f708c533411e4114dbd42681e9beff56",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/Jelly/AI/sfx/blocked.wav",
     "sha256": "a8fde06563c4b30d5a3ab9d879bce56581fa431a02a8870d5c2317bb847e55c6",
     "bytes": 5282,
@@ -4576,26 +3928,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/bloom_activate.wav",
-    "sha256": "d53246a9ba3b148625e8a6e5b5ac252bff509578d76aa6af28273b59d2321767",
-    "bytes": 32530,
-    "guid": "32d59400224330c4f93dd492b31093c6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/Jelly/AI/sfx/bomb.wav",
     "sha256": "2848fdcee7c2716590f064e1af753e439b9c6e5b7aa374ae275a083d3adfd376",
     "bytes": 40044,
     "guid": "b39b69bcaaac9ce4b942733adf22b5e7",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/boss_action.wav",
-    "sha256": "fd8d7134e02fb399ca49e0e7b76cadbf563a3e73855d8001156a82217ed02e9b",
-    "bytes": 56044,
-    "guid": "b915111e7287f004ebae016f3a2b1ad1",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4620,14 +3956,6 @@
     "sha256": "f14c05766343426b7854d3fa5afe219200866db813853c60acc8d30cd2ea9a49",
     "bytes": 31132,
     "guid": "dbb5cdb810ce152428568fbee5c69567",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/clear_yarn.wav",
-    "sha256": "a3dd1f278ee16209de5108385ba0814184dd6539ad028a8e00d7b7548e80ff5c",
-    "bytes": 40044,
-    "guid": "0683795b9e501e04996270dd260fcb53",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4664,38 +3992,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/container_open.wav",
-    "sha256": "2312953885c59bcff788d1f010b0ea63c2f3ac9c3834de0d887dfc07a6f97f8e",
-    "bytes": 36044,
-    "guid": "7713609020d16f04488145763bd2a054",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/core_burst.wav",
-    "sha256": "c4ad310365376d47ce9217c5dad235d5020d60f608431b12fdafedd56f09e95b",
-    "bytes": 48044,
-    "guid": "4504d25d40cb3fc44a549ce3d5a539d5",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/core_charge.wav",
-    "sha256": "9eed52425afca9ca8030779df6c8c021dd08d6904b7d1fe706a66a31a0e5a6ab",
-    "bytes": 19496,
-    "guid": "10d285688382f054796c0df4a8643fff",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/cream_critical.wav",
-    "sha256": "1eae36d5b8047118474f4a8ac4ae9c90a6360e855e73b2d2e8e916b508524e49",
-    "bytes": 28044,
-    "guid": "9dafe020ad418514da6a7048b3f6d80a",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/Jelly/AI/sfx/goal_complete.wav",
     "sha256": "aee1f0b8f5fa06c3c5afbf6989929c98f0c8fb347aac35a88daf91b0e3d0ae18",
     "bytes": 47498,
@@ -4712,42 +4008,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/heat_upgrade.wav",
-    "sha256": "6c13005df39d6daa4a99adbcb9252437c20c44291386f7a110737fb13604d321",
-    "bytes": 32044,
-    "guid": "4413ccc74133bfc4b8488edfd96c7546",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/heavy_charge.wav",
-    "sha256": "bb5b4effd9dca3389b5514bd88b6ba0b59671cc9f569a010505946b39a0604df",
-    "bytes": 36044,
-    "guid": "a5dcc7b55020fe44ebd672ebf88252a1",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/heavy_impact.wav",
-    "sha256": "4480e2414ac6aa99a094ec61af63efca96a8b246a44eaf605b1151ea61192099",
-    "bytes": 28044,
-    "guid": "10b4f8944644c9440834e4dbd2257d43",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/Jelly/AI/sfx/hit.wav",
     "sha256": "2f832dc37499f84155abc306e6e46f05dcd89e03e68aa21f8c8469a6ff521439",
     "bytes": 12844,
     "guid": "ef173309296882b428e0d593f2dd9e92",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/ice_break.wav",
-    "sha256": "3ef6aaa300bbdbb5126f0686c131451a3c43cb1240c3d3aeac7659dce91bfafe",
-    "bytes": 32044,
-    "guid": "099412c273ec22941bf91f2e4e114cca",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4760,58 +4024,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/large_box_split.wav",
-    "sha256": "d06e28582e6c284abba5efec698712476d4227c14754dc6d92e917300c64db55",
-    "bytes": 52044,
-    "guid": "bc0419539110b3a4a9e6bb5315b64be3",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/link_collapse.wav",
-    "sha256": "002c2ec1f0b002a68b00a5a185e6f67e401811bd9bd9f2739d5fd5ee7057aa8c",
-    "bytes": 48044,
-    "guid": "64094a9b74f261f47b68b18b34ea319b",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/link_mark.wav",
-    "sha256": "f9601afcb716f2903ed086db0fb5f9ef0b84df6b07a06745a05b3656f87c2f71",
-    "bytes": 48044,
-    "guid": "e2910751880c6d8469bfb7ce85f3790c",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/Jelly/AI/sfx/lose.wav",
     "sha256": "9023e02c6e382ee9e7e774cfb522a273a02c38571996abf7a7729019e2ffbd2f",
     "bytes": 63114,
     "guid": "a350d5f5584669f4bacc6647c8fdfd82",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/needle_activate.wav",
-    "sha256": "79a3a0438f5e117eeb4381f5dd7653361727d0a7687dd10019c1789bcbe069e3",
-    "bytes": 32044,
-    "guid": "54babdca6a18c86439521cb90e5dba46",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/paw_bounce.wav",
-    "sha256": "887da8bb18ca89c75e32e7591ab2707556c6894c5e9c85057cc67b174cf2dc66",
-    "bytes": 32044,
-    "guid": "347607d1dcbde4c4dab7a86cddf2c5ab",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/rainbow_sweep.wav",
-    "sha256": "350504a294207d668dfc15d2775ede649a56779926de242c9ae5bf0e5eb4ae3a",
-    "bytes": 36044,
-    "guid": "c7fef670b5efb3e45ba1a4989c9fe1bc",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4848,22 +4064,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/rear_critical.wav",
-    "sha256": "c27ae04995a98c908e4416d12ae53e5517b93aecd9fd31a8ff356700064bd269",
-    "bytes": 28044,
-    "guid": "40fbed04f257b76499b6627df2314345",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/resonance.wav",
-    "sha256": "c9a8829111301e95b6ebe2ce31d57053b8606cfa4c834e536a152822f9b2f084",
-    "bytes": 32044,
-    "guid": "9411d069eaceb7d4aba26c7380a9339f",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Audio/Jelly/AI/sfx/shoot.wav",
     "sha256": "f023893dedae1ccc091f516306a6698448517236d12e10b311a1e7b6655465e2",
     "bytes": 16044,
@@ -4876,14 +4076,6 @@
     "sha256": "f4aba65594b26b25e7491051176849795291b52ed4ba9fa5bba5b245fdf0478e",
     "bytes": 28044,
     "guid": "f84a2fce8b52680489a99c728875be92",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/Jelly/AI/sfx/split_activate.wav",
-    "sha256": "4a671cadc73910f7b045775cbbf46c0077edae63c99c915cfeed1a26baf044d8",
-    "bytes": 28044,
-    "guid": "d668064a5df61484ea98341835ec3bca",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -4944,102 +4136,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Audio/Jelly/break.ogg",
-    "sha256": "d55886ec5b145045d1abd13926675b93646a8865e53e1f7a3a58cfbb7b733cff",
-    "bytes": 8578,
-    "guid": "b96f140dc433a9346a434ed4a2e92012",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/manifest.json",
-    "sha256": "415cef4009899e283945b88ccace86e5c699752d090017b34cf074482aaac959",
-    "bytes": 3950,
-    "guid": "890acdc1d2166c647a729a90218756d2",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_block_shrink_a.wav",
-    "sha256": "8f2177e2dc8aa732a16a1a16d80c6ea3e2e2c57c7c919f2b8da4970671af3af5",
-    "bytes": 22976,
-    "guid": "d0a18a541602dc04f907d65c8c70115d",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_block_shrink_b.wav",
-    "sha256": "ec783eca203ca34cdcfc28d8587708cca218af724350dc38a592d38e1f819af4",
-    "bytes": 22976,
-    "guid": "f2a6676fb92158444abe586e154bb8b4",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_clear_a.wav",
-    "sha256": "38098dc67ff94d45021f8ca59e0b1d374da5c5685c6ab3a11ca9a59c666a1a60",
-    "bytes": 34442,
-    "guid": "b543a77a3253a0746ae3d8cfc20b9a99",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_clear_b.wav",
-    "sha256": "ee80bf0f64e2f7f8694254223b1c25c61c179e1d449c2df9709f1c998ffac86f",
-    "bytes": 34442,
-    "guid": "1d5c287fee1bc6243a64614f394442f6",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_cocoa_activate_a.wav",
-    "sha256": "09d87d3c516967d1b534f433cd0cee5dcec1f0644da482c3408bde86dda53bc7",
-    "bytes": 58256,
-    "guid": "22fa912d041067646b8564f5611a58c9",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_cocoa_activate_b.wav",
-    "sha256": "41d782af3600b2928c4f0ea0476be0672df7507e4fafeed6d957836d5e9c69ce",
-    "bytes": 58256,
-    "guid": "7765a17d74d00904b82553d3c9cad292",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_ice_break_a.wav",
-    "sha256": "7e030558acb547c293111b2691498f4d62fef7525e900b2c65217b7ac05766a7",
-    "bytes": 19448,
-    "guid": "a56717399a3e8404fa2315ef55f29059",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snow_ice_break_b.wav",
-    "sha256": "22b76569a1416cef15607fc1e6178b576b30bc3af5c308813711f94bbba84fc5",
-    "bytes": 19448,
-    "guid": "136aca01146b0ea4498eb002ac19f2ef",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snowdrift_layer_a.wav",
-    "sha256": "a02efefd7d5ccb9177a264b3dfb1ec02da2221f10f3c38b59045e8ad443808ce",
-    "bytes": 21212,
-    "guid": "7de308811e8e4294a98bc2efd77daf35",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Audio/SnowV76/snowdrift_layer_b.wav",
-    "sha256": "301884d069ce09c00352109d051b6b2d65d8c9dd00f1a446179a72e917fc34a0",
-    "bytes": 21212,
-    "guid": "9be14d2bc96bed545b2b44ed41f19bf8",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/BakedJelly.shader",
     "sha256": "1b88f19a417327f20ffa3998a1719000c457cae3bf275d91bf9b2aa193b694c6",
     "bytes": 966,
@@ -5052,46 +4148,6 @@
     "sha256": "1c707ae99278e032b5a936b00e17c0647eb03f2a09f1d5ba333cd3c48bb84bc0",
     "bytes": 857,
     "guid": "a0672139636e8214a90751f0c006668e",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/BoardGrass.shader",
-    "sha256": "2a8c2b95066860447d4dd1dddf9769eb461a60f5b7e131288ac5eae452afed17",
-    "bytes": 1326,
-    "guid": "4d3320218d0d718468d6558dd5a8b8ab",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Calibration/objects_reference_bounds.csv",
-    "sha256": "9bae0f83f83ec85e379e263b46f67c681c2aaeef14a041215268e170b4a5a8b4",
-    "bytes": 1142,
-    "guid": "6f3e8cf29766f7143b0f9282858900cf",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Calibration/reference_calibration.json",
-    "sha256": "74f1ef3e7d751282b9f508b777886cbb5c3246580f04665aaf16e3a5e03f99af",
-    "bytes": 1931,
-    "guid": "a9b16913a2f93f84cbb2936befd322ea",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Calibration/Round27_visible_grid.csv",
-    "sha256": "c404b69d05e0d21d8f876e94f47ea6c40599fd85337d2fc45a2612b0df096331",
-    "bytes": 13598,
-    "guid": "0d38b51473177064ba86049d2783f274",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Calibration/trajectory_sample_first_volley.csv",
-    "sha256": "8de7d3451fbb00ae2ffc58caa9ce9a813d00c5461113c7d186005f6541f1a961",
-    "bytes": 410,
-    "guid": "c926d8f7aa31cc543975a073b32bb241",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -5120,14 +4176,6 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Fonts/FeedbackSansSC.otf",
-    "sha256": "faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9",
-    "bytes": 8331336,
-    "guid": "3fd820443f983554ba9eba92afba95c0",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Fonts/LemiYuanqiTuantuan-Notice.txt",
     "sha256": "3c824e0c8b47590f6e7b1b7be39b96c6c1e728c553f87e18c0b4cf2ed8e0934f",
     "bytes": 264,
@@ -5136,26 +4184,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Fonts/LemiYuanqiTuantuan.ttf",
-    "sha256": "528ebdfa1401c799d32967f072b2cda9ca18e8ee71ea309e8a8906b77e8adda3",
-    "bytes": 4293708,
-    "guid": "18dbdb755f0d45d2b4fbdb3316152263",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Fonts/LilitaOne-OFL.txt",
     "sha256": "255d5debbb80eb2ea762644311f266a279e8778f00156655a516e2b7781a63e1",
     "bytes": 4392,
     "guid": "acca092b292d7ce418d7546eb7dfe8b1",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Fonts/LilitaOne-Regular.ttf",
-    "sha256": "f5b641c45c69d772ee4eda687bc9fda411d5cad6b0b45371491da4580cbc8d59",
-    "bytes": 28092,
-    "guid": "b86db24a777355b4fa267f26a934f361",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -5192,26 +4224,10 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/Fonts/MiaoGardenRoundedSubset.ttf",
-    "sha256": "9859dd4af1fb94b5125f03e1aa36d21c9cbc145cd85bed57696a4cfa63e61979",
-    "bytes": 101328,
-    "guid": "e026ee82b2d2f7045b47d8734ca2bc40",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
     "source": "Assets/Resources/Fonts/MiaoRoundedUI-Bold.ttf",
     "sha256": "63e17bacce03c9872894423bb748c4885c39d27976f6a35cdf00e6004ec4bf7e",
     "bytes": 2993836,
     "guid": "7bfd3814f15961348be6c699bf0150ac",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Fonts/MiaoRoundedUI-Heavy.ttf",
-    "sha256": "8122e6c96ab449729c7302f8da56a049d5d70126c5c80742c98f737b61657fbc",
-    "bytes": 285920,
-    "guid": "9729945e140931941b3743ab64aebbb9",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -5273,17 +4289,9 @@
   },
   {
     "source": "Assets/Resources/LeagueConfig.json",
-    "sha256": "97a304bb4770fb431dc736f8ce94f8f722b511e98e736ed174a26a49a2fd99e8",
-    "bytes": 4183,
+    "sha256": "d029e4f4e43f936d9c50631b5d30390addc2e6e666fe82b1f551cbfea972ba91",
+    "bytes": 4218,
     "guid": "667275954c079bf499d3891429298328",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/Mainline/rules.json",
-    "sha256": "10505c2a063983c8f6854a9e6bc6f5c7624c3457f3a4fcae01b2ff737151850d",
-    "bytes": 193,
-    "guid": "e201110cece243f0a56074b687b65ee3",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -5296,18 +4304,18 @@
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/OpeningYarn.shader",
-    "sha256": "e0e6b47a4f077f6f890309f258db11b9218fa28406a87dbbc0ad476745d90e40",
-    "bytes": 809,
-    "guid": "ed012055eadb8774e8305a11863a1989",
+    "source": "Assets/Resources/OpeningStory049UI.shader",
+    "sha256": "9ba3b65ca1da87de7c3cb95fa37cbc8eed554aa28a61726a13dd0290009c6535",
+    "bytes": 964,
+    "guid": "e5ed3a9cab9790744af6890dbed5b142",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
   {
-    "source": "Assets/Resources/PixelJelly.shader",
-    "sha256": "27c4063b64745bbf7c1c5e029898182dad3f3abfa66b4157468876f4a8b7682c",
-    "bytes": 963,
-    "guid": "2b9879c786e542ec8965745030af0184",
+    "source": "Assets/Resources/OpeningYarn.shader",
+    "sha256": "e0e6b47a4f077f6f890309f258db11b9218fa28406a87dbbc0ad476745d90e40",
+    "bytes": 809,
+    "guid": "ed012055eadb8774e8305a11863a1989",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },
@@ -5332,14 +4340,6 @@
     "sha256": "fadc599ba81b1d7fd6939dc859fbf228ec54deeacf0599b5252065bb58dfe27f",
     "bytes": 1408,
     "guid": "c8ae533b188bc06489b529daaacb2899",
-    "usage": "unresolved-until-resource-closure",
-    "redistribution": "consult-license-evidence"
-  },
-  {
-    "source": "Assets/Resources/StreakTrials/trials.json",
-    "sha256": "4f68a12664c30fccf3777ff7590f70198e633a2348334040afcce5c14b555bd9",
-    "bytes": 1149,
-    "guid": "6bfc8501ed9f3d143aa8d3b7dde88d3d",
     "usage": "unresolved-until-resource-closure",
     "redistribution": "consult-license-evidence"
   },

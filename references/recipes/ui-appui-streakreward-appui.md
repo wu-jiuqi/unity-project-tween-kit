@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/AppUI.StreakReward.cs`
-文件 SHA-256：`4c5255d2dfd52a6300896f190541055ae204aa716487b88b4f59b914c4dfe53c`
+文件 SHA-256：`d5e6d8efa747be565244fcc12b91e1491123f5fa4781e21cc54811b737019246`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.StreakReward.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.cs:177` · `AppUI.StartPreparedLevel` → `ShowCampaignStreakReward(generation)`
+- `Assets/Scripts/UI/AppUI.cs:183` · `AppUI.StartPreparedLevel` → `ShowCampaignStreakReward(generation)`
 
 ```csharp
 IEnumerator ShowCampaignStreakReward(int generation){

@@ -1,0 +1,14 @@
+#if UNITY_EDITOR || BOUNCE_QA
+using System;using System.Linq;using System.Collections.Generic;using UnityEngine;namespace BounceGarden {public sealed partial class GameSession {
+ public void QASevenClear(){
+  foreach(var t in ChainTools.ToArray())SevenConsume(t);foreach(var b in CollectionBricks.ToArray()){b.Remove();Destroy(b.gameObject);}CollectionBricks.Clear();
+  foreach(var l in chainLoot)if(l.View!=null)Destroy(l.View.gameObject);chainLoot.Clear();foreach(var beam in chainBeams)if(beam.View!=null)Destroy(beam.View.gameObject);chainBeams.Clear();
+  chainMotions.Clear();ClearFlowBoardPlan();chainGravityDirty=false;ChainFalling=false;ClearSevenSpecials();jellyTargets.Clear();Array.Clear(JellyGoal,0,JellyGoal.Length);Array.Clear(JellyCollected,0,JellyCollected.Length);CollectionGoal[0]=999;CollectionGoal[1]=0;Collected[0]=Collected[1]=0;
+ }
+
+ public ChainTool QASevenTool(int kind,int col,int row,int color){var t=SpawnChainTool(kind,ChainGridRules.Center(col,row));t.ColorIndex=color;t.ReadyAt=0;return t;}
+
+ public BrickBody QAThirdNormal(int c,int r,int color=0){var b=QASevenBrick(c,r,1,color);b.Definition.reveal="opening-N";return b;}
+
+}}
+#endif

@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/JellyJourney80.cs`
-文件 SHA-256：`66db8964f17834ea516b410081808bb2e1061bb1e8d7bf1b1f3c3d6f16c48bf2`
+文件 SHA-256：`9468a7f3f17a1a25f0716170d5b114fefe8c8f2c8d6065608055287e9bb36b87`
 [原始源码快照](../source/Assets/Scripts/UI/JellyJourney80.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -48,8 +48,6 @@ public float Sway(int index)=>DragPull*18*Mathf.Sin(index*1.31f+.8f);
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/JellyJourney80QA.cs:18` · `JellyJourney80QA.Start` → `Map.PullJelly(90)`
-- `Assets/Scripts/JellyJourney80QA.cs:21` · `JellyJourney80QA.Start` → `Map.PullJelly(90)`
 - `Assets/Scripts/UI/JellyJourneyMotion80.cs:49` · `JellyMapDrag80.OnDrag` → `.PullJelly(e.delta.y)`
 
 ```csharp
@@ -65,7 +63,6 @@ public void PullJelly(float pixels){dragSpring?.Kill();float design=pixels*1080/
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/JellyJourney80QA.cs:18` · `JellyJourney80QA.Start` → `Map.EndJellyDrag()`
 - `Assets/Scripts/UI/JellyJourneyMotion80.cs:50` · `JellyMapDrag80.OnEndDrag` → `.EndJellyDrag()`
 - `Assets/Scripts/UI/JellyJourneyMotion80.cs:51` · `JellyMapDrag80.OnDisable` → `.EndJellyDrag()`
 
@@ -73,7 +70,7 @@ Roslyn 已解析的实际源码调用位置：
 public void EndJellyDrag(){dragging=false;dragSpring?.Kill();if(!gameObject.activeInHierarchy){pull=0;return;}dragSpring=DOTween.To(()=>pull,v=>pull=v,0,.8f).SetEase(Ease.OutElastic,1.1f,.28f).SetUpdate(true).SetTarget(this);}
 ```
 
-### LateUpdate · L73
+### LateUpdate · L74
 
 方法 SHA-256：`e44650874994cca4bb0d93e6b32f0c5978a98d8f85303bcb85ebf2d116980174`
 时间来源：Time.unscaledDeltaTime
@@ -137,10 +134,10 @@ ScrollRect scroll;
 RectTransform viewport,content,header,footer,background,islands,nodes;
 ```
 ```csharp
-TMP_Text cta,note;
+Image gardenLeft,gardenRight;
 ```
 ```csharp
-Button play,locate;
+Button locate;
 ```
 ```csharp
 JellyRouteRibbon80 route;
@@ -168,6 +165,9 @@ Tween dragSpring;
 ```
 ```csharp
 float auditClock=float.NaN;
+```
+```csharp
+float lastFooterReserve=-1;
 ```
 
 业务/组件依赖保留在上述字段、泛型 Get/AddComponent 和源方法参数中。语义解析不覆盖运行时委托结果；`nameMatchedCallSites` 仅供补充检索。

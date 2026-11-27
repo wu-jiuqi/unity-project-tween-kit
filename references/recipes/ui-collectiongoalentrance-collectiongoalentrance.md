@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/CollectionGoalEntrance.cs`
-文件 SHA-256：`775fdda7cd72a378e3de7b884fa1f11efd9b9f890c5cf3424f0f0046daa64393`
+文件 SHA-256：`e830eb8ef97a4c7d3c66b949778e9dba82e22790c0a865dd2a9ee6ab208fa4f8`
 [原始源码快照](../source/Assets/Scripts/UI/CollectionGoalEntrance.cs.txt)
 
 用在哪里：AppUI.StartPreparedLevel → ShowCollectionGoalEntrance → CollectionGoalEntrance.Begin(hud.GoalsRect)

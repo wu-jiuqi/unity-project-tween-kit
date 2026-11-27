@@ -2,14 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 namespace BounceGarden {
-public sealed class ChainLiveBurst {public int Id,YarnColor,Remaining=5,Breaks,Tier=-1;public StreakBooster Booster;public int Hits=>Breaks;}
+public sealed class ChainLiveBurst {public int Id,YarnColor,Remaining=5,Breaks,Tier=-1;public StreakBooster Booster;}
 public sealed partial class GameSession {
  readonly Dictionary<int,ChainLiveBurst> chainBursts=new Dictionary<int,ChainLiveBurst>();
  readonly HashSet<Transform> chainMovedThisStep=new HashSet<Transform>();
  int chainBurstSerial;float chainNextLaunch;
  Vector2? bufferedChainShot;
  public bool ChainLaunchQueued=>bufferedChainShot.HasValue;
- public float ChainLaunchWait=>Mathf.Max(0,chainNextLaunch-simulationClock);
+ 
  void ClearBufferedChainShot(){bufferedChainShot=null;}
  bool BufferChainShot(Vector2 direction){if(bufferedChainShot.HasValue)return false;bufferedChainShot=NormalizeAimDirection(direction);changed=true;return true;}
  void PromoteBufferedChainShot(){if(!bufferedChainShot.HasValue||!ChainCanLaunch)return;queuedShot=bufferedChainShot;strategyQueuedRequest=strategyBufferedRequest;bufferedChainShot=null;changed=true;}
@@ -18,7 +18,7 @@ public sealed partial class GameSession {
  public int ChainMovingHits {get;private set;}public int ChainMovingBreaks {get;private set;}
  static Vector2 ChainPiecePosition(ChainGridPiece p){var b=p.GetComponent<Rigidbody2D>();return b!=null?b.position:(Vector2)p.transform.position;}
  void ClearChainLive(){StrategyReset();ClearBufferedChainShot();ChainMovingHits=ChainMovingBreaks=0;chainMovedThisStep.Clear();chainBursts.Clear();chainBurstSerial=0;chainNextLaunch=0;}
- void BeginChainLiveBurst(){RefillBeforeVolley();var b=new ChainLiveBurst{Id=++chainBurstSerial,YarnColor=nextVolleyYarn,Remaining=UnityEngine.Mathf.Max(1,CurrentLevel.volleyCount),Booster=ConsumeStreakSelection()};chainBursts.Add(b.Id,b);nextVolleyYarn=UnityEngine.Random.Range(0,YarnArt.ColorCount);chainNextLaunch=simulationClock+.55f;CollectionRound=Mathf.Max(1,CurrentLevel.initialShots-Shots);ChainRatingBreaks=0;ChainRatingTier=-1;chainRewardTier=-1;NextChainRowTools=new int[9];if(FusionActive)FusionBeginVolley();changed=true;}
+ void BeginChainLiveBurst(){RefillBeforeVolley();var b=new ChainLiveBurst{Id=++chainBurstSerial,YarnColor=nextVolleyYarn,Remaining=UnityEngine.Mathf.Max(1,CurrentLevel.volleyCount),Booster=ConsumeStreakSelection()};chainBursts.Add(b.Id,b);nextVolleyYarn=UnityEngine.Random.Range(0,YarnArt.ColorCount);chainNextLaunch=simulationClock+.55f;CollectionRound=Mathf.Max(1,CurrentLevel.initialShots-Shots);ChainRatingBreaks=0;ChainRatingTier=-1;chainRewardTier=-1;NextChainRowTools=new int[9];changed=true;}
  void AssignChainBall(BallBody ball){ball.ChainBurstId=chainBurstSerial;ball.ChainBornAt=simulationClock;if(chainBursts.TryGetValue(chainBurstSerial,out var burst)){ball.SetYarnColor(burst.YarnColor);ball.SetStreakBooster(burst.Booster);}}
  void RecordChainLiveBreak(BallBody ball){
   if(!chainBursts.TryGetValue(ball.ChainBurstId,out var b)){RecordChainRatingBreak();return;}
@@ -27,7 +27,7 @@ public sealed partial class GameSession {
  void ReturnChainBall(BallBody ball){
   if(!chainBursts.TryGetValue(ball.ChainBurstId,out var b))return;b.Remaining--;if(b.Remaining>0)return;
   using(StrategyCause("group-return",b.Id)){
-  StrategyEmit(new StrategyEvent{kind="group-return"});chainBursts.Remove(b.Id);if(FusionActive)QueueFusionRating(b.Tier);else if(CollectionGoalEarned&&!IsTutorial&&!IsStreakTrial)DeferVictoryGroup(b);else {QueueChainLiveReward(CampaignChainRewards(b.Tier));RefillAfterVolley(b.Id);}changed=true;}
+  StrategyEmit(new StrategyEvent{kind="group-return"});chainBursts.Remove(b.Id);if(CollectionGoalEarned)DeferVictoryGroup(b);else {QueueChainLiveReward(CampaignChainRewards(b.Tier));RefillAfterVolley(b.Id);}changed=true;}
  }
  void QueueChainLiveReward(int[] packet){
   if(CollectionGoalEarned){FinishEarnedCollectionSupply();return;}
@@ -36,7 +36,7 @@ public sealed partial class GameSession {
  }
  void TryChainReplacementRewards(){
   if(CollectionGoalEarned){FinishEarnedCollectionSupply();return;}
-  if(FusionActive||SevenFreezeBoard)return;
+  if(SevenFreezeBoard)return;
   if(chainReplacementRewards.Count==0||!IsPlaying&&!VictorySettlementActive||IsPaused||CollectionWon&&!SevenSpecialActive)return;
   var candidates=CollectionBricks.Where(b=>b.Alive&&!RefillProtected(b)&&b.Definition.kind==BrickKind.Normal&&b.Definition.juiceGroup==0&&!OpeningCopperBrick(b)&&!OpeningCatBrick(b)&&!OpeningIngotBrick(b)&&!OpeningYarnBrick(b)&&!OpeningCookieBrick(b)&&(!IsJellyTarget(b)||IsOpening)&&!ChainPowerRules.IsNest(b.Definition)&&!b.GetComponent<ChainTileVisibility>().Hidden&&!ChainBonds.Any(g=>g.Members.Contains(b))).ToList();
   while(chainReplacementRewards.Count>0&&candidates.Count>0){

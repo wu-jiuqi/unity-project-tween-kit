@@ -1,30 +1,25 @@
-using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine;using UnityEngine.UI;
 namespace ProjectTweenKit {
-// A filled gold image masks its own moving energy edge; particles never spill
-// outside the star silhouette. A coalesced comet precedes every fill change.
+// Rotating artwork behind a screen-aligned RectMask2D. No custom fill shader.
 public sealed class StarChargeView:MonoBehaviour {
- Image gold,comet;Material chargeMaterial;RectTransform host,cometRoot;float pending,target,fill,fromFill,fillAge=1,flight=-1,clock,fullAge=9;Vector2 origin;
- public float Fill=>fill;public float Target=>pending;public bool Settled=>flight<0&&Mathf.Abs(fill-pending)<.002f;
- public bool EdgeVisible=>fill>.005f&&fill<.995f;
- public void RefreshGeometry(float dt=0){clock+=dt;Render();}
- public void Initialize(RectTransform layer,float initial){host=layer;var face=GetComponent<Image>();face.sprite=BattleJellyArt.Get("vine-star-off");face.color=new Color(.76f,.94f,.64f,1);
-  gold=UICraft.Box(transform,"Gradually filled golden star",0,0,80,80,Color.white);gold.sprite=BattleJellyArt.Get("vine-star-on");gold.type=Image.Type.Simple;gold.raycastTarget=false;var r=gold.rectTransform;r.anchorMin=Vector2.zero;r.anchorMax=Vector2.one;r.sizeDelta=Vector2.zero;chargeMaterial=new Material(Resources.Load<Shader>("StarCharge"));gold.material=chargeMaterial;
-  comet=BattleJellyArt.Image(layer,"vine-star-on",0,0,18,18);comet.name="Score starlight entering pendant";cometRoot=comet.rectTransform;comet.raycastTarget=false;
-  SetImmediate(initial);
+ // 136 covers the full diagonal of the rotating 90 x 82 artwork at every angle.
+ const float FillExtent=136,HalfExtent=FillExtent*.5f;
+ Image empty,gold,edge,comet;RectTransform host,cometRoot,clip,visual;bool victory;float pending,target,fill,fromFill,fillAge=1,flight=-1,clock,fullAge=9,rotation;Vector2 origin;
+ public bool Settled=>flight<0&&Mathf.Abs(fill-pending)<.002f;
+ public float Fill=>fill;public float Target=>pending;public bool EdgeVisible=>fill>.005f&&fill<.995f;public bool UsesNativeUIFill=>clip!=null&&clip.GetComponent<RectMask2D>()!=null&&gold.material==gold.defaultMaterial;public RectTransform FillMask=>clip;public float RotorAngle=>rotation;
+ public void PrepareVictoryTransfer(){if(victory)return;victory=true;transform.localRotation*=Quaternion.Euler(0,0,rotation);rotation=0;fullAge=9;if(comet!=null)comet.gameObject.SetActive(false);flight=-1;Render();}
+ public void RefreshGeometry(float dt=0){clock+=dt;Render();}public void SetRotation(float angle){rotation=Mathf.Repeat(angle,360);Render();}
+ Image Layer(Transform parent,string name,Sprite sprite){var im=UICraft.Box(parent,name,0,0,90,82,Color.white);im.sprite=sprite;im.type=Image.Type.Simple;im.raycastTarget=false;return im;}
+ public void Initialize(RectTransform layer,float initial){host=layer;GetComponent<Image>().enabled=false;visual=UICraft.Root(transform,"Star artwork and fill",0,0,90,82);empty=Layer(visual,"Rotating empty star",CurrentKitArt.Star("star-empty-v22"));
+  clip=UICraft.Root(visual,"Screen-aligned bottom-up gold mask",0,-HalfExtent,FillExtent,FillExtent);clip.pivot=new Vector2(.5f,0);clip.gameObject.AddComponent<RectMask2D>();gold=Layer(clip,"Rotating golden star",CurrentKitArt.Star("star-gold-v18"));gold.rectTransform.anchorMin=gold.rectTransform.anchorMax=new Vector2(.5f,0);gold.rectTransform.anchoredPosition=new Vector2(0,HalfExtent);gold.gameObject.AddComponent<Mask>().showMaskGraphic=true;
+  edge=UICraft.Box(gold.transform,"Horizontal fill boundary",0,0,160,2,Color.white);edge.type=Image.Type.Simple;edge.raycastTarget=false;
+  comet=CurrentKitArt.StarImage(layer,"star-gold-v18",0,0,18,18);cometRoot=comet.rectTransform;SetImmediate(initial);
  }
- public void SetImmediate(float value){pending=target=fill=fromFill=Mathf.Clamp01(value);fillAge=1;flight=-1;if(gold!=null)gold.fillAmount=fill;Render();}
- public void Charge(float value,Vector3 source){value=Mathf.Clamp01(value);if(value<pending-.001f){SetImmediate(value);return;}if(value<=pending+.0001f)return;pending=value;
-  if(flight<0){flight=0;origin=host.InverseTransformPoint(source);comet.gameObject.SetActive(true);}
- }
- public void Advance(float dt){clock+=dt;if(flight>=0){flight+=dt;float u=Mathf.Clamp01(flight/.24f);Vector2 end=host.InverseTransformPoint(transform.position);cometRoot.anchoredPosition=Vector2.Lerp(origin,end,u)+Vector2.up*Mathf.Sin(u*Mathf.PI)*35;cometRoot.localScale=Vector3.one*(1+.4f*Mathf.Sin(u*Mathf.PI));comet.color=new Color(1,1,.83f,1-u*.25f);if(u>=1){flight=-1;fromFill=fill;target=pending;fillAge=0;comet.gameObject.SetActive(false);}}
-  float before=fill;fillAge+=dt;fill=Mathf.Lerp(fromFill,target,Mathf.SmoothStep(0,1,Mathf.Clamp01(fillAge/.36f)));if(before<.999f&&fill>=.999f){fullAge=0;SoundService.Play("score_star_full");}fullAge+=dt;gold.fillAmount=fill;Render();
- }
- void Render(){if(gold==null)return;chargeMaterial.SetFloat("_Charge",fill);chargeMaterial.SetFloat("_Clock",clock);
-  float pulse=Mathf.Sin(Mathf.Clamp01(fullAge/.38f)*Mathf.PI);transform.localScale=Vector3.one*(1+pulse*.32f);
-  if(comet!=null&&flight<0)comet.gameObject.SetActive(false);
- }
+ public void SetImmediate(float value){pending=target=fill=fromFill=Mathf.Clamp01(value);fillAge=1;flight=-1;Render();}
+ public void Charge(float value,Vector3 source){value=Mathf.Clamp01(value);if(value<pending-.001f){SetImmediate(value);return;}if(value<=pending+.0001f)return;pending=value;if(flight<0){flight=0;origin=host.InverseTransformPoint(source);comet.gameObject.SetActive(true);}}
+ public void Advance(float dt){clock+=dt;if(flight>=0){flight+=dt;float u=Mathf.Clamp01(flight/.24f);Vector2 end=host.InverseTransformPoint(transform.position);cometRoot.anchoredPosition=Vector2.Lerp(origin,end,u)+Vector2.up*Mathf.Sin(u*Mathf.PI)*35;cometRoot.localScale=Vector3.one*(1+.4f*Mathf.Sin(u*Mathf.PI));comet.color=new Color(1,1,.83f,1-u*.25f);if(u>=1){flight=-1;fromFill=fill;target=pending;fillAge=0;comet.gameObject.SetActive(false);}}float before=fill;fillAge+=dt;fill=Mathf.Lerp(fromFill,target,Mathf.SmoothStep(0,1,Mathf.Clamp01(fillAge/.36f)));if(before<.999f&&fill>=.999f){fullAge=0;SoundService.Play("score_star_full");}fullAge+=dt;Render();}
+ void Render(){if(gold==null)return;Quaternion turn=Quaternion.Euler(0,0,rotation);empty.rectTransform.localRotation=gold.rectTransform.localRotation=turn;empty.enabled=fill<.999f;gold.enabled=fill>.001f;clip.sizeDelta=new Vector2(FillExtent,FillExtent*fill);float cut=-HalfExtent+FillExtent*fill;edge.enabled=EdgeVisible;if(edge.enabled){edge.rectTransform.localRotation=Quaternion.Inverse(turn);edge.rectTransform.localPosition=Quaternion.Inverse(turn)*new Vector3(0,cut-1,0);edge.color=new Color(1,1,.88f,.8f+.2f*Mathf.Sin(clock*12));}float pulse=Mathf.Sin(Mathf.Clamp01(fullAge/.38f)*Mathf.PI);if(!victory)transform.localScale=Vector3.one*(1+pulse*.32f);var size=((RectTransform)transform).rect.size;visual.localScale= victory?Vector3.one*(size.x/90f):new Vector3(size.x/90f,size.y/82f,1);visual.anchoredPosition=new Vector2(0,-45*pulse*.32f*(size.y/82f)/(1+pulse*.32f));if(comet!=null&&flight<0)comet.gameObject.SetActive(false);}
  void OnDisable(){if(comet!=null)comet.gameObject.SetActive(false);}
- void OnDestroy(){if(comet!=null)Destroy(comet.gameObject);if(chargeMaterial!=null)Destroy(chargeMaterial);}
+ void OnDestroy(){if(comet!=null)Destroy(comet.gameObject);}
 }
 }

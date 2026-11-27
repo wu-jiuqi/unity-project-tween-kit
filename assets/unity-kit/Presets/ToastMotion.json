@@ -1,0 +1,51 @@
+{
+    "schemaVersion": 1,
+    "component": "ProjectTweenKit.ToastMotion",
+    "settings": [
+        {
+            "field": "EnterDuration",
+            "type": "System.Single",
+            "value": 0.18000000715255738,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "ExitDuration",
+            "type": "System.Single",
+            "value": 0.14000000059604646,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "HoldDuration",
+            "type": "System.Single",
+            "value": 3.200000047683716,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "EnterScale",
+            "type": "System.Single",
+            "value": 0.9599999785423279,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        },
+        {
+            "field": "ExitScale",
+            "type": "System.Single",
+            "value": 0.9399999976158142,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+        }
+    ]
+}

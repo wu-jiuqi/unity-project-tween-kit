@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/RearCatLauncher.cs`
-文件 SHA-256：`b1146d45430e9f24900b00b40823ad78885df2392406c15f91397d68f2d4ba2f`
+文件 SHA-256：`2c8cee4084b1844acd21cd833e27a08c8b6aa66f65aa72f30425a70b44421a72`
 [原始源码快照](../source/Assets/Scripts/World/RearCatLauncher.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

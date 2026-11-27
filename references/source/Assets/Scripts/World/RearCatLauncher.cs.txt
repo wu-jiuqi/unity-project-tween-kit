@@ -9,7 +9,7 @@ public sealed class RearCatLauncher:MonoBehaviour {
  float clockMs,afterShot=10;
  bool aiming,firing;
  public int FrameIndex {get;private set;}
- public float ClockMs=>clockMs;
+ 
  public bool ShowLoadedBall=>afterShot>=.10f;
  public SpriteRenderer Face=>face;
  public void Initialize(GameSession session){

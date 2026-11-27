@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "boxCells": 2,
+  "maxCount": 8,
+  "pitch": 0.82,
+  "ordinaryBody": 0.76,
+  "boxBody": 1.58,
+  "stateOrder": [
+    "box-closed",
+    "box-8",
+    "box-7",
+    "box-6",
+    "box-5",
+    "box-4",
+    "box-3",
+    "box-2",
+    "box-1",
+    "box-0"
+  ],
+  "registration": "visible whole-object alpha bounds; centered; uniform fit, no stretching",
+  "view": "approved mild elevated frontal view, visible front paw wall",
+  "sprites": [
+    {
+      "key": "box-0",
+      "asset": "box-0",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 173,
+      "y": 149,
+      "w": 901,
+      "h": 945
+    },
+    {
+      "key": "box-1",
+      "asset": "box-1",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 171,
+      "y": 148,
+      "w": 905,
+      "h": 951
+    },
+    {
+      "key": "box-2",
+      "asset": "box-2",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 171,
+      "y": 147,
+      "w": 905,
+      "h": 951
+    },
+    {
+      "key": "box-3",
+      "asset": "box-3",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 173,
+      "y": 147,
+      "w": 902,
+      "h": 950
+    },
+    {
+      "key": "box-4",
+      "asset": "box-4",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 172,
+      "y": 148,
+      "w": 904,
+      "h": 949
+    },
+    {
+      "key": "box-5",
+      "asset": "box-5",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 175,
+      "y": 149,
+      "w": 898,
+      "h": 948
+    },
+    {
+      "key": "box-6",
+      "asset": "box-6",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 171,
+      "y": 148,
+      "w": 905,
+      "h": 950
+    },
+    {
+      "key": "box-7",
+      "asset": "box-7",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 172,
+      "y": 147,
+      "w": 903,
+      "h": 951
+    },
+    {
+      "key": "box-8",
+      "asset": "box-8",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 174,
+      "y": 149,
+      "w": 899,
+      "h": 948
+    },
+    {
+      "key": "box-closed",
+      "asset": "box-closed",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 173,
+      "y": 150,
+      "w": 901,
+      "h": 944
+    },
+    {
+      "key": "fish-biscuit",
+      "asset": "fish-biscuit",
+      "sourceWidth": 1684,
+      "sourceHeight": 934,
+      "x": 218,
+      "y": 176,
+      "w": 1234,
+      "h": 569
+    },
+    {
+      "key": "yarn-3",
+      "asset": "yarn-3",
+      "sourceWidth": 1254,
+      "sourceHeight": 1254,
+      "x": 144,
+      "y": 159,
+      "w": 967,
+      "h": 933
+    }
+  ]
+}

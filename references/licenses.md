@@ -18,3 +18,8 @@ DOTween官网列出对原版与修改版的不同分发条件。因此不分发�
 
 
 0.4.0新增示例继续使用项目已有StartupLoading、OnboardingV1、TutorialV41、BattleUIV42和藤蔓挂件素材。启动页PNG及meta来自同一BounceBusters项目已导出的微信工程资源，沿用原GUID和导入设置，映射中的source以../../Builds开头；不将其冒充主Assets文件。没有导入unity-ui-tween仓库美术，也没有新生成图。许可判断继续沿用上面的项目素材记录。
+
+
+## 游戏0.5.1同步
+
+新版接口、时间驱动、共享Loading、五页资源等待、八帧结果页、原生遮罩充星及新增清理合同见[当前补充说明](current-051.md)。旧章节的3.6秒加载猫与旧材质充星说明属于0.4.0历史实现；当前charge条目和结果页以本轮代码为准，独立旧LoadingPresentation仍保留。

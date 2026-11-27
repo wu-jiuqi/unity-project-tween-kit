@@ -1,98 +1,10 @@
 using UnityEngine;
-
-namespace BounceGarden
-{
-    // Preserve the approved painting; local masks move its original foliage.
-    // Physics and live jelly rails remain separate scene layers.
-    public sealed class GardenSceneArt : MonoBehaviour
-    {
-        const string PlatePath = "Art/GardenBackgroundV2/reference-plate";
-        static Sprite plate;
-        readonly Vector4[] regions = new Vector4[16];
-        readonly Vector4[] activity = new Vector4[16];
-        readonly Vector4[] motion = new Vector4[16];
-        Material material;
-        GameSession owner;
-        int count;
-        float clock;
-        public int ClickCount { get; private set; }
-        public int DecorationCount => count;
-        public float AnimationClock => clock;
-        public Vector2 PeekCatPosition => Point(730,90);
-        public Vector2 SleepCatPosition => Point(90,1600);
-        public Vector2 FlowerPosition => Point(827,450);
-        static Vector2 Point(float x,float y) => new Vector2((x/853f-.5f)*10.8f,(.5f-y/1844f)*23.4f);
-        void Region(float x,float y,float rx,float ry,bool cat=false)
-        {
-            regions[count]=new Vector4(x/853f,1-y/1844f,rx/853f,ry/1844f);
-            activity[count]=new Vector4(2,cat?1:0,0,0);count++;
-        }
-        public void Initialize(GameSession session)
-        {
-            owner=session;
-            if(plate==null){var texture=Resources.Load<Texture2D>(PlatePath);
-                if(texture==null)throw new System.InvalidOperationException("Approved garden painting missing");
-                plate=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.5f),100,0,SpriteMeshType.FullRect);
-                // Interpolate the gentle UV motion across a fixed grid. The shader now
-                // evaluates regions per vertex rather than per screen pixel.
-                const int columns=48,rows=104;
-                var vertices=new Vector2[(columns+1)*(rows+1)];
-                var triangles=new ushort[columns*rows*6];int next=0;
-                for(int y=0;y<=rows;y++)for(int x=0;x<=columns;x++){
-                    int index=y*(columns+1)+x;
-                    vertices[index]=new Vector2(x/(float)columns*texture.width,y/(float)rows*texture.height);
-                    if(x==columns||y==rows)continue;
-                    triangles[next++]=(ushort)index;triangles[next++]=(ushort)(index+columns+1);triangles[next++]=(ushort)(index+1);
-                    triangles[next++]=(ushort)(index+1);triangles[next++]=(ushort)(index+columns+1);triangles[next++]=(ushort)(index+columns+2);
-                }
-                plate.OverrideGeometry(vertices,triangles);}
-            var shader=Resources.Load<Shader>("GardenReferenceMotion");
-            if(shader==null||!shader.isSupported)throw new System.InvalidOperationException("Garden reference motion shader unavailable");
-            material=new Material(shader);
-            var node=new GameObject("Approved reference painting with original foliage");node.transform.SetParent(transform,false);
-            var face=node.AddComponent<SpriteRenderer>();face.sprite=plate;face.sharedMaterial=material;face.sortingOrder=-30;
-            node.transform.localScale=new Vector3(10.8f/face.sprite.bounds.size.x,23.4f/face.sprite.bounds.size.y,1);
-            Region(45,140,130,170); Region(730,90,130,110,true);
-            Region(90,1600,160,90,true); Region(755,1620,120,110,true);
-            Region(20,375,68,78); Region(827,450,65,95);
-            Region(15,770,60,72); Region(824,900,55,70);
-            Region(20,1190,75,150); Region(833,1230,65,125);
-            Region(824,1500,40,50); Region(90,1740,160,110);
-            Region(790,1760,140,100); Region(124,36,65,60); Region(818,255,65,50);
-            material.SetVectorArray("_Regions",regions);material.SetInt("_RegionCount",count);Upload();
-        }
-        public bool TryTap(Vector2 point)
-        {
-            if(owner==null||!owner.IsPlaying||owner.IsPaused)return false;
-            if(Mathf.Abs(point.x)<4.48f&&point.y>-8.2f&&point.y<8.2f)return false;
-            var uv=new Vector2(point.x/10.8f+.5f,point.y/23.4f+.5f);
-            for(int i=count-1;i>=0;i--){var r=regions[i];
-                float x=(uv.x-r.x)/r.z,y=(uv.y-r.y)/r.w;
-                if(x*x+y*y>.8f)continue;
-                activity[i].x=0;ClickCount++;Upload();return true;}
-            return false;
-        }
-        // These coefficients are constant across the whole painting. Compute them once
-        // per frame instead of repeating trigonometry for every shaded phone pixel.
-        void Upload()
-        {
-            float time=Mathf.Floor(clock*12)/12;
-            for(int i=0;i<count;i++){
-                float age=activity[i].x,cat=activity[i].y,phase=i*.83f;
-                float tapped=age<.75f?Mathf.Sin(age*19)*Mathf.Exp(-age*6):0;
-                float sway=Mathf.Sin(time*1.5f+phase)-Mathf.Sin(phase);
-                motion[i]=new Vector4((1-cat)*(.018f*sway+.045f*tapped),.045f*tapped,
-                    cat*.008f*(Mathf.Sin(time*1.7f+phase)-Mathf.Sin(phase)),cat*.0018f*Mathf.Max(0,tapped));
-            }
-            material.SetFloat("_MotionClock",clock);material.SetVectorArray("_Motion",motion);
-        }
-        void Update()
-        {
-            if(owner==null||!owner.IsPlaying||owner.IsPaused)return;
-            clock+=Time.deltaTime;
-            for(int i=0;i<count;i++)activity[i].x=Mathf.Min(2,activity[i].x+Time.deltaTime);
-            Upload();
-        }
-        void OnDestroy(){if(material!=null)Destroy(material);}
-    }
+namespace BounceGarden {
+// Direct approved painting, without procedural grass, distortion or a second frame.
+public sealed class GardenSceneArt:MonoBehaviour {
+ Material material;
+ 
+ public void Initialize(GameSession game){var texture=Resources.Load<Texture2D>("Art/BattleGarden050/petal-garden-v22");var sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),Vector2.one*.5f,100);var node=new GameObject("Unmodified prototype background");node.transform.SetParent(transform,false);var face=node.AddComponent<SpriteRenderer>();face.sprite=sprite;face.sortingOrder=-30;material=new Material(Shader.Find("Sprites/Default"));face.sharedMaterial=material;node.transform.localScale=new Vector3(10.8f/sprite.bounds.size.x,23.4f/sprite.bounds.size.y,1);gameObject.AddComponent<PetalField050>().Initialize(game);gameObject.AddComponent<BattleGardenPresentation050>();}
+ public bool TryTap(Vector2 point)=>false;void OnDestroy(){if(material!=null)Destroy(material);}
+}
 }

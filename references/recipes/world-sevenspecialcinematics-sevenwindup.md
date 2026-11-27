@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/SevenSpecialCinematics.cs`
-文件 SHA-256：`ba1d34624edba93f5a13507d89e413ace978773343f4d9bb47b5552cf3b20f7d`
+文件 SHA-256：`abeddcf4671a69c5b9b36ee0faf35bd2114fd68601f5cf76d74448d6f8c175d6`
 [原始源码快照](../source/Assets/Scripts/World/SevenSpecialCinematics.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

@@ -4,25 +4,11 @@ using TMPro;
 namespace BounceGarden {
 public partial class AppUI {
  int streakTrial=-1;
- public void OpenStreakTrials(){if(!LocalTestTools.Available)return;
-  OpenModal("连胜道具试炼",UICraft.Blue,900,1300);
-  UICraft.Label(modal,"独立高难挑战 · 不影响主线和真实连胜\n道具仅限本关，每件强化下一组全部5颗球",0,390,790,130,31,UICraft.Ink);
-  for(int i=0;i<3;i++){int trial=i;var t=StreakTrials.Get(i);UICraft.Button(modal,"Level "+(i+1),0,170-i*200,760,125,i==2?new Color32(224,175,71,255):i==1?new Color32(239,158,118,255):UICraft.Green,()=>QAStartStreakTrial(trial),40);UICraft.Label(modal,i==0?"本关赠送：穿透×1":i==1?"本关赠送：穿透×1  爆炸×1":"本关赠送：穿透×1  爆炸×1  光球×1",0,85-i*200,790,50,29,UICraft.Ink);}
-  UICraft.Button(modal,"返回设置",0,-510,540,100,UICraft.Blue,Settings,36);
- }
- public void QAStartStreakTrial(int trial){if(!RuntimeQA.IsIsolated)return;BeginLevel(20,false,true,Mathf.Clamp(trial,0,2));}
+ 
+ 
  static bool BattleToolsVisible=>false;
  void BuildStreakToolsHUD(){var root=UICraft.Root(hudRoot,"Streak trial boosters",0,-990,960,210);root.gameObject.AddComponent<StreakTrialHUD>().Initialize(Session);root.gameObject.SetActive(BattleToolsVisible);}
- void ShowStreakTrialResult(bool win){
-  CancelAim();playing=false;won=win;viewGeneration++;hudRoot.gameObject.SetActive(false);Session.SetPaused(true);Clear(overlayRoot);modal=null;
-  OpenModal(win?"试炼完成！":"再试一次",win?UICraft.Green:UICraft.Blue,900,1150);results=modal;results.gameObject.AddComponent<ResultAudioTimeline>().Initialize(win);
-  var close=modal.Find("Button X").GetComponent<Button>();close.onClick.RemoveAllListeners();close.onClick.AddListener(ReturnHome);
-  UICraft.Label(modal,"Level "+(streakTrial+1)+"\n"+(win?"挑战成功！":"试试换个角度和道具使用顺序。"),0,230,790,160,38,UICraft.Ink);
-  UICraft.Label(modal,"本关临时道具不带出\n主线、金币、排行与真实连胜均不受影响",0,45,790,120,30,UICraft.Ink);
-  UICraft.Button(modal,"重新挑战",0,-130,700,115,UICraft.Green,()=>BeginLevel(20,false,true,streakTrial),43);
-  UICraft.Button(modal,"选择其他试炼",0,-285,700,115,UICraft.Blue,()=>{ReturnHome();OpenStreakTrials();},40);
-  UICraft.Button(modal,"返回花园",0,-440,540,100,UICraft.Blue,ReturnHome,36);
- }
+ 
 }
 public sealed class StreakTrialHUD:MonoBehaviour {
  public static readonly float[] SlotX={-267,-6,260};public const float SlotY=13;
@@ -51,7 +37,7 @@ public sealed class StreakTrialHUD:MonoBehaviour {
   hint=UICraft.Label(root,"",0,180,980,62,27,UICraft.Ink);hint.gameObject.SetActive(false);UICraft.Label(root,"本关道具不可用 · 左右滑动",0,-150,700,35,23,UICraft.Ink);foreach(var label in root.GetComponentsInChildren<TMP_Text>())BattleRoundTypography.Style(label,false);game.StateChanged+=Refresh;Refresh();
  }
  void Refresh(){if(game==null||game.Generation!=generation)return;wasReady=game.CanSelectStreakBooster;for(int i=0;i<3;i++){var k=(StreakBooster)(i+1);int n=game.StreakStock(k);bool unlocked=game.BoosterAvailable(k);locks[i].enabled=!unlocked;buy[i].gameObject.SetActive(game.UsesShopBoosters&&unlocked);buy[i].interactable=!game.IsPaused;bool selected=game.SelectedStreakBooster==k;int bonus=game.UsesShopBoosters?game.BoosterProfile.StreakBonusStock(k,game.LevelIndex):0;counts[i].text=unlocked?(bonus>0?"赠"+bonus:n.ToString()):"锁";bool available=unlocked&&game.CanSelectStreakBooster&&n>0;buttons[i].interactable=available;if(!jelly)frames[i].sprite=ScoreSkillArt.Get("SkillPanelV65",selected?"selected":available?"normal":"disabled");icons[i].color=!unlocked?new Color(.6f,.6f,.6f,.3f):n>0?Color.white:new Color(.65f,.65f,.65f,.7f);ready[i].enabled=selected;}
-  hint.text=game.IsOpening?"本关不使用道具 · 左右滑动查看":game.IsPaused?"已暂停":game.SelectedStreakBooster!=StreakBooster.None?StreakTrials.Name(game.SelectedStreakBooster)+" · 下一组五球生效 · 再点取消":!game.CanSelectStreakBooster?"本组发射中…":game.UsesShopBoosters&&game.BoosterProfile.HasRescue(game.LevelIndex)?"本关救助：穿透优先免费使用1次":game.IsStreakTrial?"试炼赠送道具 · 选择技能后拖动发射":(game.UsesShopBoosters&&game.BoosterProfile.CampaignStreakTier>0?game.BoosterProfile.CampaignWinStreak+"连胜 · 本关临时奖励优先使用":"选择技能，强化下一组五球");
+  hint.text=game.IsOpening?"本关不使用道具 · 左右滑动查看":game.IsPaused?"已暂停":game.SelectedStreakBooster!=StreakBooster.None?StreakTrials.Name(game.SelectedStreakBooster)+" · 下一组五球生效 · 再点取消":!game.CanSelectStreakBooster?"本组发射中…":game.UsesShopBoosters&&game.BoosterProfile.HasRescue(game.LevelIndex)?"本关救助：穿透优先免费使用1次":(game.UsesShopBoosters&&game.BoosterProfile.CampaignStreakTier>0?game.BoosterProfile.CampaignWinStreak+"连胜 · 本关临时奖励优先使用":"选择技能，强化下一组五球");
  }
  void Update(){if(game!=null&&game.Generation==generation&&wasReady!=game.CanSelectStreakBooster)Refresh();}
  void OnDestroy(){if(game!=null)game.StateChanged-=Refresh;}

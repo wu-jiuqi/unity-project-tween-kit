@@ -1,0 +1,18 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+// Approved gallery buttons-a sprites; reuse the existing fixed-hit-root UIBounce.
+public static class CommonButtonsA {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ public static Sprite Get(string key){if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/CommonButtonsA/"+key);if(t==null)throw new InvalidOperationException(key);float cap=key.StartsWith("round")?0:t.width*(150f/591f);s=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,new Vector4(cap,0,cap,0));s.name="CommonButtonsA/"+key;return cache[key]=s;}
+ public static Button Button(Transform parent,string name,string caption,float x,float y,float w,float h,Action action,string family="secondary",int font=53){
+  var b=CSettingsArt.Button(parent,name,caption,x,y,w,h,action,null,font);var visual=b.transform.Find("ButtonVisual");
+  var face=UICraft.Box(visual,"Common A button face",0,0,w,h,Color.white);face.transform.SetAsFirstSibling();face.raycastTarget=false;face.sprite=Get(family+"-normal");face.type=family=="round"?Image.Type.Simple:Image.Type.Sliced;face.preserveAspect=family=="round";face.pixelsPerUnitMultiplier=face.sprite.rect.height/h;
+  b.targetGraphic=face;b.transition=Selectable.Transition.SpriteSwap;b.spriteState=new SpriteState{pressedSprite=Get(family+"-pressed")};
+  foreach(var t in visual.GetComponentsInChildren<TMP_Text>()){t.color=new Color32(113,69,35,255);t.fontStyle=FontStyles.Normal;}return b;
+ }
+}
+}

@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/ChainRatingView.cs`
-文件 SHA-256：`d68c815cd8652a35e0437702be0183314ec650f59109589c275d8aa8778734e0`
+文件 SHA-256：`cbecd5f784954e8766c92f5ea8ec6bd1ea4a8a992296988868668092cbd1906a`
 [原始源码快照](../source/Assets/Scripts/UI/ChainRatingView.cs.txt)
 
 用在哪里：ChainCollectionHUD.Initialize → ChainRatingView.Initialize；Update观察ChainRatingSerial

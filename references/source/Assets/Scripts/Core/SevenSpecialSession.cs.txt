@@ -7,7 +7,7 @@ namespace BounceGarden {
 // Keep serialized legacy IDs stable: former link=rainbow, cross=1, bomb=2.
 public static class SevenSpecialRules {
  public static readonly int[] Kinds={5,6,1,2,3};
- public const int Cross=1,Bomb=2,Rainbow=3,Vertical=5,Horizontal=6,Damage=10,DoubleDamage=30;
+ public const int Cross=1,Bomb=2,Rainbow=3,Vertical=5,Horizontal=6;
  public static bool IsSpecial(int kind)=>kind==1||kind==2||kind==3||kind==5||kind==6;
  public static int Priority(int kind,int color,int bound)=>kind==Rainbow?0:color==bound?1:kind==Cross?2:3;
  public static bool Nearby(Vector2 a,Vector2 b)=>Mathf.Abs(a.x-b.x)<=CollectionLevels.Pitch*1.08f&&Mathf.Abs(a.y-b.y)<=CollectionLevels.Pitch*1.08f;
@@ -23,7 +23,7 @@ public static class SevenSpecialRules {
  public static int[] RewardKinds={Horizontal,Vertical,Cross,Bomb,Rainbow};
 }
 public sealed partial class GameSession {
- public bool SevenSpecialActive=>IsChainCollection&&!FusionActive;
+ public bool SevenSpecialActive=>IsChainCollection;
  System.Random sevenRandom;
  int sevenSpawnSerial,sevenEffectDepth;
  int sevenPresentationPending;bool sevenAbsorbing;
@@ -34,14 +34,14 @@ public sealed partial class GameSession {
  public int SevenConversions {get;private set;}
  public int SevenCombos {get;private set;}
  public int SevenEmptyCasts {get;private set;}
- public int SevenWaitingCount=>sevenWaiting.Count;
+ 
  public bool SevenSettlementPending=>SevenSpecialActive&&(sevenPresentationPending>0||SevenSuctionFx.Alive(this)>0||sevenEffectDepth>0||sevenRefillBarrier||sevenWaiting.Count>0||simulationClock<sevenFxUntil);
  bool SevenAnimationsPending=>IngotSpecialFx.Alive(this)>0||SevenSuctionFx.Alive(this)>0||simulationClock<sevenFxUntil||chainBeams.Count>0||chainLoot.Count>0||SevenSpecialFx.Alive(this)>0||fx!=null&&fx.JellyActiveCount>0;
  internal bool SevenFreezeBoard=>SevenSpecialActive&&(sevenPresentationPending>0||SevenSuctionFx.Alive(this)>0||sevenRefillBarrier&&!sevenAwaitRefill);
  internal bool SevenWaitingPiece(ChainGridPiece p)=>sevenWaiting.Any(t=>t.View==p.transform);
  public int NextSevenColor(){if(sevenRandom==null)sevenRandom=new System.Random(unchecked(Generation*15485863+LevelIndex*7919+80));return sevenRandom.Next(SevenSpecialArt.ColorCount);}
  void ClearSevenSpecials(){ClearRefill80();sevenWaiting.Clear();sevenRandom=null;sevenSpawnSerial=sevenEffectDepth=sevenPresentationPending=0;sevenAbsorbing=false;sevenFxUntil=0;sevenRefillBarrier=sevenAwaitRefill=false;SevenDoubles=SevenConversions=SevenCombos=SevenEmptyCasts=0;}
- int SevenAuthoredTool(int kind){if(!SevenSpecialActive||kind!=1)return kind;int n=sevenSpawnSerial++%3;return n==0?SevenSpecialRules.Horizontal:n==1?SevenSpecialRules.Vertical:SevenSpecialRules.Cross;}
+ 
  internal bool SevenTerrain(BrickBody b)=>OpeningCopperBrick(b)||OpeningCatBrick(b)||OpeningCookieBrick(b)||OpeningYarnBrick(b)||b.Definition.kind==BrickKind.Stone;
  public bool SevenColorTarget(BrickBody b){
   if(!SevenSpecialActive||b==null||!b.Alive||RefillProtected(b)||SevenTerrain(b)||ChainPowerRules.IsNest(b.Definition)||b.GetComponent<ChainGridPiece>()?.Size>1)return false;
@@ -154,13 +154,12 @@ public sealed partial class GameSession {
   if(b==null||!b.Alive||RefillProtected(b))return false;
   if(OpeningCopperBrick(b))return OpeningDamageCopper(b,damage,true);
   if(OpeningHitCookie(b,armor)||OpeningHitYarn(b,armor)||SevenTerrain(b))return false;
-  if(b.ShellIntact){int removed=b.DamageArmor(armor);ChainArmorBreaks+=removed;HitCount++;AddScore(ScoreRules.Damage*removed);ChainCollectionArt.SpecialDamage(b);EmitFeedback(b.transform.position,"hit",new Color(1,.76f,.3f));SoundService.Play("armor_break");changed=true;return false;}
   return DealChainHealth(b,damage,originalPosition);
  }
  void SevenConvert(int color,int kind,Vector2 center,bool ingot=false){
   var nodes=new List<Vector2>();var goldNodes=new List<bool>();var targets=CollectionBricks.Where(b=>SevenColorTarget(b)&&b.Definition.colorIndex==color&&!b.GetComponent<ChainTileVisibility>().Hidden).OrderBy(b=>b.Id).ToArray();
   var tools=ChainTools.Where(t=>t.Kind!=3&&t.ColorIndex==color&&!t.Consumed&&!t.Waiting&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true).ToArray();
-  foreach(var b in targets){if(!b.Alive)continue;if(b.ShellIntact){SevenHit(b,10,1);continue;}Vector2 p=b.GetComponent<Rigidbody2D>().position;goldNodes.Add(ingot||OpeningIngotBrick(b));SevenConvertBrick(b);nodes.Add(p);}
+  foreach(var b in targets){if(!b.Alive)continue;Vector2 p=b.GetComponent<Rigidbody2D>().position;goldNodes.Add(ingot||OpeningIngotBrick(b));SevenConvertBrick(b);nodes.Add(p);}
   foreach(var t in tools)if(ChainTools.Contains(t)){nodes.Add(t.Position);goldNodes.Add(ingot||t.Ingot);OpeningEliminatedAt(t.Position);SevenConsume(t);}
   Action release=StrategyWrap(()=>{if(nodes.Count>0){CombatFeel?.Power(center,.025f);SoundService.Play(goldNodes.Any(gold=>gold)?(kind==2?"ingot_bomb_release":"ingot_laser_release"):kind==2?"bomb":"cross_laser");}for(int i=0;i<nodes.Count;i++){var p=nodes[i];bool gold=goldNodes[i];PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);long previous=BeginOpeningElimination();try{SevenConversions++;if(gold)IngotSpecialFx.Skill(this,world,kind,p,1.2f);else SevenSpecialFx.Play(this,world,kind,p,1.2f,color);SevenArea(p,kind,10,1,false,color,gold);}finally{EndOpeningElimination(previous);}}ScheduleChainGravity();});
   if(nodes.Count>0&&(Physics2D.simulationMode!=SimulationMode2D.Script||BalanceClock.Active)){int generation=Generation;sevenPresentationPending++;SevenWindup.PlayCopies(this,world,kind,color,nodes,()=>{if(generation!=Generation)return;sevenPresentationPending=Mathf.Max(0,sevenPresentationPending-1);release();},goldNodes);}else release();
@@ -170,7 +169,7 @@ public sealed partial class GameSession {
   // Keep authored collection/score accounting once, without a break or suction portrait.
   bool before=sevenAbsorbing;sevenAbsorbing=true;try{DealChainHealth(brick,int.MaxValue);}finally{sevenAbsorbing=before;}
  }
- void SevenAbsorbHit(BrickBody brick,int damage,int armor,Vector2 center){if(brick==null||!brick.Alive||RefillProtected(brick))return;if(OpeningCopperBrick(brick)){OpeningDamageCopper(brick,damage,true);return;}if(OpeningHitCookie(brick,armor)||OpeningHitYarn(brick,armor)||SevenTerrain(brick))return;Vector2 originalPosition=brick.GetComponent<Rigidbody2D>().position;bool protectedBody=brick.ShellIntact;bool whole=!protectedBody&&brick.CurrentHealth<=damage;SevenSuctionFx.Pull(this,world,brick,center,whole);bool before=sevenAbsorbing;sevenAbsorbing=true;try{SevenHit(brick,damage,armor,originalPosition);}finally{sevenAbsorbing=before;}}
+ void SevenAbsorbHit(BrickBody brick,int damage,int armor,Vector2 center){if(brick==null||!brick.Alive||RefillProtected(brick))return;if(OpeningCopperBrick(brick)){OpeningDamageCopper(brick,damage,true);return;}if(OpeningHitCookie(brick,armor)||OpeningHitYarn(brick,armor)||SevenTerrain(brick))return;Vector2 originalPosition=brick.GetComponent<Rigidbody2D>().position;bool protectedBody=false;bool whole=brick.CurrentHealth<=damage;SevenSuctionFx.Pull(this,world,brick,center,whole);bool before=sevenAbsorbing;sevenAbsorbing=true;try{SevenHit(brick,damage,armor,originalPosition);}finally{sevenAbsorbing=before;}}
  void TickSevenSpecials(){
   if(VictorySettlementActive&&!VictorySpecialsReleased)return;
   if(!SevenSpecialActive)return;

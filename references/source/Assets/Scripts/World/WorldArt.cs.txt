@@ -17,10 +17,8 @@ namespace BounceGarden
             if (cache.TryGetValue(kind, out Sprite known)) return known;
             var production=ProductionArt.Get(kind);
             if(production!=null){cache[kind]=production;return production;}
-            var supplied = Resources.Load<Sprite>("Art/" + kind);
-            if (supplied != null) { cache[kind] = supplied; return supplied; }
-            var texture = Resources.Load<Texture2D>("Art/" + kind);
-            if (texture != null) { supplied = UnityEngine.Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f,.5f), 100); cache[kind] = supplied; return supplied; }
+            Sprite supplied;Texture2D texture;
+            if(kind!="brick"&&kind!="ring"&&kind!="circle"&&kind!="ball"&&kind!="star"&&kind!="grass"&&kind!="water")throw new System.InvalidOperationException("Unknown artwork: "+kind);
             const int n = 96;
             texture = new Texture2D(n,n,TextureFormat.RGBA32,false) { name = "Fallback_" + kind, filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
             var pixels = new Color[n*n];
@@ -99,7 +97,7 @@ namespace BounceGarden
         public int JellyActiveCount=>jelly!=null?jelly.ActiveCount:0;
         public void PrepareJelly(int count){jelly=gameObject.AddComponent<JellyPopPool>();jelly.Initialize(Owner,count);}
         public void PlayJelly(BrickBody brick){if(jelly!=null&&brick.UsesJelly)jelly.Play(brick.JellyPosition,brick.RestFaceScale,brick.Face.sortingOrder,brick.PaintFrames);}
-        public GameSession Owner;public int Peak{get;private set;}public int Reused{get;private set;}public int ActiveCount=>live.Count;public int RingCount{get;private set;}
+        public GameSession Owner;public int Peak{get;private set;}public int Reused{get;private set;}public int RingCount{get;private set;}
         float R(float min,float max)=>(float)(min+random.NextDouble()*(max-min));
         public void Emit(Vector2 position,string cue,Color color,string appearance=null){
             if(!FeedbackProfile.Active.enabledFeedback)return;float cell=Owner!=null?Owner.Board.CellWidth:.73f;

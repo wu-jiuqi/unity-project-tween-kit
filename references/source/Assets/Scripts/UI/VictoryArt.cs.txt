@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BounceGarden {
 // Shared immutable textures and sprite rectangles. No character assets are loaded.
 public static class VictoryArt {
-    [Serializable] sealed class Entry { public string name, texture; public int[] rect; }
+    [Serializable] sealed class Entry { public string name,texture; public int[] rect; }
     [Serializable] sealed class Layout { public Entry[] sprites; }
     static readonly Dictionary<string, Sprite> sprites = new Dictionary<string, Sprite>();
     static readonly Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();

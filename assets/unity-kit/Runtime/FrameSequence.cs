@@ -11,6 +11,6 @@ public sealed class FrameSequence:MonoBehaviour {
  void Update(){if(!running)return;age+=KitClock.Delta*PlaybackSpeed;Sample(age);if(!Loop&&age>=Duration)running=false;}
  public void Seek(float seconds){age=Mathf.Max(0,seconds);running=Loop||age<Duration;Sample(age);}
  public void StopAndRestore(){running=false;Sample(0);}
- void OnDisable(){running=false;}
+ void OnDisable(){StopAndRestore();}
 }
 }

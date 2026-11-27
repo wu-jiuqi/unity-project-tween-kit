@@ -1,13 +1,13 @@
 using System.Collections;using UnityEngine;
 namespace BounceGarden {
 public partial class AppUI {
- ChapterOpening70 chapterOpening;bool openingQueued;
- public bool ChapterOpeningActive=>chapterOpening!=null;
+ 
+ 
  public void StartFromChapterHome(){returnToTree=false;BeginLevel(NextCampaignLevel);}
- void QueueChapterOpening(){if(Profile.PendingChapter<1||chapterOpening!=null||openingQueued)return;openingQueued=true;StartCoroutine(OpenChapterOnHome(viewGeneration));}
- IEnumerator OpenChapterOnHome(int generation){yield return null;openingQueued=false;if(generation!=viewGeneration||CurrentPage!="home"||Profile.PendingChapter<1||chapterOpening!=null)yield break;int chapter=Profile.PendingChapter;var root=UICraft.Root(canvasRoot,"新花园开启流程");chapterOpening=root.gameObject.AddComponent<ChapterOpening70>();chapterOpening.Build(chapter,()=>{if(!Profile.CompleteChapterOpening(chapter)){Toast("新章节保存失败，请重试。");return false;}ChapterHomeView.SetThemeImmediately(chapter);RefreshChapterHome();return true;},()=>chapterOpening=null);}
- IEnumerator ReturnHomeAfterChapterResult(int generation){while(generation==viewGeneration&&victory!=null&&!victory.Ready)yield return null;if(generation!=viewGeneration)yield break;yield return new WaitForSecondsRealtime(.9f);if(generation==viewGeneration)ReturnHome();}
- public void QACompleteChapterOpening(){if(!RuntimeQA.IsIsolated)return;if(RuntimeQA.IsIsolated&&chapterOpening!=null)chapterOpening.QAComplete();}
- public void QARequestGatedLevel(int index){if(!RuntimeQA.IsIsolated)return;BeginLevel(index,false,true);}
+ 
+ 
+ 
+ 
+ 
 }
 }

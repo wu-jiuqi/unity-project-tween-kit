@@ -9,6 +9,7 @@ namespace BounceGarden {
 public sealed partial class BalanceStatistics:MonoBehaviour {
  public const int HistoryLimit=512,LaunchLimit=256;
  const string StorageKey="BounceGarden.BalanceStatistics.v1";
+ 
  public BalanceHistory History {get;private set;}=new BalanceHistory();
  public string LastError {get;private set;}="";
  public string LastExportDirectory {get;private set;}="";
@@ -67,7 +68,7 @@ public sealed partial class BalanceStatistics:MonoBehaviour {
  int Stock()=>app.Profile.BoosterStock(StreakBooster.Pierce)+app.Profile.BoosterStock(StreakBooster.Bomb)+app.Profile.BoosterStock(StreakBooster.Super);
  int Specials()=>game.ChainTools.Count(t=>!t.Consumed&&SevenSpecialRules.IsSpecial(t.Kind));
  public void Begin(){Guard(()=>{
-  if(!initialized||game.IsTutorial||game.IsStreakTrial)return;
+  if(!initialized)return;
   Finish("restarted");lastLoss=null;generation=game.Generation;launch=null;
   string config=Configuration(game),hash=BalanceReport.Hash(config);int level=game.LevelIndex+1;
   var previous=History.rounds.Where(r=>r.level==level).ToArray();
@@ -139,6 +140,6 @@ public sealed partial class BalanceStatistics:MonoBehaviour {
  void OnApplicationFocus(bool value){focused=value;if(!value)Checkpoint();}
  void OnApplicationPause(bool value){backgrounded=value;if(value)Checkpoint();}
  void OnApplicationQuit(){Finish("interrupted");}
- internal void SetWriterForTest(Action<string> value){if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Test writer requires isolated QA");writer=value;testWriter=true;dirty=true;saveRetryAt=0;}
+ 
 }
 }

@@ -1,0 +1,66 @@
+using UnityEngine;
+namespace BounceGarden {
+// Each rooted clump is a progress milestone; flowers and butterflies are ambient.
+public sealed class BrandGardenHedge:MonoBehaviour {
+ public const int ClumpCount=10;
+ public const float GrowthDuration=.42f;
+ static readonly int[] FlowerOwners={1,3,6,8};
+ readonly RectTransform[] clumps=new RectTransform[ClumpCount],flowers=new RectTransform[4],butterflies=new RectTransform[2];
+ readonly float[] started=new float[ClumpCount],poked=new float[ClumpCount];
+ readonly Vector2[] roots=new Vector2[ClumpCount];
+ float age;int sprouted;Sprite[] butterflyFrames;
+ 
+ public int GrownCount{get;private set;}
+ public int FlowerCount{get;private set;}
+ public int ReactionCount{get;private set;}
+ public bool GrowthSettled=>GrownCount==sprouted;
+ public void Build(){
+  for(int side=-1;side<=1;side+=2){var edge=BrandSplashArt.Image(transform,"Garden/hedge-1",side*495,-15,90);edge.pivot=new Vector2(.5f,0);edge.name="Existing garden edge "+side;}
+  BrandSplashArt.Image(transform,"Garden/planter",0,0,960);
+  for(int i=0;i<ClumpCount;i++){
+   float x=-410+i*(820f/(ClumpCount-1));float y=11+9*(1-Mathf.Pow(x/455f,2));
+   roots[i]=new Vector2(x,y);started[i]=poked[i]=-100;
+   clumps[i]=BrandSplashArt.Image(transform,"Garden/hedge-"+(i%3),x,y,135+(i%3)*3);
+   clumps[i].pivot=new Vector2(.5f,0);clumps[i].gameObject.SetActive(false);
+  }
+  // The same planter pixels are layered in front to keep growing roots in the soil.
+  var front=BrandSplashArt.Image(transform,"Garden/planter-front",0,0,960);
+  front.sizeDelta=new Vector2(960,BrandSplashArt.Get("Garden/planter").rect.height*960/BrandSplashArt.Get("Garden/planter").rect.width);
+  for(int i=0;i<flowers.Length;i++){
+   flowers[i]=BrandSplashArt.Image(clumps[FlowerOwners[i]],"Garden/flower-"+(i%3),i%2==0?-16:14,clumps[FlowerOwners[i]].rect.height*.55f,36);
+   flowers[i].anchorMin=flowers[i].anchorMax=new Vector2(.5f,0);
+   flowers[i].pivot=new Vector2(.5f,0);flowers[i].gameObject.SetActive(false);
+  }
+  butterflyFrames=new[]{BrandSplashArt.Get("Garden/butterfly-open"),BrandSplashArt.Get("Garden/butterfly-fold")};
+  for(int i=0;i<2;i++)butterflies[i]=BrandSplashArt.Image(transform,"Garden/butterfly-open",0,120,55-i*8);
+ }
+ public void SetProgress(float value){
+  int desired=Mathf.Clamp(Mathf.FloorToInt(Mathf.Clamp01(value)*ClumpCount+.0001f),0,ClumpCount);
+  while(sprouted<desired){int i=sprouted++;started[i]=age;clumps[i].localScale=new Vector3(.7f,.001f,1);clumps[i].gameObject.SetActive(true);}
+ }
+ public Vector3 ClumpWorldPosition(int index)=>clumps[Mathf.Clamp(index,0,ClumpCount-1)].position;
+ public void Poke(int index){if(index<0||index>=sprouted)return;poked[index]=age;ReactionCount++;}
+ void Update(){
+  age+=Mathf.Min(Time.unscaledDeltaTime,.05f);GrownCount=0;FlowerCount=0;
+  for(int i=0;i<sprouted;i++){
+   float elapsed=age-started[i],t=Mathf.Clamp01(elapsed/GrowthDuration);if(t>=1)GrownCount++;
+   float reaction=age-poked[i];float wave=reaction<1.3f?Mathf.Sin(reaction*17)*Mathf.Exp(-reaction*4.5f):0;
+   float sway=t>=1?Mathf.Sin(age*1.7f+i*.65f)*.8f:0;
+   clumps[i].localScale=new Vector3(Mathf.Lerp(.7f,1,1-Mathf.Pow(1-t,3))+wave*.075f,Mathf.Max(.001f,UICraft.OutBack(t)-wave*.055f),1);
+   clumps[i].localRotation=Quaternion.Euler(0,0,sway+wave*5);
+   clumps[i].anchoredPosition=roots[i];
+  }
+  for(int i=0;i<flowers.Length;i++){
+   float t=Mathf.Clamp01((age-started[FlowerOwners[i]]-.30f)/.34f);bool show=FlowerOwners[i]<sprouted&&t>0;
+   flowers[i].gameObject.SetActive(show);if(!show)continue;FlowerCount++;
+   flowers[i].localScale=Vector3.one*UICraft.OutBack(t);flowers[i].localRotation=Quaternion.Euler(0,0,Mathf.Sin(age*2+i)*3);
+  }
+  for(int i=0;i<2;i++){
+   float phase=age*(1.0f+i*.17f)+i*3.1f;
+   butterflies[i].anchoredPosition=new Vector2((i==0?-205:230)+Mathf.Sin(phase*.8f)*87,132+Mathf.Sin(phase*1.7f)*23+i*13);
+   butterflies[i].GetComponent<UnityEngine.UI.Image>().sprite=butterflyFrames[(Mathf.FloorToInt(age*13+i)%3)==0?1:0];
+   butterflies[i].localRotation=Quaternion.Euler(0,0,Mathf.Sin(phase)*12);
+  }
+ }
+}
+}

@@ -6,10 +6,10 @@ public sealed class ChainRatingView:MonoBehaviour {
  GameSession game;int generation,seen;float age=3;RectTransform root;Image art;CanvasGroup group;
  readonly RectTransform[] sparks=new RectTransform[13];readonly Image[] sparkImages=new Image[13];
  public int VisibleTier {get;private set;}=-1;
- public bool IsVisible=>root!=null&&root.gameObject.activeSelf&&group.alpha>.05f;
- public float Age=>age;
- public string VisibleText=>VisibleTier<0?null:ChineseArt.Rating(VisibleTier);
- public Sprite VisibleArt=>art==null?null:art.sprite;
+ 
+ 
+ 
+ 
  public void Initialize(GameSession owner){game=owner;generation=game.Generation;seen=game.ChainRatingSerial;root=UICraft.Root(transform,"Rating reward",0,-300,600,190);group=root.gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;group.interactable=false;art=ChineseArt.Cheer(root,540,160);for(int i=0;i<sparks.Length;i++){var image=UICraft.Art(root,"pastel/fx_spark",0,0,30,30);image.raycastTarget=false;sparkImages[i]=image;sparks[i]=image.rectTransform;}root.gameObject.SetActive(false);}
  void Update(){
   if(game==null||game.Generation!=generation||!game.IsPlaying){root.gameObject.SetActive(false);VisibleTier=-1;return;}if(game.IsPaused)return;

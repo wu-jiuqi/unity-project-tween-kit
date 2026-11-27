@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/VictoryPresentation.Stars.cs`
-文件 SHA-256：`c21e4fc7be0638dc272b38ff8d7c5a033e93bf2baa257515c736a314b86aa0dc`
+文件 SHA-256：`9b3bdb9b15da345bd4f2344ca14114a01caf09cd32862fb18b714d88bd638212`
 [原始源码快照](../source/Assets/Scripts/UI/VictoryPresentation.Stars.cs.txt)
 
 用在哪里：AppUI.ShowResults(win) → VictoryPresentation.Begin → Render / RenderHeaderStars
@@ -15,18 +15,18 @@
 
 ### RenderHeaderStars · L9
 
-方法 SHA-256：`3565a8bd81a3a269b4318e012473c827b555f58656cf31ae4992fa5c030696e5`
+方法 SHA-256：`0bd5d5e2235a5fdbf131ba8dd2595719792e98edd7b52d8285fc8c2cdfca3b96`
 时间来源：Time.unscaledDeltaTime
 曲线证据：Mathf.Pow, Mathf.Sin, Mathf.SmoothStep
 解析符号：`BounceGarden.VictoryPresentation.RenderHeaderStars(bool)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/VictoryPresentation.cs:85` · `VictoryPresentation.Render` → `RenderHeaderStars(motion)`
+- `Assets/Scripts/UI/VictoryPresentation.cs:48` · `VictoryPresentation.Render` → `RenderHeaderStars(motion)`
 - `Assets/Scripts/UI/VictoryPresentation.Stars.cs:8` · `VictoryPresentation.ReceiveVictoryStars` → `RenderHeaderStars(true)`
 
 ```csharp
-void RenderHeaderStars(bool motion){float p=motion?Mathf.Clamp01((clock-.08f)/.8f):1;float move=1-Mathf.Pow(1-p,3);for(int i=0;i<3;i++){var star=headerStars[i];if(star==null)continue;var end=new Vector2((i-1)*250,i==1?740:625);var size=Vector2.one*(i==1?207:184);star.anchoredPosition=Vector2.Lerp(headerFrom[i],end,move);star.sizeDelta=Vector2.Lerp(headerSizes[i],size,move);star.localRotation=Quaternion.Euler(0,0,Mathf.LerpAngle(headerAngles[i],(i-1)*-10,move));star.GetComponent<StarChargeView>()?.RefreshGeometry(Time.unscaledDeltaTime);float idle=Mathf.Max(0,clock-.88f);float blend=motion?Mathf.SmoothStep(0,1,Mathf.Clamp01(idle/.25f)):0;star.anchoredPosition+=JellyMotion.FloatOffset(idle,i)*blend;star.localScale=Vector3.Lerp(Vector3.one*(1+Mathf.Sin(p*Mathf.PI)*.08f),JellyMotion.FloatScale(idle,i),blend);star.localRotation*=Quaternion.Euler(0,0,JellyMotion.FloatAngle(idle,i)*blend);}}
+void RenderHeaderStars(bool motion){float p=motion?Mathf.Clamp01((clock-.08f)/.8f):1;float move=1-Mathf.Pow(1-p,3);for(int i=0;i<3;i++){var star=headerStars[i];if(star==null)continue;var end=new Vector2((i-1)*238,i==1?320:295);var size=Vector2.one*(i==1?240:215);star.anchoredPosition=Vector2.Lerp(headerFrom[i],end,move);star.sizeDelta=Vector2.Lerp(headerSizes[i],size,move);star.localRotation=Quaternion.Euler(0,0,Mathf.LerpAngle(headerAngles[i],(i-1)*-10,move));star.GetComponent<StarChargeView>()?.RefreshGeometry(Time.unscaledDeltaTime);float idle=Mathf.Max(0,clock-.88f);float blend=motion?Mathf.SmoothStep(0,1,Mathf.Clamp01(idle/.25f)):0;star.anchoredPosition+=JellyMotion.FloatOffset(idle,i)*blend;star.localScale=Vector3.Lerp(Vector3.one*(1+Mathf.Sin(p*Mathf.PI)*.08f),JellyMotion.FloatScale(idle,i),blend);star.localRotation*=Quaternion.Euler(0,0,JellyMotion.FloatAngle(idle,i)*blend);}}
 ```
 
 ## 对象层级和素材入口

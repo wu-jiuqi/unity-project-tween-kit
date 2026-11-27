@@ -1,9 +1,9 @@
 # BattleScoreMeter · BattleScoreMeter
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/BattleScoreMeter.cs`
-文件 SHA-256：`ebe6d6a89afdedf69eb5408b3d7b3868911ef4524e835afba8ef8176b049da52`
+文件 SHA-256：`700779743353107445b65ee85a9be138e307085e6cc488dce0592869ab574c29`
 [原始源码快照](../source/Assets/Scripts/UI/BattleScoreMeter.cs.txt)
 
 本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
@@ -14,7 +14,7 @@
 
 ## 源方法、参数与曲线
 
-### OnBall · L26
+### OnBall · L29
 
 方法 SHA-256：`37b2ed23a895d969b1805ec3a8c832ef81e3aabb17da857bf4c85333b1305581`
 时间来源：本方法未直接取时；查调用者/字段
@@ -27,7 +27,20 @@
 void OnBall(Vector2 point,float speed){if(!Allowed)return;BallResponses++;for(int i=0;i<3;i++){float distance=Mathf.Abs(point.x-xs[i]);float direction=point.x>=xs[i]?1:-1;float influence=.48f+.52f*Mathf.Exp(-distance*.5f);Impulse(i,direction*Mathf.Clamp(speed*16,75,190)*influence);}}
 ```
 
-### LateUpdate · L29
+### Advance · L31
+
+方法 SHA-256：`2ce9821cec2de4772a0101fa7b19af137b3d38cc41fdfa9ab04d052b15cc6b92`
+时间来源：本方法未直接取时；查调用者/字段
+曲线证据：Mathf.Exp
+解析符号：`BounceGarden.BattleScoreMeter.Advance(float)`
+
+未解析到直接调用；仍须检查委托、反射、动态类型和条件入口。
+
+```csharp
+public void Advance(float dt){if(!Allowed)return;dt=Mathf.Clamp(dt,0,.05f);clock+=dt;if(FeedbackProfile.Active.enabledFeedback)BallPass(dt);for(int i=0;i<3;i++){if(!FeedbackProfile.Active.enabledFeedback){angle[i]=velocity[i]=0;continue;}velocity[i]*=Mathf.Exp(-1.35f*dt);angle[i]+=velocity[i]*dt;}Place();foreach(var charge in charges)if(charge!=null)charge.Advance(dt);}
+```
+
+### LateUpdate · L32
 
 方法 SHA-256：`8fdb1e55ab0de7dee2e3a26b237cb1c4f04ba52bfaba513889aaea48da316b45`
 时间来源：PresentationDelta, Time.deltaTime, Time.unscaledDeltaTime
@@ -69,6 +82,12 @@ int[] thresholds;
 float clock;
 ```
 ```csharp
+readonly Vector4[] ballSamples=new Vector4[32];
+```
+```csharp
+readonly RectTransform[] anchors=new RectTransform[3];
+```
+```csharp
 readonly RectTransform[] hinges=new RectTransform[3];
 ```
 ```csharp
@@ -87,7 +106,7 @@ int displayScore;
 readonly float[] angle=new float[3],velocity=new float[3],lastBrick={-10,-10,-10};
 ```
 ```csharp
-readonly float[] xs={-2.85f,0,2.85f};
+readonly float[] xs={-2.15f,0,2.15f};
 ```
 
 业务/组件依赖保留在上述字段、泛型 Get/AddComponent 和源方法参数中。语义解析不覆盖运行时委托结果；`nameMatchedCallSites` 仅供补充检索。

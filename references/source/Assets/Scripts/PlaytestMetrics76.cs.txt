@@ -20,15 +20,14 @@ public sealed class PlaytestMetrics76:MonoBehaviour {
  int[] attempts=new int[78];int frameCount,cursor;float nextMemorySample;readonly Queue<float> releases=new Queue<float>();
  AppUI app;Round round;string lastSavedJson;
  const string StorageKey="BounceGarden.PlaytestMetrics.v76";
- public Round Current=>round;
- public int CompletedCount=>rounds.Count;
+ 
+ 
  public int RecoveredCount {get;private set;}
  public BalanceStatistics Balance {get;private set;}
  public void Initialize(AppUI owner){app=owner;Balance=gameObject.AddComponent<BalanceStatistics>();Balance.Initialize(owner);app.Session.VolleyStarted+=VolleyStarted;if(RuntimeQA.IsIsolated)return;try{var json=PlayerPrefs.GetString(StorageKey,"");if(!string.IsNullOrEmpty(json)){RestoreJson(json);if(RecoveredCount>0)Save();}}catch(Exception e){Debug.LogWarning("Playtest metrics unavailable: "+e.Message);}}
  internal void RestoreJson(string json){var report=JsonUtility.FromJson<Report>(json);if(report==null||report.schema<1||report.schema>2)throw new InvalidOperationException("Invalid metrics schema");if(report.attempts!=null&&report.attempts.Length==78)for(int i=0;i<78;i++)attempts[i]=Mathf.Clamp(report.attempts[i],0,1000000);rounds.Clear();if(report.rounds!=null)foreach(var item in report.rounds)if(item!=null&&item.level>=1&&item.level<=78)rounds.Add(item);if(report.active!=null&&report.active.level>=1&&report.active.level<=78){report.active.outcome="interrupted";rounds.Add(report.active);RecoveredCount++;}while(rounds.Count>HistoryLimit)rounds.RemoveAt(0);}
  public void BeginRound(int level){
-  Finish("abandoned");if(app.Session.IsTutorial||app.Session.IsStreakTrial)return;
-  level=Mathf.Clamp(level,0,77);int n=attempts[level]=Mathf.Min(1000000,attempts[level]+1);
+  Finish("abandoned");  level=Mathf.Clamp(level,0,77);int n=attempts[level]=Mathf.Min(1000000,attempts[level]+1);
   round=new Round{level=level+1,attempt=n,firstAttempt=n==1,coinsBefore=app.Profile.Coins,streak=app.Profile.CampaignWinStreak,version=GameVersion.Name};frameCount=cursor=0;nextMemorySample=0;releases.Clear();
   Balance?.Begin();
  }

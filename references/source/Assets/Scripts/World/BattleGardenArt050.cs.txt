@@ -1,0 +1,13 @@
+using System.Collections.Generic;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+public static class BattleGardenArt050 {
+ public static readonly Color Ink=new Color32(117,70,34,255);
+ static readonly Dictionary<string,Sprite> sprites=new Dictionary<string,Sprite>();
+ public static Sprite Get(string key){if(sprites.TryGetValue(key,out var s))return s;string path=key=="level-plaque-v19"?"Art/BattleHUD051/level-plaque":key=="moves-medallion"?"Art/BattleHUD051/moves-medallion":key=="goal-panel"?"Art/BattleHUD051/goal-panel":"Art/BattleGarden050/"+key;var t=Resources.Load<Texture2D>(path);if(t==null)throw new System.InvalidOperationException("Battle art missing: "+key);var border=key=="hud-panel"||key=="goal-badge"?new Vector4(t.height*.24f,t.height*.24f,t.height*.24f,t.height*.24f):Vector4.zero;return sprites[key]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,border);}
+ public static Image Image(Transform parent,string key,float x,float y,float w,float h){var im=UICraft.Box(parent,"Battle garden "+key,x,y,w,h,Color.white);im.sprite=Get(key);im.type=key=="hud-panel"||key=="goal-badge"?UnityEngine.UI.Image.Type.Sliced:UnityEngine.UI.Image.Type.Simple;if(im.type==UnityEngine.UI.Image.Type.Sliced)im.pixelsPerUnitMultiplier=Mathf.Max(.01f,im.sprite.rect.height/h);im.raycastTarget=false;im.preserveAspect=key=="level-ribbon"||key=="goal-cloud"||key=="moves-medallion"||key=="stem"||key=="stem-compact";return im;}
+}
+public partial class GameSession {
+ // Read the existing active registry. No velocity or physics mutation.
+ public int CopyGrassBallSamples(Vector4[] output){int n=0;foreach(var pair in active){var ball=pair.Value;if(ball==null||!ball.Active)continue;Vector2 p=BoardDisplay.Forward(ball.Body.position),v=ball.Body.linearVelocity;output[n++]=new Vector4(p.x,p.y,v.x,v.y);if(n==output.Length)break;}return n;}
+}
+}

@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/BalanceStatistics.cs:110` · `BalanceStatistics.Update` → `TickStrategy(active)`
+- `Assets/Scripts/BalanceStatistics.cs:111` · `BalanceStatistics.Update` → `TickStrategy(active)`
 
 ```csharp
 void TickStrategy(bool active){strategyRecorder?.Tick(Time.unscaledDeltaTime,active);}

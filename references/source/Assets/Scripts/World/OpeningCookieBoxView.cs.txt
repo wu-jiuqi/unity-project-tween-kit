@@ -7,7 +7,7 @@ public sealed class OpeningCookieBoxView:MonoBehaviour {
  public BrickBody Brick {get;private set;}
  public int Remaining {get;private set;}
  public int CollectionHops {get;private set;}
- public float VisualHeight=>lift==null?0:lift.localPosition.y;
+ 
  public void Initialize(GameSession owner,BrickBody brick,int capacity){
   game=owner;Brick=brick;Remaining=capacity;brick.Face.enabled=false;
   foreach(var label in brick.GetComponentsInChildren<TMPro.TMP_Text>())label.gameObject.SetActive(false);

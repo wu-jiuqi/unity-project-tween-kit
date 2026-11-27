@@ -1,0 +1,24 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+// Approved 03-home assets. Ordinary labels are always live TMP text.
+public static class HomeAArt {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ public static readonly Color Ink=new Color32(113,69,35,255),Cream=new Color32(255,245,222,255);
+ public static Sprite Get(string key){if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/HomeA/"+key);if(t==null)throw new InvalidOperationException("Missing Home A art: "+key);Vector4 b=Vector4.zero;
+  if(key=="level-panel"||key=="nav-dock"||key=="nav-selected"){float edge=Mathf.Round(Mathf.Min(t.width,t.height)*.27f);b=new Vector4(edge,edge,edge,edge);}else if(key=="level-badge")b=new Vector4(97,0,97,0);
+  s=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,b);s.name="HomeA/"+key;return cache[key]=s;
+ }
+ public static Image Image(Transform parent,string key,float x,float y,float w,float h,bool sliced=false){var i=UICraft.Box(parent,key,x,y,w,h,Color.white);i.sprite=Get(key);i.raycastTarget=false;i.type=sliced?UnityEngine.UI.Image.Type.Sliced:UnityEngine.UI.Image.Type.Simple;i.preserveAspect=!sliced;if(sliced)i.pixelsPerUnitMultiplier=i.sprite.rect.height/h;return i;}
+ public static TMP_Text Text(Transform parent,string name,string value,float x,float y,float w,float h,int size){var t=UICraft.Label(parent,value,x,y,w,h,size,Ink);t.name=name;t.font=GameTypography.Font;t.color=Ink;t.fontStyle=FontStyles.Normal;t.enableAutoSizing=false;t.textWrappingMode=TextWrappingModes.NoWrap;t.margin=Vector4.zero;return t;}
+ public static Button Round(Transform parent,string name,float x,float y,float size,Action action){var b=CommonButtonsA.Button(parent,name,"",x,y,size,size,action,"round");b.gameObject.AddComponent<HomeARoundFace>();return b;}
+}
+// Correct the paired sprites' unequal transparent gutters without moving the hit rectangle.
+public sealed class HomeARoundFace:MonoBehaviour {
+ Image face;RectTransform rect;
+ void LateUpdate(){if(face==null){face=GetComponent<Button>().targetGraphic as Image;if(face==null)return;rect=face.rectTransform;}bool pressed=face.overrideSprite!=null&&face.overrideSprite.name.EndsWith("pressed",StringComparison.Ordinal);rect.anchoredPosition=new Vector2(rect.rect.width*(pressed?.02076f:-.02595f),rect.rect.height*(pressed?-.00519f:-.00173f));}
+}
+}

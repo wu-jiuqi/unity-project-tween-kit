@@ -20,7 +20,7 @@ public static class OpeningCopperArt {
 }
 [DefaultExecutionOrder(650)]public sealed class OpeningCopperView:MonoBehaviour {
  GameSession game;public BrickBody Brick {get;private set;}public SpriteRenderer Image {get;private set;}
- SpriteRenderer previous;Transform visual;TMP_Text number;Vector2 impactDirection=Vector2.up;public Vector2 ImpactStretch=>JellyMotion.HitStretch(age,impactDirection);public bool ImpactAnimating=>age<JellyMotion.HitDuration;float age=1;int oldHp;readonly HashSet<long> attacks=new HashSet<long>();
+ SpriteRenderer previous;Transform visual;TMP_Text number;Vector2 impactDirection=Vector2.up;public Vector2 ImpactStretch=>JellyMotion.HitStretch(age,impactDirection);float age=1;int oldHp;readonly HashSet<long> attacks=new HashSet<long>();
  public void Initialize(GameSession g,BrickBody b){game=g;Brick=b;foreach(var text in GetComponentsInChildren<TMP_Text>())text.gameObject.SetActive(false);visual=new GameObject("Fixed footprint copper jelly artwork").transform;visual.SetParent(transform,false);previous=OpeningCopperArt.Image(visual,"Outgoing HP state",67);Image=OpeningCopperArt.Image(visual,"Current HP state",68);number=WorldArt.Text(visual,"Remaining copper HP",b.CurrentHealth.ToString(),Vector2.zero,.07f,Color.white,71);number.fontSize=4.8f;OpeningCopperArt.StyleNumber(number);number.transform.localPosition=new Vector3(0,0,-.12f);Render();}
  public bool RegisterAttack(long key)=>attacks.Add(key);
  public void Hit(int from,Vector2 incoming){oldHp=from;impactDirection=incoming.sqrMagnitude>.001f?incoming.normalized:Vector2.up;age=0;game.OpeningCopperHitFx(transform.position);Render();}

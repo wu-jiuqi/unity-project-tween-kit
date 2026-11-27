@@ -1,9 +1,9 @@
 # HomeFeedbackView · HomeFeedbackView
 
-状态：`requires-route-review`；交付：`source-evidence-only`。
+状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/HomeFeedbackView.cs`
-文件 SHA-256：`aef2773f232632afb25debb34374b5036bed8d539969d3cc5c3fcd029ea9b6b5`
+文件 SHA-256：`1d0c3caa645fd0767b86945562348d968b962c57cc21101a3dea41273823340f`
 [原始源码快照](../source/Assets/Scripts/UI/HomeFeedbackView.cs.txt)
 
 本分组已交付以下表现片段；其余宿主方法仍需继续核对，不代表完整系统已提取。
@@ -14,7 +14,7 @@
 
 ## 源方法、参数与曲线
 
-### Update · L30
+### Update · L22
 
 方法 SHA-256：`2d7f9c13be0489a086dcc5101e579cfc740c05b5526131f50021ed2c829e6c85`
 时间来源：Time.unscaledDeltaTime
@@ -36,20 +36,22 @@ void Update(){if(title==null)return;if(!focused||!FeedbackProfile.Active.enabled
  }
 ```
 
-### Pop · L40
+### Pop · L32
 
-方法 SHA-256：`49e9431bdf620c840234f09179f57bf4056451f05be006ee18dbece524b0d235`
+方法 SHA-256：`cef4c92cf65c8f6468b9248e2087d90aada6f638996689af18ed00899b3b9e3a`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：Mathf.Cos, Mathf.Exp
 解析符号：`BounceGarden.HomeFeedbackView.Pop(float, float)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/HomeFeedbackView.cs:32` · `HomeFeedbackView.Update` → `Pop(entrance,0)`
-- `Assets/Scripts/UI/HomeFeedbackView.cs:32` · `HomeFeedbackView.Update` → `Pop(entrance,.13f)`
+- `Assets/Scripts/UI/HomeAFeedback.cs:21` · `HomeAFeedback.Update` → `HomeFeedbackView.Pop(entrance,0)`
+- `Assets/Scripts/UI/HomeAFeedback.cs:21` · `HomeAFeedback.Update` → `HomeFeedbackView.Pop(entrance,.13f)`
+- `Assets/Scripts/UI/HomeFeedbackView.cs:24` · `HomeFeedbackView.Update` → `Pop(entrance,0)`
+- `Assets/Scripts/UI/HomeFeedbackView.cs:24` · `HomeFeedbackView.Update` → `Pop(entrance,.13f)`
 
 ```csharp
-static float Pop(float time,float delay){if(time<0)return 0;float t=time-delay;if(t<0)return -.75f;return -Mathf.Cos(t*17)*Mathf.Exp(-t*4.7f)*.85f;}
+public static float Pop(float time,float delay){if(time<0)return 0;float t=time-delay;if(t<0)return -.75f;return -Mathf.Cos(t*17)*Mathf.Exp(-t*4.7f)*.85f;}
 ```
 
 ## 对象层级和素材入口

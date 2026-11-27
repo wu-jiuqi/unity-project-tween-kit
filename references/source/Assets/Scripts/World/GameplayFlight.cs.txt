@@ -3,7 +3,7 @@ using UnityEngine;
 namespace BounceGarden {
 // Shared by physics, prediction, launcher and future artwork adapters. Units are world units.
 public static class FlightGeometry {
- public const float Radius=.12f*1.35f, Left=-4.45f, Right=4.45f, Top=7.49f, ReturnY=-6.10f;
+ public const float Radius=.12f*1.35f,Left=-4.45f,Right=4.45f,Top=7.49f,ReturnY=-6.10f;
  public const float RecallDelay=10f;
 }
 public sealed class StaticAimWall:MonoBehaviour {}
@@ -16,8 +16,8 @@ public sealed class FlightTrail:MonoBehaviour {
  BallBody tracked;
  static readonly System.Collections.Generic.Dictionary<Material,Material> yarnMaterials=new System.Collections.Generic.Dictionary<Material,Material>();
  static Material VisibleYarn(Material source){if(!yarnMaterials.TryGetValue(source,out var result)){result=new Material(Resources.Load<Shader>("YarnTrail79")){name="Bright "+source.name,mainTexture=source.mainTexture};if(source.name.Contains("lilac"))result.SetVector("_YRange",new Vector4(.445f,.565f,0,0));yarnMaterials.Add(source,result);}return result;}
- public int Count=>count;
- public Transform TrackedBall=>head;
+ 
+ 
  public void Create(GameSession session,Transform movingBall){owner=session;head=movingBall;tracked=movingBall.GetComponent<BallBody>();line=gameObject.AddComponent<LineRenderer>();var outer=new GameObject("Yarn luminous outer strand");outer.transform.SetParent(transform,false);glow=outer.AddComponent<LineRenderer>();Configure(line,44);Configure(glow,43);SetYarnVariant(session.YarnVariant);}
  static void Configure(LineRenderer renderer,int order){renderer.useWorldSpace=true;renderer.sortingOrder=order;renderer.numCornerVertices=0;renderer.numCapVertices=3;renderer.textureMode=LineTextureMode.Stretch;renderer.positionCount=0;renderer.widthCurve=new AnimationCurve(new Keyframe(0,.02f),new Keyframe(.30f,.45f),new Keyframe(1,1));}
  void BindYarn(Material source){line.sharedMaterial=glow.sharedMaterial=VisibleYarn(source);var outer=new MaterialPropertyBlock();outer.SetFloat("_Glow",1);glow.SetPropertyBlock(outer);}
@@ -32,14 +32,14 @@ public sealed class FlightTrail:MonoBehaviour {
  }
  void DropFirst(){for(int i=1;i<count;i++){points[i-1]=points[i];times[i-1]=times[i];}count--;}
  void LateUpdate(){
-  if(owner==null||owner.IsPaused||owner.JuiceFrozen||(!emitting&&count==0))return;
+  if(owner==null||owner.IsPaused||(!emitting&&count==0))return;
   if(!owner.IsPlaying)emitting=false;
   clock+=Time.deltaTime;var f=FeedbackProfile.Active;
   // Rigidbody interpolation advances the rendered ball between fixed ticks.
   // Sample its rendered Transform too, so the strand stays attached to it.
   // Authoritative fixed-step samples retain sharp bounce corners. Only the last
   // rendered vertex follows interpolation, avoiding backtracking hooks each frame.
-  int power=owner.Mechanic==JuiceMechanic.Heat&&tracked!=null?(tracked.HeatHits>=8?2:tracked.HeatHits>=4?1:0):0;
+  int power=0;
   float lifetime=f.trailDuration+power*.025f,maxLength=f.trailMaxLength+power*.25f;
   while(count>0&&clock-times[0]>lifetime)DropFirst();
   float length=0;for(int i=count-1;i>0;i--){float segment=Vector3.Distance(points[i],points[i-1]);if(length+segment>maxLength){float keep=Mathf.Max(0,maxLength-length);points[i-1]=Vector3.Lerp(points[i],points[i-1],segment>0?keep/segment:0);while(i>1){DropFirst();i--;}break;}length+=segment;}

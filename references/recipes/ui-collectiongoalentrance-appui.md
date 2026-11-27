@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/CollectionGoalEntrance.cs`
-文件 SHA-256：`775fdda7cd72a378e3de7b884fa1f11efd9b9f890c5cf3424f0f0046daa64393`
+文件 SHA-256：`e830eb8ef97a4c7d3c66b949778e9dba82e22790c0a865dd2a9ee6ab208fa4f8`
 [原始源码快照](../source/Assets/Scripts/UI/CollectionGoalEntrance.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.cs:177` · `AppUI.StartPreparedLevel` → `ShowCollectionGoalEntrance(generation)`
+- `Assets/Scripts/UI/AppUI.cs:183` · `AppUI.StartPreparedLevel` → `ShowCollectionGoalEntrance(generation)`
 
 ```csharp
 IEnumerator ShowCollectionGoalEntrance(int generation){

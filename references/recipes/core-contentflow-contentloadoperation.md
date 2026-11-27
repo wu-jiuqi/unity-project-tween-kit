@@ -3,7 +3,7 @@
 状态：`non-animation`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/Core/ContentFlow.cs`
-文件 SHA-256：`8526199ced40072a2297730c30be80ef8d55d31919a4a21a209906287ff14723`
+文件 SHA-256：`fb8d6f405ac79fbbae515606b3280471121ce937faff4f001b2ed22af88d5bd2`
 [原始源码快照](../source/Assets/Scripts/Core/ContentFlow.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -19,17 +19,14 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/OptimizationV76QA.cs:24` · `OptimizationV76QA.Start` → `op.Run(Nested())`
-- `Assets/Scripts/OptimizationV76QA.cs:25` · `OptimizationV76QA.Start` → `op.Run(Endless(),.12f)`
-- `Assets/Scripts/OptimizationV76QA.cs:26` · `OptimizationV76QA.Start` → `op.Run(Endless())`
-- `Assets/Scripts/OptimizationV76QA.cs:27` · `OptimizationV76QA.Start` → `op.Run(Once())`
-- `Assets/Scripts/PrefetchReuse020QA.cs:5` · `AppUI.QATrackedPrefetch` → `operation.Run(page!=null?GameContent.PreparePage(page):GameContent.PrefetchLevel(level))`
 - `Assets/Scripts/UI/AppUI.ContentLoading.cs:21` · `AppUI.PrefetchFollowingLevel` → `operation.Run(GameContent.PrefetchLevel(index+1))`
 - `Assets/Scripts/UI/AppUI.ContentLoading.cs:24` · `AppUI.PrefetchFollowingLevel` → `operation.Run(GameContent.PreparePage("chapters"))`
 - `Assets/Scripts/UI/AppUI.ContentLoading.cs:26` · `AppUI.PrefetchFollowingLevel` → `operation.Run(GameContent.PreparePage("result-lose"))`
 - `Assets/Scripts/UI/AppUI.ContentLoading.cs:42` · `AppUI.PrepareOutcomeRoutine` → `operation.Run(GameContent.PreparePage(page))`
-- `Assets/Scripts/UI/AppUI.ContentLoading.cs:58` · `AppUI.RunLevelLoad` → `operation.Run(StartPreparedLevel(loading,generation))`
-- `Assets/Scripts/UI/AppUI.ContentLoading.cs:73` · `AppUI.PrepareMenuContentRoutine` → `operation.Run(GameContent.PreparePage(page))`
+- `Assets/Scripts/UI/AppUI.ContentLoading.cs:53` · `AppUI.RunLevelLoad` → `operation.Run(StartPreparedLevel(loading,generation))`
+- `Assets/Scripts/UI/AppUI.ContentLoading.cs:66` · `AppUI.PrepareMenuContentRoutine` → `operation.Run(GameContent.PreparePage(page))`
+- `Assets/Scripts/UI/AppUI.LeagueFlow.cs:30` · `AppUI.PrepareLeagueFlowContent` → `operation.Run(GameContent.PreparePage("ranking"))`
+- `Assets/Scripts/UI/JellyLogoIntro.cs:99` · `JellyLogoIntro.PrepareHome` → `preparation.Run(GameContent.PreparePage("home"))`
 
 ```csharp
 public IEnumerator Run(IEnumerator routine,float timeout=DefaultTimeout){

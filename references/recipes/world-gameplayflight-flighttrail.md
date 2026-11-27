@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/GameplayFlight.cs`
-文件 SHA-256：`e49e2630469f1fa50c46f8c4ae043bf3b6f8f0297044cc030d05c96a0375d790`
+文件 SHA-256：`b7e6543790b143ba33906fd637b772182797dc015a74655d0f50cbff277ef077`
 [原始源码快照](../source/Assets/Scripts/World/GameplayFlight.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -44,7 +44,7 @@ void BindYarn(Material source){line.sharedMaterial=glow.sharedMaterial=VisibleYa
 
 ### LateUpdate · L34
 
-方法 SHA-256：`fe6d99a757c45acb93978356398f3c31869a86258d4d00be45c8721d42309f9f`
+方法 SHA-256：`420d95513bb4e13f8a0c00a86e34118ad63134a89179373056254263ce4ddd8b`
 时间来源：Time.deltaTime
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.FlightTrail.LateUpdate()`
@@ -53,14 +53,14 @@ Unity 引擎回调；是否创建并启用组件，见 constructionSites 与场�
 
 ```csharp
 void LateUpdate(){
-  if(owner==null||owner.IsPaused||owner.JuiceFrozen||(!emitting&&count==0))return;
+  if(owner==null||owner.IsPaused||(!emitting&&count==0))return;
   if(!owner.IsPlaying)emitting=false;
   clock+=Time.deltaTime;var f=FeedbackProfile.Active;
   // Rigidbody interpolation advances the rendered ball between fixed ticks.
   // Sample its rendered Transform too, so the strand stays attached to it.
   // Authoritative fixed-step samples retain sharp bounce corners. Only the last
   // rendered vertex follows interpolation, avoiding backtracking hooks each frame.
-  int power=owner.Mechanic==JuiceMechanic.Heat&&tracked!=null?(tracked.HeatHits>=8?2:tracked.HeatHits>=4?1:0):0;
+  int power=0;
   float lifetime=f.trailDuration+power*.025f,maxLength=f.trailMaxLength+power*.25f;
   while(count>0&&clock-times[0]>lifetime)DropFirst();
   float length=0;for(int i=count-1;i>0;i--){float segment=Vector3.Distance(points[i],points[i-1]);if(length+segment>maxLength){float keep=Mathf.Max(0,maxLength-length);points[i-1]=Vector3.Lerp(points[i],points[i-1],segment>0?keep/segment:0);while(i>1){DropFirst();i--;}break;}length+=segment;}

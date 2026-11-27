@@ -70,7 +70,6 @@ public sealed partial class GameSession {
   }
   int columns=0;
   for(int c=0;c<9;c++)if((scope&(1<<c))!=0&&(selected<0||selected==c))for(int r=8;r>=0;r--)if(flowCells[c,r]==null&&!FlowReserved(c,r)&&(RefillActive||DraftTopClear(c,r))){
-   if(FusionActive&&!FusionCanSupply(flowDraft.FindAll(n=>n.Incoming).Count))continue;
    var n=AddFlowDraft(null,c,r);float y=CollectionLevels.Top+CollectionLevels.Pitch*.5f+.45f;
    float x=ChainGridRules.Center(c,r).x;
    foreach(var other in flowDraft)if(other!=n&&Mathf.Abs(other.Source.x-x)<CollectionLevels.Pitch*(other.Size+1)*.5f-.025f)y=Mathf.Max(y,other.Source.y+CollectionLevels.Pitch*(other.Size+1)*.5f+.025f);

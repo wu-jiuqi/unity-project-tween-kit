@@ -8,8 +8,8 @@ public sealed class CookieBoxArtView:MonoBehaviour {
  [SerializeField,Range(0,8)] int remaining=8;
  [SerializeField] bool opened=true;
  SpriteRenderer image;
- public int Remaining=>remaining;
- public bool Opened=>opened;
+ 
+ 
  public const int GridSize=2;
  public static Vector2 CollisionSize=>Vector2.one*(GridSize*CollectionLevels.Pitch);
  public void SetState(int count,bool open=true){

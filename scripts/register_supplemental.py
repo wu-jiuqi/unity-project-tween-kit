@@ -18,9 +18,13 @@ SLICES=[
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--source',type=Path,required=True);a=ap.parse_args();src=a.source.resolve()
+    previous=json.loads((KIT/'references/supplemental-deliveries.json').read_text(encoding='utf-8'))
     records=[];diffs=json.loads((KIT/'references/extraction-diffs.json').read_text(encoding='utf-8'))
     for ident,cls,rel,methods,adaptation in SLICES:
         original=src/rel;snapshot=KIT/'references/source'/('Platform/StartupLoadingView86.cs.txt' if rel.startswith('../../') else rel+'.txt')
+        if not original.exists():
+            record=next(r.copy() for r in previous['entries'] if r['galleryEntry']==ident)
+            record['sourceStatus']='frozen-0.4.0-reference';record['usageStatus']='historical-reference';records.append(record);continue
         snapshot.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(original,snapshot)
         target=KIT/'assets/unity-kit/Runtime'/(cls+'.cs');diffs=[d for d in diffs if d['target']!=target.relative_to(KIT).as_posix()]
         owner={'pagenav':'AppUI','stagger':'AppUI','rankmove':'LeagueRankingView','guide':'PlayableTutorialGuide','hintfade':'BattleAimHint','homefeedback':'HomeFeedbackView','pendulum':'BattleScoreMeter','breath':'LeagueMatchPresentation'}.get(ident,'StartupLoadingView86')
@@ -28,7 +32,9 @@ def main():
         records.append(record);diffs.append({**record,'diff':list(difflib.unified_diff(original.read_text(encoding='utf-8-sig').splitlines(),target.read_text(encoding='utf-8-sig').splitlines(),fromfile=rel,tofile=target.name,lineterm=''))})
     # Exact helpers are also auditable; they carry no host business code.
     for cls in ['OnboardingArt','TutorialArt']:
-        rel='Assets/Scripts/UI/'+cls+'.cs';original=src/rel;target=KIT/'assets/unity-kit/Runtime'/(cls+'.cs');diffs=[d for d in diffs if d['target']!=target.relative_to(KIT).as_posix()]
+        rel='Assets/Scripts/UI/'+cls+'.cs';original=src/rel;target=KIT/'assets/unity-kit/Runtime'/(cls+'.cs')
+        if not original.exists():continue
+        diffs=[d for d in diffs if d['target']!=target.relative_to(KIT).as_posix()]
         diffs.append({'source':rel,'sourceSha256':sha(original),'target':target.relative_to(KIT).as_posix(),'targetSha256':sha(target),'diff':list(difflib.unified_diff(original.read_text(encoding='utf-8-sig').splitlines(),target.read_text(encoding='utf-8-sig').splitlines(),fromfile=rel,tofile=target.name,lineterm=''))})
     host=src/'../../Tools/Platform/WeChat/HomeContentStartup.cs';hostSnapshot=KIT/'references/source/Platform/HomeContentStartup.cs.txt';shutil.copy2(host,hostSnapshot)
     write(KIT/'references/supplemental-deliveries.json',{'entries':records,'platformHostEvidence':{'source':'../../Tools/Platform/WeChat/HomeContentStartup.cs','snapshot':hostSnapshot.relative_to(KIT).as_posix(),'sha256':sha(host),'route':'HomeContentStartup.Build → StartupLoadingView86.Build；Load的真实阶段SetProgress → 首页首帧准备完成后Complete；Failure/Resume保持进度'}})

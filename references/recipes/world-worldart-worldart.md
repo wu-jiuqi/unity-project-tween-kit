@@ -3,7 +3,7 @@
 状态：`non-animation`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/WorldArt.cs`
-文件 SHA-256：`f28868835b1d5c89d381e526d38297ffbc75224cb97d79e131b05743f5f962e8`
+文件 SHA-256：`b920bb3d7d1fcb01e8f3a036033a05004ca2c1b7e51c2fe1d0c59fdb195e4954`
 [原始源码快照](../source/Assets/Scripts/World/WorldArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -12,15 +12,14 @@
 
 ### Sprite · L15
 
-方法 SHA-256：`54e34705d2bc0b421484ad13aaf0d43c8b2387513f74411f7d53a308566ad5f8`
+方法 SHA-256：`5f3df9e6e37a8bf9d97415f205a2a0c30c8834bfed4870d713ff61b6fd0a5840`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：Mathf.Cos, Mathf.Exp, Mathf.Sin
 解析符号：`BounceGarden.WorldArt.Sprite(string)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/World/JuiceGardenView.cs:49` · `JuiceGardenView.TrackBall` → `WorldArt.Sprite("ring")`
-- `Assets/Scripts/World/WorldArt.cs:76` · `WorldArt.Draw` → `Sprite(sprite)`
+- `Assets/Scripts/World/WorldArt.cs:74` · `WorldArt.Draw` → `Sprite(sprite)`
 
 ```csharp
 public static Sprite Sprite(string kind)
@@ -28,10 +27,8 @@ public static Sprite Sprite(string kind)
             if (cache.TryGetValue(kind, out Sprite known)) return known;
             var production=ProductionArt.Get(kind);
             if(production!=null){cache[kind]=production;return production;}
-            var supplied = Resources.Load<Sprite>("Art/" + kind);
-            if (supplied != null) { cache[kind] = supplied; return supplied; }
-            var texture = Resources.Load<Texture2D>("Art/" + kind);
-            if (texture != null) { supplied = UnityEngine.Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f,.5f), 100); cache[kind] = supplied; return supplied; }
+            Sprite supplied;Texture2D texture;
+            if(kind!="brick"&&kind!="ring"&&kind!="circle"&&kind!="ball"&&kind!="star"&&kind!="grass"&&kind!="water")throw new System.InvalidOperationException("Unknown artwork: "+kind);
             const int n = 96;
             texture = new Texture2D(n,n,TextureFormat.RGBA32,false) { name = "Fallback_" + kind, filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
             var pixels = new Color[n*n];

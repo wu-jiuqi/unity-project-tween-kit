@@ -1,24 +1,15 @@
 namespace BounceGarden {
 // Predictable authored waves: learn, build pressure, breathe, then a higher plateau.
 public static class ChainCollectionBalance {
- public const int FishGoal=8,ToyGoal=6;
+ 
  public const int JarHealth=7,BoxHealth=6,ArmorHealth=8,RearHealth=1;
  public static bool IsBreather(int round)=>round>=6&&round%4==2;
  public static int Tier(int round)=>round<=2||IsBreather(round)?0:round<=5?1:2;
- public static float DescentRows(int round)=>Tier(round)==0?1f:Tier(round)==1?1.15f:1.3f;
- public static float DescentSeconds(int round)=>Tier(round)==0?.32f:Tier(round)==1?.28f:.24f;
- public static string Label(int round)=>IsBreather(round)?"BREATHER":Tier(round)==0?"WARMUP":Tier(round)==1?"BUILD UP":"PRESSURE";
- public static bool HasOrdinary(int round,int col){
-  if(col<1||col>7)return false; // Keep both side-wall approaches available.
-  if(IsBreather(round))return (col+round)%2==0;
-  return Tier(round)==0?(col+round)%4!=0:col!=1+(round*2)%7;
- }
+ 
+ 
+ 
+ 
  public static int OrdinaryHealth(int round,int col)=>Tier(round)==0?4:Tier(round)==1?((col+round)%4==0?6:5):((col+round)%2==0?7:6);
- public static BrickKind SpecialAt(int round,int col){
-  if(round<=2||IsBreather(round))return BrickKind.Normal;
-  if(round%4==1&&col==4)return BrickKind.Stone;
-  int guardColumn=round%2==1?(round%4==1?7:1):(round%4==0?3:5);
-  return col==guardColumn?(round%2==1?BrickKind.Armor:BrickKind.RearWeak):BrickKind.Normal;
- }
+ 
 }
 }

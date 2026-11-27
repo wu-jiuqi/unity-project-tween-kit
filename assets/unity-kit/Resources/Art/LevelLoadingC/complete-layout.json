@@ -1,0 +1,177 @@
+{
+  "revision": "complete-v5",
+  "sprites": [
+    {
+      "key": "whole-shadow",
+      "name": "shadow",
+      "x": 0,
+      "y": -266,
+      "width": 430,
+      "rotation": 0,
+      "sourceSize": [
+        268,
+        46
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-box-rear",
+      "name": "box-rear",
+      "x": 0,
+      "y": -132.23290717065038,
+      "width": 568,
+      "rotation": 0,
+      "sourceSize": [
+        1799,
+        765
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-brick-coral",
+      "name": "brick-coral",
+      "x": -157,
+      "y": 35,
+      "width": 145,
+      "rotation": 12,
+      "sourceSize": [
+        249,
+        241
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-brick-yellow",
+      "name": "brick-yellow",
+      "x": 178,
+      "y": 31,
+      "width": 145,
+      "rotation": -12,
+      "sourceSize": [
+        249,
+        241
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-cat-body",
+      "name": "cat-body",
+      "x": 5,
+      "y": 90.86454183266932,
+      "width": 318,
+      "rotation": 0,
+      "sourceSize": [
+        1004,
+        1068
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-brick-green",
+      "name": "brick-green",
+      "x": -105,
+      "y": -27,
+      "width": 145,
+      "rotation": 8,
+      "sourceSize": [
+        250,
+        241
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-brick-blue",
+      "name": "brick-blue",
+      "x": 4,
+      "y": -24,
+      "width": 145,
+      "rotation": 4,
+      "sourceSize": [
+        250,
+        241
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-brick-purple",
+      "name": "brick-purple",
+      "x": 127,
+      "y": -27,
+      "width": 140,
+      "rotation": -10,
+      "sourceSize": [
+        250,
+        241
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-cat-paw-left",
+      "name": "cat-paw-left",
+      "x": -69,
+      "y": 6,
+      "width": 90,
+      "rotation": 0,
+      "sourceSize": [
+        197,
+        146
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-cat-paw-right",
+      "name": "cat-paw-right",
+      "x": 66,
+      "y": -4,
+      "width": 90,
+      "rotation": 0,
+      "sourceSize": [
+        197,
+        145
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-box-front",
+      "name": "box-front",
+      "x": 0,
+      "y": -132.23290717065038,
+      "width": 568,
+      "rotation": 0,
+      "sourceSize": [
+        1799,
+        765
+      ],
+      "complete": true
+    },
+    {
+      "key": "whole-sprout",
+      "name": "sprout",
+      "x": 195,
+      "y": -253,
+      "width": 125,
+      "rotation": 0,
+      "sourceSize": [
+        228,
+        176
+      ],
+      "complete": true
+    }
+  ],
+  "pawGroup": [
+    0,
+    48
+  ],
+  "boxSharedCanvas": [
+    1799,
+    765
+  ],
+  "boxSharedPosition": [
+    0,
+    -132.23290717065038
+  ],
+  "boxSeamOverlapPixels": 2,
+  "boxOpaqueRGBReassemblyMaxError": 0,
+  "noBakedOcclusionCuts": true,
+  "noPoseSwaps": true
+}

@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/IngotSpecialFx.cs`
-文件 SHA-256：`ffc604411eebf915c1f419d3d01fef25b10c8f03a81a2620660cc595d194db27`
+文件 SHA-256：`7d966bc57976e68319455719f3db18cbe952fef8a2a46177411d3e979ca0acac`
 [原始源码快照](../source/Assets/Scripts/World/IngotSpecialFx.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

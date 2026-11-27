@@ -1,7 +1,7 @@
 using UnityEngine;
 namespace BounceGarden {
 public static class ScoreRules {
- public const int Damage=100, Break=500, Objective=1000, SpareShot=3000, Cap=1000000000;
+ public const int Damage=100,Break=500,Objective=1000,SpareShot=3000,Cap=1000000000;
  public static int WinCoins(int score)=>40+Mathf.Min(30,Mathf.Max(0,score)/10000*5);
 }
 public sealed partial class GameSession {
@@ -16,8 +16,8 @@ public sealed partial class GameSession {
  public int VictoryClearScore {get;private set;}int victoryClearScoreFrom;
  // Optional future goal. Existing levels leave this zero and keep their collection rules.
  public int RequiredScore {get;private set;}
- public bool ScoreGoalMet=>RequiredScore<=0||Score>=RequiredScore;
- public void SetScoreGoal(int value){RequiredScore=Mathf.Clamp(value,0,ScoreRules.Cap);changed=true;}
+ 
+ 
  void ResetScore(){Score=CompletionBonus=RequiredScore=DamageScore=BreakScore=ObjectiveScore=CreditedCompletionBonus=VictoryClearScore=victoryClearScoreFrom=0;ScoreFinalized=false;}
  void AddScore(int value){if(ScoreFinalized||!IsPlaying&&!VictorySettlementActive||IsPaused||value<=0)return;int before=Score;Score=(int)System.Math.Min(ScoreRules.Cap,(long)Score+value);StrategyEmit(new StrategyEvent{kind="score",amount=Score-before});changed=true;}
  void ScoreImpact(BrickBody brick,int hp,bool broken){

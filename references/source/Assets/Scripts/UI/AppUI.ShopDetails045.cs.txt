@@ -1,0 +1,74 @@
+using System;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+using A45=BounceGarden.DressingShopArt044;
+namespace BounceGarden {
+public partial class AppUI {
+ enum ShopDetail045 { Booster,Avatar,Frame,Economy }
+ ShopDetail045 detailKind045;StreakBooster detailBooster045;string detailCosmetic045;
+ RectTransform detailRoot045;DressingShopLayout044 detailLayout045;
+ 
+ void OpenDetail045(){ShowPage("shop-detail",false);DrawDetail045();}
+ void ReturnToShop045(){OpenShopCategory(shopCategory);}
+ void OpenBoosterOffer(StreakBooster kind){
+  if(!Profile.BoosterUnlocked(kind)){Toast("第"+LocalProfile.BoosterUnlockLevel(kind)+"关解锁");return;}
+  detailKind045=ShopDetail045.Booster;detailBooster045=kind;OpenDetail045();
+ }
+ public void OpenCosmeticOffer(string id,bool frame){
+  if(!CatCosmeticCatalog.Items.Any(i=>i.id==id)){Toast("暂未找到这款装扮");return;}
+  detailKind045=frame?ShopDetail045.Frame:ShopDetail045.Avatar;detailCosmetic045=id;OpenDetail045();
+ }
+ void OpenEconomyGuide(){detailKind045=ShopDetail045.Economy;OpenDetail045();}
+ void DetailText045(string text,float x,float y,float width=620,int size=21,Color? color=null){A45.Text(detailRoot045,text,x,y,width,size*1.5f,size,color);}
+ void DetailTool045(Transform parent,StreakBooster kind,float x,float y,float size){
+  var rt=A45.Rect(parent,"045 live booster "+kind,x,y,size,size);var im=rt.gameObject.AddComponent<Image>();im.sprite=ScoreSkillArt.Booster(kind);im.color=Color.white;im.preserveAspect=true;im.raycastTarget=false;
+ }
+ string BoosterName045(StreakBooster kind)=>kind==StreakBooster.Pierce?"穿透球":kind==StreakBooster.Bomb?"爆炸球":"超级光球";
+ void DetailPrice045(int price){A45.Card(detailRoot045,"045 live price",166,832,388,72);A45.Image(detailRoot045,"coin",300,868,38,38);DetailText045(price.ToString("N0")+" 金币",387,868,230,28);}
+ void DetailActions045(string caption,Action action){
+  A45.Button(detailRoot045,"045 primary action",caption,360,970,528,64,action,"primary",29);
+  A45.Button(detailRoot045,"045 return shop","返回小铺",360,1038,402,42,ReturnToShop045,"secondary",21);
+ }
+ void DrawDetail045(){
+  if(!pages.TryGetValue("shop-detail",out var page)||page==null)return;
+  bool economy=detailKind045==ShopDetail045.Economy,booster=detailKind045==ShopDetail045.Booster,frame=detailKind045==ShopDetail045.Frame;
+  bool owned=!economy&&!booster&&Profile.OwnsShopCosmetic(detailCosmetic045,frame);
+  detailRoot045=MakeComposition044(page,economy?"金币与道具":booster?"购买道具":owned?"我的收藏":"解锁装扮",out detailLayout045);
+  // Replace the generic subtitle with this page's approved introduction text.
+  var subtitle=detailRoot045.GetComponentsInChildren<TMPro.TMP_Text>().First(t=>t.text=="把花园里的小美好，装进口袋");subtitle.text=economy?"收集金币，挑选喜欢的道具与装扮":"每一次出发，都带上一份好心情";
+  if(economy){DrawEconomy045();return;}
+  A45.Card(detailRoot045,"045 item preview",68,286,584,360);
+  DetailText045(booster?"道具预览":frame?"佩戴预览":"头像预览",360,328,540,19,A45.Muted);
+  if(booster){
+   var kind=detailBooster045;DetailTool045(detailRoot045,kind,360,474,240);
+   DetailText045("强化下一组全部五球",360,617,540,19,A45.Muted);DetailText045(BoosterName045(kind),360,695,620,35);
+   DetailText045(kind==StreakBooster.Pierce?"穿过普通砖，固定砖会阻挡。":kind==StreakBooster.Bomb?"撞击后触发范围爆炸。":"十字激光造成2点伤害。",360,756,620,21,A45.Muted);
+   DetailText045("下一组五球生效，发射时消耗。",360,790,620,21,A45.Muted);
+   int price=LocalProfile.BoosterPrice(kind);DetailPrice045(price);DetailText045("当前拥有 "+Profile.BoosterStock(kind)+" / 99",360,918,540,19,A45.Muted);
+   string transaction=Guid.NewGuid().ToString("N");bool purchased=false;
+   DetailActions045("金币购买",()=>{if(purchased)return;if(!Profile.PurchaseBooster(transaction,kind)){SoundService.Play("ui_unavailable");Toast(Profile.Coins<price?"金币不足":Profile.BoosterStock(kind)>=99?"背包已满":"购买保存失败，请重试。");return;}purchased=true;SoundService.Play("purchase_success");DrawShop();RefreshWallet();OpenBoosterOffer(kind);});
+  }else{
+   string id=detailCosmetic045;var item=CatCosmeticCatalog.Items.First(i=>i.id==id);
+   if(frame)CatCosmeticCatalog.Create(detailRoot045,Profile.EquippedAvatarResource,item.frame.resource,0,90,262);
+   else A45.Avatar(detailRoot045,item.avatar.resource,360,475,248);
+   string name=CosmeticName044(id,frame);DetailText045((frame?"头像框":"头像")+" · "+(owned?"已拥有":frame?"装扮预览":name),360,617,540,19,A45.Muted);DetailText045(name,360,695,620,35);
+   DetailText045(owned?"已经收入收藏，随时更换装扮。":frame?"把花园里的小美好，戴在头像边。":"选一位喜欢的伙伴，陪你探索花园。",360,756,620,21,A45.Muted);
+   DetailText045(owned?"搭配喜欢的头像，一起出发。":"金币解锁后永久拥有。",360,790,620,21,A45.Muted);
+   if(owned){A45.Card(detailRoot045,"045 owned state",166,832,388,72);DetailText045("已拥有 · 可随时佩戴",360,868,540,25,new Color32(99,131,85,255));}
+   else DetailPrice045(LocalProfile.CosmeticPrice(id,frame));
+   bool purchased=false;DetailActions045(owned?"更换装扮":"金币购买",()=>{if(owned){OpenDressing(frame);return;}if(purchased)return;if(!Profile.PurchaseCosmetic(id,frame)){SoundService.Play("ui_unavailable");Toast(Profile.Coins<LocalProfile.CosmeticPrice(id,frame)?"金币不足":"购买保存失败，请重试。");return;}purchased=true;SoundService.Play("purchase_success");DrawShop();RefreshWallet();OpenCosmeticOffer(id,frame);});
+  }
+ }
+ void DrawEconomy045(){
+  A45.Card(detailRoot045,"045 earning rules",57,286,606,198);A45.Image(detailRoot045,"coin",113,336,62,62);DetailText045("赚取金币",349,329,460,28);
+  string[] earn={"新玩家初始获得 400 金币","通关基础 40；首次通关再加 20","每 10,000 积分加 5，最多加 30"};for(int i=0;i<earn.Length;i++)DetailText045(earn[i],360,381+i*32,620,21,A45.Muted);
+  A45.Card(detailRoot045,"045 booster rules",57,500,606,254);DetailText045("道具规则",360,537,620,28);
+  for(int i=0;i<3;i++){var kind=(StreakBooster)(i+1);float x=168+i*192;DetailTool045(detailRoot045,kind,x,598,68);DetailText045(BoosterName045(kind),x,650,185,21);A45.Image(detailRoot045,"coin",x-27.5f,685.5f,25,25);DetailText045(LocalProfile.BoosterPrice(kind).ToString(),x+17,686,110,21);}
+  DetailText045("每件强化下一组全部五球，最多持有 99 件",360,726,620,20,A45.Muted);
+  A45.Card(detailRoot045,"045 progression rules",57,771,606,197);A45.Image(detailRoot045,"sprout045",117,821,62,62);DetailText045("成长奖励",349,814,460,28);
+  string[] rewards={"第 1 / 3 / 10 关解锁对应道具","新玩家第 3 / 6 / 10 关各获 100 金币","每失败 3 次，补 1 次本关专用穿透"};for(int i=0;i<rewards.Length;i++)DetailText045(rewards[i],360,865+i*32,620,21,A45.Muted);
+  A45.Button(detailRoot045,"045 economy done","知道了",360,1022,528,64,ReturnToShop045,"primary",29);
+ }
+}
+}

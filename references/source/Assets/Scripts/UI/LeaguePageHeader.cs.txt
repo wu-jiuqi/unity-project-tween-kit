@@ -4,34 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace BounceGarden {
 // Independent hit regions, ribbon layers and clock; all remain below the WX content inset.
-public static class LeaguePageHeader {
- public static TMP_Text Build(Transform parent,float top,Action back,Action info,string heading="排行榜",string rootName="League ribbon navigation",bool withCountdown=true,string backName="Return home",string infoName="League rewards preview"){
-  var root=UICraft.Root(parent,rootName,0,top-110,1080,270);
-  var backButton=Circle(root,backName,-450,"",back,true);
-  var ribbon=UICraft.Root(root,"Title ribbon",0,0,720,155);
-  for(int n=0;n<2;n++){var tail=UICraft.Root(ribbon,"Ribbon tail "+n,(n==0?-1:1)*318,-20,135,102);var graphic=tail.gameObject.AddComponent<LeagueRibbonTail>();graphic.color=new Color32(242,177,52,255);graphic.mirror=n==1;graphic.raycastTarget=false;}
-  var face=UICraft.Art(ribbon,"pastel/button_yellow",0,0,620,140);LeagueSurface.Fit(face,"button_yellow",620,128);
-  var title=UICraft.Label(ribbon,heading,0,2,570,105,66);title.color=Color.white;
-  var holder=UICraft.Root(root,"Adaptive title bounds",0,0,720,155);ribbon.SetParent(holder,false);
-  var mobile=root.gameObject.AddComponent<MobileNavigation73>();mobile.Title=holder;mobile.Back=backButton;
-  ribbon.gameObject.AddComponent<LeagueJelly>().Play();if(!withCountdown)return null;
-  var pill=UICraft.Box(root,"Countdown capsule",0,-112,354,70,new Color32(255,253,246,255));
-  UICraft.Art(pill.transform,"pastel/icon_clock",-134,0,47,47);
-  var countdown=UICraft.Label(pill.transform,"",25,0,285,56,36);countdown.name="League countdown";
-  return countdown;
- }
- static RectTransform Circle(Transform parent,string name,float x,string label,Action action,bool back){
-  var button=UICraft.Button(parent,label,x,0,128,128,UICraft.Blue,action,74);button.name=name;
-  var visual=button.transform.Find("ButtonVisual");foreach(Transform child in visual)child.gameObject.SetActive(false);
-  HeaderMedallions.CenteredArt(visual,"button_circle_cream",108,new Vector2(101,100));
-  if(back)HeaderMedallions.CenteredArt(visual,"icon_back",56);else UICraft.Label(visual,"i",0,2,90,100,73);return button.GetComponent<RectTransform>();
- }
-}
-[RequireComponent(typeof(CanvasRenderer))]
-public sealed class LeagueRibbonTail:MaskableGraphic {
- public bool mirror;
- protected override void OnPopulateMesh(VertexHelper vh){vh.Clear();var r=rectTransform.rect;float s=mirror?-1:1;var p=new[]{new Vector2(-r.width/2,r.height/2),new Vector2(r.width/2,r.height/2),new Vector2(r.width/2,-r.height/2),new Vector2(-r.width/2,-r.height/2),new Vector2(-r.width*.20f,0)};for(int i=0;i<p.Length;i++)vh.AddVert(new Vector3(p[i].x*s,p[i].y,0),color,Vector2.zero);vh.AddTriangle(0,1,4);vh.AddTriangle(1,2,4);vh.AddTriangle(2,3,4);}
-}
+
+
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class LeagueTintGradient:MaskableGraphic {
  public Color top=new Color32(255,232,183,255),bottom=new Color32(250,247,238,255);

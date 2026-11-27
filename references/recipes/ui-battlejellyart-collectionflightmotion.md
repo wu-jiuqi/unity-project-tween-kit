@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/BattleJellyArt.cs`
-文件 SHA-256：`63839a5d4d89e7a68cbfa7b9f5fd2725400a94a09cf9cc9b44f7feea2b1cca3b`
+文件 SHA-256：`a164482acef4b29ab5e4801ec76b40e59dc32750ccc6135b7c7e0d43b3338e94`
 [原始源码快照](../source/Assets/Scripts/UI/BattleJellyArt.cs.txt)
 
 用在哪里：GameSession.OpeningCollect → chainLoot → TickChainCollection → CollectionFlightMotion.Apply；ChainCollectionHUD 计算真实目标
@@ -22,7 +22,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/Core/ChainCollectionSession.cs:215` · `GameSession.TickChainCollection` → `CollectionFlightMotion.Apply(loot,target,IsOpening&&loot.OpeningTarget>=0?OpeningTargets[loot.OpeningTarget].kind:"ordinary_color")`
+- `Assets/Scripts/Core/ChainCollectionSession.cs:157` · `GameSession.TickChainCollection` → `CollectionFlightMotion.Apply(loot,target,IsOpening&&loot.OpeningTarget>=0?OpeningTargets[loot.OpeningTarget].kind:"ordinary_color")`
 
 ```csharp
 public static void Apply(ChainLoot loot,Vector2 target,string kind){

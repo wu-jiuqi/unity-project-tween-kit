@@ -5,8 +5,8 @@ using UnityEngine.UI;
 namespace BounceGarden {
 public sealed class VictoryFinale:MonoBehaviour {
  GameSession game;ChainCollectionHUD hud;BattleHUDSummary summary;BattleScoreMeter meter;RectTransform root;Action<RectTransform[]> complete;
- Image[] bombs,points;TMP_Text[] gains;bool[] thrown,landed;int[] weights,colors,amounts;Vector2[] slots;Vector2 from,scoreTarget;int remaining,initialScore,finalScore;float age,blastAt,scoreEnd,nextCountTick,starSoundAt=-1;bool cleared,handed,detached,sounded;Image blast,merge,white;Material pigment,mergePigment;RectTransform[] stars;Vector2[] starStarts;Vector2[] starSizes;
- public int BombCount=>bombs.Length;public int ThrownCount{get;private set;}public bool BoardCleared=>cleared;public float BlastAt=>blastAt;public float ScoreCompleteAt=>scoreEnd;public float Elapsed=>age;public int DisplayScore{get;private set;}public RectTransform[] Stars=>stars;
+ Image[] bombs,points;TMP_Text[] gains;bool[] thrown,landed;int[] weights,colors,amounts;Vector2[] slots;Vector2 from,scoreTarget;int remaining,initialScore,finalScore;float age,blastAt,scoreEnd,nextCountTick,starSoundAt=-1;bool cleared,handed,detached,sounded;Image blast,merge,white;Material pigment,mergePigment;RectTransform[] stars;Vector2[] starStarts;Vector2[] starSizes;float[] starAngles;
+ public int ThrownCount{get;private set;}public int DisplayScore{get;private set;}public RectTransform[] Stars=>stars;
  public void Begin(GameSession session,ChainCollectionHUD collection,BattleHUDSummary score,BattleScoreMeter scoreMeter,int before,Action<RectTransform[]> done){
   game=session;hud=collection;summary=score;meter=scoreMeter;complete=done;root=(RectTransform)transform;remaining=game.Shots;initialScore=before;finalScore=game.Score;DisplayScore=before;
   var blocker=gameObject.AddComponent<Image>();blocker.color=Color.clear;blocker.raycastTarget=true;gameObject.AddComponent<VictoryPlaybackControl>().Initialize(game);
@@ -46,8 +46,8 @@ public sealed class VictoryFinale:MonoBehaviour {
   if(explosion>=0&&!sounded){sounded=true;SoundService.Play("victory_finale_blast");PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);}
   if(explosion>=.25f&&!cleared){cleared=true;game.SweepVictoryBoard();}
   float flash=explosion-.29f;white.color=new Color(1,1,1,FeedbackProfile.Active.enabledFeedback&&flash>=0&&flash<.16f?.72f*(1-flash/.16f):0);
-  float starAge=explosion-.84f;if(starAge>=0){if(!detached){detached=true;starSoundAt=Time.unscaledTime;SoundService.Play("victory_stars_transfer");stars=meter!=null?meter.DetachVictoryStars(root):new RectTransform[0];starStarts=new Vector2[stars.Length];starSizes=new Vector2[stars.Length];for(int i=0;i<stars.Length;i++){starStarts[i]=stars[i].anchoredPosition;starSizes[i]=stars[i].rect.size;stars[i].SetAsLastSibling();}}
-   float u=Ease(starAge/.48f);for(int i=0;i<stars.Length;i++){stars[i].anchoredPosition=Vector2.Lerp(starStarts[i],new Vector2((i-1)*270,i==1?365:230),u);stars[i].sizeDelta=Vector2.Lerp(starSizes[i],Vector2.one*(i==1?360:310),u);stars[i].GetComponent<StarChargeView>()?.RefreshGeometry(dt);stars[i].localScale=Vector3.one;stars[i].localRotation=Quaternion.Euler(0,0,Mathf.Lerp(0,(i-1)*-12,u));}
+  float starAge=explosion-.84f;if(starAge>=0){if(!detached){detached=true;starSoundAt=Time.unscaledTime;SoundService.Play("victory_stars_transfer");stars=meter!=null?meter.DetachVictoryStars(root):new RectTransform[0];starStarts=new Vector2[stars.Length];starSizes=new Vector2[stars.Length];starAngles=new float[stars.Length];for(int i=0;i<stars.Length;i++){starStarts[i]=stars[i].anchoredPosition;starSizes[i]=stars[i].rect.size;starAngles[i]=stars[i].localEulerAngles.z;stars[i].SetAsLastSibling();}}
+   float u=Ease(starAge/.48f);for(int i=0;i<stars.Length;i++){stars[i].anchoredPosition=Vector2.Lerp(starStarts[i],new Vector2((i-1)*270,i==1?365:230),u);stars[i].sizeDelta=Vector2.Lerp(starSizes[i],Vector2.one*(i==1?360:310),u);stars[i].GetComponent<StarChargeView>()?.RefreshGeometry(dt);stars[i].localScale=Vector3.one;stars[i].localRotation=Quaternion.Euler(0,0,Mathf.LerpAngle(starAngles[i],(i-1)*-12,u));}
    if(starAge>=.65f&&Time.unscaledTime-starSoundAt>=.45f){handed=true;var done=complete;complete=null;done?.Invoke(stars);}
   }
  }

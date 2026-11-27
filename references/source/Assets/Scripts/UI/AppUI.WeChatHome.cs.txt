@@ -3,7 +3,7 @@ namespace BounceGarden {
 public partial class AppUI {
  // Move the authored home header and carousel together; never resize the page or board.
  int pageInsetRevision=-1;RectTransform lastHomeLayout;
- public Rect MenuSafeRect=>lastSafe;
+ 
  float WeChatSecondaryTopReserve(){
   Rect blocked;if(!WeChatLayoutMetrics.TryGetBlockedRect(MenuAvoidanceViewport,out blocked)||lastSafe.width<=0)return 0;
   float unit=WeChatLayoutMetrics.LogicalPixelScale(MenuAvoidanceViewport),center=MenuAvoidanceViewport.x*.5f;
@@ -26,6 +26,7 @@ public partial class AppUI {
   var top=page.Find("Home top content") as RectTransform;
   if(top!=null){top.localScale=Vector3.one;top.anchoredPosition=new Vector2(0,topOffset);}
   page.GetComponentInChildren<ChapterHomeView>()?.Layout(menuHeight,WeChatPageTopReserve());
+  page.GetComponentInChildren<HomeAView>()?.Layout(menuHeight,WeChatPageTopReserve());
   var bottom=page.Find("Home bottom content") as RectTransform;
   if(bottom!=null)bottom.anchoredPosition=new Vector2(0,-extra-200);
   var feedback=page.Find("Home achievement feedback") as RectTransform;

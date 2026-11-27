@@ -1,0 +1,58 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+namespace BounceGarden {
+// Local random generator never changes gameplay RNG. All motion uses unscaled time.
+public sealed class BrandGardenScene:MonoBehaviour {
+ enum Action {Run,Approach,Paw,Return,Watch}
+ RectTransform root,cat,shadow,ball;Image catImage;Sprite[] poses;BrandGardenHedge hedge;
+ System.Random random;Action action;float age,angle,stateAt,nextVisit,nextWatch;Vector2 from,last,returnTo;int selected;bool poked;
+ public int VisitCount{get;private set;}
+ public int PawCount{get;private set;}
+ 
+ 
+ 
+ public void Build(BrandGardenHedge target){
+  hedge=target;root=(RectTransform)transform;random=new System.Random(unchecked(Environment.TickCount+GetInstanceID()));
+  poses=new Sprite[8];for(int i=0;i<8;i++)poses[i]=BrandSplashArt.Get("Garden/cat-"+i);
+  shadow=UICraft.Box(root,"Kitten ground contact",0,0,130,25,new Color(.36f,.20f,.09f,.15f),true).rectTransform;
+  ball=BrandSplashArt.Image(root,"loading-paw",0,0,56);ball.name="Plaza toy marble";
+  cat=UICraft.Root(root,"Plaza kitten",0,0,240,240);catImage=cat.gameObject.AddComponent<Image>();catImage.sprite=poses[0];catImage.preserveAspect=true;catImage.raycastTarget=false;cat.pivot=new Vector2(.5f,.2f);
+  angle=1.7f;nextVisit=Between(2.5f,3.6f);nextWatch=Between(8,12);last=Plaza(angle);cat.anchoredPosition=last;
+ }
+ float Between(float min,float max)=>min+(float)random.NextDouble()*(max-min);
+ Vector2 Plaza(float a){float h=root.rect.height;return new Vector2(Mathf.Cos(a)*318,-h*.14f+Mathf.Sin(a)*h*.018f);}
+ Vector2 GardenTarget(){var p=root.InverseTransformPoint(hedge.ClumpWorldPosition(selected));return new Vector2(p.x+(selected<BrandGardenHedge.ClumpCount/2?53:-53),p.y+68);}
+ void StartVisit(int index){selected=index;from=last;stateAt=age;poked=false;action=Action.Approach;VisitCount++;}
+ 
+ void Update(){
+  if(cat==null)return;float dt=Mathf.Min(Time.unscaledDeltaTime,.05f);age+=dt;
+  float size=Mathf.Clamp(root.rect.height*.12f,210,280);cat.sizeDelta=new Vector2(size,size);
+  float t=age-stateAt;Vector2 p=last;int frame=Mathf.FloorToInt(age*10)%4;
+  if(action==Action.Run){
+   angle+=dt*.9f;p=Plaza(angle);
+   if(age>=nextVisit&&hedge.GrownCount>0)StartVisit(random.Next(hedge.GrownCount));
+   else if(age>=nextWatch){action=Action.Watch;stateAt=age;from=p;nextWatch=age+Between(8,13);}
+  }else if(action==Action.Approach){
+   float f=Mathf.Clamp01(t/.9f);p=Vector2.Lerp(from,GardenTarget(),Mathf.SmoothStep(0,1,f));
+   if(f>=1){action=Action.Paw;stateAt=age;}
+  }else if(action==Action.Paw){
+   p=GardenTarget();frame=6+(Mathf.FloorToInt(t*5)%2);
+   if(!poked&&t>=.24f){hedge.Poke(selected);PawCount++;poked=true;}
+   if(t>=1.0f){action=Action.Return;stateAt=age;from=p;returnTo=Plaza(angle);}
+  }else if(action==Action.Return){
+   float f=Mathf.Clamp01(t/1.0f);p=Vector2.Lerp(from,returnTo,Mathf.SmoothStep(0,1,f));
+   if(f>=1){action=Action.Run;nextVisit=age+Between(5,9);}
+  }else{
+   p=from;frame=t>.22f&&t<.36f?5:4;if(t>=.7f)action=Action.Run;
+  }
+  float dx=p.x-last.x;float direction=action==Action.Paw?(selected<BrandGardenHedge.ClumpCount/2?-1:1):Mathf.Abs(dx)>.03f?Mathf.Sign(dx):Mathf.Sign(cat.localScale.x);
+  bool moving=action==Action.Run||action==Action.Approach||action==Action.Return;
+  cat.localScale=new Vector3(direction,1,1);cat.anchoredPosition=p+Vector2.up*(moving?Mathf.Abs(Mathf.Sin(age*10))*4:Mathf.Sin(age*2)*.8f);
+  cat.localRotation=Quaternion.Euler(0,0,action==Action.Paw?Mathf.Sin(t*8)*1.2f:0);catImage.sprite=poses[frame];
+  shadow.anchoredPosition=p+Vector2.down*4;shadow.sizeDelta=new Vector2(size*.55f,20);
+  ball.anchoredPosition=Plaza(angle+.32f)+Vector2.up*20;ball.localRotation=Quaternion.Euler(0,0,-angle*Mathf.Rad2Deg*3);
+  last=p;
+ }
+}
+}

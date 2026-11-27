@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/OpeningIntroduction.cs`
-文件 SHA-256：`c467bf55eb7c4ad9d5866a4a26dff546585c47bab4b503afe437de0134994ea0`
+文件 SHA-256：`f8d81f47ee83376de12872c067c516ee3c72d2a68c788c572af0f6530db7800b`
 [原始源码快照](../source/Assets/Scripts/UI/OpeningIntroduction.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.Alphabet.cs:13` · `AppUI.ShowAlphabetIntroductions` → `ShowOpeningIntroduction(generation)`
+- `Assets/Scripts/UI/AppUI.Alphabet.cs:12` · `AppUI.ShowAlphabetIntroductions` → `ShowOpeningIntroduction(generation)`
 
 ```csharp
 IEnumerator ShowOpeningIntroduction(int generation){

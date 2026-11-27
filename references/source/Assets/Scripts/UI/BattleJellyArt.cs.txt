@@ -6,7 +6,7 @@ namespace BounceGarden {
 public static class BattleJellyArt {
  static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
  public static Sprite Get(string key){if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/BattleJellyV5/"+key);if(t==null)throw new System.InvalidOperationException("Missing battle art "+key);return cache[key]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);}
- public static string GoalPad(GameSession g,int index,int jelly,int food){if(g.IsTutorial)return "goal-pad-honey";if(index>=0){var target=g.OpeningTargets[index];if(target.kind!="ordinary_color")return "goal-pad-honey";return target.color=="Y"?"goal-pad-honey":target.color=="P"?"goal-pad-pink":target.color=="M"?"booster-body-mint":target.color=="L"?"booster-body-lavender":"goal-pad-blue";}return food==1?"goal-pad-pink":food==0||jelly==4?"goal-pad-honey":"goal-pad-blue";}
+ 
  public static Image Image(Transform p,string key,float x,float y,float w,float h){var i=UICraft.Box(p,key,x,y,w,h,Color.white);i.type=UnityEngine.UI.Image.Type.Simple;i.sprite=Get(key);i.preserveAspect=false;i.raycastTarget=false;return i;}
 }
 static class BattleCountExtensions {public static int SumCounts(this int[] a){int n=0;foreach(int v in a)n+=v;return n;}}

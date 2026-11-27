@@ -52,3 +52,8 @@
 - HomeLayeredFeedback：Play重启分层入场，保留闲置相位；StopAndRestore停止并归位。对象绑定是视觉子层，不改变布局根。
 - PendantSwing：四子步只驱动挂点旋转，不拥有碰撞/物理；停止清空角速度与角度并恢复初始旋转。
 - DecorativeBreath：相对原scale呼吸；停止/禁用精确还原，不累乘。
+
+
+## 游戏0.5.1同步
+
+新版接口、时间驱动、共享Loading、五页资源等待、八帧结果页、原生遮罩充星及新增清理合同见[当前补充说明](current-051.md)。旧章节的3.6秒加载猫与旧材质充星说明属于0.4.0历史实现；当前charge条目和结果页以本轮代码为准，独立旧LoadingPresentation仍保留。

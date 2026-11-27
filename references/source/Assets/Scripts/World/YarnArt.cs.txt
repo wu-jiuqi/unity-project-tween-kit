@@ -5,7 +5,7 @@ namespace BounceGarden {
 // Only the launcher, loaded ball, flight ball and its strand use these assets.
 // Existing brick appearance and damage/destruction resources remain independent.
 public static class YarnArt {
- public const float BallVisualScale=1.35f;
+ 
  [Serializable] public sealed class Layout {
   public int[] canvas,frame_durations_ms;
   public float[] pivot_unity;
@@ -19,7 +19,7 @@ public static class YarnArt {
  static Layout layout;
  public static Layout Calibration {get{Ensure();return layout;}}
  public static int VariantForLevel(int level)=>Mathf.Abs(level)%colors.Length;
- public static string ColorName(int variant)=>colors[Mathf.Abs(variant)%colors.Length];
+ 
  public static Sprite CatFrame(int index){Ensure();return cats[Mathf.Clamp(index,0,cats.Length-1)];}
  public static Sprite Ball(int variant){Ensure();return balls[Mathf.Abs(variant)%balls.Length];}
  public static Material Strand(int variant){Ensure();return strands[Mathf.Abs(variant)%strands.Length];}

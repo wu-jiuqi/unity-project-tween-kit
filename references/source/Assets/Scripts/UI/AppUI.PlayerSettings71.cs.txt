@@ -73,7 +73,7 @@ public partial class AppUI {
   CSettingsArt.Image(modal,restart?"illustration_restart":"illustration_home",0,545,680,295);
   var body=SettingsTextC("当前关卡将结束\n已使用的道具不会返还。",0,35,860,180,48);body.textWrappingMode=TMPro.TextWrappingModes.Normal;
   CSettingsArt.Button(modal,"继续本局","继续本局",0,-260,860,170,CloseModal);
-  CSettingsArt.Button(modal,restart?"确认重新开始":"确认返回首页",restart?"确认重新开始":"确认返回首页",0,-515,860,150,()=>{RemoveModal(false);if(restart)BeginLevel(currentLevel,Session.IsTutorial,true,streakTrial);else ReturnHome();},"button_cream_normal",43);
+  CSettingsArt.Button(modal,restart?"确认重新开始":"确认返回首页",restart?"确认重新开始":"确认返回首页",0,-515,860,150,()=>{RemoveModal(false);if(restart)BeginLevel(currentLevel,false,true,streakTrial);else ReturnHome();},"button_cream_normal",43);
   FitSettingsModal77(height);
  }
 }

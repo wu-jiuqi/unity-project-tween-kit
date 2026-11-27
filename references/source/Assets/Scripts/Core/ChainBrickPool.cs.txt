@@ -4,7 +4,7 @@ namespace BounceGarden {
 public sealed partial class GameSession {
  readonly Stack<BrickBody> chainBrickPool=new Stack<BrickBody>(96);
  public int ChainBrickReuses {get;private set;}
- public int ChainBrickPoolCount=>chainBrickPool.Count;
+ 
  static bool PlainChainBrick(BrickSpawn d)=>d.kind==BrickKind.Normal&&d.colorIndex>=0&&d.colorIndex<SevenSpecialArt.ColorCount&&d.juiceGroup==0&&!d.shutter&&(string.IsNullOrEmpty(d.reveal)||d.reveal=="opening-N");
  void ClearChainBrickPool(){chainBrickPool.Clear();ChainBrickReuses=0;}
  void RetireDeadChainBricks(){

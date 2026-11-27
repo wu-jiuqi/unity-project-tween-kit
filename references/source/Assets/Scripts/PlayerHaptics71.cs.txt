@@ -18,6 +18,8 @@ public static class PlayerHaptics71 {
    if(RuntimeQA.IsIsolated){finish(false);return;}
    #if UNITY_ANDROID && !UNITY_EDITOR
    bool ok=AndroidPulse(strength);finish(ok);
+   #elif UNITY_WEBGL && BOUNCE_BROWSER && !UNITY_EDITOR
+   bool ok=BounceBrowserHaptic(strength==Strength.Heavy?400:15)!=0;finish(ok);
    #elif UNITY_IOS && !UNITY_EDITOR
    bool ok=BounceImpactHaptic(strength==Strength.Heavy?1:0);finish(ok);
    #else
@@ -40,6 +42,9 @@ public static class PlayerHaptics71 {
    return true;
   }
  }
+ #endif
+ #if UNITY_WEBGL && BOUNCE_BROWSER && !UNITY_EDITOR
+ [System.Runtime.InteropServices.DllImport("__Internal")]static extern int BounceBrowserHaptic(int milliseconds);
  #endif
  #if UNITY_IOS && !UNITY_EDITOR
  [System.Runtime.InteropServices.DllImport("__Internal")]

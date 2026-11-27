@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/EncouragementDrag.cs`
-文件 SHA-256：`d2c55d0c4d8f6ca52f2623ff8c3b1452bf5e24d68f8c3b53ee1e16cd95a378fa`
+文件 SHA-256：`653ceacf70e66153347159ef901ab6c8e9ab03db452fad3c4f5e4c87b8f832d8`
 [原始源码快照](../source/Assets/Scripts/UI/EncouragementDrag.cs.txt)
 
 用在哪里：ChapterHomeView.Build → HomeFeedbackView.Create → EncouragementDrag.Initialize

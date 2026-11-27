@@ -3,33 +3,34 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/AppUI.LeagueFlow.cs`
-文件 SHA-256：`106308cafc8688a90747c9e37e93639ea46f6ab35ff19b5065d2ea48ded7051d`
+文件 SHA-256：`75bbbef833c361782e976ba7f8625ff0b7f5f6a2fc3ca57f4b213491a1b0359c`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.LeagueFlow.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### TickLeagueFlow · L13
+### TickLeagueFlow · L14
 
-方法 SHA-256：`83aacfa4b752f68cdd6e3a647cefbbe1e594673f1e035e9e593adf4179ce55a3`
+方法 SHA-256：`5f44b0aadbd05a79a98c2b02e1f76640644b54f749341b506bda560622ce2769`
 时间来源：Time.unscaledTime
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.AppUI.TickLeagueFlow()`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.cs:89` · `AppUI.Update` → `TickLeagueFlow()`
-- `Assets/Scripts/UI/AppUI.LeagueFlow.cs:11` · `AppUI.ShowPendingLeagueBeforeContinue` → `TickLeagueFlow()`
+- `Assets/Scripts/UI/AppUI.cs:92` · `AppUI.Update` → `TickLeagueFlow()`
+- `Assets/Scripts/UI/AppUI.LeagueFlow.cs:12` · `AppUI.ShowPendingLeagueBeforeContinue` → `TickLeagueFlow()`
 
 ```csharp
 void TickLeagueFlow(){
-  if(!leagueFocused||Profile==null||!Profile.LeagueUnlocked||PlayerStrategyTestBuild.Enabled||LeagueFlowActive||busy||NavigationActive||modal!=null||overlayRoot==null)return;
+  if(!leagueFocused||Profile==null||!Profile.LeagueUnlocked||PlayerStrategyTestBuild.Enabled||LeagueFlowActive||busy||NavigationActive||modal!=null||overlayRoot==null||contentLoad!=null||leagueFlowContent!=null)return;
   bool result=playing&&RewardReady&&baseRewardSaved&&!qaResult;if(playing&&!result)return;
   if(!result&&overlayRoot.childCount>0)return;
   if(!result&&CurrentPage!="home"&&CurrentPage!="chapters"&&CurrentPage!="ranking"&&CurrentPage!="vip")return;
   if(Time.unscaledTime<leagueFlowPoll)return;leagueFlowPoll=Time.unscaledTime+.4f;
   var s=LeagueSource.Read();if(s==null)return;
+  if((s.reward!=null||!Profile.LeagueMatchSeen(s.periodId))&&!GameContent.PageReady("ranking")){leagueFlowContent=new ContentLoadOperation();StartCoroutine(PrepareLeagueFlowContent(leagueFlowContent));return;}
   if(s.reward!=null){ShowLeagueAutomaticReward(s);return;}
   if(!Profile.LeagueMatchSeen(s.periodId)){
    leagueFlowRoot=UICraft.Root(safeRoot,"Automatic league season flow");leagueFlowRoot.anchorMin=Vector2.zero;leagueFlowRoot.anchorMax=Vector2.one;leagueFlowRoot.sizeDelta=Vector2.zero;
@@ -39,9 +40,31 @@ void TickLeagueFlow(){
  }
 ```
 
+### PrepareLeagueFlowContent · L29
+
+方法 SHA-256：`47d3471e7d7a65bf686e583d5e5ecdf54fabe23d419c686b906f72f412539406`
+时间来源：Time.unscaledTime
+曲线证据：查原式或下级调用
+解析符号：`BounceGarden.AppUI.PrepareLeagueFlowContent(BounceGarden.ContentLoadOperation)`
+
+Roslyn 已解析的实际源码调用位置：
+
+- `Assets/Scripts/UI/AppUI.LeagueFlow.cs:21` · `AppUI.TickLeagueFlow` → `PrepareLeagueFlowContent(leagueFlowContent)`
+
+```csharp
+IEnumerator PrepareLeagueFlowContent(ContentLoadOperation operation){
+  yield return operation.Run(GameContent.PreparePage("ranking"));
+  if(leagueFlowContent!=operation)yield break;
+  leagueFlowContent=null;
+  if(operation.Cancelled)yield break;
+  leagueFlowPoll=Time.unscaledTime+(operation.Succeeded?0:30);
+  if(!operation.Succeeded){Debug.LogWarning("BOUNCE_LEAGUE_LOAD_FAILED "+(operation.TimedOut?"timeout":operation.Failure?.Message));Toast("联赛资源暂未准备完成，请稍后点击花园联赛重试。");}
+ }
+```
+
 ## 对象层级和素材入口
 
-- L22：`UICraft.Root(safeRoot,"Automatic league season flow")`
+- L24：`UICraft.Root(safeRoot,"Automatic league season flow")`
 
 素材完整路径、原始 GUID 与包内映射见 [resource-map.json](../resource-map.json)。未解析的动态路径仍留在 source-map.json 的 resourceEvidence；不能猜测为已打包。
 
@@ -59,6 +82,9 @@ float leagueFlowPoll;
 ```
 ```csharp
 string leagueResultShown;
+```
+```csharp
+ContentLoadOperation leagueFlowContent;
 ```
 
 业务/组件依赖保留在上述字段、泛型 Get/AddComponent 和源方法参数中。语义解析不覆盖运行时委托结果；`nameMatchedCallSites` 仅供补充检索。

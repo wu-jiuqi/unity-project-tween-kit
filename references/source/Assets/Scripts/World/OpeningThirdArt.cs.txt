@@ -17,7 +17,7 @@ public static class OpeningThirdArt {
 [DefaultExecutionOrder(500)]public sealed class OpeningCatView:MonoBehaviour {
  public BrickBody Brick;public int Charge;public int Queued,PendingIngots;public float WaveAge=-1;public SpriteRenderer Image;readonly HashSet<long> hits=new HashSet<long>();
  const float ImpactDuration=.45f;float impactAge=ImpactDuration;Vector2 impactDirection;
- public bool ImpactAnimating=>impactAge<ImpactDuration;
+ 
  public void Impact(Vector2 incoming){impactDirection=incoming.sqrMagnitude>.001f?incoming.normalized:Vector2.up;impactAge=0;}
  public void TickImpact(float dt){impactAge=Mathf.Min(ImpactDuration,impactAge+dt);}
  public Vector2 ImpactStretch=>JellyMotion.HitStretch(impactAge,impactDirection);

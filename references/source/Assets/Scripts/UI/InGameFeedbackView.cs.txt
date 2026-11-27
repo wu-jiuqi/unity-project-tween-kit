@@ -13,21 +13,21 @@ public sealed class InGameFeedbackView:MonoBehaviour {
   "把小烦恼统统弹走！", "这一局，有猫咪陪着你"};
  static TMP_FontAsset font;
  static Sprite plate;
- public static string CheerText(int tier)=>ChineseArt.Rating(tier);
+ 
  bool cheersEnabled=true;
  GameSession owner;int generation,messageIndex;System.Random random;
  InGameFeedbackState state=new InGameFeedbackState();
  RectTransform lane,bullet,cheerRoot;CanvasGroup bulletGroup,cheerGroup;Image icon,cheerImage;TMP_Text caption;
  readonly RectTransform[] sparks=new RectTransform[13];readonly Image[] sparkImages=new Image[13];
  float bulletAge,bulletWidth;bool bulletVisible,stopped;string audience;
- public InGameFeedbackState State=>state;
- public bool BulletVisible=>bulletVisible;
- public float BulletX=>bullet.anchoredPosition.x;
- public float BulletAge=>bulletAge;
+ 
+ 
+ 
+ 
  public int VisibleTier {get;private set;}=-1;
- public string Audience=>audience;
- public TMP_Text Caption=>caption;
- public Sprite VisibleArt=>cheerImage==null?null:cheerImage.sprite;
+ 
+ 
+ 
  public void Initialize(GameSession session,bool withCheers=true){
   cheersEnabled=withCheers;
   owner=session;generation=owner.Generation;random=new System.Random(Guid.NewGuid().GetHashCode());audience=random.Next(860,2681).ToString("N0",System.Globalization.CultureInfo.InvariantCulture);

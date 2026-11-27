@@ -2,14 +2,154 @@ using System.Collections;using UnityEngine;using UnityEngine.UI;using DG.Tweenin
 namespace BounceGarden {
 public sealed class JellyLogoIntro:MonoBehaviour {
  public const float HoldDuration=6.8f,FadeDuration=.4f;
- RectTransform logo;TMP_Text quote;Sequence reveal;readonly List<JellyGlyph> glyphs=new List<JellyGlyph>();
- public void Begin(){logo=PastelLogo.Create(transform,0,190,850,370);
- quote=UICraft.Label(transform,"玩上五分钟，\n快乐一整天。",0,-190,900,160,48,UICraft.Ink);quote.ForceMeshUpdate();int characters=quote.textInfo.characterCount;quote.maxVisibleCharacters=0;
- int index=0;foreach(Transform item in logo){var glyph=item.gameObject.AddComponent<JellyGlyph>();glyphs.Add(glyph);glyph.Begin(index++);}StartCoroutine(ReleaseAfterLanding());
- reveal=DOTween.Sequence().SetUpdate(true);reveal.AppendInterval(2.05f);float visible=0;reveal.Append(DOTween.To(()=>visible,v=>{visible=v;quote.maxVisibleCharacters=Mathf.FloorToInt(v);},characters,characters*.035f).SetEase(Ease.Linear));
+ public static bool ExternalStartupOwnsIntro;
+ public BrandLoadingProgress Loading{get;private set;}
+ public BrandGardenScene GardenScene{get;private set;}
+ public bool PresentationReady{get;private set;}
+ public bool CanDismiss=>PresentationReady&&Loading!=null&&Loading.IsComplete;
+ public float Elapsed=>Time.unscaledTime-startedAt;
+ float startedAt;ContentLoadOperation preparation;bool preparing;GameObject retry;
+ public bool AllLettersLanded{get;private set;}
+ public bool DecorationsStarted{get;private set;}
+ public bool DecorationsSettled{get;private set;}
+ // The pop scale and the subsequent surface wobble are separate animation layers.
+ public float DecorationScale=>decorationPopScale;
+ float decorationPopScale;
+ RectTransform logo,decorations;TMP_Text quote,version;CanvasGroup quoteGroup;Sequence reveal;Material quoteMaterial;
+ readonly List<JellyGlyph> glyphs=new List<JellyGlyph>();
+ public void Begin(bool prepareHome=true){
+  startedAt=Time.unscaledTime;
+  logo=UICraft.Root(transform,"Brand logo - independent sprites",0,0,1040,450);
+  decorations=UICraft.Root(logo,"Behind letters - cat and jellies",0,0,1040,450);
+  BrandSplashArt.Image(decorations,"jelly-pink",-325,65,215);
+  BrandSplashArt.Image(decorations,"jelly-blue",-195,90,185);
+  BrandSplashArt.Image(decorations,"jelly-yellow",295,75,210);
+  BrandSplashArt.Image(decorations,"jelly-mint",-410,-15,175);
+  BrandSplashArt.Image(decorations,"jelly-purple",415,-10,175);
+  BrandSplashArt.Image(decorations,"cat",0,123,332);
+  // Put the scale origins inside the lettering, preserving the resting artwork
+  // positions. Small silhouettes are occluded, then grow out from behind the word.
+  foreach(RectTransform decoration in decorations){
+   decoration.pivot=new Vector2(.5f,.2f);
+   decoration.anchoredPosition-=Vector2.up*decoration.rect.height*.3f;
+  }
+  SetDecorationScale(0);
+  var letters=UICraft.Root(logo,"Four falling letters",0,0,1040,450);
+  string[] keys={"letter-miao","letter-dan","letter-chai","letter-xiang"};
+  string[] names={"喵","弹","拆","箱"};
+  for(int i=0;i<4;i++){
+   var letter=BrandSplashArt.Image(letters,keys[i],-334+i*223,-58,246);letter.name=names[i];
+   var glyph=letter.gameObject.AddComponent<JellyGlyph>();glyphs.Add(glyph);glyph.Begin(i);
+  }
+  quote=UICraft.Label(transform,"—— 玩上五分钟，\n快乐一整天！",0,0,960,210,72);
+  quote.name="Brand encouragement";quote.color=new Color32(104,63,30,255);quote.enableAutoSizing=false;
+  quote.textWrappingMode=TextWrappingModes.NoWrap;quote.characterSpacing=1;quote.lineSpacing=12;quote.fontStyle=FontStyles.Bold;
+  quoteMaterial=new Material(quote.fontSharedMaterial);quoteMaterial.EnableKeyword("OUTLINE_ON");
+  quoteMaterial.SetFloat("_FaceDilate",.12f);
+  quoteMaterial.SetColor("_OutlineColor",new Color32(255,246,218,255));quoteMaterial.SetFloat("_OutlineWidth",.34f);quoteMaterial.SetFloat("_OutlineSoftness",0);
+  quoteMaterial.EnableKeyword("UNDERLAY_ON");quoteMaterial.SetColor("_UnderlayColor",new Color(0.35f,.19f,.08f,.25f));
+  quoteMaterial.SetFloat("_UnderlayOffsetY",-.5f);quoteMaterial.SetFloat("_UnderlaySoftness",0);quoteMaterial.SetFloat("_UnderlayDilate",.04f);quote.fontSharedMaterial=quoteMaterial;
+  quoteGroup=quote.gameObject.AddComponent<CanvasGroup>();quoteGroup.alpha=0;
+  version=UICraft.Label(transform,"版本 "+GameVersion.Name,0,0,600,50,26);version.color=new Color32(113,83,54,255);
+  var progress=UICraft.Root(transform,"Brand loading progress",0,0,940,300);Loading=progress.gameObject.AddComponent<BrandLoadingProgress>();Loading.Build();
+  var plaza=UICraft.Root(transform,"Brand living plaza",0,0,1080,((RectTransform)transform).rect.height);plaza.SetSiblingIndex(1);
+  GardenScene=plaza.gameObject.AddComponent<BrandGardenScene>();GardenScene.Build(Loading.Hedge);
+  Layout();StartCoroutine(ReleaseAfterLanding());
+  if(prepareHome)StartCoroutine(PrepareHome());
  }
- IEnumerator ReleaseAfterLanding(){while(glyphs.Exists(g=>!g.DropComplete))yield return null;float release=Time.unscaledTime;foreach(var glyph in glyphs)glyph.ReleaseJelly(release);}
- void OnDestroy(){reveal?.Kill();}
+ void Layout(){
+  float height=((RectTransform)transform).rect.height;
+  logo.anchoredPosition=new Vector2(0,height*.235f);logo.localScale=Vector3.one*.94f;
+  quote.rectTransform.anchoredPosition=new Vector2(0,-height*.005f);
+  if(Loading!=null)Loading.GetComponent<RectTransform>().anchoredPosition=new Vector2(0,-height*.28f);
+  if(GardenScene!=null)GardenScene.GetComponent<RectTransform>().sizeDelta=new Vector2(1080,height);
+  version.rectTransform.anchoredPosition=new Vector2(0,-height*.445f);
+ }
+ float previousHeight;
+ void LateUpdate(){float height=((RectTransform)transform).rect.height;if(logo!=null&&!Mathf.Approximately(height,previousHeight)){previousHeight=height;Layout();}}
+ IEnumerator ReleaseAfterLanding(){
+  while(glyphs.Exists(g=>!g.DropComplete))yield return null;
+  AllLettersLanded=true;float release=Time.unscaledTime;foreach(var glyph in glyphs)glyph.ReleaseJelly(release);
+  DecorationsStarted=true;SoundService.Play("whoosh");
+  reveal=DOTween.Sequence().SetUpdate(true);
+  // Scale each decoration about its own center; scaling their parent would throw
+  // the outer jellies offscreen and change their authored positions behind the letters.
+  reveal.Append(DOTween.To(()=>DecorationScale,SetDecorationScale,1.5f,.24f).SetEase(Ease.OutCubic));
+  reveal.Append(DOTween.To(()=>DecorationScale,SetDecorationScale,1f,.34f).SetEase(Ease.OutSine));
+  reveal.AppendCallback(()=>{
+   DecorationsSettled=true;int index=0;
+   foreach(RectTransform decoration in decorations){
+    var jelly=decoration.gameObject.AddComponent<JellyLogoDecoration>();
+    jelly.Play(index++,startedAt+HoldDuration,decoration.name=="cat" ? .45f : .62f);
+   }
+  });reveal.AppendInterval(.08f);
+  reveal.AppendCallback(()=>StartCoroutine(RevealQuote()));
+ }
+ void SetDecorationScale(float value){decorationPopScale=value;foreach(Transform decoration in decorations)decoration.localScale=Vector3.one*value;}
+ IEnumerator RevealQuote(){
+  float elapsed=0;while(elapsed<.4f){elapsed+=Time.unscaledDeltaTime;float t=Mathf.Clamp01(elapsed/.4f),e=1-Mathf.Pow(1-t,3);
+   quoteGroup.alpha=t;float height=((RectTransform)transform).rect.height;
+   quote.rectTransform.anchoredPosition=new Vector2(0,-height*.005f-18*(1-e));
+   quote.rectTransform.localScale=Vector3.one*Mathf.Lerp(.96f,1,e);yield return null;
+  }
+  quoteGroup.alpha=1;quote.rectTransform.localScale=Vector3.one;Layout();PresentationReady=true;
+ }
+ IEnumerator PrepareHome(){
+  if(preparing)yield break;preparing=true;if(retry!=null)retry.SetActive(false);Loading.Resume();Loading.SetProgress(.15f);
+  preparation=new ContentLoadOperation();yield return preparation.Run(GameContent.PreparePage("home"));
+  if(!preparation.Succeeded){
+   preparing=false;Loading.Failure("花园准备未完成，请重试。");
+   if(retry==null)retry=UICraft.Button(Loading.transform,"重试",0,-253,300,85,UICraft.Gold,()=>StartCoroutine(PrepareHome()),34).gameObject;
+   retry.SetActive(true);yield break;
+  }
+  Loading.SetProgress(.8f);Canvas.ForceUpdateCanvases();yield return null;yield return null;
+  Loading.SetProgress(.95f);while(!PresentationReady)yield return null;Loading.Complete();preparing=false;
+ }
+ void OnDisable(){preparation?.Cancel();reveal?.Kill();StopAllCoroutines();}
+ void OnDestroy(){if(quoteMaterial!=null)Destroy(quoteMaterial);}
+}
+// Shared with the original letter animation: same frequencies, damping and mesh
+// deformation. Decorations use a softer strength and a small phase offset.
+public static class JellyLogoMotion {
+ public struct Pose {public Vector3 Scale;public float Lift,Rotation,Deformation;}
+ public static Pose Sample(float elapsed,float remaining,float strength=1,float phase=0,float fadeIn=1){
+  float envelope=Mathf.Exp(-.42f*elapsed)*Mathf.Clamp01(remaining/.65f)*strength*fadeIn;
+  float wave=Mathf.Sin(elapsed*11.5f+phase);
+  return new Pose{Scale=new Vector3(1+wave*.17f*envelope,1-wave*.14f*envelope,1),
+   Lift=Mathf.Abs(Mathf.Sin(elapsed*5.75f+phase*.5f))*21*envelope,
+   Rotation=Mathf.Sin(elapsed*8+phase)*3.8f*envelope,
+   Deformation=Mathf.Sin(Mathf.Floor(elapsed*30)/30*11.5f+phase)*.42f*envelope};
+ }
+ public static void Deform(VertexHelper mesh,Rect bounds,float deformation){
+  if(Mathf.Abs(deformation)<.001f)return;UIVertex vertex=default(UIVertex);
+  for(int i=0;i<mesh.currentVertCount;i++){
+   mesh.PopulateUIVertex(ref vertex,i);float y=Mathf.InverseLerp(bounds.yMin,bounds.yMax,vertex.position.y);
+   vertex.position.x+=(y-.5f)*bounds.width*.065f*deformation;
+   vertex.position.y+=Mathf.Abs(vertex.position.x/bounds.width)*bounds.height*.04f*deformation;mesh.SetUIVertex(vertex,i);
+  }
+ }
+}
+public sealed class JellyLogoDecoration:BaseMeshEffect {
+ RectTransform rect;Vector2 rest;Vector3 restScale;Quaternion restRotation;
+ float started,ends,strength,phase,deformation;bool running;
+ public void Play(int index,float endAt,float amplitude){
+  rect=(RectTransform)transform;rest=rect.anchoredPosition;restScale=rect.localScale;restRotation=rect.localRotation;
+  started=Time.unscaledTime;ends=endAt;strength=amplitude;phase=index*.36f;running=true;
+ }
+ void Update(){
+  if(!running)return;float now=Time.unscaledTime;
+  if(now>=ends){ResetPose();return;}
+  float elapsed=now-started;
+  var pose=JellyLogoMotion.Sample(elapsed,ends-now,strength,phase,Mathf.SmoothStep(0,1,elapsed/.14f));
+  rect.localScale=Vector3.Scale(restScale,pose.Scale);rect.anchoredPosition=rest+Vector2.up*pose.Lift;
+  rect.localRotation=restRotation*Quaternion.Euler(0,0,pose.Rotation);deformation=pose.Deformation;graphic.SetVerticesDirty();
+ }
+ void ResetPose(){
+  running=false;if(rect==null)return;rect.anchoredPosition=rest;rect.localScale=restScale;rect.localRotation=restRotation;
+  deformation=0;if(graphic!=null)graphic.SetVerticesDirty();
+ }
+ public override void ModifyMesh(VertexHelper mesh){if(IsActive()&&rect!=null)JellyLogoMotion.Deform(mesh,rect.rect,deformation);}
+ protected override void OnDisable(){ResetPose();base.OnDisable();}
 }
 public sealed class JellyGlyph:BaseMeshEffect {
  RectTransform rect;Vector2 rest;Sequence motion;float deformation,started,jellyStarted=-1,landingPitch=1;
@@ -21,8 +161,8 @@ public sealed class JellyGlyph:BaseMeshEffect {
  public void Begin(int index){landingPitch=.94f+(index%4)*.035f;started=Time.unscaledTime;rect=(RectTransform)transform;rest=rect.anchoredPosition;rect.anchoredPosition=new Vector2(rest.x+(index%2==0?-22:22),1170f-((RectTransform)rect.parent).anchoredPosition.y+rect.rect.height+80);visibility=gameObject.AddComponent<CanvasGroup>();visibility.alpha=0;rect.localRotation=Quaternion.Euler(0,0,index%2==0?-13:12);rect.localScale=new Vector3(.87f,1.14f,1);
  motion=DOTween.Sequence().SetUpdate(true);motion.AppendInterval(.12f+index*.105f);motion.AppendCallback(()=>{DropStarted=true;visibility.alpha=1;});motion.Append(DOTween.To(()=>rect.anchoredPosition,v=>rect.anchoredPosition=v,rest,.5f).SetEase(Ease.InCubic));motion.Join(rect.DOLocalRotate(Vector3.zero,.5f));motion.AppendCallback(()=>StartCoroutine(Impact()));
  }
- IEnumerator Impact(){SoundService.Play("jelly_land",landingPitch);for(int frame=0;frame<Poses.Length;frame++){var pose=Poses[frame];rect.localScale=new Vector3(pose.x,pose.y,1);rect.localRotation=Quaternion.Euler(0,0,frame==Poses.Length-1?0:pose.z);deformation=frame==Poses.Length-1?0:Mathf.Sin(frame*1.2f)*(1-frame/(float)Poses.Length);graphic.SetVerticesDirty();yield return new WaitForSecondsRealtime(1f/30f);}DropComplete=true;while(jellyStarted<0)yield return null;InSustainedPhase=true;while(Time.unscaledTime-started<JellyLogoIntro.HoldDuration){float t=Time.unscaledTime-jellyStarted;float remaining=JellyLogoIntro.HoldDuration-(Time.unscaledTime-started);float envelope=Mathf.Exp(-.42f*t)*Mathf.Clamp01(remaining/.65f);float wave=Mathf.Sin(t*11.5f);rect.localScale=new Vector3(1+wave*.17f*envelope,1-wave*.14f*envelope,1);rect.anchoredPosition=rest+new Vector2(0,Mathf.Abs(Mathf.Sin(t*5.75f))*21*envelope);rect.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*8)*3.8f*envelope);deformation=Mathf.Sin(Mathf.Floor(t*30)/30*11.5f)*.42f*envelope;graphic.SetVerticesDirty();yield return null;}rect.anchoredPosition=rest;rect.localScale=Vector3.one;rect.localRotation=Quaternion.identity;deformation=0;graphic.SetVerticesDirty();}
- public override void ModifyMesh(VertexHelper mesh){if(!IsActive()||Mathf.Abs(deformation)<.001f)return;UIVertex vertex=default(UIVertex);var bounds=rect.rect;for(int i=0;i<mesh.currentVertCount;i++){mesh.PopulateUIVertex(ref vertex,i);float y=Mathf.InverseLerp(bounds.yMin,bounds.yMax,vertex.position.y);vertex.position.x+=(y-.5f)*bounds.width*.065f*deformation;vertex.position.y+=Mathf.Abs(vertex.position.x/bounds.width)*bounds.height*.04f*deformation;mesh.SetUIVertex(vertex,i);}}
+ IEnumerator Impact(){SoundService.Play("jelly_land",landingPitch);for(int frame=0;frame<Poses.Length;frame++){var pose=Poses[frame];rect.localScale=new Vector3(pose.x,pose.y,1);rect.localRotation=Quaternion.Euler(0,0,frame==Poses.Length-1?0:pose.z);deformation=frame==Poses.Length-1?0:Mathf.Sin(frame*1.2f)*(1-frame/(float)Poses.Length);graphic.SetVerticesDirty();yield return new WaitForSecondsRealtime(1f/30f);}DropComplete=true;while(jellyStarted<0)yield return null;InSustainedPhase=true;while(Time.unscaledTime-started<JellyLogoIntro.HoldDuration){float t=Time.unscaledTime-jellyStarted;float remaining=JellyLogoIntro.HoldDuration-(Time.unscaledTime-started);var pose=JellyLogoMotion.Sample(t,remaining);rect.localScale=pose.Scale;rect.anchoredPosition=rest+Vector2.up*pose.Lift;rect.localRotation=Quaternion.Euler(0,0,pose.Rotation);deformation=pose.Deformation;graphic.SetVerticesDirty();yield return null;}rect.anchoredPosition=rest;rect.localScale=Vector3.one;rect.localRotation=Quaternion.identity;deformation=0;graphic.SetVerticesDirty();}
+ public override void ModifyMesh(VertexHelper mesh){if(IsActive()&&rect!=null)JellyLogoMotion.Deform(mesh,rect.rect,deformation);}
  protected override void OnDisable(){motion?.Kill();StopAllCoroutines();base.OnDisable();}
 }
 }

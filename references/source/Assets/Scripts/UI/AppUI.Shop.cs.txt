@@ -4,61 +4,28 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
-using R=BounceGarden.ReferenceShopStyle;
 namespace BounceGarden {
 public partial class AppUI {
- int shopCategory;bool dressingFrames;string previewAvatar,previewFrame;RectTransform shopBody,dressBody;float referenceShopHeight;RectTransform shopListing;TMP_Text referenceWallet;RectTransform referenceWalletTarget;
+ int shopCategory;bool dressingFrames;string previewAvatar,previewFrame;RectTransform shopBody;float referenceShopHeight;TMP_Text referenceWallet;RectTransform referenceWalletTarget;
  static readonly string[] CatNames={"英短猫","布偶猫","暹罗猫","缅因猫","波斯猫","孟加拉猫","无毛猫","折耳猫","异短猫","安哥拉猫"};
  static readonly string[] FrameNames={"蓝色爪印","丁香蝴蝶结","海洋珍珠","森林绿叶","玫瑰花园","金色星光","月光","薄荷缎带","蜜桃爱心","皇家皇冠"};
- void ShopEnter(RectTransform target,int order=0){target.localScale=Vector3.one*.98f;target.DOScale(1,.20f).SetDelay(order*.018f).SetEase(Ease.OutCubic).SetUpdate(true).SetLink(target.gameObject);}
- void BuildCosmeticShop(RectTransform page){shopBody=UICraft.Root(page,"Reference shop",0,0,500,970);DrawShop();}
- void DrawShop(){if(shopBody==null)return;float reserve=WeChatSecondaryTopReserve();referenceShopHeight=(menuHeight-reserve)/(1080f/500);shopBody.anchoredPosition=new Vector2(0,-reserve*.5f);shopBody.sizeDelta=new Vector2(500,referenceShopHeight);shopBody.localScale=Vector3.one*(1080f/500);Clear(shopBody);DrawReferenceHeader(shopBody);
-  string[] tabs={"道具","精选","头像","头像框"};R.Panel(shopBody,"cream",250,198,450,48);for(int i=0;i<4;i++){int tab=i;R.TextButton(shopBody,tabs[i],81+i*113,198,112,46,shopCategory==i?"lilac":null,()=>{shopCategory=tab;DrawShop();},18);}
-  bool compact=referenceShopHeight<820;float top=compact?235:375;
-  if(!compact)DrawShopBanner();float bottom=referenceShopHeight-20,height=Mathf.Max(100,bottom-top);
-  shopListing=ReferenceScroll(shopBody,250,top+height/2,460,height,shopCategory==0?740:shopCategory==1?580:Mathf.Ceil(CatCosmeticCatalog.Items.Length/3f)*195+10);
-  if(shopCategory==0){DrawBoosterProducts();return;}
-  if(shopCategory==1){ReferenceSection("人气猫咪",15,false);for(int i=0;i<3;i++)ShopProduct(shopListing,i,false,80+i*150,125);ReferenceSection("精选头像框",245,true);for(int i=0;i<3;i++)ShopProduct(shopListing,i,true,80+i*150,358);DrawCoinSupply();}
-  else for(int i=0;i<CatCosmeticCatalog.Items.Length;i++)ShopProduct(shopListing,i,shopCategory==3,80+i%3*150,96+i/3*195,true);
+ 
+ 
+ 
+ 
 
- }
- void DrawShopBanner(){var banner=R.Panel(shopBody,"lilac",250,295,450,126).rectTransform;JourneyArt.ReplacePanel(banner,"shop-banner");R.Text(banner,"喵喵小铺",225,43,188,34,22,UICraft.Ink,true);R.Text(banner,"强力道具 · 猫咪装扮",225,83,205,36,15,UICraft.Ink);}
-
- void DrawReferenceHeader(RectTransform parent){
-  var navigation=UICraft.Root(parent,"Shop navigation coordinate space",0,parent.rect.height/2,1080,270);navigation.localScale=Vector3.one*(500f/1080);
-  LeaguePageHeader.Build(navigation,0,()=>ShowPage("home"),OpenShopGuide,"喵喵小铺","Shop ribbon navigation",false,"Button Home","Shop information");
-  var avatar=R.Button(parent,"更换头像",60,132,76,76,null,OpenLeagueCustomization);avatar.name="Shop customize avatar";var style=R.Rect(avatar.transform,"Shop equipped style",38,38,70,70);R.Portrait(style,Profile.EquippedAvatarId,Profile.EquippedFrameId,35,35,70);
-  var customize=R.TextButton(parent,"更换装扮",165,132,115,56,"cream",OpenLeagueCustomization,18);customize.name="Shop customize style";
-  referenceWalletTarget=R.Panel(parent,"cream",355,132,220,54).rectTransform;referenceWalletTarget.name="Shop wallet capsule";R.Coin(parent,274,132,32);referenceWallet=R.Text(parent,Profile.Coins.ToString("N0"),349,132,110,42,22,null,true);referenceWallet.name="Shop balance";
-  R.TextButton(parent,"+",440,132,56,56,"mint",OpenEconomyGuide,27);walletText=referenceWallet;walletTarget=referenceWalletTarget;
- }
- void OpenShopGuide(){OpenReferenceModal("喵喵小铺指南",408,500);R.Text(dressBody,"金币可购买道具、头像与头像框。\n道具强化下一组五球，发射时消耗。\n未发射或取消选择不扣道具。\n装扮解锁后可永久使用。",204,183,345,220,20);var customize=R.TextButton(dressBody,"搭配你的装扮",204,345,310,56,"mint",OpenLeagueCustomization,21);customize.name="Shop guide customize";R.TextButton(dressBody,"继续逛逛",204,420,310,56,"cream",CloseModal,21);}
- void ReferenceSection(string title,float y,bool frames){R.Art(shopListing,"paw",16,y,24,24);var label=R.Text(shopListing,title,131,y,190,35,20,null,true);label.alignment=TextAlignmentOptions.MidlineLeft;R.TextButton(shopListing,"查看全部 >",400,y,100,32,null,()=>{shopCategory=frames?3:2;DrawShop();},14);}
- void ShopProduct(Transform parent,int index,bool frame,float x,float y,bool top=false){var item=CatCosmeticCatalog.Items[index];var card=R.Panel(parent,"card",x,y,148,188).rectTransform;if(top){card.anchorMin=card.anchorMax=new Vector2(.5f,1);card.anchoredPosition=new Vector2(x-230,-y);}
-  if(frame)R.Portrait(card,Profile.EquippedAvatarId,item.id,74,59,112);else R.Avatar(card,item.id,74,60,108);
-  R.Text(card,frame?FrameNames[index]:CatNames[index],74,127,136,24,15,null,true);bool owned=Profile.OwnsShopCosmetic(item.id,frame);string label=owned?"已拥有":LocalProfile.CosmeticPrice(item.id,frame).ToString("N0");var buy=R.Button(card,owned?"已拥有":"购买 "+item.id+(frame?" 框":" 头像"),74,161,126,38,owned?"cream":"mint",()=>OpenCosmeticOffer(item.id,frame));if(!owned)R.Coin(buy.transform,25,19,21);R.Text(buy.transform,label,owned?63:75,19,owned?110:77,30,17,null,true);ShopEnter(card,index%3);
- }
- void DrawCoinSupply(){R.TextButton(shopListing,"金币获取与道具说明",230,527,400,60,"cream",OpenEconomyGuide,19);}
- RectTransform ReferenceScroll(Transform parent,float x,float y,float w,float h,float height){var view=R.Rect(parent,"Reference grid viewport",x,y,w,h);view.gameObject.AddComponent<Image>().color=new Color(1,1,1,.001f);view.gameObject.AddComponent<RectMask2D>();var scroll=view.gameObject.AddComponent<ScrollRect>();scroll.horizontal=false;scroll.scrollSensitivity=28;scroll.movementType=ScrollRect.MovementType.Clamped;scroll.viewport=view;var content=UICraft.Root(view,"Reference grid",0,0,w,height);content.anchorMin=content.anchorMax=new Vector2(.5f,1);content.pivot=new Vector2(.5f,1);content.anchoredPosition=Vector2.zero;scroll.content=content;return content;}
- void OpenReferenceModal(string title,float width=408,float height=750){OpenModal("",UICraft.Blue,width*2.18f,height*2.18f);Clear(modal);float fit=Mathf.Min(1,(menuHeight-100)/(height*2.18f));var dim=UICraft.Box(modal,"Dimmer",0,0,1200/fit,(menuHeight+200)/fit,new Color(.20f,.16f,.15f,.43f),false,true);dim.sprite=null;modalMotion?.Kill();modal.localScale=Vector3.one*fit;var group=modal.GetComponent<CanvasGroup>();group.alpha=0;dressBody=UICraft.Root(modal,"Reference dressing",0,0,width,height);dressBody.localScale=Vector3.one*2.18f;R.Panel(dressBody,"panel",width/2,height/2,width,height);R.Text(dressBody,title,width/2,34,width-90,38,23,null,true);R.TextButton(dressBody,"X",width-38,32,45,45,"cream",CloseModal,29);modal.localScale=Vector3.one*fit*.96f;modalMotion=DOTween.Sequence().SetUpdate(true).SetId(modal);modalMotion.Append(modal.DOScale(fit,.24f).SetEase(Ease.OutBack));modalMotion.Join(DOTween.To(()=>group.alpha,v=>group.alpha=v,1,.18f));}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  void ReflowNativeShopModal(){if(modal==null||modal.Find("Reference dressing")==null)return;modalMotion?.Kill(true);float fit=Mathf.Min(1,Mathf.Min((1080-80)/modal.sizeDelta.x,(menuHeight-100)/modal.sizeDelta.y));modal.localScale=Vector3.one*fit;var dimmer=modal.Find("Dimmer") as RectTransform;if(dimmer!=null)dimmer.sizeDelta=new Vector2(1200/fit,(menuHeight+200)/fit);}
- public void OpenDressing(bool frames=false){dressingFrames=frames;previewAvatar=Profile.EquippedAvatarId;previewFrame=Profile.EquippedFrameId;OpenReferenceModal("挑选你的装扮");DrawDressing();}
- void DrawDressing(){if(dressBody==null)return;var old=dressBody.Find("装扮选项");if(old!=null){old.gameObject.SetActive(false);Destroy(old.gameObject);}var root=UICraft.Root(dressBody,"装扮选项",0,0,408,750);var contentFade=root.gameObject.AddComponent<CanvasGroup>();contentFade.alpha=0;DOTween.To(()=>contentFade.alpha,v=>contentFade.alpha=v,1,.16f).SetUpdate(true).SetLink(root.gameObject);
-  var preview=R.Rect(root,"装扮预览",204,115,126,126);R.Portrait(preview,previewAvatar,previewFrame,63,63,126);preview.localScale=Vector3.one;preview.DOPunchScale(Vector3.one*.045f,.25f,1,.4f).SetUpdate(true).SetLink(preview.gameObject);R.Text(root,"预览",204,184,220,27,14);
-  R.Panel(root,"cream",204,219,364,44);R.TextButton(root,"头像",114,219,182,43,dressingFrames?null:"lilac",()=>{dressingFrames=false;DrawDressing();},19);R.TextButton(root,"头像框",295,219,182,43,dressingFrames?"lilac":null,()=>{dressingFrames=true;DrawDressing();},19);
-  var grid=ReferenceScroll(root,204,441,366,378,Mathf.Ceil(CatCosmeticCatalog.Items.Length/3f)*126);for(int n=0;n<CatCosmeticCatalog.Items.Length;n++){int index=n;string id=CatCosmeticCatalog.Items[index].id;bool f=dressingFrames,owned=Profile.OwnsShopCosmetic(id,f),selected=(string.IsNullOrEmpty(f?previewFrame:previewAvatar)?CatCosmeticCatalog.Default.id:(f?previewFrame:previewAvatar))==id;var card=R.Panel(grid,"card",0,0,116,122).rectTransform;card.anchorMin=card.anchorMax=new Vector2(.5f,1);card.anchoredPosition=new Vector2((n%3-1)*122,-63-n/3*126);
-   if(selected){var rim=UICraft.Box(card,"Selected outline",0,0,113,119,R.Mint);var inner=UICraft.Box(rim.transform,"Selected cream",0,0,110,116,new Color32(255,252,244,255));}
-   var hit=R.Button(card,"选择 "+(f?"头像框 ":"头像 ")+id,58,61,114,120,null,()=>{if(!owned){SoundService.Play("ui_unavailable");Toast("尚未解锁，去小铺看看吧。");return;}if(f)previewFrame=id==CatCosmeticCatalog.Default.id?"":id;else previewAvatar=id==CatCosmeticCatalog.Default.id?"":id;DrawDressing();});
-   if(f)R.Portrait(hit.transform,previewAvatar,id,57,43,88);else if(index<0)R.Portrait(hit.transform,"",previewFrame,57,43,88);else R.Avatar(hit.transform,id,57,43,87);
-   if(f)R.Text(hit.transform,index<0?"默认":FrameNames[index],57,89,105,19,13,null,true);
-   string status=selected?((f?Profile.EquippedFrameId:Profile.EquippedAvatarId)==(id==CatCosmeticCatalog.Default.id?"":id)?"使用中":"已选择"):owned?"已拥有":LocalProfile.CosmeticPrice(id,f).ToString("N0");float statusY=f?108:104;if(selected||owned)R.Panel(hit.transform,selected?"mint":"cream",57,statusY,91,19);R.Text(hit.transform,status,selected||owned?57:66,statusY,88,20,13,selected?new Color32(28,151,97,255):R.Ink,true);
-   if(!owned&&!f)foreach(var image in hit.GetComponentsInChildren<Image>())if(image.name.StartsWith("Catalog avatar",StringComparison.Ordinal))image.color=new Color(1,1,1,.65f);
-   if(selected){var check=UICraft.Box(hit.transform,"Check",43,44,24,24,R.Mint,true);check.rectTransform.localScale=Vector3.one*.65f;check.rectTransform.DOScale(1,.22f).SetEase(Ease.OutBack).SetUpdate(true).SetLink(check.gameObject);var shortArm=UICraft.Box(check.transform,"Check short",-4,-1,7,3,Color.white);shortArm.rectTransform.localRotation=Quaternion.Euler(0,0,-45);var longArm=UICraft.Box(check.transform,"Check long",2,1,12,3,Color.white);longArm.rectTransform.localRotation=Quaternion.Euler(0,0,45);}else if(!owned){R.Art(hit.transform,"lock",95,79,17,19);R.Coin(hit.transform,30,statusY,16);}
-  }
-  R.TextButton(root,"到小铺发现更多装扮",204,656,340,34,null,()=>OpenShopCategory(dressingFrames?2:1),15);R.TextButton(root,"保存装扮",204,704,310,56,"mint",()=>{if(!Profile.EquipShopCosmetics(previewAvatar,previewFrame)){SoundService.Play("ui_unavailable");Toast("装扮保存失败，请重试。");return;}SoundService.Play("cosmetic_equip");if(UnityEngine.Random.value<.25f)SoundService.Play("cat_dress_pleased");RefreshLeagueViews();if(CurrentPage=="shop")DrawShop();CloseModal();Toast("装扮已保存");},23);
- }
- public void OpenCosmeticOffer(string id,bool frame){var item=CatCosmeticCatalog.Items.First(i=>i.id==id);int index=Array.IndexOf(CatCosmeticCatalog.Items,item),price=LocalProfile.CosmeticPrice(id,frame);bool owned=Profile.OwnsShopCosmetic(id,frame);OpenReferenceModal(owned?"我的收藏":"解锁装扮",408,540);if(frame)R.Portrait(dressBody,Profile.EquippedAvatarId,id,204,190,200);else R.Avatar(dressBody,id,204,190,180);R.Text(dressBody,frame?FrameNames[index]:CatNames[index],204,310,350,40,23,null,true);R.Text(dressBody,owned?"已拥有":price.ToString("N0")+" 金币",204,365,350,35,20);R.TextButton(dressBody,owned?"更换装扮":"金币购买",204,448,310,57,"mint",()=>{if(owned){OpenDressing(frame);return;}if(!Profile.PurchaseCosmetic(id,frame)){SoundService.Play("ui_unavailable");Toast(Profile.Coins<price?"金币不足":"购买保存失败，请重试。");return;}SoundService.Play("purchase_success");DrawShop();RefreshWallet();OpenCosmeticOffer(id,frame);CosmeticSpark(modal);},22);}
- void CosmeticSpark(Transform parent){for(int n=0;n<8;n++){float angle=n*Mathf.PI/4;var spark=UICraft.Art(parent,"pastel/fx_spark",0,180,70,70);if(spark==null)continue;var rt=spark.rectTransform;DOTween.To(()=>rt.anchoredPosition,v=>rt.anchoredPosition=v,new Vector2(Mathf.Cos(angle)*220,180+Mathf.Sin(angle)*200),.5f).SetEase(Ease.OutCubic).SetUpdate(true).SetLink(rt.gameObject);DOTween.To(()=>spark.color.a,v=>{var c=spark.color;c.a=v;spark.color=c;},0,.25f).SetDelay(.25f).SetUpdate(true).SetLink(rt.gameObject);Destroy(rt.gameObject,.65f);}}
+ 
+ 
+ 
+ 
 }
 }
 

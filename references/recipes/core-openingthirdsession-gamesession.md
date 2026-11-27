@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/Core/OpeningThirdSession.cs`
-文件 SHA-256：`e98d8c98bfedd7d8db8123229e4493a50bbe9ba913582d78573da8999dd3cd82`
+文件 SHA-256：`20d64b09bf12776d674252629d3e41e902cef6739a9950ff1599a61ed7496ddd`
 [原始源码快照](../source/Assets/Scripts/Core/OpeningThirdSession.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -19,28 +19,6 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/CatFlowQA.cs:14` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:20` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:26` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:30` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.20f)`
-- `Assets/Scripts/CatFlowQA.cs:31` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.02f)`
-- `Assets/Scripts/CatFlowQA.cs:34` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:39` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.02f)`
-- `Assets/Scripts/CatFlowQA.cs:42` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:47` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:55` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:56` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.02f)`
-- `Assets/Scripts/CatFlowQA.cs:61` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.01f)`
-- `Assets/Scripts/CatFlowQA.cs:62` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.5f)`
-- `Assets/Scripts/CatFlowQA.cs:63` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.70f)`
-- `Assets/Scripts/CatFlowQA.cs:64` · `GameSession.QACatFlowChecks` → `TickOpeningThird(.10f)`
-- `Assets/Scripts/SfxV87QA.cs:32` · `SfxV87QA.Start` → `game.TickOpeningThird(.02f)`
-- `Assets/Scripts/ThirdGroupQA.cs:13` · `GameSession.QAThirdStep` → `TickOpeningThird(dt)`
-- `Assets/Scripts/ThirdGroupQA.cs:32` · `ThirdGroupQA.Start` → `g.TickOpeningThird(.04f)`
-- `Assets/Scripts/ThirdGroupQA.cs:32` · `ThirdGroupQA.Start` → `g.TickOpeningThird(.2f)`
-- `Assets/Scripts/ThirdGroupQA.cs:32` · `ThirdGroupQA.Start` → `g.TickOpeningThird(.04f)`
-- `Assets/Scripts/ThirdGroupQA.cs:32` · `ThirdGroupQA.Start` → `g.TickOpeningThird(.5f)`
-- `Assets/Scripts/ThirdGroupQA.cs:34` · `ThirdGroupQA.Start` → `g.TickOpeningThird(.5f)`
 - `Assets/Scripts/World/OpeningThirdArt.cs:36` · `OpeningThirdDirector.Update` → `game.TickOpeningThird(game.PresentationDelta(Time.unscaledDeltaTime))`
 
 ```csharp

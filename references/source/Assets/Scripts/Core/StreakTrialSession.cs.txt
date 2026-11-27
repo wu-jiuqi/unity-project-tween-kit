@@ -3,53 +3,40 @@ using System.Linq;
 using UnityEngine;
 namespace BounceGarden {
 public enum StreakBooster {None,Pierce,Bomb,Super}
-[Serializable] public sealed class StreakTrial {public string name,focus;public int streak,moves;public string[] rows;}
-[Serializable] public sealed class StreakTrialData {public StreakTrial[] trials;}
+
+
 public static class StreakTrials {
- static StreakTrialData data;
- public static StreakTrial Get(int i){if(data==null)data=JsonUtility.FromJson<StreakTrialData>(Resources.Load<TextAsset>("StreakTrials/trials").text);return data.trials[Mathf.Clamp(i,0,2)];}
- public static LevelData Level(int i){var t=Get(i);return new LevelData{alphabetCampaign=true,label="Level "+(i+1),note=t.focus,initialShots=t.moves,volleyCount=5};}
+ 
+ 
+ 
  public static string Name(StreakBooster k)=>k==StreakBooster.Pierce?"穿透毛线球":k==StreakBooster.Bomb?"爆炸毛线球":k==StreakBooster.Super?"超级光球":"普通毛线球";
  public static string Rule(StreakBooster k)=>k==StreakBooster.Pierce?"穿过砖块，直接伤害不变，石墩阻挡":k==StreakBooster.Bomb?"碰砖或碰墙反弹，触发3×3爆炸，范围伤害2点":k==StreakBooster.Super?"碰砖或碰墙时，触发十字激光，造成2点伤害":"选择一种道具，强化下一组全部5颗球";
- public static Color Color(StreakBooster k)=>k==StreakBooster.Pierce?new Color(.50f,1,.83f):k==StreakBooster.Bomb?new Color(1,.63f,.38f):k==StreakBooster.Super?new Color(1,.94f,.42f):UnityEngine.Color.white;
+ 
 }
 public sealed partial class GameSession {
  public int StreakTrialIndex {get;private set;}=-1;
- public bool IsStreakTrial=>StreakTrialIndex>=0;
- public int SimulatedStreak=>IsStreakTrial?StreakTrials.Get(StreakTrialIndex).streak:0;
+ 
  readonly int[] streakTools=new int[4];
  public StreakBooster SelectedStreakBooster {get;private set;}
  public int StreakExplosions {get;private set;}public int StreakLasers {get;private set;}
  StreakBooster preparedShopBooster;
  // Fusion editor sessions exercise every booster with their isolated memory profile.
  // Production and legacy editor sessions retain their actual campaign unlock index.
- int CampaignBoosterIndex=>FusionActive&&RuntimeQA.IsIsolated?Math.Max(LevelIndex,LocalProfile.BoosterUnlockLevel(StreakBooster.Super)-1):LevelIndex;
+ int CampaignBoosterIndex=>LevelIndex;
  bool PrepareShopBooster(){preparedShopBooster=StreakBooster.None;if(!UsesShopBoosters||SelectedStreakBooster==StreakBooster.None)return true;if(!BoosterProfile.ConsumeCampaignBooster(SelectedStreakBooster,CampaignBoosterIndex)){changed=true;Feedback?.Invoke(LauncherPosition,"booster-save-failed");return false;}preparedShopBooster=SelectedStreakBooster;return true;}
  public LocalProfile BoosterProfile {get;set;}
- public bool UsesShopBoosters=>IsChainCollection&&!IsOpening&&!IsTutorial&&!IsStreakTrial&&BoosterProfile!=null;
+ public bool UsesShopBoosters=>IsChainCollection&&!IsOpening&&BoosterProfile!=null;
  public int StreakStock(StreakBooster k)=>UsesShopBoosters?BoosterProfile.BoosterStock(k)+BoosterProfile.StreakBonusStock(k,CampaignBoosterIndex)+(k==StreakBooster.Pierce&&BoosterProfile.HasRescue(CampaignBoosterIndex)?1:0):(int)k>0&&(int)k<streakTools.Length?streakTools[(int)k]:0;
  public bool ApplyCampaignStreakBonus(){if(!UsesShopBoosters||!BoosterProfile.PrepareCampaignStreakRound(CampaignBoosterIndex))return false;NotifyBoosterStock();for(int i=1;i<=3;i++){var k=(StreakBooster)i;if(BoosterProfile.StreakBonusStock(k,CampaignBoosterIndex)>0&&BoosterAvailable(k))return true;}return false;}
- public bool BoosterAvailable(StreakBooster k)=>IsStreakTrial||UsesShopBoosters&&BoosterProfile.BoosterUnlocked(k,CampaignBoosterIndex);
+ public bool BoosterAvailable(StreakBooster k)=>UsesShopBoosters&&BoosterProfile.BoosterUnlocked(k,CampaignBoosterIndex);
  public void NotifyBoosterStock(){changed=true;StateChanged?.Invoke();}
- public bool CanSelectStreakBooster=>(IsStreakTrial||UsesShopBoosters)&&ChainCanLaunch&&!bufferedChainShot.HasValue&&!CollectionVictoryPending;
+ public bool CanSelectStreakBooster=>(UsesShopBoosters)&&ChainCanLaunch&&!bufferedChainShot.HasValue&&!CollectionVictoryPending;
  public bool SelectStreakBooster(StreakBooster kind){if(!CanSelectStreakBooster||(int)kind<0||(int)kind>3||kind!=StreakBooster.None&&(!BoosterAvailable(kind)||StreakStock(kind)==0))return false;SelectedStreakBooster=SelectedStreakBooster==kind?StreakBooster.None:kind;SoundService.Play(SelectedStreakBooster==StreakBooster.None?"booster_cancel":"booster_select");RefreshLoadedStreakBall();SetAim(null);changed=true;StateChanged?.Invoke();return true;}
- void ResetStreakTrialTools(){Array.Clear(streakTools,0,streakTools.Length);SelectedStreakBooster=StreakBooster.None;StreakExplosions=StreakLasers=0;if(IsStreakTrial){streakTools[1]=1;if(SimulatedStreak>=5)streakTools[2]=1;if(SimulatedStreak>=10)streakTools[3]=1;}}
- StreakBooster ConsumeStreakSelection(){var k=SelectedStreakBooster;if(UsesShopBoosters){k=preparedShopBooster;preparedShopBooster=StreakBooster.None;}else if(IsStreakTrial&&StreakStock(k)>0)streakTools[(int)k]--;else return StreakBooster.None;SelectedStreakBooster=StreakBooster.None;if(k!=StreakBooster.None){SoundService.Play("booster_apply");}RefreshLoadedStreakBall();return k;}
- void InitializeStreakTrialGrid(){
-  CollectionGoal[0]=CollectionGoal[1]=0;
-  var stage=StreakTrials.Get(StreakTrialIndex);
-  for(int r=0;r<9;r++)for(int c=0;c<9;c++){
-   char ch=stage.rows[r][c];int food=ch=='F'?1:ch=='T'?2:0;
-   int hp=ch=='J'?3:food>0?(StreakTrialIndex==0?5:7):ch=='R'?8:ch=='1'?1:ch=='A'?4:ch=='X'?1:ch-'0';
-   if(hp<1||hp>9)hp=5;
-   CreateBrick(new BrickSpawn{position=CollectionLevels.Cell(c,r),size=Vector2.one*.76f,hp=hp,colorIndex=ch=='J'?1:0,juiceGroup=food,kind=ch=='X'?BrickKind.Stone:ch=='R'?BrickKind.RearWeak:ch=='A'?BrickKind.Armor:BrickKind.Normal,referenceCol=c,referenceRow=r},0);
-   var brick=CollectionBricks.Last();if(ch=='J')RegisterJellyTarget(brick,1);if(food>0)CollectionGoal[food-1]++;
-  }
-  ChainMessage=stage.focus;PlanChainRow();
- }
+ void ResetStreakTrialTools(){Array.Clear(streakTools,0,streakTools.Length);SelectedStreakBooster=StreakBooster.None;StreakExplosions=StreakLasers=0;}
+ StreakBooster ConsumeStreakSelection(){var k=SelectedStreakBooster;if(UsesShopBoosters){k=preparedShopBooster;preparedShopBooster=StreakBooster.None;}else return StreakBooster.None;SelectedStreakBooster=StreakBooster.None;if(k!=StreakBooster.None){SoundService.Play("booster_apply");}RefreshLoadedStreakBall();return k;}
+ 
  public void TriggerStreakImpact(BallBody ball,Vector2 contact){
-  if(FusionActive){TriggerFusionBooster(ball,contact);return;}
-  if(!(IsStreakTrial||UsesShopBoosters)||!IsPlaying||IsPaused||CollectionVictoryPending||ball==null||!ball.Active||ball.SessionGeneration!=Generation||ball.StreakProcStep==PhysicsStep)return;
+  if(!(UsesShopBoosters)||!IsPlaying||IsPaused||CollectionVictoryPending||ball==null||!ball.Active||ball.SessionGeneration!=Generation||ball.StreakProcStep==PhysicsStep)return;
   if(ball.StreakPower!=StreakBooster.Bomb&&ball.StreakPower!=StreakBooster.Super)return;
   // One event per ball per physics step coalesces simultaneous corner contacts;
   // ordinary subsequent bounces retain the requested repeated activation.

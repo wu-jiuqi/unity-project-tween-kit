@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/Core/OpeningCampaign.cs:62` · `GameSession.TickOpeningYarn` → `view.Tick(dt)`
+- `Assets/Scripts/Core/OpeningCampaign.cs:61` · `GameSession.TickOpeningYarn` → `view.Tick(dt)`
 
 ```csharp
 public void Tick(float dt){if(game==null||game.IsPaused)return;bounceAge+=dt;layerAge+=dt;if(Layers>0&&LayerRemaining<=0){image.enabled=true;image.sprite=OpeningYarnArt.Rest(Layers);rest=OpeningYarnArt.Fit(OpeningYarnArt.RestKey(Layers),0);}float t=Mathf.Clamp01(bounceAge/.22f),impact=Mathf.Sin(t*Mathf.PI)*.13f;image.transform.localScale=Vector3.Scale(rest,new Vector3(1+impact,1-impact*.8f,1));}

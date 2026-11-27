@@ -159,8 +159,16 @@ public sealed partial class Gallery {
   if(!Current.interactive&&elapsed-triggeredAt>=duration)return "本轮演示已完成  ·  点击“再看一次”重新观看";
   return Current.interactive?"等待你的操作  ·  "+Instructions(Current.id):"自动演示中  ·  可暂停、慢放或重新开始";
  }
- string PrimaryCaption(){if(Current.id=="modal"&&component is ModalMotion modal)return modal.IsOpen?"关闭弹窗":"打开弹窗";switch(Current.id){case "loadingprogress":case "startuploading":return "模拟任务进度 +20%";case "pagenav":return "切换页面";case "stagger":return "播放分组入场";case "rankmove":return "更新名次顺序";case "guide":return "模拟操作 / 恢复指示";case "hintfade":return "操作提示显隐";case "homefeedback":return "播放欢迎语入场";case "pendulum":return "施加交替冲量";case "reward":return "开始收集";case "scoreimpact":return "加分并变色放大";case "scoregain":return "增加 +120";case "taskarrival":return "收集一个目标";case "moves":return "步数 -1";case "rating":return "播放连击评价";case "leaguejelly":return "更新排行卡";case "themedissolve":return "切换背景";case "number":return "开始滚分";case "hit":return "触发受击";case "charge":return "充能 +25%";default:return Current.interactive?"请直接操作舞台":"再看一次 / 空格";}}
+ string PrimaryCaption(){if(Current.id=="modal"&&component is ModalMotion modal)return modal.IsOpen?"关闭弹窗":"打开弹窗";switch(Current.id){case "toast":return "切换提示消息";case "errorpopup":return "重新打开异常弹窗";case "pageflow":return "跨标签切换";case "nativecharge":return "旋转45°并充能";case "lowmoves":return "播放三次警告";case "teaching":return "切换下一种机关";case "loadingprogress":case "startuploading":return "模拟任务进度 +20%";case "pagenav":return "切换页面";case "stagger":return "播放分组入场";case "rankmove":return "更新名次顺序";case "guide":return "模拟操作 / 恢复指示";case "hintfade":return "操作提示显隐";case "homefeedback":return "播放欢迎语入场";case "pendulum":return "施加交替冲量";case "reward":return "开始收集";case "scoreimpact":return "加分并变色放大";case "scoregain":return "增加 +120";case "taskarrival":return "收集一个目标";case "moves":return "步数 -1";case "rating":return "播放连击评价";case "leaguejelly":return "更新排行卡";case "themedissolve":return "切换背景";case "number":return "开始滚分";case "hit":return "触发受击";case "charge":return "充能 +25%";default:return Current.interactive?"请直接操作舞台":"再看一次 / 空格";}}
  static string Instructions(string id){switch(id){
+  case "toast":return "点击切换提示，快速连点观察最新消息替换；舞台按钮可给同文案续时。";
+  case "loadingbox":return "观察箱体落下、砖块和猫咪依次弹出；装饰循环不代表真实加载进度。";
+  case "errorpopup":return "点击重试或返回，关闭后显示本地操作结果；可重新打开继续观察共用动画。";
+  case "pageflow":return "切换五个标签，观察跨页方向；先等待资源，再点资源就绪，也可切换标签取消等待。";
+  case "nativecharge":return "点击旋转45度并增加充能，观察水平填充、完整星形和满星时隐藏底色。";
+  case "celebration":return "观察艺术字入场、沿弧线移至底部，再继续角色与标题循环；重播只改变表现。";
+  case "lowmoves":return "点击播放三次整体缩放与红字提醒；此处不改变真实步数，也不触发设备震动。";
+  case "teaching":return "观察三步依次循环，点击切换七种机关；演示不提交目标、得分或教学进度。";
   case "scoreimpact":return "点击加分，观察数字变金色、放大再回落；可调高亮颜色。";
   case "scoregain":return "快速连点增加，看加分合并后轻微放大、上浮并淡出。";
   case "taskarrival":return "逐次点击收集，观察卡片反馈；第三次出现完成印章。";
@@ -197,7 +205,7 @@ public sealed partial class Gallery {
   default:return "自动展示奖章飞入与名次变化；可重新开始观看。";
  }}
  void ResizeInterface(){uiWidth=Screen.width;uiHeight=Screen.height;chrome.localScale=Vector3.one*Mathf.Min(uiWidth/1600f,uiHeight/1000f);ResizeStage();}
- void ResizeStage(){if(viewport==null)return;float height=Current.tall?2340:1250;if(new[]{"press","switch","number","float","scoreimpact","scoregain","moves","taskarrival","rating","leaguejelly","loadingprogress","hintfade","homefeedback","pendulum","breath"}.Contains(Current.id))height=650;if(Current.id=="drag"||Current.id=="activity"||Current.id=="pagenav"||Current.id=="stagger"||Current.id=="rankmove"||Current.id=="guide")height=800;if(Current.id=="loadingprogress")height=850;if(Current.id=="startuploading")height=2200;if(Current.id=="hit"||Current.id=="wordmark")height=750;if(component is FrameSequence)height=1000;if(Current.id=="modal")height=1700;if(Current.id=="logo"||Current.id=="loading")height=1650;var view=StageViewport;stage.localScale=Vector3.one*Mathf.Min((view.rect.width-35)/1080f,(view.rect.height-28)/height);}
+ void ResizeStage(){if(viewport==null)return;float height=Current.tall?2340:1250;if(new[]{"press","switch","number","float","scoreimpact","scoregain","moves","taskarrival","rating","leaguejelly","loadingprogress","hintfade","homefeedback","pendulum","breath"}.Contains(Current.id))height=650;if(Current.id=="drag"||Current.id=="activity"||Current.id=="pagenav"||Current.id=="stagger"||Current.id=="rankmove"||Current.id=="guide")height=800;if(Current.id=="loadingprogress")height=850;if(Current.id=="startuploading")height=2200;if(new[]{"toast","lowmoves","nativecharge"}.Contains(Current.id))height=750;if(Current.id=="pageflow")height=1050;if(Current.id=="loadingbox")height=850;if(Current.id=="teaching"||Current.id=="errorpopup")height=1800;if(Current.id=="hit"||Current.id=="wordmark")height=750;if(component is FrameSequence)height=1000;if(Current.id=="modal")height=1700;if(Current.id=="logo"||Current.id=="loading")height=1650;var view=StageViewport;stage.localScale=Vector3.one*Mathf.Min((view.rect.width-35)/1080f,(view.rect.height-28)/height);}
 
  void ResetCurrentParameters(){if(component==null||!defaults.TryGetValue(Current.id,out var preset))return;preset.Apply(component);retained[Current.id]=preset;Replay();Report("已恢复本项默认参数。");}
 

@@ -14,7 +14,7 @@ public static class WeChatLayoutMetrics {
   menu=capsule;validMenu=capsule.width>0&&capsule.height>0&&capsule.xMin>=0&&capsule.yMin>=0&&capsule.xMax<=w&&capsule.yMax<=h;
   Revision++;
  }
- public static void EnableFallback(){Enabled=true;Revision++;}
+ 
  public static void Reset(){Enabled=false;width=height=0;safe=menu=Rect.zero;validMenu=false;Revision++;}
  public static float LogicalPixelScale(Vector2Int pixels)=>pixels.x/(width>0?width:390f);
  // WX uses logical pixels with a top-left origin; Unity uses render pixels
@@ -37,6 +37,6 @@ public static class WeChatLayoutMetrics {
   return true;
  }
  // Compatibility for older QA callers; capsule never changes the content viewport.
- public static Rect Fit(Rect nativeSafe,Vector2Int pixels)=>nativeSafe;
+ 
 }
 }

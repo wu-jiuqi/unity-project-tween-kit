@@ -26,7 +26,7 @@ public static class StreakBallArt {
  public static Material Trail(StreakBooster kind){Ensure(kind);return trails[kind];}
  public static Sprite Beam(StreakBooster kind){Ensure(kind);return beams[kind];}
  public static float BallScale(StreakBooster kind){Ensure(kind);float f=fractions.TryGetValue(Key(kind),out var v)?v:.75f;return FlightGeometry.Radius*2/(frames[kind][4].bounds.size.x*f);}
- public static void ReleaseContentCache(){foreach(var sheet in frames.Values)foreach(var sprite in sheet)if(sprite!=null)UnityEngine.Object.Destroy(sprite);foreach(var sprite in beams.Values)if(sprite!=null)UnityEngine.Object.Destroy(sprite);foreach(var m in materials.Values)if(m!=null)UnityEngine.Object.Destroy(m);foreach(var m in trails.Values)if(m!=null)UnityEngine.Object.Destroy(m);frames.Clear();beams.Clear();materials.Clear();trails.Clear();}
+ 
 }
 public sealed class StreakImpactPool:MonoBehaviour {
  struct Slot {public SpriteRenderer View;public StreakBooster Kind;public float Age,Size;public bool Active;}
@@ -40,10 +40,10 @@ public sealed class StreakImpactPool:MonoBehaviour {
 }
 public sealed partial class GameSession {
  StreakImpactPool streakArtFx;
- public int StreakArtImpacts=>streakArtFx!=null?streakArtFx.Played:0;
+ 
  void PrepareStreakArtFx(){if(streakArtFx!=null)return;var root=new GameObject("Pooled booster artwork");root.transform.SetParent(world,false);streakArtFx=root.AddComponent<StreakImpactPool>();streakArtFx.Initialize(this);}
- public void PlayStreakImpact(StreakBooster kind,Vector2 point){if(kind==StreakBooster.Pierce&&IsPlaying&&!IsPaused)SoundService.Play("pierce_pass");if(!(IsStreakTrial||UsesShopBoosters)||!IsPlaying||IsPaused||!FeedbackProfile.Active.enabledFeedback)return;if(kind!=StreakBooster.Pierce)CombatFeel?.VisualImpact();PrepareStreakArtFx();streakArtFx.Play(kind,point,kind==StreakBooster.Pierce?.75f:kind==StreakBooster.Bomb?CollectionLevels.Pitch*3:1.4f);}
- void RefreshLoadedStreakBall(){if(!(IsStreakTrial||UsesShopBoosters)||loadedBall==null)return;var image=loadedBall.GetComponent<SpriteRenderer>();var k=SelectedStreakBooster;image.color=Color.white;if(k==StreakBooster.None){image.sprite=YarnArt.Ball(YarnVariant);image.sharedMaterial=WorldArt.BoardMaterial;loadedBall.localScale=Vector3.one;}else{image.sprite=StreakBallArt.Frame(k,4+(int)(simulationClock*12)%4);image.sharedMaterial=StreakBallArt.Material(k);loadedBall.localScale=Vector3.one*StreakBallArt.BallScale(k);}}
+ public void PlayStreakImpact(StreakBooster kind,Vector2 point){if(kind==StreakBooster.Pierce&&IsPlaying&&!IsPaused)SoundService.Play("pierce_pass");if(!(UsesShopBoosters)||!IsPlaying||IsPaused||!FeedbackProfile.Active.enabledFeedback)return;if(kind!=StreakBooster.Pierce)CombatFeel?.VisualImpact();PrepareStreakArtFx();streakArtFx.Play(kind,point,kind==StreakBooster.Pierce?.75f:kind==StreakBooster.Bomb?CollectionLevels.Pitch*3:1.4f);}
+ void RefreshLoadedStreakBall(){if(!(UsesShopBoosters)||loadedBall==null)return;var image=loadedBall.GetComponent<SpriteRenderer>();var k=SelectedStreakBooster;image.color=Color.white;if(k==StreakBooster.None){image.sprite=YarnArt.Ball(YarnVariant);image.sharedMaterial=WorldArt.BoardMaterial;loadedBall.localScale=Vector3.one;}else{image.sprite=StreakBallArt.Frame(k,4+(int)(simulationClock*12)%4);image.sharedMaterial=StreakBallArt.Material(k);loadedBall.localScale=Vector3.one*StreakBallArt.BallScale(k);}}
  void DrawStreakBeam(Vector2 from,Vector2 to){DrawJellyPowerBeam(1,from,to);Vector2 delta=to-from;if(delta.sqrMagnitude<.0001f)return;var root=new GameObject("Generated super light beam").transform;root.SetParent(world,false);root.position=(from+to)*.5f;root.rotation=Quaternion.Euler(0,0,Mathf.Atan2(delta.y,delta.x)*Mathf.Rad2Deg);var image=root.gameObject.AddComponent<SpriteRenderer>();image.sprite=StreakBallArt.Beam(StreakBooster.Super);image.sharedMaterial=StreakBallArt.Trail(StreakBooster.Super);image.sortingOrder=73;image.color=new Color(1,1,1,.85f);root.localScale=new Vector3(delta.magnitude/image.sprite.bounds.size.x,.17f/image.sprite.bounds.size.y,1);chainBeams.Add(new ChainBeam{View=root,Life=.20f,Duration=.20f,StartAlpha=.85f});}
 }
 }

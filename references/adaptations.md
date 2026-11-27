@@ -59,3 +59,8 @@
 新组件时间接入KitClock，展馆用同一份实现；原曲线/默认节奏保留。微信启动源原先不在主Assets目录中，现以独立源快照和宿主调用证据登记。StartupLoadingPresentation的安全区由宿主管理，示例按自身RectTransform等比展示；启动SDK、下载、首页构建和网络重试均未带入运行时。StartupArt缓存有限的一组原PNG精灵，不逐帧创建Sprite。
 
 参数导出沿用MotionPreset schemaVersion=1的component/settings，新增的说明字段被旧读取器忽略；固定曲线说明不变更代码。普通保存和一键导出使用同一路径，自动验证使用独立evidence目录隔离用户预设。
+
+
+## 游戏0.5.1同步
+
+新版接口、时间驱动、共享Loading、五页资源等待、八帧结果页、原生遮罩充星及新增清理合同见[当前补充说明](current-051.md)。旧章节的3.6秒加载猫与旧材质充星说明属于0.4.0历史实现；当前charge条目和结果页以本轮代码为准，独立旧LoadingPresentation仍保留。

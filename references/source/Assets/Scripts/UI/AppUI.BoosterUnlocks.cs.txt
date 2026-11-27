@@ -5,17 +5,10 @@ using UnityEngine.UI;
 namespace BounceGarden {
 public partial class AppUI {
  StreakBooster pendingBoosterGuide;
- IEnumerator ShowBoosterUnlocks(int generation){
-  if(Session.IsTutorial||Session.IsStreakTrial)yield break;
-  for(int i=1;i<=3;i++){var k=(StreakBooster)i;if(!Profile.BoosterUnlocked(k,currentLevel))continue;if(!Profile.GrantBoosterUnlock(k,currentLevel)){Toast("道具赠送保存失败，请稍后重试。");continue;}
-   if(!BattleToolsVisible||Profile.BoosterIntroSeen(k))continue;
-   bool complete=false;var root=UICraft.Root(canvasRoot,"道具解锁介绍 "+k);alphabetIntroduction=root.gameObject.AddComponent<AlphabetIntroductionView>();alphabetIntroduction.Begin(this,BoosterIntroduction.Copy(k),()=>{Profile.MarkBoosterIntro(k);complete=true;});while(!complete&&generation==viewGeneration&&alphabetIntroduction!=null)yield return null;if(generation!=viewGeneration)yield break;alphabetIntroduction=null;
-  }
-  for(int i=1;i<=3;i++){var k=(StreakBooster)i;if(Profile.BoosterUnlocked(k,currentLevel)&&!Profile.BoosterGuideSeen(k)&&Session.StreakStock(k)>0){pendingBoosterGuide=k;break;}}
- }
+ 
  void ShowBoosterSelectionGuide(){if(!BattleToolsVisible){pendingBoosterGuide=StreakBooster.None;return;}var k=pendingBoosterGuide;pendingBoosterGuide=StreakBooster.None;if(k==StreakBooster.None||!Session.CanSelectStreakBooster)return;var root=UICraft.Root(hudRoot,"首次道具选择引导");root.gameObject.AddComponent<BoosterSelectionGuide>().Build(this,Session,k);}
  public void OpenInGameBoosterOffer(StreakBooster kind){
-  if(!playing||Session.IsPaused||Session.IsTutorial||Session.IsStreakTrial||!Profile.BoosterUnlocked(kind,currentLevel))return;
+  if(!playing||Session.IsPaused||!Profile.BoosterUnlocked(kind,currentLevel))return;
   CancelAim();Session.SetPaused(true);OpenModal("补充"+StreakTrials.Name(kind),UICraft.Green,860,1000);
   var image=UICraft.Box(modal,"道具独立插图",0,185,230,230,Color.white);image.sprite=ScoreSkillArt.Booster(kind);image.type=Image.Type.Simple;image.preserveAspect=true;
   UICraft.Label(modal,StreakTrials.Rule(kind),0,-15,740,125,30,UICraft.Ink);UICraft.Label(modal,"金币 "+Profile.Coins+" · 已拥有 "+Profile.BoosterStock(kind)+" / 99",0,-145,740,70,32,UICraft.Ink);
@@ -36,7 +29,5 @@ public sealed class BoosterSelectionGuide:MonoBehaviour {
  void Changed(){if(game==null||game.Generation!=generation){Destroy(gameObject);return;}if(game.SelectedStreakBooster==Kind&&app.Profile.MarkBoosterGuide(Kind))Destroy(gameObject);}
  void OnDestroy(){if(game!=null)game.StateChanged-=Changed;}
 }
-public static class BoosterIntroduction {
- public static AlphabetIntro Copy(StreakBooster k)=>new AlphabetIntro{id=300+(int)k,key=k.ToString(),title=StreakTrials.Name(k)+"解锁",captions=new[]{"已赠送 1 件", "点击道具后再拖动发射",k==StreakBooster.Pierce?"穿过普通砖，固定砖阻挡":k==StreakBooster.Bomb?"碰撞触发周围范围爆炸":"十字激光造成2点伤害","下一组全部五球生效"},rule="取消选择不消耗。发射时使用1件，下一组恢复普通球。"};
-}
+
 }

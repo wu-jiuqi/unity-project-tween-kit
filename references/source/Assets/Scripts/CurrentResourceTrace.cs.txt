@@ -1,0 +1,16 @@
+#if UNITY_EDITOR || BOUNCE_QA
+using System;using System.IO;using System.Collections.Generic;using UnityEngine;
+namespace BounceGarden {
+public sealed class CurrentResourceTrace:ResourcesAPI {
+ [Serializable]public class Entry{public string path,type;public bool found;}
+ [Serializable]class Dump{public Entry[] entries;}
+ static readonly Dictionary<string,Entry> entries=new Dictionary<string,Entry>();static string output;
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]static void Boot(){var a=Environment.GetCommandLineArgs();int i=Array.IndexOf(a,"--qa-out");if(Array.IndexOf(a,"--qa")>=0&&i>=0)Begin(a[i+1]+"/resource-loads.json");}
+ public static void Begin(string path){output=path;entries.Clear();overrideAPI=new CurrentResourceTrace();Application.quitting-=Write;Application.quitting+=Write;}
+ static void Record(string path,Type type,bool found){string key=path+"|"+type;entries[key]=new Entry{path=path,type=type.Name,found=found};}
+ protected override UnityEngine.Object Load(string path,Type type){var value=base.Load(path,type);Record(path,type,value!=null);return value;}
+ protected override UnityEngine.Object[] LoadAll(string path,Type type){var value=base.LoadAll(path,type);Record(path,type,value!=null&&value.Length>0);return value;}
+ public static void Write(){if(string.IsNullOrEmpty(output))return;Directory.CreateDirectory(Path.GetDirectoryName(output));var array=new Entry[entries.Count];entries.Values.CopyTo(array,0);File.WriteAllText(output,JsonUtility.ToJson(new Dump{entries=array},true));}
+}
+}
+#endif

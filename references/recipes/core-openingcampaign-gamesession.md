@@ -3,14 +3,14 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/Core/OpeningCampaign.cs`
-文件 SHA-256：`a0270a2cf75dd7c26f5fcaa1de39ab37432cea4c523be4c0d5698a9387273fd3`
+文件 SHA-256：`ec6c56f66fa068fa076f3d3694423c25ad1b929775f06c290c3103e6f25b4471`
 [原始源码快照](../source/Assets/Scripts/Core/OpeningCampaign.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### InitializeOpeningGridSteps · L64
+### InitializeOpeningGridSteps · L63
 
 方法 SHA-256：`a449cf3b0df472ea68d594c85b07b74a772e119749a2f9fa10ca6d605afc0f35`
 时间来源：本方法未直接取时；查调用者/字段
@@ -19,8 +19,8 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/Core/GameSession.cs:159` · `GameSession.BuildSession` → `InitializeOpeningGridSteps(true)`
-- `Assets/Scripts/Core/OpeningCampaign.cs:63` · `GameSession.InitializeOpeningGrid` → `InitializeOpeningGridSteps(false)`
+- `Assets/Scripts/Core/GameSession.cs:148` · `GameSession.BuildSession` → `InitializeOpeningGridSteps(true)`
+- `Assets/Scripts/Core/OpeningCampaign.cs:62` · `GameSession.InitializeOpeningGrid` → `InitializeOpeningGridSteps(false)`
 
 ```csharp
 System.Collections.IEnumerator InitializeOpeningGridSteps(bool incremental){
@@ -41,7 +41,7 @@ System.Collections.IEnumerator InitializeOpeningGridSteps(bool incremental){
 
 ## 对象层级和素材入口
 
-- L66：`SpawnOpeningCookieBox(box)`
+- L65：`SpawnOpeningCookieBox(box)`
 
 素材完整路径、原始 GUID 与包内映射见 [resource-map.json](../resource-map.json)。未解析的动态路径仍留在 source-map.json 的 resourceEvidence；不能猜测为已打包。
 
@@ -51,9 +51,6 @@ System.Collections.IEnumerator InitializeOpeningGridSteps(bool incremental){
 
 ## 源字段与依赖
 
-```csharp
-bool openingDraftSuppressed;
-```
 ```csharp
 int openingSupplySerial;
 ```

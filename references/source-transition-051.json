@@ -1,0 +1,1157 @@
+{
+  "date": "2026-11-27",
+  "previousCommit": "244e492d4666b757169a62f9090035b0ff723702",
+  "previousGroups": 258,
+  "currentGroups": 113,
+  "removedGroups": [
+    {
+      "id": "assets-editor-earlycontinuousv40qa-earlycontinuousv40runner",
+      "source": "Assets/Editor/EarlyContinuousV40QA.cs",
+      "class": "EarlyContinuousV40Runner",
+      "previousStatus": "editor-tool",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "balancestatisticsqa-balancestatisticsqa",
+      "source": "Assets/Scripts/BalanceStatisticsQA.cs",
+      "class": "BalanceStatisticsQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "bannerjellyqa-bannerjellyqa",
+      "source": "Assets/Scripts/BannerJellyQA.cs",
+      "class": "BannerJellyQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "battlejellyqa-battlejellyqa",
+      "source": "Assets/Scripts/BattleJellyQA.cs",
+      "class": "BattleJellyQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "campaignsettlement020qa-campaignsettlement020qa",
+      "source": "Assets/Scripts/CampaignSettlement020QA.cs",
+      "class": "CampaignSettlement020QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "catcosmeticsqa-catcosmeticsqa",
+      "source": "Assets/Scripts/CatCosmeticsQA.cs",
+      "class": "CatCosmeticsQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "catflowqa-catflowqa",
+      "source": "Assets/Scripts/CatFlowQA.cs",
+      "class": "CatFlowQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "celebration020qa-celebration020qa",
+      "source": "Assets/Scripts/Celebration020QA.cs",
+      "class": "Celebration020QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chaincollectionqa-chaincollectionqa",
+      "source": "Assets/Scripts/ChainCollectionQA.cs",
+      "class": "ChainCollectionQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chaindifficultyresearch-chaindifficultyresearch",
+      "source": "Assets/Scripts/ChainDifficultyResearch.cs",
+      "class": "ChainDifficultyResearch",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chaingravityqa-chaingravityqa",
+      "source": "Assets/Scripts/ChainGravityQA.cs",
+      "class": "ChainGravityQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainguardqa-chainguardqa",
+      "source": "Assets/Scripts/ChainGuardQA.cs",
+      "class": "ChainGuardQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainpowerqa-chainpowerqa",
+      "source": "Assets/Scripts/ChainPowerQA.cs",
+      "class": "ChainPowerQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainpresentationqa-chainpresentationqa",
+      "source": "Assets/Scripts/ChainPresentationQA.cs",
+      "class": "ChainPresentationQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainratingqa-chainratingqa",
+      "source": "Assets/Scripts/ChainRatingQA.cs",
+      "class": "ChainRatingQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainrealtimeqa-chainrealtimeqa",
+      "source": "Assets/Scripts/ChainRealtimeQA.cs",
+      "class": "ChainRealtimeQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainrefillv39qa-chainrefillv39qa",
+      "source": "Assets/Scripts/ChainRefillV39QA.cs",
+      "class": "ChainRefillV39QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainvisualqa-chainvisualqa",
+      "source": "Assets/Scripts/ChainVisualQA.cs",
+      "class": "ChainVisualQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chainvolleygravityqa-chainvolleygravityqa",
+      "source": "Assets/Scripts/ChainVolleyGravityQA.cs",
+      "class": "ChainVolleyGravityQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chapterartpreview-chapterartpreview",
+      "source": "Assets/Scripts/ChapterArtPreview.cs",
+      "class": "ChapterArtPreview",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chinesecheerartqa-chinesecheerartqa",
+      "source": "Assets/Scripts/ChineseCheerArtQA.cs",
+      "class": "ChineseCheerArtQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "chinesev60outcomeqa-chinesev60outcomeqa",
+      "source": "Assets/Scripts/ChineseV60OutcomeQA.cs",
+      "class": "ChineseV60OutcomeQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "collectionqa-collectionqa",
+      "source": "Assets/Scripts/CollectionQA.cs",
+      "class": "CollectionQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "collisionhapticsqa-collisionhapticsqa",
+      "source": "Assets/Scripts/CollisionHapticsQA.cs",
+      "class": "CollisionHapticsQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "combatfeedback79qa-combatfeedback79qa",
+      "source": "Assets/Scripts/CombatFeedback79QA.cs",
+      "class": "CombatFeedback79QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "cookiecollidergravityqa-cookiecollidergravityqa",
+      "source": "Assets/Scripts/CookieColliderGravityQA.cs",
+      "class": "CookieColliderGravityQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "coppernumberqa-coppernumberqa",
+      "source": "Assets/Scripts/CopperNumberQA.cs",
+      "class": "CopperNumberQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "core-bosslevel-gamesession",
+      "source": "Assets/Scripts/Core/BossLevel.cs",
+      "class": "GameSession",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "core-collectionsession-gamesession",
+      "source": "Assets/Scripts/Core/CollectionSession.cs",
+      "class": "GameSession",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "core-fusionpresentationsession-gamesession",
+      "source": "Assets/Scripts/Core/FusionPresentationSession.cs",
+      "class": "GameSession",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "core-mainlineplanner-mainlineplanner",
+      "source": "Assets/Scripts/Core/MainlinePlanner.cs",
+      "class": "MainlinePlanner",
+      "previousStatus": "non-animation",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "core-pixeldropsession-pixeldropbody",
+      "source": "Assets/Scripts/Core/PixelDropSession.cs",
+      "class": "PixelDropBody",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "economyv67qa-economyv67qa",
+      "source": "Assets/Scripts/EconomyV67QA.cs",
+      "class": "EconomyV67QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "encouragementdragqa-encouragementdragqa",
+      "source": "Assets/Scripts/EncouragementDragQA.cs",
+      "class": "EncouragementDragQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "encouragementqa-encouragementqa",
+      "source": "Assets/Scripts/EncouragementQA.cs",
+      "class": "EncouragementQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "failureqa-failureqa",
+      "source": "Assets/Scripts/FailureQA.cs",
+      "class": "FailureQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "flightqa-flightqa",
+      "source": "Assets/Scripts/FlightQA.cs",
+      "class": "FlightQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "flightv22qa-flightv22qa",
+      "source": "Assets/Scripts/FlightV22QA.cs",
+      "class": "FlightV22QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "fontgoalloopqa-fontgoalloopqa",
+      "source": "Assets/Scripts/FontGoalLoopQA.cs",
+      "class": "FontGoalLoopQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "fourthgroupqa-fourthgroupqa",
+      "source": "Assets/Scripts/FourthGroupQA.cs",
+      "class": "FourthGroupQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "gardenbackgroundqa-gardenbackgroundqa",
+      "source": "Assets/Scripts/GardenBackgroundQA.cs",
+      "class": "GardenBackgroundQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "grouprefill82qa-grouprefill82qa",
+      "source": "Assets/Scripts/GroupRefill82QA.cs",
+      "class": "GroupRefill82QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "homebannerqa-homebannerqa",
+      "source": "Assets/Scripts/HomeBannerQA.cs",
+      "class": "HomeBannerQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "homefeedbackqa-homefeedbackqa",
+      "source": "Assets/Scripts/HomeFeedbackQA.cs",
+      "class": "HomeFeedbackQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "immediatespecialintro020qa-immediatespecialintro020qa",
+      "source": "Assets/Scripts/ImmediateSpecialIntro020QA.cs",
+      "class": "ImmediateSpecialIntro020QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ingamefeedbackqa-ingamefeedbackqa",
+      "source": "Assets/Scripts/InGameFeedbackQA.cs",
+      "class": "InGameFeedbackQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ingotfxqa-ingotfxqa",
+      "source": "Assets/Scripts/IngotFxQA.cs",
+      "class": "IngotFxQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "jellybalancer2qa-jellybalancer2qa",
+      "source": "Assets/Scripts/JellyBalanceR2QA.cs",
+      "class": "JellyBalanceR2QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "jellybrickqa-jellybrickqa",
+      "source": "Assets/Scripts/JellyBrickQA.cs",
+      "class": "JellyBrickQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "jellyjourney80qa-jellyjourney80preview",
+      "source": "Assets/Scripts/JellyJourney80QA.cs",
+      "class": "JellyJourney80Preview",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "jellyjourney80qa-jellyjourney80qa",
+      "source": "Assets/Scripts/JellyJourney80QA.cs",
+      "class": "JellyJourney80QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "jellyribbontexture80qa-jellyribbontexture80qa",
+      "source": "Assets/Scripts/JellyRibbonTexture80QA.cs",
+      "class": "JellyRibbonTexture80QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "jellyv40qa-jellyv40qa",
+      "source": "Assets/Scripts/JellyV40QA.cs",
+      "class": "JellyV40QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "jellywallqa-jellywallqa",
+      "source": "Assets/Scripts/JellyWallQA.cs",
+      "class": "JellyWallQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leaguecalendarpreview-leaguecalendarpreview",
+      "source": "Assets/Scripts/LeagueCalendarPreview.cs",
+      "class": "LeagueCalendarPreview",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leaguecalendarqa-leaguecalendarqa",
+      "source": "Assets/Scripts/LeagueCalendarQA.cs",
+      "class": "LeagueCalendarQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leaguefontpreview-leaguefontpreview",
+      "source": "Assets/Scripts/LeagueFontPreview.cs",
+      "class": "LeagueFontPreview",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leagueqa-leagueqa",
+      "source": "Assets/Scripts/LeagueQA.cs",
+      "class": "LeagueQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leaguev66qa-leaguev66qa",
+      "source": "Assets/Scripts/LeagueV66QA.cs",
+      "class": "LeagueV66QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leaguev79qa-leaguev79qa",
+      "source": "Assets/Scripts/LeagueV79QA.cs",
+      "class": "LeagueV79QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-fusioncoreqa-fusioncoreqa",
+      "source": "Assets/Scripts/LevelEditor/FusionCoreQA.cs",
+      "class": "FusionCoreQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-fusiondeviceqa-fusiondeviceqa",
+      "source": "Assets/Scripts/LevelEditor/FusionDeviceQA.cs",
+      "class": "FusionDeviceQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-fusionflowqa-fusionflowqa",
+      "source": "Assets/Scripts/LevelEditor/FusionFlowQA.cs",
+      "class": "FusionFlowQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-fusionqa-fusionqa",
+      "source": "Assets/Scripts/LevelEditor/FusionQA.cs",
+      "class": "FusionQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-fusionrearqa-fusionrearqa",
+      "source": "Assets/Scripts/LevelEditor/FusionRearQA.cs",
+      "class": "FusionRearQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-fusionsuperrangeqa-fusionsuperrangeqa",
+      "source": "Assets/Scripts/LevelEditor/FusionSuperRangeQA.cs",
+      "class": "FusionSuperRangeQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-levelbalancepolicy-balancefirepolicy",
+      "source": "Assets/Scripts/LevelEditor/LevelBalancePolicy.cs",
+      "class": "BalanceFirePolicy",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-levelbalancerunner-levelbalancerunner",
+      "source": "Assets/Scripts/LevelEditor/LevelBalanceRunner.cs",
+      "class": "LevelBalanceRunner",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-leveleditorapp-leveleditorapp",
+      "source": "Assets/Scripts/LevelEditor/LevelEditorApp.cs",
+      "class": "LevelEditorApp",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-leveleditorplaytest-leveleditorplaytest",
+      "source": "Assets/Scripts/LevelEditor/LevelEditorPlaytest.cs",
+      "class": "LevelEditorPlaytest",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "leveleditor-openingbalancechecks-openingbalancechecks",
+      "source": "Assets/Scripts/LevelEditor/OpeningBalanceChecks.cs",
+      "class": "OpeningBalanceChecks",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "levelentry88qa-levelentry88qa",
+      "source": "Assets/Scripts/LevelEntry88QA.cs",
+      "class": "LevelEntry88QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "levelfivesettlementqa-levelfivesettlementqa",
+      "source": "Assets/Scripts/LevelFiveSettlementQA.cs",
+      "class": "LevelFiveSettlementQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "lifecycleqa-lifecycleqa",
+      "source": "Assets/Scripts/LifecycleQA.cs",
+      "class": "LifecycleQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "loadingqa-loadingqa",
+      "source": "Assets/Scripts/LoadingQA.cs",
+      "class": "LoadingQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "mobile73qa-mobile73qa",
+      "source": "Assets/Scripts/Mobile73QA.cs",
+      "class": "Mobile73QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "mobilev54qa-mobilev54qa",
+      "source": "Assets/Scripts/MobileV54QA.cs",
+      "class": "MobileV54QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "mobilev55handoffqa-mobilev55handoffqa",
+      "source": "Assets/Scripts/MobileV55HandoffQA.cs",
+      "class": "MobileV55HandoffQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "mobilev55stressqa-mobilev55stressqa",
+      "source": "Assets/Scripts/MobileV55StressQA.cs",
+      "class": "MobileV55StressQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "mobilev56brickqa-mobilev56brickqa",
+      "source": "Assets/Scripts/MobileV56BrickQA.cs",
+      "class": "MobileV56BrickQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "mobilev57inputqa-mobilev57inputqa",
+      "source": "Assets/Scripts/MobileV57InputQA.cs",
+      "class": "MobileV57InputQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "mobilev58outcomeqa-mobilev58outcomeqa",
+      "source": "Assets/Scripts/MobileV58OutcomeQA.cs",
+      "class": "MobileV58OutcomeQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "onboardingqa-onboardingqa",
+      "source": "Assets/Scripts/OnboardingQA.cs",
+      "class": "OnboardingQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "opening81qa-opening81qa",
+      "source": "Assets/Scripts/Opening81QA.cs",
+      "class": "Opening81QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "openingeffectsqa-openingeffectsqa",
+      "source": "Assets/Scripts/OpeningEffectsQA.cs",
+      "class": "OpeningEffectsQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "optimizationv76qa-optimizationv76qa",
+      "source": "Assets/Scripts/OptimizationV76QA.cs",
+      "class": "OptimizationV76QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "packagecleanupqa-packagecleanupqa",
+      "source": "Assets/Scripts/PackageCleanupQA.cs",
+      "class": "PackageCleanupQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "pastelqa-pastelqa",
+      "source": "Assets/Scripts/PastelQA.cs",
+      "class": "PastelQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "prefetchreuse020qa-appui",
+      "source": "Assets/Scripts/PrefetchReuse020QA.cs",
+      "class": "AppUI",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "prefetchreuse020qa-prefetchreuse020qa",
+      "source": "Assets/Scripts/PrefetchReuse020QA.cs",
+      "class": "PrefetchReuse020QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "refill80qa-gamesession",
+      "source": "Assets/Scripts/Refill80QA.cs",
+      "class": "GameSession",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "refill80qa-refill80qa",
+      "source": "Assets/Scripts/Refill80QA.cs",
+      "class": "Refill80QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "refillcolumnsqa-refillcolumnsqa",
+      "source": "Assets/Scripts/RefillColumnsQA.cs",
+      "class": "RefillColumnsQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "refillv63qa-refillv63qa",
+      "source": "Assets/Scripts/RefillV63QA.cs",
+      "class": "RefillV63QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "resultnosplashf4qa-resultnosplashf4qa",
+      "source": "Assets/Scripts/ResultNoSplashF4QA.cs",
+      "class": "ResultNoSplashF4QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "round4audit-round4audit",
+      "source": "Assets/Scripts/Round4Audit.cs",
+      "class": "Round4Audit",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "round5demo-round5demo",
+      "source": "Assets/Scripts/Round5Demo.cs",
+      "class": "Round5Demo",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "round6demo-round6demo",
+      "source": "Assets/Scripts/Round6Demo.cs",
+      "class": "Round6Demo",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "secondgroupintegrationqa-secondgroupintegrationqa",
+      "source": "Assets/Scripts/SecondGroupIntegrationQA.cs",
+      "class": "SecondGroupIntegrationQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "secondgroupintegrationqa-secondgrouppreview",
+      "source": "Assets/Scripts/SecondGroupIntegrationQA.cs",
+      "class": "SecondGroupPreview",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "settingscpreview-settingscpreview",
+      "source": "Assets/Scripts/SettingsCPreview.cs",
+      "class": "SettingsCPreview",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "settingscqa-settingscqa",
+      "source": "Assets/Scripts/SettingsCQA.cs",
+      "class": "SettingsCQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "settlement82qa-settlement82qa",
+      "source": "Assets/Scripts/Settlement82QA.cs",
+      "class": "Settlement82QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "sevenspecial80qa-sevenspecial80qa",
+      "source": "Assets/Scripts/SevenSpecial80QA.cs",
+      "class": "SevenSpecial80QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "sfxv87qa-sfxv87qa",
+      "source": "Assets/Scripts/SfxV87QA.cs",
+      "class": "SfxV87QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "specialgenerationaudit-specialgenerationaudit",
+      "source": "Assets/Scripts/SpecialGenerationAudit.cs",
+      "class": "SpecialGenerationAudit",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "streakrewardv74qa-streakrewardv74qa",
+      "source": "Assets/Scripts/StreakRewardV74QA.cs",
+      "class": "StreakRewardV74QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "streakv61qa-streakv61qa",
+      "source": "Assets/Scripts/StreakV61QA.cs",
+      "class": "StreakV61QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "systemsv64qa-systemsv64qa",
+      "source": "Assets/Scripts/SystemsV64QA.cs",
+      "class": "SystemsV64QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "thirdgroupqa-thirdgroupqa",
+      "source": "Assets/Scripts/ThirdGroupQA.cs",
+      "class": "ThirdGroupQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-activitycarousel-activitycarousel",
+      "source": "Assets/Scripts/UI/ActivityCarousel.cs",
+      "class": "ActivityCarousel",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-activityjellymotion-activityjellymotion",
+      "source": "Assets/Scripts/UI/ActivityJellyMotion.cs",
+      "class": "ActivityJellyMotion",
+      "previousStatus": "source-route-reviewed",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-alphabetintroductionview-boosters-boosterstoryactor",
+      "source": "Assets/Scripts/UI/AlphabetIntroductionView.Boosters.cs",
+      "class": "BoosterStoryActor",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-alphabetintroductionview-motion-alphabetintroductionview",
+      "source": "Assets/Scripts/UI/AlphabetIntroductionView.Motion.cs",
+      "class": "AlphabetIntroductionView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-appui-boosterunlocks-appui",
+      "source": "Assets/Scripts/UI/AppUI.BoosterUnlocks.cs",
+      "class": "AppUI",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-appui-chapteropening70-appui",
+      "source": "Assets/Scripts/UI/AppUI.ChapterOpening70.cs",
+      "class": "AppUI",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-appui-shop-appui",
+      "source": "Assets/Scripts/UI/AppUI.Shop.cs",
+      "class": "AppUI",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-appui-tutorial-appui",
+      "source": "Assets/Scripts/UI/AppUI.Tutorial.cs",
+      "class": "AppUI",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-battleinterfacetour-appui",
+      "source": "Assets/Scripts/UI/BattleInterfaceTour.cs",
+      "class": "AppUI",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-battleinterfacetour-battleinterfacetour",
+      "source": "Assets/Scripts/UI/BattleInterfaceTour.cs",
+      "class": "BattleInterfaceTour",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-bosshud-bosshud",
+      "source": "Assets/Scripts/UI/BossHUD.cs",
+      "class": "BossHUD",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-chapteropening70-chapteropening70",
+      "source": "Assets/Scripts/UI/ChapterOpening70.cs",
+      "class": "ChapterOpening70",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-failurecatanimation-failurecatanimation",
+      "source": "Assets/Scripts/UI/FailureCatAnimation.cs",
+      "class": "FailureCatAnimation",
+      "previousStatus": "source-route-reviewed",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-gametypography-gametypography",
+      "source": "Assets/Scripts/UI/GameTypography.cs",
+      "class": "GameTypography",
+      "previousStatus": "non-animation",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-journeyart-chaptertransitionpreview",
+      "source": "Assets/Scripts/UI/JourneyArt.cs",
+      "class": "ChapterTransitionPreview",
+      "previousStatus": "inactive-preview",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-leaguebannerstatus-leaguebannerstatus",
+      "source": "Assets/Scripts/UI/LeagueBannerStatus.cs",
+      "class": "LeagueBannerStatus",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-lessoncollectionflight-lessoncollectionflight",
+      "source": "Assets/Scripts/UI/LessonCollectionFlight.cs",
+      "class": "LessonCollectionFlight",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-openingintroduction-openingruledemo",
+      "source": "Assets/Scripts/UI/OpeningIntroduction.cs",
+      "class": "OpeningRuleDemo",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-paintingcollectionpresentation-paintingcollectionpresentation",
+      "source": "Assets/Scripts/UI/PaintingCollectionPresentation.cs",
+      "class": "PaintingCollectionPresentation",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-playabletutorialguide-playabletutorialguide",
+      "source": "Assets/Scripts/UI/PlayableTutorialGuide.cs",
+      "class": "PlayableTutorialGuide",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-referencechapterview-chapterhomeview",
+      "source": "Assets/Scripts/UI/ReferenceChapterView.cs",
+      "class": "ChapterHomeView",
+      "previousStatus": "source-route-reviewed",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-round6nav-round6nav",
+      "source": "Assets/Scripts/UI/Round6Nav.cs",
+      "class": "Round6Nav",
+      "previousStatus": "legacy-route-disabled",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-tutorialmotionboard-tutorialmotionboard",
+      "source": "Assets/Scripts/UI/TutorialMotionBoard.cs",
+      "class": "TutorialMotionBoard",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-uicraft-uicraft",
+      "source": "Assets/Scripts/UI/UICraft.cs",
+      "class": "UICraft",
+      "previousStatus": "non-animation",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "ui-victorycatanimation-victorycatanimation",
+      "source": "Assets/Scripts/UI/VictoryCatAnimation.cs",
+      "class": "VictoryCatAnimation",
+      "previousStatus": "source-route-reviewed",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "victoryfinaleqa-victoryfinalepreview",
+      "source": "Assets/Scripts/VictoryFinaleQA.cs",
+      "class": "VictoryFinalePreview",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "victoryfinaleqa-victoryfinaleqa",
+      "source": "Assets/Scripts/VictoryFinaleQA.cs",
+      "class": "VictoryFinaleQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "victoryqa-victoryqa",
+      "source": "Assets/Scripts/VictoryQA.cs",
+      "class": "VictoryQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "victoryrace020qa-victoryrace020qa",
+      "source": "Assets/Scripts/VictoryRace020QA.cs",
+      "class": "VictoryRace020QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "victoryspeedr3qa-victoryspeedr3qa",
+      "source": "Assets/Scripts/VictorySpeedR3QA.cs",
+      "class": "VictorySpeedR3QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "wechatadaptation87qa-wechatadaptation87qa",
+      "source": "Assets/Scripts/WeChatAdaptation87QA.cs",
+      "class": "WeChatAdaptation87QA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "windowsdemorecorder-demorecorderbootstrap",
+      "source": "Assets/Scripts/WindowsDemoRecorder.cs",
+      "class": "DemoRecorderBootstrap",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "windowsdemorecorder-windowsdemorecorder",
+      "source": "Assets/Scripts/WindowsDemoRecorder.cs",
+      "class": "WindowsDemoRecorder",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-abilityart-abilityframefx",
+      "source": "Assets/Scripts/World/AbilityArt.cs",
+      "class": "AbilityFrameFx",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-boardsurface-boardsurface",
+      "source": "Assets/Scripts/World/BoardSurface.cs",
+      "class": "BoardSurface",
+      "previousStatus": "non-animation",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-bossbody-bossbody",
+      "source": "Assets/Scripts/World/BossBody.cs",
+      "class": "BossBody",
+      "previousStatus": "mixed-physics-presentation-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-chaincubeart-chainbondview",
+      "source": "Assets/Scripts/World/ChainCubeArt.cs",
+      "class": "ChainBondView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-chaincubeart-chaincubeburst",
+      "source": "Assets/Scripts/World/ChainCubeArt.cs",
+      "class": "ChainCubeBurst",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-chaincubeart-chaincubeidle",
+      "source": "Assets/Scripts/World/ChainCubeArt.cs",
+      "class": "ChainCubeIdle",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-chaincubeart-chaincubeview",
+      "source": "Assets/Scripts/World/ChainCubeArt.cs",
+      "class": "ChainCubeView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-chainvisualart-chainbrickview",
+      "source": "Assets/Scripts/World/ChainVisualArt.cs",
+      "class": "ChainBrickView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-chainvisualart-chainidlesprite",
+      "source": "Assets/Scripts/World/ChainVisualArt.cs",
+      "class": "ChainIdleSprite",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-chainvisualart-chainstoneview",
+      "source": "Assets/Scripts/World/ChainVisualArt.cs",
+      "class": "ChainStoneView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-electriccircuit-electriccircuit",
+      "source": "Assets/Scripts/World/ElectricCircuit.cs",
+      "class": "ElectricCircuit",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-fusionballbudgetview-fusionballbudgetview",
+      "source": "Assets/Scripts/World/FusionBallBudgetView.cs",
+      "class": "FusionBallBudgetView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-gardensceneart-gardensceneart",
+      "source": "Assets/Scripts/World/GardenSceneArt.cs",
+      "class": "GardenSceneArt",
+      "previousStatus": "non-animation",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-juicegardenview-juicegardenview",
+      "source": "Assets/Scripts/World/JuiceGardenView.cs",
+      "class": "JuiceGardenView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-mainlineart-mainlinebrickview",
+      "source": "Assets/Scripts/World/MainlineArt.cs",
+      "class": "MainlineBrickView",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-mainlineart-mainlinecanvas",
+      "source": "Assets/Scripts/World/MainlineArt.cs",
+      "class": "MainlineCanvas",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-mainlineart-mainlineframefx",
+      "source": "Assets/Scripts/World/MainlineArt.cs",
+      "class": "MainlineFrameFx",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-paintingboard-paintingboard",
+      "source": "Assets/Scripts/World/PaintingBoard.cs",
+      "class": "PaintingBoard",
+      "previousStatus": "requires-route-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-physicsbodies-movingobstacle",
+      "source": "Assets/Scripts/World/PhysicsBodies.cs",
+      "class": "MovingObstacle",
+      "previousStatus": "mixed-physics-presentation-review",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "world-pixelpieceart-pixelpieceart",
+      "source": "Assets/Scripts/World/PixelPieceArt.cs",
+      "class": "PixelPieceArt",
+      "previousStatus": "non-animation",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    },
+    {
+      "id": "yarnqa-yarnqa",
+      "source": "Assets/Scripts/YarnQA.cs",
+      "class": "YarnQA",
+      "previousStatus": "test-fixture",
+      "status": "absent-from-current-source-inventory; historical snapshot retained"
+    }
+  ],
+  "policy": "Only current inventory counts toward current coverage. Historical snapshots and reusable old presets remain explicitly versioned."
+}

@@ -22,7 +22,7 @@ public static class OpeningCampaign {
  public static AlphabetStage Metadata(int index){var s=Stage(index);return new AlphabetStage{letter=(index+1).ToString(),name=s.name,lesson=s.focus,moves=s.moves,pressure=index<4?1:1.3f,glyph=Enumerable.Repeat("00000",7).ToArray(),cells=Array.Empty<AlphabetCell>(),chests=Array.Empty<AlphabetChest>()};}
  public static bool Allows(int index,int kind)=>Contains(index)&&SevenSpecialRules.IsSpecial(kind);
  public static int ToolKind(string kind){switch(kind){case "bomb":return SevenSpecialRules.Bomb;case "horizontal":return SevenSpecialRules.Horizontal;case "vertical":return SevenSpecialRules.Vertical;case "cross":return SevenSpecialRules.Cross;case "rainbow":return SevenSpecialRules.Rainbow;default:throw new InvalidOperationException("Unknown opening special "+kind);}}
- public static void LoadBalanceData(string json){if(!RuntimeQA.IsIsolated)throw new InvalidOperationException("Balance data requires isolation");var previous=data;try{data=JsonUtility.FromJson<OpeningData>(json);if(data?.levels==null||data.levels.Length!=Count)throw new InvalidOperationException("Need 45 stages");Validate();}catch{data=previous;throw;}}
+ 
  public static void ValidateHealth(OpeningStage s){
   if(s.health!=null&&(s.health.ordinaryHp<1||s.health.ordinaryHp>99||s.health.refillHp<1||s.health.refillHp>99))throw new InvalidOperationException("Opening HP must be 1-99");
   var cells=new HashSet<int>();foreach(var p in s.hpOverrides??Array.Empty<OpeningHpOverride>()){if(p.c<0||p.c>8||p.r<0||p.r>8||p.hp<1||p.hp>99||!cells.Add(p.r*9+p.c)||s.rows[p.r][p.c]=='.'||s.pieces.Any(v=>v.kind!="ingot"&&p.c>=v.c&&p.c<v.c+(v.kind=="cookie_box"?2:1)&&p.r>=v.r&&p.r<v.r+(v.kind=="cookie_box"?2:1)))throw new InvalidOperationException("Invalid ordinary HP override");}
@@ -48,9 +48,8 @@ public static class OpeningCampaign {
 }
 
 public sealed partial class GameSession {
- bool openingDraftSuppressed;
- public bool IsOpening=>IsAlphabet&&!IsTutorial&&!IsStreakTrial&&!FusionActive&&!openingDraftSuppressed&&OpeningCampaign.Contains(LevelIndex);
- public bool OpeningHasYarn=>IsOpening&&OpeningCampaign.Targets(OpeningStage).Any(t=>t.kind=="yarn");
+ public bool IsOpening=>IsAlphabet&&OpeningCampaign.Contains(LevelIndex);
+ 
  public OpeningStage OpeningStage=>IsOpening?OpeningCampaign.Stage(LevelIndex):null;
  int openingSupplySerial;long openingEliminationSerial,openingEliminationBatch;
  readonly Dictionary<long,int> openingEliminationStrength=new Dictionary<long,int>();
@@ -58,7 +57,7 @@ public sealed partial class GameSession {
  readonly List<OpeningYarnEffect> openingYarnEffects=new List<OpeningYarnEffect>();
  public int OpeningYarnLayersRemoved {get;private set;}
  public int OpeningYarnPending=>openingYarnEffects.Count(v=>v!=null&&v.Pending);
- void ClearOpening(){ClearOpeningTargets();ClearOpeningThird();ClearOpeningCopper();openingDraftSuppressed=false;openingYarn.Clear();openingCookies.Clear();openingYarnEffects.Clear();openingEliminationStrength.Clear();openingSupplySerial=0;openingEliminationSerial=openingEliminationBatch=0;OpeningYarnLayersRemoved=OpeningCookiesReleased=0;}
+ void ClearOpening(){ClearOpeningTargets();ClearOpeningThird();ClearOpeningCopper();openingYarn.Clear();openingCookies.Clear();openingYarnEffects.Clear();openingEliminationStrength.Clear();openingSupplySerial=0;openingEliminationSerial=openingEliminationBatch=0;OpeningYarnLayersRemoved=OpeningCookiesReleased=0;}
  void TickOpeningYarn(float dt){if(IsPaused)return;TickOpeningCopper(dt);foreach(var box in openingCookies.Values)if(box!=null&&box.Brick.Alive)box.Tick(dt);foreach(var view in openingYarn.Values)if(view!=null&&view.Brick.Alive)view.Tick(dt);for(int i=openingYarnEffects.Count-1;i>=0;i--){var effect=openingYarnEffects[i];if(effect==null){openingYarnEffects.RemoveAt(i);continue;}effect.Tick(dt);if(!effect.Pending)openingYarnEffects.RemoveAt(i);}}
  void InitializeOpeningGrid(){var steps=InitializeOpeningGridSteps(false);while(steps.MoveNext()){} }
  System.Collections.IEnumerator InitializeOpeningGridSteps(bool incremental){

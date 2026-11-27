@@ -3,7 +3,7 @@
 状态：`non-animation`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/PlayerHaptics71.cs`
-文件 SHA-256：`1605e8f0f36d6b9e39c7f7526323e7a055a2841ae4fcef70d74380ae5aaa9bec`
+文件 SHA-256：`dcaf0049a9e6ccd21728c1ad4fdf19c88847ac3d6ffa2e3401878186831c0770`
 [原始源码快照](../source/Assets/Scripts/PlayerHaptics71.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -12,16 +12,13 @@
 
 ### TryPulse · L9
 
-方法 SHA-256：`f3c059818acddb7a57ab694641d1c19ad72bd629ace86af1cf8a05d758d41356`
+方法 SHA-256：`fa8052278940176690c829dea7d3e4cf28dccabfdd2acd4b8fe4d5e5ececce7f`
 时间来源：Time.unscaledTime
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.PlayerHaptics71.TryPulse(BounceGarden.PlayerHaptics71.Strength, System.Action<bool>)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/CollisionHapticsQA.cs:25` · `CollisionHapticsQA.Start` → `PlayerHaptics71.TryPulse(PlayerHaptics71.Strength.Heavy,ok=>result=ok)`
-- `Assets/Scripts/Mobile73QA.cs:49` · `Mobile73QA.Start` → `PlayerHaptics71.TryPulse(PlayerHaptics71.Strength.Medium,_=>{})`
-- `Assets/Scripts/Mobile73QA.cs:51` · `Mobile73QA.Start` → `PlayerHaptics71.TryPulse(PlayerHaptics71.Strength.Medium,ok=>result=ok)`
 - `Assets/Scripts/PlayerHaptics71.cs:8` · `PlayerHaptics71.Pulse` → `TryPulse(strength,null)`
 
 ```csharp
@@ -37,6 +34,8 @@ public static void TryPulse(Strength strength,Action<bool> completed){
    if(RuntimeQA.IsIsolated){finish(false);return;}
    #if UNITY_ANDROID && !UNITY_EDITOR
    bool ok=AndroidPulse(strength);finish(ok);
+   #elif UNITY_WEBGL && BOUNCE_BROWSER && !UNITY_EDITOR
+   bool ok=BounceBrowserHaptic(strength==Strength.Heavy?400:15)!=0;finish(ok);
    #elif UNITY_IOS && !UNITY_EDITOR
    bool ok=BounceImpactHaptic(strength==Strength.Heavy?1:0);finish(ok);
    #else

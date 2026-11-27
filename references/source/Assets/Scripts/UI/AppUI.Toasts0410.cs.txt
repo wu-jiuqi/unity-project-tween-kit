@@ -1,0 +1,19 @@
+using UnityEngine;
+namespace BounceGarden {
+public partial class AppUI {
+ internal void LayoutToast0410(ToastNotification0410 view){
+  if(view==null||canvasRoot==null)return;
+  var pixels=MenuAvoidanceViewport;var safe=AlphabetSafeRect;
+  if(WeChatLayoutMetrics.TryGetBlockedRect(pixels,out var blocked))safe.yMax=Mathf.Min(safe.yMax,blocked.yMin-12);
+  float cw=canvasRoot.rect.width,ch=canvasRoot.rect.height;
+  float availableW=safe.width/Mathf.Max(1,pixels.x)*cw,availableH=safe.height/Mathf.Max(1,pixels.y)*ch;
+  float fit=Mathf.Min(1,Mathf.Min(availableW*.833333f/900,Mathf.Max(1,availableH-60)/view.Height));
+  var rt=(RectTransform)view.transform;var parent=(RectTransform)rt.parent;
+  rt.localScale=new Vector3(canvasRoot.lossyScale.x/parent.lossyScale.x,canvasRoot.lossyScale.y/parent.lossyScale.y,1)*fit;
+  var center=new Vector3((safe.center.x/Mathf.Max(1,pixels.x)-.5f)*cw,((safe.center.y+safe.height*.048f)/Mathf.Max(1,pixels.y)-.5f)*ch,0);
+  rt.anchoredPosition=(Vector2)parent.InverseTransformPoint(canvasRoot.TransformPoint(center));
+ }
+ 
+ 
+}
+}

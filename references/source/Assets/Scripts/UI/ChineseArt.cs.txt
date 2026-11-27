@@ -4,17 +4,17 @@ using UnityEngine.UI;
 namespace BounceGarden {
 // Independent transparent Chinese word sprites share the existing presentation timelines.
 public static class ChineseArt {
- static Texture2D logo;static Sprite brand;static readonly Sprite[] cheers=new Sprite[4];
+ static readonly Sprite[] cheers=new Sprite[4];
  static readonly string[] CheerKeys={"nice","great","amazing","incredible"};
- public static string Rating(int tier)=>new[]{"真不错！","太棒啦！","好厉害！","不可思议！"}[Mathf.Clamp(tier,0,3)];
+ 
  public static Sprite CheerArt(int tier){tier=Mathf.Clamp(tier,0,3);if(cheers[tier]!=null)return cheers[tier];
   var texture=Resources.Load<Texture2D>("Art/ChineseV59/Cheers/"+CheerKeys[tier]);if(texture==null)throw new InvalidOperationException("Missing Chinese cheer art: "+CheerKeys[tier]);
   return cheers[tier]=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);
  }
  public static Image Cheer(Transform parent,float width,float height){return Image(parent,"Chinese encouragement artwork",CheerArt(0),0,0,width,height);}
  public static void SetCheer(Image image,int tier){image.sprite=CheerArt(tier);image.color=Color.white;}
- public static Sprite Brand {get{if(brand!=null)return brand;if(logo==null)logo=Resources.Load<Texture2D>("Art/ChineseV59/logo");if(logo==null)throw new InvalidOperationException("Chinese logo is missing");return brand=Sprite.Create(logo,new Rect(0,0,logo.width,logo.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);}}
+ 
  public static Image Image(Transform parent,string name,Sprite sprite,float x,float y,float w,float h){var image=UICraft.Box(parent,name,x,y,w,h,Color.white);image.sprite=sprite;image.type=UnityEngine.UI.Image.Type.Simple;image.preserveAspect=true;image.raycastTarget=false;return image;}
- public static string PicnicTitle(string key)=>key=="lemon"?"柠檬冻":key=="cookie"?"饼干连锁":key=="basket"?"野餐篮":key=="strawberry"?"草莓成熟":key=="anchor"?"固定砖":key=="soda"?"汽水接力":"草莓成熟";
+ 
 }
 }

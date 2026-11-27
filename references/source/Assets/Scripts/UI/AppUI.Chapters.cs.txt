@@ -2,12 +2,12 @@ using UnityEngine;
 namespace BounceGarden {
 public partial class AppUI {
  int NextCampaignLevel=>Profile.HomeLevelIndex;
- void BuildChapterHome(RectTransform page){var scene=UICraft.Root(page,"Home chapter scene");var home=scene.gameObject.AddComponent<ChapterHomeView>();home.Build(NextCampaignLevel,()=>ShowPage("chapters"),StartFromChapterHome,OpenLeagueCustomization,Settings,()=>ShowPage("ranking"),()=>{shopCategory=0;ShowPage("shop");DrawShop();},message=>Toast(message));if(Profile.CampaignWinStreak>0){var footer=scene.Find("Native home composition/Play current level");if(footer!=null)UICraft.Label(footer,Profile.CampaignWinStreak+"连胜"+(Profile.CampaignStreakTier>0?" · 下一关自动赠送强化道具":" · 再赢"+(3-Profile.CampaignWinStreak)+"关获得穿透奖励"),0,147,850,62,31,UICraft.Ink);}}
+ void BuildChapterHome(RectTransform page){var scene=UICraft.Root(page,"Home chapter scene");scene.gameObject.AddComponent<HomeAView>().Build(StartFromChapterHome,OpenLeagueCustomization,Settings);}
  bool returnToTree;
  void BuildChapters(RectTransform page){Background(page,Color.white);page.gameObject.AddComponent<ChapterRouteView>().Build(Profile,()=>{returnToTree=false;ShowPage("home");},index=>StartTreeLevel(index),Toast);}
  public bool StartTreeLevel(int index){if(busy||!TreeJourney80.CanPlay(Profile,index))return false;returnToTree=true;BeginLevel(index);return true;}
- public void QAOpenChapters(){if(!RuntimeQA.IsIsolated)return;ShowPage("chapters",false);}
- void RefreshChapterHome(){ClearPages();ShowPage("home",false);}
- public void QARefreshChapterHome(){if(!RuntimeQA.IsIsolated)return;RefreshChapterHome();}
+ 
+ 
+ 
 }
 }

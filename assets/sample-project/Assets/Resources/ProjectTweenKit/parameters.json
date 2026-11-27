@@ -68,17 +68,17 @@
     },
     {
       "id": "charge",
-      "notes": "飞光.24秒，填充.36秒；保留透明处理、填充遮罩与随时间变化的材质参数。",
+      "notes": "已同步原生UI旋转充能实现；彗星.24秒，填充.36秒，满星脉冲.38秒；原接口保留。",
       "timeSource": "KitClock.Delta"
     },
     {
       "id": "victorycat",
-      "notes": "Victory=true，16帧非均匀时长，总长1.92秒；PlaybackSpeed为倍率，Loop控制循环。不要平均化每帧时长。",
+      "notes": "新版8帧，4×2图集；胜利1.92秒，失败2.32秒；ResultsC048Art保留各帧非均匀时长。",
       "timeSource": "KitClock.Delta"
     },
     {
       "id": "failurecat",
-      "notes": "Victory=false，16帧非均匀时长，总长2.32秒；PlaybackSpeed为倍率。不要复用胜利帧时长。",
+      "notes": "新版8帧，4×2图集；胜利1.92秒，失败2.32秒；ResultsC048Art保留各帧非均匀时长。",
       "timeSource": "KitClock.Delta"
     },
     {
@@ -179,6 +179,46 @@
     {
       "id": "breath",
       "notes": "Amplitude=.035，AngularSpeed=3 rad/s；相对原比例乘1+Amplitude×sin(age×AngularSpeed)。",
+      "timeSource": "KitClock.Delta"
+    },
+    {
+      "id": "toast",
+      "notes": "EnterDuration=.18秒 OutCubic，ExitDuration=.14秒 InCubic；HoldDuration=3.2秒，EnterScale=.96，ExitScale=.94。最新待显示消息覆盖旧消息；宿主输入类型与停留时长。",
+      "timeSource": "KitClock.Delta"
+    },
+    {
+      "id": "loadingbox",
+      "notes": "箱体落下.38秒、回弹.24秒；猫与砖块循环4.2秒；Render绝对时间，不驱动真实进度。",
+      "timeSource": "KitClock.Delta"
+    },
+    {
+      "id": "errorpopup",
+      "notes": "开.18秒/关.14秒；共享LoadingBoxAnimation；关闭按钮意图至多交付一次，取消/禁用丢弃意图。",
+      "timeSource": "KitClock.Delta"
+    },
+    {
+      "id": "pageflow",
+      "notes": "Width=920设计单位，Duration=.27秒 OutCubic；一次只显示出发与目的页，跨标签只移动一屏；请求票据阻止过期完成。",
+      "timeSource": "KitClock.Delta"
+    },
+    {
+      "id": "nativecharge",
+      "notes": "原生RectMask2D+星形Mask；136单位方形覆盖旋转对角线；彗星.24秒、填充.36秒；满星隐藏底色。",
+      "timeSource": "KitClock.Delta"
+    },
+    {
+      "id": "celebration",
+      "notes": "标题关键帧0/.14/.26/.40/.56/.78秒；1.65秒预备，1.8–2.4秒弧线下移，2.85秒落位；12fps、12帧持续循环。",
+      "timeSource": "KitClock.Delta"
+    },
+    {
+      "id": "lowmoves",
+      "notes": "WarningCycle=.48秒，WarningLoops=3，WarningAmplitude=.10，整体峰值1.2倍；业务阈值与400ms震动由宿主处理。",
+      "timeSource": "KitClock.ScaledDelta"
+    },
+    {
+      "id": "teaching",
+      "notes": "LoopDuration=6.72秒，每步2.24秒；七种现用教学页的原素材、实际轴心和静态相位，点击切换机关；业务进度不提交。",
       "timeSource": "KitClock.Delta"
     }
   ]

@@ -1,0 +1,12 @@
+#if UNITY_EDITOR || BOUNCE_QA
+using System;using System.Linq;using System.Collections.Generic;using UnityEngine;namespace BounceGarden {public sealed partial class GameSession {
+ public BallBody[] QAGRBalls(int id=0)=>active.Values.Where(b=>id==0||b.ChainBurstId==id).ToArray();
+
+ public void QAFinaleScore(int points){AddScore(points);changed=true;}
+
+ public void QAFinaleGoal(int moves,int points){if(!RuntimeQA.IsIsolated)return;typeof(RuleState).GetProperty("Shots").SetValue(rules,moves);AddScore(points);for(int i=0;i<OpeningTargets.Length;i++)OpeningCollected[i]=OpeningTargets[i].count;changed=true;}
+
+ public void QASpeedFixture(){QASevenClear();for(int r=4;r<9;r++)for(int c=2;c<7;c++)if(c!=4||r!=6)QAThirdNormal(c,r,c%5);QASevenTool(2,4,6,1);}
+
+}}
+#endif

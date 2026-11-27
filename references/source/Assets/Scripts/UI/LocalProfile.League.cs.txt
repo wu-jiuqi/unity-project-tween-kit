@@ -25,7 +25,7 @@ public sealed partial class LocalProfile {
   if(!LeagueUnlocked)return null;
   long now=LeagueClock.UtcSeconds;
   // Do not keep writing unchanged snapshots every frame; view requests once per configured interval.
-  if(storageHealthy&&(offline||league.current==null||now>league.current.lastObserved||(LeagueSettings.activeCompetition&&league.current.competitionVersion<LeagueEngine.ActiveCompetitionVersion)))LeagueTransaction(()=>{LeagueEngine.PrepareActive(league,LeagueSettings,now,Badges);LeagueEngine.Advance(league,now,Badges,offline);LeagueEngine.Open(league,LeagueSettings,now,Badges);},false);
+  if(storageHealthy&&(offline||league.current==null||LeagueExclusiveCosmetics.NeedsRefresh(league,LeagueSettings)||now>league.current.lastObserved||(LeagueSettings.activeCompetition&&league.current.competitionVersion<LeagueEngine.ActiveCompetitionVersion)))LeagueTransaction(()=>{LeagueExclusiveCosmetics.RefreshCurrent(league,LeagueSettings);LeagueEngine.PrepareActive(league,LeagueSettings,now,Badges);LeagueEngine.Advance(league,now,Badges,offline);LeagueEngine.Open(league,LeagueSettings,now,Badges);},false);
   var p=league.current;if(p==null)return null;
   var entries=LeagueEngine.Standings(p,Badges);var player=entries.First(e=>e.player);
   return new LeagueSnapshot{config=p.config,periodId=p.id,remaining=Math.Max(0,p.endsAt-now),entries=entries,player=player,next=player.rank>1?entries[player.rank-2]:null,reward=league.rewards.FirstOrDefault(r=>r.eligible&&!r.claimed)};
@@ -50,7 +50,7 @@ public sealed partial class LocalProfile {
   LeagueEngine.Win(league,LeagueSettings,now,oldBadges,Badges,true);LastLeagueMedalGain=1;LastLeagueRankAfter=LeagueEngine.Standings(p,Badges).First(e=>e.player).rank;
  }
  public bool GrantMedals(string transactionKey,int amount){if(!ValidKey(transactionKey)||amount<=0)return false;return Commit(transactionKey+"/medals",0,amount,UnlockedLevel);}
- public bool AddTestMedals(){return GrantMedals("medal-test/"+Guid.NewGuid().ToString("N"),LeagueSettings.testMedals);}
+ 
  public bool ClaimLeagueReward(string periodId){
   var reward=league.rewards.FirstOrDefault(r=>r.periodId==periodId);if(reward==null||!reward.eligible||reward.claimed||committed.Contains(periodId+"/leagueReward")||(long)reward.coins+LeagueDuplicateCoins(reward)>int.MaxValue-Coins)return false;
   int duplicate=LeagueDuplicateCoins(reward);

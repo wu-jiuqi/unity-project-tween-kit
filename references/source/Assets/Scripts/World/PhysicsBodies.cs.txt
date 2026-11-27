@@ -10,7 +10,7 @@ namespace BounceGarden
         public int ChainBurstId;public float ChainBornAt;
         public StreakBooster StreakPower {get;private set;}
         public int StreakProcStep=-1;
-        public SpriteRenderer FlightVisual=>visual;
+        
         public int YarnColor{get;private set;}
         public void SetYarnColor(int color){YarnColor=Mathf.Clamp(color,0,YarnArt.ColorCount-1);visual.sprite=YarnArt.Ball(YarnColor);visual.sharedMaterial=WorldArt.BoardMaterial;visual.transform.localScale=visualBaseScale;trail.SetYarnVariant(YarnColor);}
         float streakArtAge;
@@ -21,25 +21,18 @@ namespace BounceGarden
         GameSession owner;
         bool enteredBoard;
         Vector2 previousPosition;
-        float previousY, lastContactTime, impact;
+        float previousY,lastContactTime,impact;
         Vector2 flightDirection=Vector2.up;
         float flightSpeed;
         SpriteRenderer visual,boosterHalo;
         FlightTrail trail;
         public int ChainBreaks,ChainBankBreaks;public bool ChainBank,ChainGenerated;
         public Vector2 IncomingDirection {get;private set;}
-        public int HeatHits, BankCharge;
-        public int MatchColor {get;private set;}
-        public BallAbility Ability {get;private set;}
-        public bool AbilityUsed {get;private set;}
-        bool charged,piercing,strand;
-        int strandHits;
         readonly System.Collections.Generic.HashSet<int> pierced=new System.Collections.Generic.HashSet<int>();
         readonly System.Collections.Generic.List<Collider2D> ignored=new System.Collections.Generic.List<Collider2D>();
-        readonly RaycastHit2D[] streakPierceHits=new RaycastHit2D[24];
+        
         bool restoreStreakPierce;
         CircleCollider2D circle;
-        float abilityAge;
         Vector3 visualBaseScale;
         public void Create(GameSession session, PhysicsMaterial2D material)
         {
@@ -57,13 +50,12 @@ namespace BounceGarden
         }
         public void Initialize(int id,int generation,Vector2 position,Vector2 velocity,float gravity)
         {
-            ChainBreaks=ChainBankBreaks=0;ChainBank=ChainGenerated=false;IncomingDirection=velocity.normalized;HeatHits=BankCharge=0;impact=0;Id=id;SessionGeneration=generation;Active=true;enteredBoard=false;previousPosition=position;previousY=position.y;lastContactTime=-1;
+            ChainBreaks=ChainBankBreaks=0;ChainBank=ChainGenerated=false;IncomingDirection=velocity.normalized;impact=0;Id=id;SessionGeneration=generation;Active=true;enteredBoard=false;previousPosition=position;previousY=position.y;lastContactTime=-1;
             flightSpeed=owner.CurrentLevel.ballSpeed;flightDirection=velocity.sqrMagnitude>.000001f?velocity.normalized:Vector2.up;
             transform.position=position;transform.rotation=Quaternion.identity;visual.transform.localScale=visualBaseScale;
-            MatchColor=owner.IsColorMatch?owner.SpawningColor:-1;
-            int yarn=owner.IsColorMatch?ColorMatchArt.YarnVariant(MatchColor):owner.YarnVariant;
+            int yarn=owner.YarnVariant;
             YarnColor=yarn;visual.sprite=YarnArt.Ball(yarn);visual.sharedMaterial=WorldArt.BoardMaterial;trail.SetYarnVariant(yarn);
-            StreakPower=StreakBooster.None;restoreStreakPierce=false;boosterHalo.enabled=false;StreakProcStep=-1;charged=piercing=strand=false;AbilityUsed=false;strandHits=0;abilityAge=0;pierced.Clear();SetAbility(owner.SelectedAbility);
+            StreakPower=StreakBooster.None;restoreStreakPierce=false;boosterHalo.enabled=false;StreakProcStep=-1;pierced.Clear();
             visual.color=Color.white;gameObject.SetActive(true);Body.simulated=true;
             trail.ResetTrail(position);Body.position=position;Body.rotation=0;Body.gravityScale=0f;Body.linearDamping=0;Body.angularDamping=0;Body.linearVelocity=flightDirection*flightSpeed;Body.angularVelocity=0;Body.WakeUp();
         }
@@ -76,7 +68,7 @@ namespace BounceGarden
         }
         void FixedUpdate()
         {
-            if(!Active||owner==null||!owner.IsPlaying||owner.IsPaused||owner.JuiceFrozen||owner.RefillFreezeBalls)return;
+            if(!Active||owner==null||!owner.IsPlaying||owner.IsPaused||owner.RefillFreezeBalls)return;
             for(int i=ignored.Count-1;i>=0;i--){var c=ignored[i];if(c==null){ignored.RemoveAt(i);continue;}var bounds=c.bounds;bounds.Expand(FlightGeometry.Radius*2+.03f);if(!c.enabled||!bounds.Contains(new Vector3(Body.position.x,Body.position.y,c.bounds.center.z))){Physics2D.IgnoreCollision(circle,c,false);ignored.RemoveAt(i);}}
             if(restoreStreakPierce){Body.linearVelocity=flightDirection*flightSpeed;restoreStreakPierce=false;}
             RestoreSpeed();
@@ -85,25 +77,12 @@ namespace BounceGarden
             float returnY=owner.ReturnLineY;
             if(p.y>(owner.IsChainCollection?returnY+.1f:-5.0f))enteredBoard=true;
             if((enteredBoard&&previousY>returnY&&p.y<=returnY) || p.y < -10.65f || Mathf.Abs(p.x)>6.2f || p.y>10.5f)
-            { var exit=enteredBoard&&previousY>returnY&&p.y<=returnY?Vector2.Lerp(previousPosition,p,(previousY-returnY)/(previousY-p.y)):p;trail.Sample(exit);if(owner.TryPawReturn(this,exit))return;owner.LoseBall(this,exit);return; }
+            { var exit=enteredBoard&&previousY>returnY&&p.y<=returnY?Vector2.Lerp(previousPosition,p,(previousY-returnY)/(previousY-p.y)):p;trail.Sample(exit);owner.LoseBall(this,exit);return; }
             owner.CheckChainTools(this,previousPosition,p);
             trail.Sample(p);previousPosition=p;previousY=p.y;
         }
         void SweepStreakPierce(){
-            if(!(owner.IsStreakTrial||owner.UsesShopBoosters)||StreakPower!=StreakBooster.Pierce||!owner.FusionPierceAvailable(this))return;
-            var filter=new ContactFilter2D();filter.SetLayerMask(1<<8);filter.useTriggers=false;
-            float distance=flightSpeed*Time.fixedDeltaTime+.005f,barrier=distance+.001f;
-            int count=Physics2D.CircleCast(Body.position,FlightGeometry.Radius,flightDirection,filter,streakPierceHits,distance);
-            // A finite pass budget is spent from the nearest contact outward.
-            for(int i=1;i<count;i++){var hit=streakPierceHits[i];int j=i-1;while(j>=0&&streakPierceHits[j].distance>hit.distance){streakPierceHits[j+1]=streakPierceHits[j];j--;}streakPierceHits[j+1]=hit;}
-            for(int i=0;i<count;i++){var hit=streakPierceHits[i];var b=hit.collider.GetComponentInParent<BrickBody>();if(b==null||b.Definition.kind==BrickKind.Stone||owner.FusionPierceBlocked(b))barrier=Mathf.Min(barrier,hit.distance);}
-            for(int i=0;i<count;i++){
-                var hit=streakPierceHits[i];var b=hit.collider.GetComponentInParent<BrickBody>();
-                if(hit.distance>barrier||b==null||!b.Alive||b.Definition.kind==BrickKind.Stone||owner.FusionPierceBlocked(b)||ignored.Contains(hit.collider)||!owner.FusionPierceAvailable(this))continue;
-                // Ignore before the solver runs, so a piercing hit never receives
-                // an unwanted bounce impulse. Separation re-arms a later traversal.
-                PlayerHaptics71.Pulse();Physics2D.IgnoreCollision(circle,hit.collider,true);ignored.Add(hit.collider);IncomingDirection=flightDirection;owner.HitBrick(b,this,hit.point);owner.PlayStreakImpact(StreakBooster.Pierce,hit.point);owner.FusionConsumePierce(this);
-            }
+            return;
         }
         void RestoreSpeed(Collision2D collision=null)
         {
@@ -123,24 +102,18 @@ namespace BounceGarden
         void OnTriggerEnter2D(Collider2D other)
         {
             if(Active&&enteredBoard&&Body.position.y<=owner.ReturnLineY&&Body.linearVelocity.y<0&&other.GetComponent<WaterVolume>()!=null)
-                {if(!owner.TryPawReturn(this,Body.position))owner.LoseBall(this,Body.position);}
+                {owner.LoseBall(this,Body.position);}
         }
-        public void RedirectFromPaw(Vector2 p){Body.position=p;transform.position=p;previousPosition=p;previousY=p.y;flightDirection=new Vector2(Body.linearVelocity.x,Mathf.Max(.35f,Mathf.Abs(Body.linearVelocity.y))).normalized;Body.linearVelocity=flightDirection*flightSpeed;trail.ResetTrail(p);}
+        
         public void QATick(){FixedUpdate();}
-        public void ResumeChainFlight(Vector2 position,Vector2 velocity){if((Body.position-position).sqrMagnitude>.000001f){Body.position=position;transform.position=position;previousPosition=position;previousY=position.y;trail.ResetTrail(position);}flightDirection=velocity.normalized;Body.linearVelocity=velocity;}
+        
         public void PauseTrail(bool pause){Body.gravityScale=0;}
-        void Update(){if(!Active||owner==null||owner.IsPaused||owner.JuiceFrozen)return;impact=Mathf.Max(0,impact-Time.deltaTime);float k=FeedbackProfile.Active.enabledFeedback?Mathf.Sin(impact/.10f*Mathf.PI)*.07f:0;visual.transform.localScale=Vector3.Scale(StreakPower==StreakBooster.None?visualBaseScale:Vector3.one*StreakBallArt.BallScale(StreakPower),new Vector3(1+k,1-k,1)*(strand?.72f:1));if(StreakPower!=StreakBooster.None){streakArtAge+=Time.deltaTime;visual.sprite=StreakBallArt.Frame(StreakPower,4+(int)(streakArtAge*12)%4);}if(owner.IsJuiceStage){int power=owner.Mechanic==JuiceMechanic.Heat?(HeatHits>=8?2:HeatHits>=4?1:0):BankCharge;visual.color=power>0?Color.Lerp(Color.white,owner.Mechanic==JuiceMechanic.Bank?JuiceGardenView.Mint:JuiceGardenView.Gold,.25f*power):Color.white;}if(owner.IsAbilityRoute){abilityAge+=Time.deltaTime;visual.sprite=AbilityArt.Ball(Ability,Mathf.FloorToInt(abilityAge*(charged||piercing?16:8))%6);}}
+        void Update(){if(!Active||owner==null||owner.IsPaused)return;impact=Mathf.Max(0,impact-Time.deltaTime);float k=FeedbackProfile.Active.enabledFeedback?Mathf.Sin(impact/.10f*Mathf.PI)*.07f:0;visual.transform.localScale=Vector3.Scale(StreakPower==StreakBooster.None?visualBaseScale:Vector3.one*StreakBallArt.BallScale(StreakPower),new Vector3(1+k,1-k,1)*(1));if(StreakPower!=StreakBooster.None){streakArtAge+=Time.deltaTime;visual.sprite=StreakBallArt.Frame(StreakPower,4+(int)(streakArtAge*12)%4);}}
 
-        public void SetAbility(BallAbility ability){Ability=ability;if(owner.IsAbilityRoute){visual.sprite=AbilityArt.Ball(ability,0);trail.SetYarnVariant((int)ability);}}
-        public void ActivateAbility(){if(AbilityUsed||!Active||!owner.IsAbilityRoute)return;AbilityUsed=true;abilityAge=0;SoundService.Play(Ability==BallAbility.Heavy?"heavy_charge":Ability==BallAbility.Pierce?"needle_activate":Ability==BallAbility.Bloom?"bloom_activate":"split_activate");
-            if(Ability==BallAbility.Heavy){charged=true;owner.PlayAbilityFx(Body.position,0,.9f);}
-            else if(Ability==BallAbility.Pierce){piercing=true;pierced.Clear();owner.PlayAbilityFx(Body.position,1,.8f);}
-            else if(Ability==BallAbility.Bloom)owner.BloomAbilityBall(this);
-            else owner.SplitAbilityBall(this);
-        }
-        public int DirectDamage(){if(charged){SoundService.Play("heavy_impact");charged=false;owner.PlayAbilityFx(Body.position,0,1.1f);return 8;}return piercing?4:Ability==BallAbility.Heavy?3:2;}
-        public void MakeStrand(){strand=true;AbilityUsed=true;strandHits=0;}
-        public void RecordAbilityHit(){if(strand&&++strandHits>=3)owner.LoseBall(this,Body.position);}
+        
+        
+        
+        
 
 
         void OnCollisionEnter2D(Collision2D collision)
@@ -148,32 +121,14 @@ namespace BounceGarden
             if(!Active||owner==null||!owner.IsPlaying||owner.IsPaused||SessionGeneration!=owner.Generation)return;
             PlayerHaptics71.Pulse();
             var abilityBrick=collision.collider.GetComponentInParent<BrickBody>();
-            if((owner.IsStreakTrial||owner.UsesShopBoosters)&&StreakPower==StreakBooster.Pierce&&abilityBrick!=null&&abilityBrick.Definition.kind!=BrickKind.Stone&&!owner.FusionPierceBlocked(abilityBrick)&&owner.FusionPierceAvailable(this)){
-                IncomingDirection=flightDirection;Physics2D.IgnoreCollision(circle,collision.collider,true);if(!ignored.Contains(collision.collider))ignored.Add(collision.collider);restoreStreakPierce=true;Body.linearVelocity=flightDirection*flightSpeed;owner.HitBrick(abilityBrick,this,Body.position);owner.PlayStreakImpact(StreakBooster.Pierce,Body.position);owner.FusionConsumePierce(this);return;
-            }
-            if(owner.IsAbilityRoute&&piercing&&abilityBrick!=null&&abilityBrick.Definition.kind!=BrickKind.Stone){
-                if(pierced.Add(abilityBrick.Id)){
-                    // Preserve the incoming direction; bypass the solver's reflection.
-                    Physics2D.IgnoreCollision(circle,collision.collider,true);ignored.Add(collision.collider);
-                    Body.linearVelocity=flightDirection*flightSpeed;
-                    owner.HitBrick(abilityBrick,this,Body.position);
-                    if(pierced.Count>=3)piercing=false;
-                }return;
-            }
-            if(owner.IsAbilityRoute&&piercing)piercing=false;
             IncomingDirection=flightDirection;RestoreSpeed(collision);
             impact=.10f;if(collision.contactCount>0){var c=collision.GetContact(0);trail.Sample(c.point+c.normal*FlightGeometry.Radius);}
             var brick=collision.collider.GetComponentInParent<BrickBody>();
             Vector2 point=collision.contactCount>0?collision.GetContact(0).point:Body.position;
-            var boss=collision.collider.GetComponent<BossBody>();
-            if(boss!=null){owner.HitBoss(boss,this,point);return;}
-            var jellyWall=collision.collider.GetComponent<JellyWallContact>();
-            if(jellyWall!=null){float normalSpeed=Mathf.Abs(jellyWall.Side==1?IncomingDirection.y:IncomingDirection.x)*collision.relativeVelocity.magnitude;jellyWall.Hit(point,normalSpeed);owner.OnJuiceWall(this,jellyWall.Side,point);owner.OnChainWall(this,jellyWall.Side);}
-            if(brick!=null){if(owner.FusionActive)owner.HitFusionBallAndPower(brick,this,point);else{owner.HitBrick(brick,this,point);owner.TriggerStreakImpact(this,point);}return;}
+            var jellyWall=collision.collider.GetComponent<BoardWallContact>();
+            if(jellyWall!=null){float normalSpeed=Mathf.Abs(jellyWall.Side==1?IncomingDirection.y:IncomingDirection.x)*collision.relativeVelocity.magnitude;jellyWall.Hit(point,normalSpeed);owner.OnChainWall(this,jellyWall.Side);}
+            if(brick!=null){{owner.HitBrick(brick,this,point);owner.TriggerStreakImpact(this,point);}return;}
             if(jellyWall!=null)owner.TriggerStreakImpact(this,point);
-            var pillar=collision.collider.GetComponentInParent<ElectricPillarContact>();if(pillar!=null)pillar.Circuit.PreviewKnownConnections();
-            var mechanism=collision.collider.GetComponentInParent<MovingObstacle>();
-            if(mechanism!=null&&mechanism.IsRotor)owner.RecordRotorContact();
             var ball=collision.collider.GetComponent<BallBody>();
             if(ball!=null&&Id>ball.Id)return;
             if(Time.time-lastContactTime>.06f && collision.relativeVelocity.sqrMagnitude>1)
@@ -195,81 +150,36 @@ namespace BounceGarden
         TMP_Text number,numberShadow;
         Collider2D hitCollider;
         static readonly System.Collections.Generic.Dictionary<Texture,Material> flashMaterials=new System.Collections.Generic.Dictionary<Texture,Material>();
-        public static void ReleaseContentCache(){foreach(var m in flashMaterials.Values)if(m!=null)UnityEngine.Object.Destroy(m);flashMaterials.Clear();SevenSpecialArt.ReleaseContentCache();}
+        
         MaterialPropertyBlock flash;
         readonly System.Collections.Generic.List<SpriteRenderer> hitFaces=new System.Collections.Generic.List<SpriteRenderer>(8);
         float age,delay,pulse;
         bool round5;float footprintWidth;SpriteRenderer groundShadow;
-        public Vector2 GroundAnchor=>(Vector2)transform.position;
+        
         public SpriteRenderer Face=>face;
         public bool UsesJelly {get;private set;}
-        public Sprite[] PaintFrames=>owner!=null&&owner.SevenSpecialActive?SevenSpecialArt.OrdinaryFrames(Definition.colorIndex):owner!=null&&owner.IsAlphabet?AlphabetArt.Frames(Definition.colorIndex):owner!=null&&(owner.IsMainline||owner.IsChainCollection)?MainlineArt.Frames(Definition.colorIndex):owner!=null&&owner.IsColorMatch?ColorMatchArt.Frames(Definition.colorIndex):owner!=null&&owner.IsPainting?PaintingArt.Frames(Definition.colorIndex):null;
+        public Sprite[] PaintFrames=>SevenSpecialArt.OrdinaryFrames(Definition.colorIndex);
         public int DamageStage {get;private set;}
         public int CurrentHealth {get;private set;}
-        public bool ShellIntact {get;private set;}
-        public int ArmorLayers {get;private set;}
-        public int DamageArmor(int amount){int removed=Mathf.Min(ArmorLayers,Mathf.Max(0,amount));ArmorLayers-=removed;if(ArmorLayers==0&&ShellIntact)BreakShell();else PulseFeedback();return removed;}
-        public void ApplySevenFace(){if(owner==null||!owner.SevenSpecialActive||ShellIntact)return;face.sprite=SevenSpecialArt.Ordinary(Definition.colorIndex);Tint=SevenSpecialArt.Palette[Mathf.Clamp(Definition.colorIndex,0,SevenSpecialArt.ColorCount-1)];face.color=Color.white;if(number!=null)number.color=new Color32(68,62,70,255);if(numberShadow!=null)numberShadow.color=new Color(1,1,.97f,.32f);SevenSpecialArt.FitOrdinary(face,owner.Board.CellWidth);RestFaceScale=face.transform.localScale;}
-        public void BreakShell(){if(ArmorLayers>1){ArmorLayers--;PulseFeedback();return;}ArmorLayers=0;ShellIntact=false;face.sprite=JellyBrickArt.Rest;UsesJelly=true;JellyBrickArt.Fit(face,owner.Board.CellWidth,owner.Board.CellHeight);RestFaceScale=face.transform.localScale;face.sharedMaterial=WorldArt.BoardMaterial;Damage(CurrentHealth);}
+        public void ApplySevenFace(){if(owner==null||!owner.SevenSpecialActive)return;face.sprite=SevenSpecialArt.Ordinary(Definition.colorIndex);Tint=SevenSpecialArt.Palette[Mathf.Clamp(Definition.colorIndex,0,SevenSpecialArt.ColorCount-1)];face.color=Color.white;if(number!=null)number.color=new Color32(68,62,70,255);if(numberShadow!=null)numberShadow.color=new Color(1,1,.97f,.32f);SevenSpecialArt.FitOrdinary(face,owner.Board.CellWidth);RestFaceScale=face.transform.localScale;}
         // Optional supplied static state sprites; never use destruction animation frames as damage skins.
-        Sprite damagedSkin,criticalSkin;
-        void ApplyHealth(int hp){CurrentHealth=Mathf.Clamp(hp,0,Mathf.Max(1,Definition.hp));float ratio=(float)CurrentHealth/Mathf.Max(1,Definition.hp);DamageStage=ratio>2f/3f?0:ratio>1f/3f?1:2;if(owner!=null&&owner.IsChainCollection&&(Definition.kind==BrickKind.Stone||Definition.kind==BrickKind.Armor&&ShellIntact)){face.color=Color.white;face.sprite=AbilityArt.Brick(Definition.kind);return;}if(owner!=null&&owner.SevenPlainDefinition(Definition)){ApplySevenFace();return;}if(owner!=null&&owner.SevenSpecialActive){face.color=Color.white;face.sprite=SevenSpecialArt.Ordinary(Definition.colorIndex);return;}if(owner!=null&&owner.IsAlphabet){face.color=Color.white;face.sprite=AlphabetArt.Frames(Definition.colorIndex)[0];return;}if(owner!=null&&(owner.IsMainline||owner.IsChainCollection)){face.color=Color.white;face.sprite=MainlineArt.Frames(Definition.colorIndex)[0];return;}if(owner!=null&&owner.IsColorMatch){face.color=Color.white;face.sprite=ColorMatchArt.Frames(Definition.colorIndex)[0];return;}if(owner!=null&&owner.IsPainting){face.color=Color.white;face.sprite=PaintingArt.Frames(Definition.colorIndex)[0];return;}if(UsesJelly){face.color=DamageStage==0?Color.white:DamageStage==1?new Color(.88f,.95f,1):new Color(.75f,.85f,1);face.sprite=DamageStage==2&&criticalSkin!=null?criticalSkin:DamageStage==1&&damagedSkin!=null?damagedSkin:JellyBrickArt.Rest;}}
-
+        
+        void ApplyHealth(int hp){CurrentHealth=Mathf.Clamp(hp,0,Mathf.Max(1,Definition.hp));float ratio=(float)CurrentHealth/Mathf.Max(1,Definition.hp);DamageStage=ratio>2f/3f?0:ratio>1f/3f?1:2;if(owner!=null&&owner.SevenPlainDefinition(Definition))ApplySevenFace();else if(owner!=null&&owner.SevenSpecialActive){face.color=Color.white;face.sprite=SevenSpecialArt.Ordinary(Definition.colorIndex);}}
         public Vector3 JellyPosition => transform.TransformPoint(face.transform.localPosition);
         public Vector3 RestFaceScale{get;private set;}
         public void Initialize(GameSession session,int id,BrickSpawn definition,float entranceDelay,PhysicsMaterial2D material)
-        {
-            flash=new MaterialPropertyBlock();
-            owner=session;Id=id;Definition=definition;Alive=true;delay=entranceDelay;gameObject.layer=8;
-            transform.position=definition.position;
-            // Ordinary faces fill their board cell; use that same footprint for collisions.
-            bool largeChainBody=session.IsChainCollection&&(ChainPowerRules.IsNest(definition)||session.OpeningCookieBrick(this));
-            var box=gameObject.AddComponent<BoxCollider2D>();box.size=definition.shutter||largeChainBody?definition.size:new Vector2(session.Board.CellWidth,session.Board.CellHeight);box.edgeRadius=0;box.sharedMaterial=material;hitCollider=box;if(session.IsChainCollection){var rigid=gameObject.AddComponent<Rigidbody2D>();rigid.bodyType=RigidbodyType2D.Kinematic;rigid.useFullKinematicContacts=false;rigid.collisionDetectionMode=CollisionDetectionMode2D.Continuous;rigid.interpolation=RigidbodyInterpolation2D.Interpolate;rigid.position=definition.position;}
-            if(session.IsMainline&&definition.kind==BrickKind.Guide){box.size=Vector2.one*.38f;transform.rotation=Quaternion.Euler(0,0,definition.angle);gameObject.AddComponent<StaticAimWall>();}
-            visualRoot=new GameObject("VisualRoot").transform;visualRoot.SetParent(transform,false);
-            Vector2 displaySize=definition.visualSize.sqrMagnitude>0?definition.visualSize:definition.size;
-            Tint=definition.shutter?new Color(1,.65f,.08f):WorldArt.Palette[Mathf.Abs(definition.colorIndex)%WorldArt.Palette.Length];
-            string key=definition.shutter?"shutter":(!string.IsNullOrEmpty(definition.artKey)?definition.artKey:ProductionArt.BrickKey(definition.colorIndex,definition.hp));
-            key=Round5Blocks.Key(key);if(!definition.shutter&&session.LevelIndex==0&&key=="round5/ivory_star")key="round5/blue_star";
-            if(!definition.shutter&&string.IsNullOrEmpty(definition.artKey))key="pastel/"+(definition.hp>1?"brick_blank_":"brick_")+new[]{"blue","yellow","blush","lavender","mint"}[Mathf.Abs(definition.colorIndex)%5];
-            UsesJelly=session.IsCollection||JellyBrickArt.Enabled(session.LevelIndex)||(session.IsAbilityRoute&&definition.kind==BrickKind.Normal)||session.IsPainting||session.IsColorMatch||session.IsBossTrial||session.IsJuiceStage||session.IsPixelDrop;
-            ShellIntact=definition.kind==BrickKind.Armor||definition.kind==BrickKind.Frost;ArmorLayers=ShellIntact?Mathf.Max(1,definition.armorLayers):0;
-            round5=true;footprintWidth=session.Board.CellWidth;
-            groundShadow=WorldArt.Draw(transform,"Ground contact shadow","circle",new Vector2(0,-session.Board.CellHeight*.40f),new Vector2(footprintWidth*.85f,session.Board.CellHeight*.13f),new Color(.35f,.26f,.22f,.10f),7);
-            var faceObject=new GameObject("Face");faceObject.transform.SetParent(visualRoot,false);face=faceObject.AddComponent<SpriteRenderer>();face.sprite=session.IsMainline?MainlineArt.Frames(definition.colorIndex)[0]:session.IsColorMatch?ColorMatchArt.Frames(definition.colorIndex)[0]:session.IsPainting?PaintingArt.Frames(definition.colorIndex)[0]:UsesJelly?JellyBrickArt.Rest:ProductionArt.Get(key);face.color=Color.white;
-            if(UsesJelly)JellyBrickArt.Fit(face,definition.shutter?definition.size.x:session.Board.CellWidth,definition.shutter?definition.size.y:session.Board.CellHeight);
-            else PastelArt.FitCell(face,definition.shutter?displaySize.x:session.Board.CellWidth,definition.shutter?displaySize.y:session.Board.CellHeight);
-            if(session.IsChainCollection&&(definition.kind==BrickKind.Stone||definition.kind==BrickKind.Armor)){face.sprite=AbilityArt.Brick(definition.kind);face.transform.localScale=Vector3.one*(session.Board.CellWidth/1.84f);face.transform.localPosition=Vector3.zero;}
-            if(session.IsAbilityRoute&&!UsesJelly){face.sprite=AbilityArt.Brick(definition.kind);face.transform.localScale=new Vector3(session.Board.CellWidth/1.84f,session.Board.CellHeight/1.84f,1);face.transform.localPosition=Vector3.zero;}
-            var cell=session.Board.LocalToCell(definition.position);face.sortingOrder=10+Mathf.Clamp(Mathf.RoundToInt(cell.y),0,11);
-            Tint=session.IsMainline?MainlineArt.Palette[definition.colorIndex]:session.IsColorMatch?ColorMatchArt.Palette[definition.colorIndex]:session.IsPainting?PaintingArt.Palette[definition.colorIndex]:WorldArt.Palette[Mathf.Abs(definition.colorIndex)%WorldArt.Palette.Length];
-            if(definition.shutter&&!UsesJelly){
-                WorldArt.Draw(visualRoot,"Pastel shutter frame","pastel/shutter_frame",Vector2.zero,displaySize,Color.white,26);
-                WorldArt.Draw(visualRoot,"Pastel shutter left","pastel/shutter_door_left",new Vector2(-displaySize.x*.23f,0),new Vector2(displaySize.x*.49f,displaySize.y*.88f),Color.white,27);
-                WorldArt.Draw(visualRoot,"Pastel shutter right","pastel/shutter_door_right",new Vector2(displaySize.x*.23f,0),new Vector2(displaySize.x*.49f,displaySize.y*.88f),Color.white,27);
-            }
-            damagedSkin=Resources.Load<Sprite>("Art/Jelly/damaged");criticalSkin=Resources.Load<Sprite>("Art/Jelly/critical");ApplyHealth(definition.hp);
-            RestFaceScale=face.transform.localScale;
-            if(!flashMaterials.TryGetValue(face.sprite.texture,out var materialForTexture)){
-                materialForTexture=new Material(Resources.Load<Shader>("HitFlash"));materialForTexture.mainTexture=face.sprite.texture;flashMaterials.Add(face.sprite.texture,materialForTexture);
-            }
-            face.sharedMaterial=materialForTexture;
-            if(definition.shutter && !UsesJelly && ProductionArt.Get("shutter")==null)
-            {
-                for(float y=-definition.size.y*.37f;y<definition.size.y*.45f;y+=.19f)
-                    WorldArt.Draw(visualRoot,"ShutterRib","brick",new Vector2(0,y),new Vector2(definition.size.x*.94f,.038f),new Color(.68f,.35f,.025f,.6f),11);
-                WorldArt.Draw(visualRoot,"Cap","brick",new Vector2(0,definition.size.y*.47f),new Vector2(definition.size.x*1.08f,.14f),new Color(1,.84f,.2f),12);
-            }
-
-            if(!session.IsPixelDrop&&!(session.IsChainCollection&&(definition.juiceGroup>0||definition.kind==BrickKind.RearWeak))&&(definition.hp>1 || definition.shutter||session.IsAbilityRoute||session.IsChainCollection)&&definition.kind!=BrickKind.Stone)
-            {
-                float top=session.Mechanic==JuiceMechanic.Sandwich?-owner.Board.CellHeight*.13f:round5?owner.Board.CellHeight*.09f:0;int order=round5?39:13;
-                numberShadow=WorldArt.Text(visualRoot,"NumberShadow",definition.hp.ToString(),new Vector2(.012f,top-.03f),.07f,new Color(.12f,.2f,.21f,.8f),order);
-                number=WorldArt.Text(visualRoot,"HP",definition.hp.ToString(),new Vector2(0,top),.07f,UICraft.Ink,order+1);if(session.IsChainCollection&&definition.colorIndex==1)number.color=new Color(1,.98f,.9f);if(session.IsChainCollection){number.fontSize=4.2f;number.transform.localPosition=new Vector3(0,0,-.1f);var hpShadow=visualRoot.Find("NumberShadow").GetComponent<TMP_Text>();hpShadow.fontSize=4.2f;hpShadow.transform.localPosition=new Vector3(.012f,-.025f,-.1f);}
-            }
-            visualRoot.localScale=session.IsChainCollection?Vector3.one:Vector3.zero;hitCollider.enabled=session.IsChainCollection;
-        }
-        public void Damage(int hp)
+{
+ flash=new MaterialPropertyBlock();owner=session;Id=id;Definition=definition;Alive=true;delay=entranceDelay;gameObject.layer=8;transform.position=definition.position;
+ var box=gameObject.AddComponent<BoxCollider2D>();box.size=session.OpeningCookieBrick(this)?definition.size:new Vector2(session.Board.CellWidth,session.Board.CellHeight);box.edgeRadius=0;box.sharedMaterial=material;hitCollider=box;
+ var rigid=gameObject.AddComponent<Rigidbody2D>();rigid.bodyType=RigidbodyType2D.Kinematic;rigid.useFullKinematicContacts=false;rigid.collisionDetectionMode=CollisionDetectionMode2D.Continuous;rigid.interpolation=RigidbodyInterpolation2D.Interpolate;rigid.position=definition.position;
+ visualRoot=new GameObject("VisualRoot").transform;visualRoot.SetParent(transform,false);UsesJelly=true;round5=true;footprintWidth=session.Board.CellWidth;
+ groundShadow=WorldArt.Draw(transform,"Ground contact shadow","circle",new Vector2(0,-session.Board.CellHeight*.40f),new Vector2(footprintWidth*.85f,session.Board.CellHeight*.13f),new Color(.35f,.26f,.22f,.10f),7);
+ var faceObject=new GameObject("Face");faceObject.transform.SetParent(visualRoot,false);face=faceObject.AddComponent<SpriteRenderer>();face.sprite=JellyBrickArt.Rest;face.color=Color.white;JellyBrickArt.Fit(face,session.Board.CellWidth,session.Board.CellHeight);
+ var cell=session.Board.LocalToCell(definition.position);face.sortingOrder=10+Mathf.Clamp(Mathf.RoundToInt(cell.y),0,11);Tint=WorldArt.Palette[Mathf.Abs(definition.colorIndex)%WorldArt.Palette.Length];ApplyHealth(definition.hp);RestFaceScale=face.transform.localScale;
+ if(!flashMaterials.TryGetValue(face.sprite.texture,out var materialForTexture)){materialForTexture=new Material(Resources.Load<Shader>("HitFlash"));materialForTexture.mainTexture=face.sprite.texture;flashMaterials.Add(face.sprite.texture,materialForTexture);}face.sharedMaterial=materialForTexture;
+ float top=owner.Board.CellHeight*.09f;numberShadow=WorldArt.Text(visualRoot,"NumberShadow",definition.hp.ToString(),new Vector2(.012f,top-.03f),.07f,new Color(.12f,.2f,.21f,.8f),39);number=WorldArt.Text(visualRoot,"HP",definition.hp.ToString(),new Vector2(0,top),.07f,UICraft.Ink,40);
+ if(definition.colorIndex==1)number.color=new Color(1,.98f,.9f);number.fontSize=4.2f;number.transform.localPosition=new Vector3(0,0,-.1f);numberShadow.fontSize=4.2f;numberShadow.transform.localPosition=new Vector3(.012f,-.025f,-.1f);visualRoot.localScale=Vector3.one;hitCollider.enabled=true;
+}        public void Damage(int hp)
         {
             if(!Alive)return;hp=Mathf.Min(CurrentHealth,hp);ApplyHealth(hp);
             PulseFeedback();if(number!=null){number.SetText("{0}",hp);if(numberShadow!=null)numberShadow.SetText("{0}",hp);}
@@ -278,7 +188,7 @@ namespace BounceGarden
         // Only ordinary white chain bricks enter the pool; special views,
         // authored collection identities and reward relationships are not reused.
         public void ReusePlainChain(int id,BrickSpawn definition){
-            Id=id;Definition=definition;Alive=true;age=delay=pulse=0;ShellIntact=false;ArmorLayers=0;visualSettled=false;enabled=true;
+            Id=id;Definition=definition;Alive=true;age=delay=pulse=0;visualSettled=false;enabled=true;
             transform.position=definition.position;transform.rotation=Quaternion.identity;transform.localScale=Vector3.one;
             var body=GetComponent<Rigidbody2D>();body.position=definition.position;body.rotation=0;body.linearVelocity=Vector2.zero;body.angularVelocity=0;body.simulated=!owner.IsPaused;
             visualRoot.localScale=Vector3.one;visualRoot.localPosition=Vector3.zero;face.transform.localScale=RestFaceScale;face.enabled=true;face.SetPropertyBlock(null);ApplyHealth(definition.hp);
@@ -293,7 +203,7 @@ namespace BounceGarden
         bool visualSettled;
         void Update()
         {
-            if(!Alive||owner==null||owner.IsPaused||owner.IsPixelDrop)return;
+            if(!Alive||owner==null||owner.IsPaused)return;
             // ChainTileVisibility owns chain colliders. Never briefly re-enable
             // hidden supply tiles or rebuild unchanged broadphase proxies here.
             if(!owner.IsChainCollection){bool enabled=age>=delay+.28f;if(hitCollider.enabled!=enabled)hitCollider.enabled=enabled;}
@@ -319,49 +229,5 @@ namespace BounceGarden
         }
     }
 
-    public sealed class MovingObstacle : MonoBehaviour
-    {
-        GameSession owner;
-        Rigidbody2D body;
-        ObstacleSpawn definition;
-        float clock;
-        public Rigidbody2D Body=>body;
-        public bool IsRotor=>definition!=null&&definition.kind=="rotor";
-        public void QATick(){FixedUpdate();}
-        public void QAResetPose(){clock=0;body.position=definition.position;body.rotation=definition.angle;transform.position=definition.position;transform.rotation=Quaternion.Euler(0,0,definition.angle);}
-        public void Initialize(GameSession session,ObstacleSpawn data,PhysicsMaterial2D material)
-        {
-            owner=session;definition=data;gameObject.layer=8;transform.position=data.position;transform.rotation=Quaternion.Euler(0,0,data.angle);
-            body=gameObject.AddComponent<Rigidbody2D>();body.bodyType=RigidbodyType2D.Kinematic;
-            body.interpolation=RigidbodyInterpolation2D.Interpolate;body.sharedMaterial=material;
-            if(data.kind=="rotor")
-            {
-                for(int i=0;i<2;i++)
-                {
-                    var arm=new GameObject("RotorArm");arm.layer=8;arm.transform.SetParent(transform,false);arm.transform.localRotation=Quaternion.Euler(0,0,45+i*90);
-                    var box=arm.AddComponent<BoxCollider2D>();box.size=data.size;box.edgeRadius=.05f;box.sharedMaterial=material;
-                    if(ProductionArt.Get("rotor")==null)WorldArt.Draw(arm.transform,"Arm","brick",Vector2.zero,data.size,new Color(.91f,.22f,.26f),15);
-                    if(ProductionArt.Get("rotor")==null)WorldArt.Draw(arm.transform,"Shine","brick",new Vector2(0,.035f),new Vector2(data.size.x*.8f,.07f),new Color(1,.45f,.44f),16);
-                }
-                WorldArt.Draw(transform,"Pinwheel","rotor",Vector2.zero,(data.visualSize.sqrMagnitude>0?data.visualSize:Vector2.one*data.size.x),Color.white,18);
-                WorldArt.Draw(transform,"Pastel rotor hub","pastel/rotor_hub",Vector2.zero,Vector2.one*(data.visualSize.sqrMagnitude>0?data.visualSize.x:data.size.x)*.25f,Color.white,19);
-                if(ProductionArt.Get("rotor")==null)WorldArt.Draw(transform,"HubShadow","circle",new Vector2(.025f,-.03f),Vector2.one*.5f,new Color(.35f,.08f,.11f),17);
-                if(ProductionArt.Get("rotor")==null)WorldArt.Draw(transform,"Hub","circle",Vector2.zero,Vector2.one*.4f,new Color(1,.67f,.23f),18);
-                if(ProductionArt.Get("rotor")==null)WorldArt.Draw(transform,"Bolt","circle",Vector2.zero,Vector2.one*.15f,new Color(1,.94f,.61f),19);
-            }
-            else
-            {
-                var box=gameObject.AddComponent<BoxCollider2D>();box.size=data.size;box.edgeRadius=.05f;box.sharedMaterial=material;
-                WorldArt.Draw(transform,"Paddle","paddle",Vector2.zero,(data.visualSize.sqrMagnitude>0?data.visualSize:data.size),Color.white,15);
-                if(ProductionArt.Get("paddle")==null)WorldArt.Draw(transform,"PaddleFace","brick",new Vector2(0,.025f),new Vector2(data.size.x*.88f,data.size.y*.35f),new Color(1,.91f,.6f),16);
-            }
-        }
-        void FixedUpdate()
-        {
-            if(owner==null||!owner.IsPlaying||owner.IsPaused)return;
-            clock+=Time.fixedDeltaTime;
-            if(definition.kind=="rotor")body.MoveRotation(body.rotation+definition.speed*Time.fixedDeltaTime);
-            else if(definition.kind=="paddle")body.MovePosition(definition.position+Vector2.right*(Mathf.Sin(clock*definition.speed+definition.phase)-Mathf.Sin(definition.phase))*definition.travel);
-        }
-    }
+    
 }

@@ -16,7 +16,7 @@ public sealed partial class LocalProfile {
  public void LeagueLoss(){if(league.current!=null&&league.current.config.activeCompetition)LeagueTransaction(()=>LeagueEngine.FinishRound(league.current,false,Badges,Badges));}
  public bool LeagueMatchSeen(string id)=>league.current==null||league.current.id!=id||league.current.matchSeen;
  public bool CompleteLeagueMatch(string id){if(league.current==null||league.current.id!=id)return false;return LeagueTransaction(()=>league.current.matchSeen=true,false);}
- public int LeagueReturnRounds=>league.current?.returnRounds??0;
- public string LeagueChaseSummary=>league.current!=null&&league.current.lastChaseRivals>0?league.current.lastChaseRivals+"位对手已追赶":"本关联赛已更新";
+ 
+ 
 }
 }

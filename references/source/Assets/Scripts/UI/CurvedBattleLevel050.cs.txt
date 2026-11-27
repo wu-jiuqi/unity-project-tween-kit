@@ -1,0 +1,9 @@
+using TMPro;using UnityEngine;
+namespace BounceGarden {
+// Bend glyph quads along the existing ribbon. Text remains dynamic and localizable.
+public sealed class CurvedBattleLevel050:MonoBehaviour {
+ TMP_Text label;void Awake(){label=GetComponent<TMP_Text>();label.OnPreRenderText+=Curve;}
+ void Curve(TMP_TextInfo info){for(int i=0;i<info.characterCount;i++){var c=info.characterInfo[i];if(!c.isVisible)continue;var vertices=info.meshInfo[c.materialReferenceIndex].vertices;int k=c.vertexIndex;Vector3 center=(vertices[k]+vertices[k+2])*.5f;float x=center.x;float y=3-x*x/800f;Quaternion rotation=Quaternion.Euler(0,0,Mathf.Atan(-2*x/800f)*Mathf.Rad2Deg);for(int j=0;j<4;j++)vertices[k+j]=rotation*(vertices[k+j]-center)+center+Vector3.up*y;}}
+ void OnDestroy(){if(label!=null)label.OnPreRenderText-=Curve;}
+}
+}

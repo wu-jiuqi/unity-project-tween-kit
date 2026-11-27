@@ -3,41 +3,15 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using R=BounceGarden.ReferenceShopStyle;
 namespace BounceGarden {
 public partial class AppUI {
  TMP_Text scoreValue,bestScoreValue;
- void BuildScoreHUD(){if(Session.IsOpening||Session.IsTutorial){var meter=UICraft.Root(hudRoot,"Jelly score meter",0,714,900,100);meter.gameObject.AddComponent<BattleScoreMeter>().Initialize(Session,Profile.BestScore(currentLevel));return;}if(!Session.IsChainCollection||Session.IsTutorial)return;var score=ScoreSkillArt.Image(hudRoot,"Score capsule","ScoreV65","score_capsule",-226,726,440,70,true);var best=ScoreSkillArt.Image(hudRoot,"Best score capsule","ScoreV65","best_capsule",226,726,440,70,true);ScoreSkillArt.Image(score.transform,"Score star emblem","ScoreV65","score_star",-191,0,41,43);ScoreSkillArt.Image(best.transform,"Record crown emblem","ScoreV65","record_badge",-191,0,37,47);scoreValue=UICraft.Label(score.transform,"",33,0,322,58,27,UICraft.Ink);bestScoreValue=UICraft.Label(best.transform,"",33,0,322,58,27,UICraft.Ink);var gainRoot=UICraft.Root(hudRoot,"Score gain effects",-230,652,420,80);gainRoot.gameObject.AddComponent<ScoreGainPresentation>().Initialize(Session);RefreshScoreHUD();}
+ void BuildScoreHUD(){if(Session.IsOpening){var meter=UICraft.Root(hudRoot,"Jelly score meter",0,714,900,100);meter.gameObject.AddComponent<BattleScoreMeter>().Initialize(Session,Profile.BestScore(currentLevel));return;}if(!Session.IsChainCollection)return;var score=ScoreSkillArt.Image(hudRoot,"Score capsule","ScoreV65","score_capsule",-226,726,440,70,true);var best=ScoreSkillArt.Image(hudRoot,"Best score capsule","ScoreV65","best_capsule",226,726,440,70,true);ScoreSkillArt.Image(score.transform,"Score star emblem","ScoreV65","score_star",-191,0,41,43);ScoreSkillArt.Image(best.transform,"Record crown emblem","ScoreV65","record_badge",-191,0,37,47);scoreValue=UICraft.Label(score.transform,"",33,0,322,58,27,UICraft.Ink);bestScoreValue=UICraft.Label(best.transform,"",33,0,322,58,27,UICraft.Ink);var gainRoot=UICraft.Root(hudRoot,"Score gain effects",-230,652,420,80);gainRoot.gameObject.AddComponent<ScoreGainPresentation>().Initialize(Session);RefreshScoreHUD();}
  void RefreshScoreHUD(){if(scoreValue!=null&&Session!=null)scoreValue.text="积分  "+Session.Score.ToString("N0");if(bestScoreValue!=null&&Session!=null)bestScoreValue.text="最高  "+Profile.BestScore(currentLevel).ToString("N0");}
- void AddScoreResult(RectTransform root){ScoreSkillArt.Image(root,"Score result artwork","ScoreV65","result_card",0,305,824,198,true);UICraft.Label(root,"本局积分  "+Session.Score.ToString("N0")+"  ·  最高  "+Profile.BestScore(currentLevel).ToString("N0"),24,330,718,65,35,UICraft.Ink);UICraft.Label(root,"含剩余步数奖励  "+Session.CompletionBonus.ToString("N0")+(string.IsNullOrEmpty(earnedWinNote)?"":"\n"+earnedWinNote),24,265,718,60,24,UICraft.Ink);}
- public void OpenScoreRecords(){
-  OpenReferenceModal("积分纪录",408,700);
-  ScoreSkillArt.Image(dressBody,"Score record emblem","ScoreV65","record_badge",-153,246,58,76);
-  R.Text(dressBody,"总积分  "+Profile.BestScoreTotal.ToString("N0"),204,91,360,46,27,null,true);
-  R.Text(dressBody,"每关仅计最高通关积分，重玩取更高值。\n本地个人纪录 · 联赛仍按奖章排名",204,145,360,64,16);
-  var list=Enumerable.Range(0,AlphabetCampaign.Count).Where(i=>Profile.BestScore(i)>0).OrderByDescending(i=>Profile.BestScore(i)).ThenBy(i=>i).ToArray();
-  var grid=ReferenceScroll(dressBody,204,411,366,442,Mathf.Max(442,list.Length*66));
-  if(list.Length==0)R.Text(grid,"通关后，这里会记录你的积分。",183,100,350,70,19);
-  for(int n=0;n<list.Length;n++){int i=list[n];R.Panel(grid,"cream",183,33+n*66,360,58);R.Text(grid,(n+1)+".  Level "+(i+1),100,33+n*66,180,45,19);R.Text(grid,Profile.BestScore(i).ToString("N0"),274,33+n*66,150,45,20,null,true);}
-  R.TextButton(dressBody,"返回排行榜",204,658,300,48,"mint",CloseModal,20);
- }
- void OpenEconomyGuide(){OpenReferenceModal("金币与道具",408,620);R.Text(dressBody,"新玩家：400 金币，道具随关卡解锁\n第1关穿透 · 第3关爆炸 · 第10关光球\n通关基础奖励 40 金币\n每 10,000 积分加 5，最多加 30\n首次通关再加 20 金币\n\n穿透球 80 · 爆炸球 120 · 光球 180\n每件强化下一组全部五球。\n每种最多存放 99 件。\n\n每失败 3 次补 1 次本关专用穿透。\n新玩家第 3/6/10 关各获 100 金币。\n重玩仍获金币，纪录只保留最高分。",204,280,360,390,18);R.TextButton(dressBody,"知道了",204,550,300,52,"mint",CloseModal,21);}
- void DrawBoosterProducts(){
-  R.Text(shopListing,"闯关道具",230,24,420,42,23,null,true);
-  for(int i=0;i<3;i++){var kind=(StreakBooster)(i+1);float y=140+i*208;var card=R.Panel(shopListing,"card",230,y,448,194).rectTransform;JourneyArt.ReplacePanel(card,"shop-card");var icon=UICraft.Box(card,"Shop booster "+kind,0,0,120,120,Color.white);GardenArt70.Orb(icon,kind,78,-151,21);icon.raycastTarget=false;
-   UICraft.Label(card,StreakTrials.Name(kind),52,59,290,34,21,UICraft.Ink);UICraft.Label(card,"已拥有 "+Profile.BoosterStock(kind)+" 件",52,28,290,28,17,UICraft.Ink);
-   UICraft.Label(card,kind==StreakBooster.Pierce?"穿透砖块，固定砖阻挡":kind==StreakBooster.Bomb?"碰撞触发3×3范围爆炸":"十字激光造成2点伤害",52,-5,290,38,17,UICraft.Ink);
-   var buy=GardenArt70.Button(card,Profile.BoosterUnlocked(kind)?LocalProfile.BoosterPrice(kind)+" 金币 · 购买":"第"+LocalProfile.BoosterUnlockLevel(kind)+"关解锁",36,-55,308,48,()=>OpenBoosterOffer(kind),19);buy.interactable=Profile.BoosterUnlocked(kind);if(!buy.interactable)ChineseArt.Image(card,"商品锁",JourneyArt.Lock,-151,21,52,52);
-  }
-  GardenArt70.Button(shopListing,"金币获取与道具说明",0,-694+shopListing.rect.height*.5f,410,51,OpenEconomyGuide,20);
- }
- void OpenBoosterOffer(StreakBooster kind){if(!Profile.BoosterUnlocked(kind)){Toast("第"+LocalProfile.BoosterUnlockLevel(kind)+"关解锁");return;}
-  OpenReferenceModal("补充道具",408,580);var icon=UICraft.Box(dressBody,"Booster offer icon",0,160,150,150,Color.white);icon.rectTransform.anchorMin=icon.rectTransform.anchorMax=new Vector2(.5f,.5f);icon.sprite=ScoreSkillArt.Booster(kind);icon.preserveAspect=true;icon.raycastTarget=false;
-  R.Text(dressBody,StreakTrials.Name(kind),204,238,360,40,24,null,true);R.Text(dressBody,"下一组五球生效 · 发射时消耗\n"+StreakTrials.Rule(kind),204,310,350,104,17);
-  int price=LocalProfile.BoosterPrice(kind);R.Text(dressBody,"已拥有 "+Profile.BoosterStock(kind)+" / 99",204,391,350,35,18);
-  string transaction=Guid.NewGuid().ToString("N");bool purchased=false;
-  R.TextButton(dressBody,price+" 金币 · 购买一件",204,463,330,57,"mint",()=>{if(purchased)return;if(!Profile.PurchaseBooster(transaction,kind)){Toast(Profile.Coins<price?"金币不足":Profile.BoosterStock(kind)>=99?"背包已满":"购买保存失败，请重试。");return;}purchased=true;SoundService.Play("purchase_success");DrawShop();RefreshWallet();OpenBoosterOffer(kind);},21);
-  R.TextButton(dressBody,"取消",204,535,240,42,"cream",CloseModal,18);
- }
+ 
+ public void OpenScoreRecords(){OpenLeagueDetail046("records");}
+ 
+ 
+ 
 }
 }

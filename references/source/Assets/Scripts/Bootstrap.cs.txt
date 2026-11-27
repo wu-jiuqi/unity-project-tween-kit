@@ -1,20 +1,8 @@
 using UnityEngine;
-namespace BounceGarden {
-public static class Bootstrap {
- [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
- static void Boot(){
- if(LevelEditing.LevelEditorRuntime.HasArg("--level-balance")){Application.targetFrameRate=-1;Physics2D.gravity=Vector2.zero;Time.fixedDeltaTime=1f/60;new GameObject("Level balance batch").AddComponent<LevelEditing.LevelBalanceRunner>();return;}
- if(LevelEditing.LevelEditorRuntime.Enabled){
-  Application.targetFrameRate=60;Physics2D.gravity=Vector2.zero;Time.fixedDeltaTime=1f/60;
-  if(Object.FindFirstObjectByType<LevelEditing.LevelEditorApp>()!=null)return;
-  var editor=new GameObject("BounceGarden Level Editor");Object.DontDestroyOnLoad(editor);editor.AddComponent<LevelEditing.LevelEditorApp>();
-  return;
- }
- if(Object.FindFirstObjectByType<AppUI>()!=null)return; Application.targetFrameRate=60;
+namespace BounceGarden {public static class Bootstrap {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Object.FindFirstObjectByType<AppUI>()!=null)return;Application.targetFrameRate=60;
 #if UNITY_ANDROID && !UNITY_EDITOR
  Screen.fullScreen=true;
 #endif
- Screen.orientation=ScreenOrientation.Portrait; Physics2D.gravity=Vector2.zero; Time.fixedDeltaTime=1f/60; var obj=new GameObject("BounceGarden"); Object.DontDestroyOnLoad(obj); obj.AddComponent<AppUI>(); }
-}
-}
-
+ Screen.orientation=ScreenOrientation.Portrait;Physics2D.gravity=Vector2.zero;Time.fixedDeltaTime=1f/60;var obj=new GameObject("BounceGarden");Object.DontDestroyOnLoad(obj);obj.AddComponent<AppUI>();}
+}}

@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/LeagueMotionArt.cs`
-文件 SHA-256：`2d678379e54ba80a5621665599a02aba49555b442a17c56395671aca8f08a970`
+文件 SHA-256：`1593e0ced02d2c5e6ce513229d110104ac691a59d1016ccbbcd695056b2c68e2`
 [原始源码快照](../source/Assets/Scripts/UI/LeagueMotionArt.cs.txt)
 
 用在哪里：AppUI.TickLeagueFlow → LeagueMedalPresentation.Show(results, before, after, medals)
@@ -13,9 +13,9 @@
 
 ## 源方法、参数与曲线
 
-### Update · L22
+### Update · L23
 
-方法 SHA-256：`29126b66f2849812d9d7445f4039881568a9fe795bedb3172e1e586a921db33d`
+方法 SHA-256：`932e156694a0c94b8e66ee7e10288e3570c810f079650bca9bf24b2a17d95d67`
 时间来源：Time.unscaledDeltaTime
 曲线证据：Mathf.Sin
 解析符号：`BounceGarden.LeagueMedalPresentation.Update()`
@@ -23,7 +23,7 @@
 Unity 引擎回调；是否创建并启用组件，见 constructionSites 与场景入口。
 
 ```csharp
-void Update(){age+=Mathf.Min(Time.unscaledDeltaTime,.05f);group.alpha=Mathf.Clamp01(age/.15f);float aspect=Mathf.Abs(transform.lossyScale.x/Mathf.Max(.001f,transform.lossyScale.y));if(arrow!=null)arrow.localScale=new Vector3(1,aspect,1);if(!moving){medal.localScale=new Vector3(1,aspect,1);return;}
+void Update(){age+=Mathf.Min(Time.unscaledDeltaTime,.05f);group.alpha=Mathf.Clamp01(age/.15f);if(compact){float p=Mathf.Clamp01(age/.55f);medal.anchoredPosition=new Vector2(-230,moving?Mathf.Sin(p*Mathf.PI)*28:0);medal.localScale=Vector3.one*(moving?Mathf.Lerp(1.2f,1,p):1);return;}float aspect=Mathf.Abs(transform.lossyScale.x/Mathf.Max(.001f,transform.lossyScale.y));if(arrow!=null)arrow.localScale=new Vector3(1,aspect,1);if(!moving){medal.localScale=new Vector3(1,aspect,1);return;}
   float enter=Mathf.Clamp01(age/.55f);medal.anchoredPosition=new Vector2(Mathf.Lerp(0,130,enter*enter),-35+Mathf.Sin(enter*Mathf.PI)*100);float size=Mathf.Lerp(1.8f,1,enter);medal.localScale=new Vector3(size,size*aspect,1);
   if(arrow!=null)arrow.anchoredPosition=new Vector2(310,-110+(delta>0?1:-1)*Mathf.Sin(Mathf.Clamp01((age-.3f)/.65f)*Mathf.PI)*45);
  }
@@ -50,7 +50,7 @@ CanvasGroup group;
 float age;
 ```
 ```csharp
-bool moving;
+bool moving,compact;
 ```
 ```csharp
 int delta;

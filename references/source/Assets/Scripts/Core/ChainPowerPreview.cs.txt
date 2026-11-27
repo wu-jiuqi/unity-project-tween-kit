@@ -4,34 +4,10 @@ using UnityEngine;
 namespace BounceGarden {
 public sealed partial class GameSession {
  readonly List<GameObject> chainPowerPreview=new List<GameObject>();
- ChainTool chainPreviewTool;float chainPreviewRefreshAt;
- public int ChainPreviewCells=>chainPowerPreview.Count;
+ ChainTool chainPreviewTool;
+ 
  void ClearChainPowerPreview(){chainPreviewTool=null;foreach(var view in chainPowerPreview)if(view!=null)Destroy(view);chainPowerPreview.Clear();}
- void PreviewCell(Vector2 p,Color color){
-  var root=new GameObject("Aimed power footprint");root.transform.SetParent(world,false);root.transform.position=p;chainPowerPreview.Add(root);
-  float h=CollectionLevels.Pitch*.46f;
-  foreach(var d in new[]{Vector2.up,Vector2.down,Vector2.left,Vector2.right})WorldArt.Draw(root.transform,"Footprint edge","brick",d*h,d.x==0?new Vector2(h*2,.035f):new Vector2(.035f,h*2),color,74);
- }
- void ShowChainPowerPreview(ChainTool tool){
-  if(FusionActive){ShowFusionPowerPreview(tool);return;}
-  if(SevenSpecialActive){ClearChainPowerPreview();return;}
-  if(chainPreviewTool==tool&&simulationClock<chainPreviewRefreshAt)return;
-  ClearChainPowerPreview();chainPreviewTool=tool;chainPreviewRefreshAt=simulationClock+.15f;Vector2 origin=tool.Position;Color color=tool.Kind==4?new Color(.7f,.9f,.45f):ChainCubeArt.ToolColor(tool.Kind);color.a=.72f;
-  PreviewCell(origin,color);
-  if(tool.Kind==2){for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++)if(x!=0||y!=0){var p=origin+new Vector2(x,y)*CollectionLevels.Pitch;if(p.x>=-4&&p.x<=4&&p.y<=CollectionLevels.Top+.1f&&p.y>=ChainGridRules.Center(0,8).y-.1f)PreviewCell(p,color);}return;}
-  if(tool.Kind==3){
-   // A link selects its actual members on activation; show the eligible pool without promising a random outcome.
-   foreach(var b in CollectionBricks.Where(b=>b.Alive&&!b.GetComponent<ChainTileVisibility>().Hidden&&!ChainPowerRules.IsNest(b.Definition)&&(b.Definition.kind==BrickKind.Normal||b.Definition.kind==BrickKind.Armor&&!b.ShellIntact)&&!ChainBonds.Any(g=>g.Members.Contains(b)))){color.a=.22f;PreviewCell(b.GetComponent<Rigidbody2D>().position,color);}return;
-  }
-  foreach(var direction in tool.Kind==4?new[]{tool.Direction}:new[]{Vector2.up,Vector2.right,Vector2.down,Vector2.left}){
-   float limit=24;
-   foreach(var b in CollectionBricks.Where(b=>b.Alive&&!b.GetComponent<ChainTileVisibility>().Hidden))if(ChainRayEntry(b,origin,direction,24,out float entry,out var point)){
-    bool barrier=b.Definition.kind==BrickKind.Stone||ChainPowerRules.IsNest(b.Definition)||b.ShellIntact||b.Definition.kind==BrickKind.RearWeak&&!ChainRearEntry(b,direction,point);
-    if(barrier)limit=Mathf.Min(limit,entry+.4f);
-   }
-   for(int i=1;i<9;i++){Vector2 p=origin+direction*CollectionLevels.Pitch*i;if(CollectionLevels.Pitch*i>limit||p.x< -4||p.x>4||p.y>CollectionLevels.Top+.1f||p.y<ChainGridRules.Center(0,8).y-.1f)break;PreviewCell(p,color);}
-  }
- }
-}
+ 
+ void ShowChainPowerPreview(ChainTool tool){ClearChainPowerPreview();}}
 }
 

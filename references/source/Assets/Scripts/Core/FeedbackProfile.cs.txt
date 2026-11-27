@@ -3,7 +3,7 @@ namespace BounceGarden {
 // One tuning surface. Values are proposed fits, not recovered original-game constants.
 [CreateAssetMenu(menuName="BounceGarden/Feedback Profile")]
 public sealed class FeedbackProfile:ScriptableObject {
- public bool enabledFeedback=true, screenShake=true;
+ public bool enabledFeedback=true,screenShake=true;
  public float ordinaryHitStop=0f,ordinaryBreakStop=0f,hitStopBudget=.03f;
  public float paintMinRadius=.45f,paintMaxRadius=2.8f,paintLife=1.2f;
  public float specialShakeHeight=.0032f,burstShakeHeight=.0022f,specialShakeDuration=.32f,burstShakeDuration=.28f;

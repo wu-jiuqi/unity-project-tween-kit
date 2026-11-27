@@ -1,0 +1,314 @@
+{
+  "version": "0.5.1",
+  "date": "2026-11-27",
+  "entries": [
+    {
+      "source": "Assets/Scripts/UI/CommonButtonsA.cs",
+      "sourceSha256": "ed2ae48d36e489a3eab9b847e31411f903e875c1320b951213305d1c1848e387",
+      "snapshot": "references/source/Assets/Scripts/UI/CommonButtonsA.cs.txt",
+      "target": "assets/unity-kit/Runtime/CommonButtonsA.cs",
+      "targetSha256": "04d5257fa2a79e0a9518294796e25b55e356d42e61cead78e2d031206f68eef9",
+      "galleryEntry": "errorpopup",
+      "component": "CommonButtonsA",
+      "owner": "CommonButtonsA",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/LevelLoadingArt.cs",
+      "sourceSha256": "933255035715456528c9f6b568c085632aebe0fac34636db85c41573b0fd818a",
+      "snapshot": "references/source/Assets/Scripts/UI/LevelLoadingArt.cs.txt",
+      "target": "assets/unity-kit/Runtime/LevelLoadingArt.cs",
+      "targetSha256": "002f3a58e3fd2beebcec1e8bcaedeccbfe7eff0aa311883ebe413354d11c3b91",
+      "galleryEntry": "loadingbox",
+      "component": "LevelLoadingArt",
+      "owner": "LevelLoadingArt",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/LoadingBoxAnimation.cs",
+      "sourceSha256": "31f9215f9f6b55fcbadf43a7dfe02a794a896b2fcbf5460b7adb7a9cf72153b3",
+      "snapshot": "references/source/Assets/Scripts/UI/LoadingBoxAnimation.cs.txt",
+      "target": "assets/unity-kit/Runtime/LoadingBoxAnimation.cs",
+      "targetSha256": "e565f0f9961c2f18604e2362b2d5031ce23663aabf9bf4ec4682074024d768ee",
+      "galleryEntry": "loadingbox",
+      "component": "LoadingBoxAnimation",
+      "owner": "LoadingBoxAnimation",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/ResultsC048Art.cs",
+      "sourceSha256": "4dd9b917cbe54b2fd132b30acde92192e174a8afac47b97b77c7a05b87f60418",
+      "snapshot": "references/source/Assets/Scripts/UI/ResultsC048Art.cs.txt",
+      "target": "assets/unity-kit/Runtime/ResultsC048Art.cs",
+      "targetSha256": "03957a44bd92f53f21055e2d7152044bab2af902107fd110c802475d789bc3ba",
+      "galleryEntry": "victorycat",
+      "component": "ResultsC048Art",
+      "owner": "ResultsC048Art",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/OpeningStory049.cs",
+      "sourceSha256": "52543b2c315cd7de5ff960db59eb45811dcf5c8ce34d3b98772b2befd2ceca55",
+      "snapshot": "references/source/Assets/Scripts/UI/OpeningStory049.cs.txt",
+      "target": "assets/unity-kit/Runtime/OpeningStory049.cs",
+      "targetSha256": "641f48fa5d659ac2614254c21d6029f27face2490638a9735c24e23c6d3c7fc5",
+      "galleryEntry": "teaching",
+      "component": "OpeningStory049",
+      "owner": "OpeningStory049",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/World/OpeningYarnArt.cs",
+      "sourceSha256": "830334db086b32c4f88c06658d4a866fccb34ffbb203cc9279cfe907383ce7b4",
+      "snapshot": "references/source/Assets/Scripts/World/OpeningYarnArt.cs.txt",
+      "target": "assets/unity-kit/Runtime/OpeningYarnArt.cs",
+      "targetSha256": "28d8bcad20f587b1dd6f04b2cbabaf634e0eba4167f3b5c87c11155bb44a272b",
+      "galleryEntry": "teaching",
+      "component": "OpeningYarnArt",
+      "owner": "OpeningYarnArt",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "仅静态图集读取、实际切片、轴心与显示尺寸；移除游戏对象控制类"
+    },
+    {
+      "source": "Assets/Scripts/World/OpeningThirdArt.cs",
+      "sourceSha256": "18a62aaee2aa40e8a034894b9c497fcf840718696c0be5821f8d0c3abb7f81f7",
+      "snapshot": "references/source/Assets/Scripts/World/OpeningThirdArt.cs.txt",
+      "target": "assets/unity-kit/Runtime/OpeningThirdArt.cs",
+      "targetSha256": "a8a9dd5faad715e0295d351545e8d73df4dab725165ba32b2acb6f781f7504d5",
+      "galleryEntry": "teaching",
+      "component": "OpeningThirdArt",
+      "owner": "OpeningThirdArt",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "仅静态图集读取、实际切片、轴心与显示尺寸；移除游戏对象控制类"
+    },
+    {
+      "source": "Assets/Scripts/World/SevenSpecialArt.cs",
+      "sourceSha256": "2d36491873ecc5e803d76a0591aa6c9fb15cd8e3c01055eca399d9e0550d5c72",
+      "snapshot": "references/source/Assets/Scripts/World/SevenSpecialArt.cs.txt",
+      "target": "assets/unity-kit/Runtime/SevenSpecialArt.cs",
+      "targetSha256": "31c4f3a041cad181fed4584f663b9b0f32eb384e4e26e15515873f4f2ea62425",
+      "galleryEntry": "teaching",
+      "component": "SevenSpecialArt",
+      "owner": "SevenSpecialArt",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "仅静态图集读取、实际切片、轴心与显示尺寸；移除游戏对象控制类"
+    },
+    {
+      "source": "Assets/Scripts/World/SecondGroupArt.cs",
+      "sourceSha256": "3ba72456561c16f58466b1b537745fbd09ed1171a3b5c0a37f63f35c7798734f",
+      "snapshot": "references/source/Assets/Scripts/World/SecondGroupArt.cs.txt",
+      "target": "assets/unity-kit/Runtime/SecondGroupArt.cs",
+      "targetSha256": "f911b09efebe2bedf0376e0819352ee4b00654aa5c65c19457942b06b145a6a4",
+      "galleryEntry": "teaching",
+      "component": "SecondGroupArt",
+      "owner": "SecondGroupArt",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "仅静态图集读取、实际切片、轴心与显示尺寸；移除游戏对象控制类"
+    },
+    {
+      "source": "Assets/Scripts/UI/VictoryPresentation.cs",
+      "sourceSha256": "e7e7d1d0538ac616024e92c2126c8db70a044aa86b6ba96c7a3643cef86598fa",
+      "snapshot": "references/source/Assets/Scripts/UI/VictoryPresentation.cs.txt",
+      "target": "assets/unity-kit/Runtime/Extracted/VictoryPresentation.cs",
+      "targetSha256": "2cf585ce41390c272eb08f57f3fda015881ab34b0a4629b3ba553448ca71545e",
+      "galleryEntry": "victory",
+      "component": "VictoryPresentation",
+      "owner": "VictoryPresentation",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/VictoryPresentation.Stars.cs",
+      "sourceSha256": "9b3bdb9b15da345bd4f2344ca14114a01caf09cd32862fb18b714d88bd638212",
+      "snapshot": "references/source/Assets/Scripts/UI/VictoryPresentation.Stars.cs.txt",
+      "target": "assets/unity-kit/Runtime/Extracted/VictoryPresentation.Stars.cs",
+      "targetSha256": "cf6ee17beebc43b0731ffeec9dbfbf3757685028d1503cae52202a825bda2756",
+      "galleryEntry": "victory",
+      "component": "VictoryPresentation.Stars",
+      "owner": "VictoryPresentation",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/FailurePresentation.cs",
+      "sourceSha256": "f3fa36d5a24799a4b4be72a72562e74e4961356ae92c59b7b6d42f7cd84835de",
+      "snapshot": "references/source/Assets/Scripts/UI/FailurePresentation.cs.txt",
+      "target": "assets/unity-kit/Runtime/Extracted/FailurePresentation.cs",
+      "targetSha256": "d8a908b8de40b8e1a3dabbedc0f35aaeaf0bf51ce80e36f96c14fe8ccb787c75",
+      "galleryEntry": "failure",
+      "component": "FailurePresentation",
+      "owner": "FailurePresentation",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/ResultsC048Art.cs",
+      "sourceSha256": "4dd9b917cbe54b2fd132b30acde92192e174a8afac47b97b77c7a05b87f60418",
+      "snapshot": "references/source/Assets/Scripts/UI/ResultsC048Art.cs.txt",
+      "target": "assets/unity-kit/Runtime/Extracted/VictoryCatAnimation.cs",
+      "targetSha256": "f76a50db0101fe9aa7271920ea939dfcc82003e6088d3a196e12ed5ecbac50a0",
+      "galleryEntry": "victorycat",
+      "component": "VictoryCatAnimation",
+      "owner": "ResultsC048Art",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "保留类名与FrameAt/Get接口；切换当前8帧与非均匀时长"
+    },
+    {
+      "source": "Assets/Scripts/UI/ResultsC048Art.cs",
+      "sourceSha256": "4dd9b917cbe54b2fd132b30acde92192e174a8afac47b97b77c7a05b87f60418",
+      "snapshot": "references/source/Assets/Scripts/UI/ResultsC048Art.cs.txt",
+      "target": "assets/unity-kit/Runtime/Extracted/FailureCatAnimation.cs",
+      "targetSha256": "0c848b8f845679f04dc1e0de95b8146d510e4e4767b84496470d5f6c1e962da4",
+      "galleryEntry": "failurecat",
+      "component": "FailureCatAnimation",
+      "owner": "ResultsC048Art",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "保留类名与FrameAt/Get接口；切换当前8帧与非均匀时长"
+    },
+    {
+      "source": "Assets/Scripts/UI/StarChargeView.cs",
+      "sourceSha256": "024b28acce52159900fec2dc1b703384cc9bda5d4af1b9af097493d7231b2ae8",
+      "snapshot": "references/source/Assets/Scripts/UI/StarChargeView.cs.txt",
+      "target": "assets/unity-kit/Runtime/Extracted/StarChargeView.cs",
+      "targetSha256": "fe225d27ffe761a132ca2f72e355623578bfb44f55c38e17a36cb921e9ce89e3",
+      "galleryEntry": "nativecharge",
+      "component": "StarChargeView",
+      "owner": "StarChargeView",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/GoalCelebration.cs",
+      "sourceSha256": "ec8d22c1f342def6353f5d331e4165604d430c148097c09d610391ec82fb938f",
+      "snapshot": "references/source/Assets/Scripts/UI/GoalCelebration.cs.txt",
+      "target": "assets/unity-kit/Runtime/GoalCelebration.cs",
+      "targetSha256": "dcad275db853d84a3d6b6e32173b9826cfd7b1cdc27dbd81b1d4f6443c88e780",
+      "galleryEntry": "celebration",
+      "component": "GoalCelebration",
+      "owner": "GoalCelebration",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "0.5.1表现切片；KitClock替换Unity时钟；宿主业务与屏幕布局适配见 current-051.md"
+    },
+    {
+      "source": "Assets/Scripts/UI/ToastNotification0410.cs",
+      "sourceSha256": "1eee26c884136c7f988023de63285dff7ac69abd6b6e824460497e1dc49f5676",
+      "snapshot": "references/source/Assets/Scripts/UI/ToastNotification0410.cs.txt",
+      "target": "assets/unity-kit/Runtime/ToastMotion.cs",
+      "targetSha256": "5393ebaefa9578177dad9de09c4a3aaa6b4c731c76742f7317b54ae1766dd062",
+      "galleryEntry": "toast",
+      "component": "ToastMotion",
+      "owner": "ToastNotification0410",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "手工抽取纯表现接口；保留时序，业务事件由宿主输入"
+    },
+    {
+      "source": "Assets/Scripts/UI/AppUI.cs",
+      "sourceSha256": "01d6a79a5fb77b7488867b897ebb97b392e85a23b80b4c0562b2f9f9418f3ebe",
+      "snapshot": "references/source/Assets/Scripts/UI/AppUI.cs.txt",
+      "target": "assets/unity-kit/Runtime/PageTransition.cs",
+      "targetSha256": "961acc3a5e78c3fd171aa151c11115ea889b62d3c536578236b8c64638a38088",
+      "galleryEntry": "pageflow",
+      "component": "PageTransition",
+      "owner": "AppUI",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "手工抽取纯表现接口；保留时序，业务事件由宿主输入"
+    },
+    {
+      "source": "Assets/Scripts/UI/OpeningStory049.cs",
+      "sourceSha256": "52543b2c315cd7de5ff960db59eb45811dcf5c8ce34d3b98772b2befd2ceca55",
+      "snapshot": "references/source/Assets/Scripts/UI/OpeningStory049.cs.txt",
+      "target": "assets/unity-kit/Runtime/ThreeStepLoop.cs",
+      "targetSha256": "1b73ffbec1c08f97106b56c095413847b8fa93701bff3fabd0f535c277ff70a7",
+      "galleryEntry": "teaching",
+      "component": "ThreeStepLoop",
+      "owner": "OpeningStory049",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "手工抽取纯表现接口；保留时序，业务事件由宿主输入"
+    },
+    {
+      "source": "Assets/Scripts/UI/ChainCollectionHUD.cs",
+      "sourceSha256": "59bec3d2199b846dc60952d4ef4cc38a2003f6d9bf1ba16280634324839ac868",
+      "snapshot": "references/source/Assets/Scripts/UI/ChainCollectionHUD.cs.txt",
+      "target": "assets/unity-kit/Runtime/MovesFeedback.cs",
+      "targetSha256": "527affb539aca901be2270a45aa7099369f45e9729f9e04d95fdf07f6f4d2cc0",
+      "galleryEntry": "lowmoves",
+      "component": "MovesFeedback",
+      "owner": "ChainCollectionHUD",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "手工抽取纯表现接口；保留时序，业务事件由宿主输入"
+    },
+    {
+      "source": "Assets/Scripts/UI/ErrorPopup0411.cs",
+      "sourceSha256": "ed26afddece5e3058f53df71deb155e865f9387408d65c60ecced6926da340e9",
+      "snapshot": "references/source/Assets/Scripts/UI/ErrorPopup0411.cs.txt",
+      "target": "assets/unity-kit/Runtime/ErrorPopupMotion.cs",
+      "targetSha256": "016d7252a2ee5ae8e17a00936a0fc07823bfacb800a8b8a72d6a55e6bb53ae69",
+      "galleryEntry": "errorpopup",
+      "component": "ErrorPopupMotion",
+      "owner": "ErrorPopup0411",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "手工抽取纯表现接口；保留时序，业务事件由宿主输入"
+    },
+    {
+      "source": "Assets/Scripts/UI/ResultSurface048.cs",
+      "sourceSha256": "b7de77ae8af3046fa3abe492c2e3764336d78dccecbf9641b19a531a6b885e79",
+      "snapshot": "references/source/Assets/Scripts/UI/ResultSurface048.cs.txt",
+      "target": "assets/unity-kit/Runtime/ResultSurface048.cs",
+      "targetSha256": "ff668a3bcad0d893d40735a5aa36cb7e526c3d19ced724c200b0d4d34f51956d",
+      "galleryEntry": "victory",
+      "component": "ResultSurface048",
+      "owner": "ResultSurface048",
+      "methods": [
+        "presentation slice; inspect recorded diff"
+      ],
+      "adaptation": "手工抽取纯表现接口；保留时序，业务事件由宿主输入"
+    }
+  ]
+}

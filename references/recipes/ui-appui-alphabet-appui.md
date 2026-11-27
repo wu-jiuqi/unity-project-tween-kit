@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/AppUI.Alphabet.cs`
-文件 SHA-256：`a7ad248bc5031bb437b92123c3196af3d9e03c22814aa433f0b8e6ccb694d5d9`
+文件 SHA-256：`8dff872e69e4ee1fd758aad88c3551cbba0060dc0437d8f5c4b5015b9e792187`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.Alphabet.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -12,36 +12,21 @@
 
 ### ShowAlphabetIntroductions · L12
 
-方法 SHA-256：`352b4f2422717c4cc5983da8094aad14b7debc6d68a6cc216a17e7abef95edd7`
+方法 SHA-256：`6b26a4f5bad6af6d30507594aadbb59b08e1197d8e954ff786cd76936fec3300`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.AppUI.ShowAlphabetIntroductions(int)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.cs:177` · `AppUI.StartPreparedLevel` → `ShowAlphabetIntroductions(generation)`
+- `Assets/Scripts/UI/AppUI.cs:183` · `AppUI.StartPreparedLevel` → `ShowAlphabetIntroductions(generation)`
 
 ```csharp
-IEnumerator ShowAlphabetIntroductions(int generation){
-  if(Session.IsOpening){yield return ShowOpeningIntroduction(generation);yield break;}
-  foreach(var page in AlphabetCampaign.Introductions(currentLevel)){
-   if(Session.SevenSpecialActive&&(page.id==4||page.id==5||page.id==10))continue;
-   if(Profile.HasAlphabetIntro(page.id))continue;
-   bool complete=false;
-   var root=UICraft.Root(canvasRoot,"Alphabet introduction "+page.id);
-   alphabetIntroduction=root.gameObject.AddComponent<AlphabetIntroductionView>();
-   alphabetIntroduction.Begin(this,page,()=>{Profile.MarkAlphabetIntro(page.id);complete=true;});
-   while(!complete&&generation==viewGeneration&&alphabetIntroduction!=null)yield return null;
-   if(generation!=viewGeneration){CloseAlphabetIntroduction();yield break;}
-   alphabetIntroduction=null;
-  }
-
- }
+IEnumerator ShowAlphabetIntroductions(int generation){yield return ShowOpeningIntroduction(generation);}
 ```
 
 ## 对象层级和素材入口
 
-- L18：`UICraft.Root(canvasRoot,"Alphabet introduction "+page.id)`
 
 素材完整路径、原始 GUID 与包内映射见 [resource-map.json](../resource-map.json)。未解析的动态路径仍留在 source-map.json 的 resourceEvidence；不能猜测为已打包。
 

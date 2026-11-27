@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/AppUI.ContentLoading.cs`
-文件 SHA-256：`672641d2a963d3b716d95d022eba8db2abf6998f2d24d056bef670f273825642`
+文件 SHA-256：`a925e7dc0fd4de317d5c16880c627b46ffaf118f619327bf2f72af7c22f1ab11`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.ContentLoading.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.cs:177` · `AppUI.StartPreparedLevel` → `PrefetchFollowingLevel(currentLevel,generation)`
+- `Assets/Scripts/UI/AppUI.cs:183` · `AppUI.StartPreparedLevel` → `PrefetchFollowingLevel(currentLevel,generation)`
 
 ```csharp
 IEnumerator PrefetchFollowingLevel(int index,int generation){
@@ -44,7 +44,7 @@ IEnumerator PrefetchFollowingLevel(int index,int generation){
 
 ### PrepareOutcomeRoutine · L41
 
-方法 SHA-256：`363a01cd4161b87ef32bcf208462c54eaa6934ef5e9c486e891a05193f70a418`
+方法 SHA-256：`036224879c2e3f938871b3e768de862dfd7931c7196e11b8da1462100fae6682`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.AppUI.PrepareOutcomeRoutine(bool, string, BounceGarden.ContentLoadOperation, UnityEngine.RectTransform, int)`
@@ -60,58 +60,51 @@ IEnumerator PrepareOutcomeRoutine(bool win,string page,ContentLoadOperation oper
   contentLoad=null;loadingMenuPage=null;
   if(operation.Succeeded){Destroy(root.gameObject);OnOutcome(win);yield break;}
   Debug.LogWarning("BOUNCE_RESULT_LOAD_FAILED "+(operation.TimedOut?"timeout":operation.Failure?.Message));
-  Destroy(root.gameObject);OpenModal("网络连接中断",UICraft.Blue,860,600);
-  UICraft.Label(modal,"本局仍可继续结算，请重试连接。",0,120,780,100,34,UICraft.Ink);
-  UICraft.Button(modal,"重试",0,-40,560,110,UICraft.Green,()=>{RemoveModal(false);PrepareOutcomeContent(win);},40);
-  UICraft.Button(modal,"返回花园",0,-190,560,100,UICraft.Blue,()=>{RemoveModal(false);CancelLoadingToHome();},36);
+  Destroy(root.gameObject);OpenErrorPopup0411("网络连接中断","本局仍可继续结算，请重试连接。",()=>{RemoveModal(false);PrepareOutcomeContent(win);},()=>{RemoveModal(false);CancelLoadingToHome();});
  }
 ```
 
-### RunLevelLoad · L53
+### RunLevelLoad · L50
 
-方法 SHA-256：`e31d375b892daf6553dda498383dcc93536ddcb4045d47a781719ac3eb87209c`
+方法 SHA-256：`67d116986af58e8d549cc9c76ed5850df65d78a4a24c0f7573d920b284f37d9a`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.AppUI.RunLevelLoad(UnityEngine.RectTransform, int, int, bool, bool, int)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.cs:148` · `AppUI.BeginLevel` → `RunLevelLoad(loading,viewGeneration,index,tutorialMode,skipOnboarding,trial)`
+- `Assets/Scripts/UI/AppUI.cs:155` · `AppUI.BeginLevel` → `RunLevelLoad(loading,viewGeneration,index,tutorialMode,skipOnboarding,trial)`
 
 ```csharp
 IEnumerator RunLevelLoad(RectTransform loading,int generation,int index,bool tutorialMode,bool skipOnboarding,int trial){
   var operation=new ContentLoadOperation();contentLoad=operation;
   var presentation=loading.GetComponent<LoadingPresentation>();
-  presentation.SetStatus("正在准备本关资源…");
-  UICraft.Button(loading,"返回花园",0,-800,560,120,UICraft.Blue,CancelLoadingToHome,40);
   yield return operation.Run(StartPreparedLevel(loading,generation));
   if(operation.Cancelled||generation!=viewGeneration)yield break;
   if(contentLoad==operation)contentLoad=null;
   if(!operation.Succeeded){
    Session.StopLevel();busy=false;playing=false;
-   OpenModal("暂时未能进入关卡",UICraft.Blue,920,900);
-   UICraft.Label(modal,operation.TimedOut?"等待时间较长，请检查网络。\n已准备的资源会保留，可重试或返回花园。":"本关准备未完成。\n请重试，或返回花园。",0,140,800,160,36,UICraft.Ink);
-   UICraft.Button(modal,"重试",0,-80,640,120,UICraft.Green,()=>BeginLevel(index,tutorialMode,skipOnboarding,trial),40);
-   UICraft.Button(modal,"返回花园",0,-250,640,120,UICraft.Blue,CancelLoadingToHome,40);
+   if(presentation!=null)presentation.SuspendForError();
+   OpenErrorPopup0411("暂时未能进入关卡",operation.TimedOut?"等待时间较长，请检查网络。\n已准备的资源会保留，可重试或返回花园。":"本关准备未完成。\n请重试，或返回花园。",()=>BeginLevel(index,tutorialMode,skipOnboarding,trial),CancelLoadingToHome);
    Debug.LogWarning("BOUNCE_LEVEL_LOAD_FAILED "+(operation.TimedOut?"timeout":operation.Failure?.Message));
   }
  }
 ```
 
-### PrepareMenuContentRoutine · L71
+### PrepareMenuContentRoutine · L64
 
-方法 SHA-256：`d57a122ef5a177c03b217e423cd95563747f9975d03945e3fbb3e12f4a87299a`
+方法 SHA-256：`c65a0c335493b1bdef3194d9bd6345e37e0d3ee28a1785a2b6bbc34602ae0103`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.AppUI.PrepareMenuContentRoutine(string, bool, BounceGarden.ContentLoadOperation)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.ContentLoading.cs:70` · `AppUI.PrepareMenuContent` → `PrepareMenuContentRoutine(page,animate,operation)`
+- `Assets/Scripts/UI/AppUI.ContentLoading.cs:63` · `AppUI.PrepareMenuContent` → `PrepareMenuContentRoutine(page,animate,operation)`
 
 ```csharp
 IEnumerator PrepareMenuContentRoutine(string page,bool animate,ContentLoadOperation operation){
-  Toast(page=="shop"?"正在准备小铺…":"正在准备关卡地图…");
+  Toast(page=="ranking"||page=="vip"||page=="league-detail"||page=="league-prizes"?"正在准备花园联赛…":page=="shop"||page=="shop-detail"?"正在准备小铺…":page=="dressing"?"正在准备装扮…":"正在准备关卡地图…");
   yield return operation.Run(GameContent.PreparePage(page));
   if(operation.Cancelled||contentLoad!=operation)yield break;
   contentLoad=null;loadingMenuPage=null;
@@ -121,8 +114,6 @@ IEnumerator PrepareMenuContentRoutine(string page,bool animate,ContentLoadOperat
 
 ## 对象层级和素材入口
 
-- L48：`UICraft.Label(modal,"本局仍可继续结算，请重试连接。",0,120,780,100,34,UICraft.Ink)`
-- L64：`UICraft.Label(modal,operation.TimedOut?"等待时间较长，请检查网络。\n已准备的资源会保留，可重试或返回花园。":"本关准备未完成。\n请重试，或返回花园。",0,140,800,160,36,UICraft.Ink)`
 
 素材完整路径、原始 GUID 与包内映射见 [resource-map.json](../resource-map.json)。未解析的动态路径仍留在 source-map.json 的 resourceEvidence；不能猜测为已打包。
 

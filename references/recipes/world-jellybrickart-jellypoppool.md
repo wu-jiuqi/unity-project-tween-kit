@@ -3,14 +3,14 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/JellyBrickArt.cs`
-文件 SHA-256：`371ef4aecef35f6bedf9f1b3dd5f5c2137d7df90e05020df4d4885311dbb1415`
+文件 SHA-256：`830e80cdfd40b834e453d677242c9de76bb4bb02369f3ee4e5e9b33a098b5a65`
 [原始源码快照](../source/Assets/Scripts/World/JellyBrickArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Update · L99
+### Update · L82
 
 方法 SHA-256：`6bac4951066228dbcf03dd0e68c67f65515b501139a5d2c909906c8de02119ad`
 时间来源：PresentationDelta, Time.deltaTime

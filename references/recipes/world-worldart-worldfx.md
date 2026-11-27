@@ -3,14 +3,14 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/WorldArt.cs`
-文件 SHA-256：`f28868835b1d5c89d381e526d38297ffbc75224cb97d79e131b05743f5f962e8`
+文件 SHA-256：`b920bb3d7d1fcb01e8f3a036033a05004ca2c1b7e51c2fe1d0c59fdb195e4954`
 [原始源码快照](../source/Assets/Scripts/World/WorldArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Emit · L104
+### Emit · L102
 
 方法 SHA-256：`cebaf1a11de723856114b2531026c30240d00325d218f544137cff411e46a686`
 时间来源：Time.time
@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/Core/GameSession.cs:365` · `GameSession.EmitFeedback` → `fx.Emit(position,cue,color,appearance)`
+- `Assets/Scripts/Core/GameSession.cs:307` · `GameSession.EmitFeedback` → `fx.Emit(position,cue,color,appearance)`
 
 ```csharp
 public void Emit(Vector2 position,string cue,Color color,string appearance=null){
@@ -37,7 +37,7 @@ public void Emit(Vector2 position,string cue,Color color,string appearance=null)
         }
 ```
 
-### Update · L122
+### Update · L120
 
 方法 SHA-256：`ad60b153d186f1aefd32b89a9ad5a058fad09ea73971395e21f55e99091ae14d`
 时间来源：PresentationDelta, Time.deltaTime

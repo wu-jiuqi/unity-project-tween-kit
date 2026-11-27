@@ -13,16 +13,15 @@ namespace BounceGarden
         readonly Queue<BallBody> reserved = new Queue<BallBody>();
         readonly Dictionary<int,BallBody> active = new Dictionary<int,BallBody>();
         readonly List<BallBody> allBalls = new List<BallBody>();
-        readonly List<MovingObstacle> obstacles = new List<MovingObstacle>();
         readonly HashSet<long> contactsThisStep = new HashSet<long>();
         readonly List<SpriteRenderer> aimDots = new List<SpriteRenderer>();
-        Transform world, ballRoot, cannonPivot, cannonVisual;
+        Transform world,ballRoot,cannonPivot,cannonVisual;
         WorldFx fx;
         public CombatFeedback79 CombatFeel {get;private set;}
         Vector2 feedbackIncoming=Vector2.up;
         RearCatLauncher catLauncher;
         int nextVolleyYarn;
-        public int YarnVariant => IsChainCollection?nextVolleyYarn:IsColorMatch ? ColorMatchArt.YarnVariant(SelectedColor) : IsAbilityRoute ? (int)SelectedAbility : YarnArt.VariantForLevel(LevelIndex);
+        public int YarnVariant => IsChainCollection?nextVolleyYarn:YarnArt.VariantForLevel(LevelIndex);
         SpriteRenderer aimEnd;Transform loadedBall;
         readonly RaycastHit2D[] aimHits=new RaycastHit2D[32];
         public int AimVisibilityChanges {get;private set;}public int AimPredictionCount {get;private set;}
@@ -35,12 +34,8 @@ namespace BounceGarden
         public void RecallBalls(){if(!RecallAvailable||IsPaused||RefillFreezeBalls)return;SoundService.Play("recall_gather");var recall=new List<BallBody>(active.Values);foreach(var b in recall)LoseBall(b,b.Body.position);}
         public Vector2 SpawnPosition(Vector2 direction)=>LauncherPosition+NormalizeAimDirection(direction)*MuzzleOffset;
 
-        public ElectricCircuit Circuit {get;private set;}
+        
         public BoardSpace Board {get;private set;}
-        public BoardSurface Ground {get;private set;}
-        public PaintingBoard Painting {get;private set;}
-        public bool IsPainting=>CurrentLevel!=null&&CurrentLevel.paintingId==PaintingLevel.Id;
-        public JellyWallFrame JellyWalls {get;private set;}
         public GardenSceneArt GardenDecor {get;private set;}
         PhysicsMaterial2D bounce;
         Vector2? queuedShot;
@@ -55,8 +50,8 @@ namespace BounceGarden
         {
             if (!CanContinue || !rules.TryContinue(5)) return false;
             IsPlaying=true;ScoreFinalized=false;IsPaused=false;queuedShot=null;noDamageTime=0;
-            foreach(var drop in DropBricks)if(drop!=null)drop.Body.simulated=true;
-            foreach(var obstacle in obstacles)if(obstacle!=null)obstacle.Body.simulated=true;
+            
+            
             changed=true;StateChanged?.Invoke();return true;
         }
         public int PendingBurstBalls => rules.PendingBurstBalls;
@@ -72,7 +67,7 @@ namespace BounceGarden
         public int HitCount { get; private set; }
         public int BreakCount { get; private set; }
         public int RotorContacts { get; private set; }
-        public void RecordRotorContact(){RotorContacts++;}
+        
         public LevelData CurrentLevel { get; private set; }
         public float LaunchLayoutOffset => IsChainCollection ? 1.15f : 0;
         public float ReturnLineY => FlightGeometry.ReturnY+LaunchLayoutOffset;
@@ -101,8 +96,8 @@ namespace BounceGarden
         // Clone data so fitting never changes the shared catalog or accumulates on restart.
         static LevelData FitToArt(LevelData source)
         {
-            var level=new LevelData{tutorial=source.tutorial,alphabetCampaign=source.alphabetCampaign,pixelDrop=source.pixelDrop,label=source.label,note=source.note,initialShots=source.initialShots,
-                volleyCount=source.volleyCount,ballInterval=source.ballInterval,ballSpeed=source.ballSpeed*.86f,gravity=0f,abilityRoute=source.abilityRoute,colorMatch=source.colorMatch,bossTrial=source.bossTrial,juiceMechanic=source.juiceMechanic,paintingId=source.paintingId,mainline=source.mainline,pixelPainting=source.pixelPainting,artName=source.artName,series=source.series,designQuestion=source.designQuestion,mechanism=source.mechanism,difficulty=source.difficulty,layout=source.layout,ballQueue=(BallAbility[])source.ballQueue.Clone()};
+            var level=new LevelData{alphabetCampaign=source.alphabetCampaign,label=source.label,note=source.note,initialShots=source.initialShots,
+                volleyCount=source.volleyCount,ballInterval=source.ballInterval,ballSpeed=source.ballSpeed*.86f,gravity=0f,artName=source.artName,series=source.series,designQuestion=source.designQuestion,mechanism=source.mechanism,difficulty=source.difficulty,layout=source.layout};
             level.bricks=new BrickSpawn[source.bricks.Length];
             for(int i=0;i<level.bricks.Length;i++){var b=source.bricks[i];level.bricks[i]=new BrickSpawn{
                 position=new Vector2(b.position.x*.86f,b.position.y*1.23f+.44f),size=b.size*.86f,visualSize=b.visualSize,hp=b.hp,colorIndex=b.colorIndex,artKey=b.artKey,referenceRow=b.referenceRow,referenceCol=b.referenceCol,referenceHp=b.referenceHp,shutter=b.shutter,reveal=b.reveal,revealTargetHp=b.revealTargetHp,kind=b.kind,axis=b.axis,angle=b.angle,paintIndex=b.paintIndex,paintColor=b.paintColor,paintOffset=b.paintOffset,juiceGroup=b.juiceGroup,juiceOrder=b.juiceOrder};}
@@ -118,8 +113,8 @@ namespace BounceGarden
         partial void OnEditorSessionStarted();
         partial void OnEditorSessionStopped();
         public void StartLevel(int index)=>StartSession(index,false);
-        public void StartTutorial()=>StartSession(0,true);
-        public void StartStreakTrial(int trial)=>StartSession(20,false,Mathf.Clamp(trial,0,2));
+        
+        
         void StartSession(int index,bool tutorialMode,int trial=-1)
         {
             var stack=new Stack<IEnumerator>();stack.Push(BuildSession(index,tutorialMode,trial,false));
@@ -133,34 +128,25 @@ namespace BounceGarden
             double phaseStarted=Time.realtimeSinceStartupAsDouble;
             Action<string> phase=name=>{double now=Time.realtimeSinceStartupAsDouble;Debug.Log("BOUNCE_BOARD_PHASE level="+index+" phase="+name+" ms="+((now-phaseStarted)*1000).ToString("F1",System.Globalization.CultureInfo.InvariantCulture));phaseStarted=now;};
             StopLevel();ResetScore();nextVolleyYarn=UnityEngine.Random.Range(0,YarnArt.ColorCount);StreakTrialIndex=trial;ResetStreakTrialTools();LevelIndex=Mathf.Clamp(index,0,LevelCatalog.Count-1);
-            var source=trial>=0?StreakTrials.Level(trial):tutorialMode?FirstBounceTutorial.Level():LevelCatalog.Get(LevelIndex);
+            var source=LevelCatalog.Get(LevelIndex);
             OverrideEditorLevel(ref source);CurrentLevel=FitToArt(source);
             Board=BoardSpace.ForLevel(LevelIndex,CurrentLevel);
             BoardDisplay.Set(Board);
             Generation++;OnEditorSessionStarted();nextTargetId=1;nextBallId=1;SpawnCount=LostCount=PhysicsStep=HitCount=BreakCount=RotorContacts=0;simulationClock=0;
             rules.Reset(CurrentLevel.initialShots);rules.UnlimitedShots=IsCollection&&!IsChainCollection;IsPlaying=true;IsPaused=incremental;
-            SelectedColor=burstColor=0;
-            ResetAbilities();
             world=new GameObject("WorldRoot").transform;world.SetParent(transform,false);
             fx=new GameObject("WorldFeedback").AddComponent<WorldFx>();fx.transform.SetParent(world,false);fx.Owner=this;
-            if(IsCollection||JellyBrickArt.Enabled(LevelIndex)||IsAbilityRoute||IsPainting||IsColorMatch||IsBossTrial||IsJuiceStage)fx.PrepareJelly(CurrentLevel.bricks.Length+6);
-            Circuit=new GameObject("ElectricCircuitVisualStudy").AddComponent<ElectricCircuit>();Circuit.transform.SetParent(world,false);Circuit.Owner=this;
+            if(IsCollection||JellyBrickArt.Enabled(LevelIndex))fx.PrepareJelly(CurrentLevel.bricks.Length+6);
+            
             phase("pools");if(incremental)yield return null;
             BuildGarden();
             phase("garden");if(incremental)yield return null;
-            if(IsPainting){Painting=new GameObject("Fox painting canvas").AddComponent<PaintingBoard>();Painting.transform.SetParent(world,false);Painting.Initialize(this);}
             ballRoot=new GameObject("Balls").transform;ballRoot.SetParent(world,false);
             for(int i=0;i<20;i++){pool.Push(CreateBall());if(incremental&&i%5==4)yield return null;}
             for(int i=0;i<CurrentLevel.bricks.Length;i++){CreateBrick(CurrentLevel.bricks[i],Mathf.Min(i*.012f,.23f));if(incremental&&i%8==7)yield return null;}
             phase("balls");
-            StartBoss();
-            StartJuice();
-            StartMainline();
             if(incremental&&IsOpening)yield return InitializeOpeningGridSteps(true);else StartCollection();
-            phase("grid");if(incremental)yield return null;
-            if(CurrentLevel.obstacles!=null)foreach(var definition in CurrentLevel.obstacles)CreateObstacle(definition);
-            BuildCannon();BuildAimDots();if(IsStreakTrial)PrepareStreakArtFx();
-            phase("launcher");if(incremental)yield return null;
+            phase("grid");if(incremental)yield return null;            BuildCannon();BuildAimDots();            phase("launcher");if(incremental)yield return null;
             var feel=new GameObject("Combat feedback v79");feel.transform.SetParent(world,false);CombatFeel=feel.AddComponent<CombatFeedback79>();CombatFeel.Initialize(this);
             Physics2D.SyncTransforms();changed=true;StateChanged?.Invoke();
             Debug.Log("SESSION_START generation="+Generation+" level="+CurrentLevel.label+" shots="+Shots+" targets="+RemainingTargets+" volley="+CurrentLevel.volleyCount);
@@ -172,20 +158,16 @@ namespace BounceGarden
             ClearVictoryDeferred();
             if(CombatFeel!=null)CombatFeel.CancelStop();CombatFeel=null;
             var shake=Camera.main!=null?Camera.main.GetComponent<CameraJuice>():null;if(shake!=null&&shake.Owner==this)shake.ResetImpact();
-            ClearFusion();
             ClearCollection();
             StreakTrialIndex=-1;ResetStreakTrialTools();
-            DropBricks.Clear();
-            ClearMainline();
-            ClearJuice();
-            ClearBoss();
-            abilityBricks.Clear();chainQueue.Clear();upcoming.Clear();selectedSlot=0;
+            
+            
             IsPlaying=false;IsPaused=false;queuedShot=null;noDamageTime=0;Generation++;
             BoardDisplay.Clear();
             foreach(var ball in allBalls)if(ball!=null)ball.Deactivate();
-            active.Clear();reserved.Clear();pool.Clear();allBalls.Clear();obstacles.Clear();aimDots.Clear();contactsThisStep.Clear();rules.Reset(0);
+            active.Clear();reserved.Clear();pool.Clear();allBalls.Clear();aimDots.Clear();contactsThisStep.Clear();rules.Reset(0);
             if(world!=null){world.gameObject.SetActive(false);Destroy(world.gameObject);world=null;}
-            cannonPivot=null;cannonVisual=null;catLauncher=null;loadedBall=null;streakArtFx=null;jellyPowerFxPlayed=0;fx=null;Circuit=null;JellyWalls=null;GardenDecor=null;Painting=null;changed=true;
+            cannonPivot=null;cannonVisual=null;catLauncher=null;loadedBall=null;streakArtFx=null;jellyPowerFxPlayed=0;fx=null;GardenDecor=null;changed=true;
             OnEditorSessionStopped();
         }
 
@@ -196,9 +178,9 @@ namespace BounceGarden
             IsPaused=paused;queuedShot=null;ClearBufferedChainShot();SetAim(null);
             if(paused){var shake=Camera.main!=null?Camera.main.GetComponent<CameraJuice>():null;if(shake!=null&&shake.Owner==this)shake.ResetImpact();}
             if(IsChainCollection)foreach(var brick in CollectionBricks){var rb=brick.GetComponent<Rigidbody2D>();if(rb!=null)rb.simulated=!paused;}
-            foreach(var drop in DropBricks)if(drop!=null)drop.Body.simulated=!paused;
-            foreach(var ball in active.Values)if(ball!=null){ball.Body.gravityScale=0;ball.Body.linearDamping=0;ball.Body.simulated=!paused&&!RefillFreezeBalls&&!BossDefeating&&!JuiceFrozen;ball.PauseTrail(paused||RefillFreezeBalls);}
-            foreach(var obstacle in obstacles)if(obstacle!=null)obstacle.Body.simulated=!paused;
+            
+            foreach(var ball in active.Values)if(ball!=null){ball.Body.gravityScale=0;ball.Body.linearDamping=0;ball.Body.simulated=!paused&&!RefillFreezeBalls;ball.PauseTrail(paused||RefillFreezeBalls);}
+            
             changed=true;StateChanged?.Invoke();
         }
 
@@ -217,7 +199,7 @@ namespace BounceGarden
                 if(bufferedChainShot.HasValue)return false;
                 if(!ChainCanLaunch)return BufferChainShot(direction);
             }
-            if(!IsPlaying||IsPaused||(IsCollection&&(!CollectionReady||CollectionTool!=0))||BossBlocksShot||(IsPixelDrop&&(ActiveBalls>0||DropSettling))||queuedShot.HasValue||!rules.CanShoot||(IsAbilityRoute&&ActiveBalls>0)||direction.sqrMagnitude<.001f||direction.y<=0)return false;
+            if(!IsPlaying||IsPaused||(IsCollection&&(!CollectionReady||CollectionTool!=0))||queuedShot.HasValue||!rules.CanShoot||direction.sqrMagnitude<.001f||direction.y<=0)return false;
             direction=NormalizeAimDirection(direction);
             queuedShot=direction;SetAim(null);return true;
         }
@@ -229,13 +211,9 @@ namespace BounceGarden
 
         void FixedUpdate()
         {
-            if(!IsPlaying||IsPaused||JuiceFrozen)return;
+            if(!IsPlaying||IsPaused)return;
             TickCollection(Time.fixedDeltaTime);
-            if(IsChainCollection&&!IsTutorial&&!IsStreakTrial&&CollectionWon){foreach(var ball in active.Values)ball.Body.simulated=false;foreach(var brick in CollectionBricks){var body=brick.GetComponent<Rigidbody2D>();if(body!=null)body.simulated=false;}return;}
-            TickPixelDrop();
-            TickJuice(Time.fixedDeltaTime);
-            TickBoss(Time.fixedDeltaTime);
-            if(BossDefeating)return;
+            if(IsChainCollection&&CollectionWon){foreach(var ball in active.Values)ball.Body.simulated=false;foreach(var brick in CollectionBricks){var body=brick.GetComponent<Rigidbody2D>();if(body!=null)body.simulated=false;}return;}
             bool couldRecall=RecallAvailable;
             noDamageTime=ActiveBalls>0?noDamageTime+Time.fixedDeltaTime:0;
             if(couldRecall!=RecallAvailable)changed=true;
@@ -261,7 +239,7 @@ namespace BounceGarden
             if(RefillFreezeBalls||!PrepareShopBooster())return;
             // Reserve the whole volley before charging it. There is no artificial active-ball gameplay cap.
             var observation=StrategyObserver==null?null:new StrategyEvent{kind="shot",request=strategyQueuedRequest,activeBalls=ActiveBalls,pendingBalls=PendingBurstBalls,liveGroups=ChainLiveGroups,x=direction.x,y=direction.y,detail=StrategySettled?"settled":"settling"};
-            burstColor=SelectedColor;
+            
             int count=Mathf.Max(1,CurrentLevel.volleyCount);
             for(int i=0;i<count;i++)reserved.Enqueue(pool.Count>0?pool.Pop():CreateBall());
             var first=reserved.Dequeue();int id=nextBallId++;
@@ -274,9 +252,6 @@ namespace BounceGarden
             if(IsCollection)collectionRoundPending=true;
             var actualBooster=SelectedStreakBooster;
             if(IsChainCollection)BeginChainVolley();
-            OnBossBurst();
-            OnJuiceBurst();
-            if(IsAbilityRoute){upcoming.RemoveAt(selectedSlot);selectedSlot=0;UpdateLoadedAbility();}
             if(cannonPivot!=null)cannonPivot.localRotation=Quaternion.Euler(0,0,Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg-90);
             OnBallSpawned(first);if(observation!=null){observation.group=chainBurstSerial;StrategyEmit(observation);}VolleyStarted?.Invoke(actualBooster);
         }
@@ -284,9 +259,7 @@ namespace BounceGarden
         void OnBallSpawned(BallBody ball)
         {
             if(IsChainCollection)AssignChainBall(ball);
-            ConfigureFusionBall(ball);
             if(active.Count==1)noDamageTime=0;
-            if(JuiceView!=null)JuiceView.TrackBall(ball);
             if(catLauncher!=null)catLauncher.Fire();
             changed=true;EmitFeedback(ball.Body.position,"shoot",new Color(1,.92f,.53f));
         }
@@ -316,48 +289,17 @@ namespace BounceGarden
             if(!contactsThisStep.Add(key))return;
             using(StrategyCause("ball-hit",ball.ChainBurstId,StrategyBrickId(brick))){
             StrategyEmit(new StrategyEvent{kind="hit",target=StrategyBrickId(brick),targetKind=StrategyKind(brick)});
-            if(FusionActive){HitFusionBrick(brick,ball,contact);return;}
-            if(IsChainCollection){HitChainBrick(brick,ball,contact);return;}
-            if(IsPixelDrop){HitPixelDrop(brick,ball,contact);return;}
-            if(IsColorMatch&&ball.MatchColor!=brick.Definition.colorIndex){EmitFeedback(contact,"wall",brick.Tint);return;}
-            if(IsAbilityRoute){HitAbilityBrick(brick,ball,contact);return;}
-            if(IsMainline){HitMainline(brick,ball,contact);return;}
-            if(IsJuiceStage){HitJuiceBrick(brick,ball,contact);return;}
-            if(!rules.DamageTarget(brick.Id,1,out bool destroyed))return;
-            noDamageTime=0;
-            HitCount++;if(destroyed)BreakCount++;
-            changed=true;
-            if(!destroyed){brick.Damage(rules.Health(brick.Id));EmitFeedback(contact,"hit",brick.Tint,brick.Face.sprite.name);return;}
-            var definition=brick.Definition;Vector2 position=brick.transform.position;Color tint=brick.Tint;
-            if(IsCollection)CollectionBrickBroken(brick,true);
-            if(IsPainting&&Painting!=null)Painting.Reveal(brick);
-            if(brick.UsesJelly)fx.PlayJelly(brick);
-            brick.Remove();EmitFeedback(position,"break",tint,brick.Face.sprite.name);
-
-            if(definition.shutter&&!string.IsNullOrEmpty(definition.reveal))
-            {
-                rules.BeginTargetStage();
-                if(definition.reveal=="rotor")CreateObstacle(new ObstacleSpawn{kind="rotor",position=position,size=new Vector2(Mathf.Min(2,definition.size.x*.9f),.26f),speed=120,angle=18});
-                else if(definition.reveal=="target")CreateBrick(new BrickSpawn{position=position,size=new Vector2(.84f,.84f),hp=Mathf.Max(1,definition.revealTargetHp),colorIndex=3},0);
-                rules.CompleteTargetStage();
+            HitChainBrick(brick,ball,contact);
             }
         }
 
-        }
         void CreateBrick(BrickSpawn definition,float delay)
         {
             OpeningPrepareSpawn(definition);if(SevenPlainDefinition(definition)&&!(IsOpening&&definition.reveal=="opening-N"))definition.colorIndex=NextSevenColor();
             int id=nextTargetId++;if(definition.kind!=BrickKind.Stone)rules.RegisterTarget(id,Mathf.Max(1,definition.hp));
             if(TryReuseChainBrick(definition,id)){OpeningTrackTarget(CollectionBricks[CollectionBricks.Count-1]);return;}
             var go=new GameObject(definition.shutter?"Shutter_"+id:"Brick_"+id);go.transform.SetParent(world,false);
-            var brick=go.AddComponent<BrickBody>();brick.Initialize(this,id,definition,delay,bounce);if(IsPixelDrop){var drop=go.AddComponent<PixelDropBody>();drop.Initialize(this,brick);DropBricks.Add(drop);}if(IsCollection)AttachCollectionBrick(brick);OpeningTrackTarget(brick);if(SevenSpecialActive&&SevenPlainDefinition(definition))go.AddComponent<SevenColourBrickView>().Initialize(this,brick);if(IsAbilityRoute)abilityBricks.Add(brick);if(IsJuiceStage)juiceBricks.Add(brick);if(IsMainline)MainlineBricks.Add(brick);
-        }
-        void CreateObstacle(ObstacleSpawn definition)
-        {
-            var go=new GameObject("Obstacle_"+definition.kind);go.transform.SetParent(world,false);
-            if(definition.kind=="electric"){go.layer=8;go.transform.position=definition.position;var box=go.AddComponent<BoxCollider2D>();box.size=definition.size*.72f;box.sharedMaterial=bounce;Circuit.AddPillar(go.transform,definition.visualSize.sqrMagnitude>0?definition.visualSize:definition.size);return;}
-            var obstacle=go.AddComponent<MovingObstacle>();obstacle.Initialize(this,definition,bounce);obstacles.Add(obstacle);
-        }
+            var brick=go.AddComponent<BrickBody>();brick.Initialize(this,id,definition,delay,bounce);if(IsCollection)AttachCollectionBrick(brick);OpeningTrackTarget(brick);if(SevenSpecialActive&&SevenPlainDefinition(definition))go.AddComponent<SevenColourBrickView>().Initialize(this,brick);        }
 
         public void EmitFeedback(Vector2 position,string cue,Color color,string appearance=null)
         {
@@ -370,12 +312,12 @@ namespace BounceGarden
         {
             if(CombatFeel!=null&&CombatFeel.Frozen){if(!IsChainCollection||!CollectionWon)return;CombatFeel.CancelStop();}
             bool won=false;
-            if(IsPlaying&&!IsPaused&&!DropSettling&&(IsCollection?ResolveCollection(out won):rules.Resolve(out won)))
+            if(IsPlaying&&!IsPaused&&(IsCollection?ResolveCollection(out won):rules.Resolve(out won)))
             {
-                IsPlaying=false;if(won&&IsChainCollection&&!IsTutorial&&!IsStreakTrial){CombatFeel?.CancelStop();IsPaused=true;}queuedShot=null;SetAim(null);ReturnReserved();if(IsChainCollection)foreach(var brick in CollectionBricks){var body=brick.GetComponent<Rigidbody2D>();if(body!=null){body.linearVelocity=Vector2.zero;body.simulated=false;}}
-                foreach(var drop in DropBricks)if(drop!=null)drop.Body.simulated=false;
+                IsPlaying=false;if(won&&IsChainCollection){CombatFeel?.CancelStop();IsPaused=true;}queuedShot=null;SetAim(null);ReturnReserved();if(IsChainCollection)foreach(var brick in CollectionBricks){var body=brick.GetComponent<Rigidbody2D>();if(body!=null){body.linearVelocity=Vector2.zero;body.simulated=false;}}
+                
                 foreach(var ball in active.Values)if(ball!=null)ball.Body.simulated=false;
-                foreach(var obstacle in obstacles)if(obstacle!=null)obstacle.Body.simulated=false;
+                
                 changed=true;Feedback?.Invoke(Vector2.zero,won?"win":"lose");
                 Debug.Log("SESSION_OUTCOME generation="+Generation+" won="+won+" shots="+Shots+" pending="+PendingBurstBalls+" active="+ActiveBalls+" targets="+RemainingTargets);
                 Outcome?.Invoke(won);
@@ -383,7 +325,7 @@ namespace BounceGarden
             if(changed){changed=false;StateChanged?.Invoke();}
             if(cannonVisual!=null)
             {
-                if(IsStreakTrial||UsesShopBoosters)RefreshLoadedStreakBall();var loaded=loadedBall;if(loaded!=null)loaded.gameObject.SetActive(IsPlaying&&Shots>0&&PendingBurstBalls==0&&(catLauncher==null||catLauncher.ShowLoadedBall));
+                if(UsesShopBoosters)RefreshLoadedStreakBall();var loaded=loadedBall;if(loaded!=null)loaded.gameObject.SetActive(IsPlaying&&Shots>0&&PendingBurstBalls==0&&(catLauncher==null||catLauncher.ShowLoadedBall));
                 cannonVisual.localScale=Vector3.one;cannonVisual.localPosition=Vector3.zero;
             }
         }
@@ -391,7 +333,7 @@ namespace BounceGarden
         public void SetAim(Vector2? direction)
         {
             bool canAim=IsChainCollection?Shots>0&&!RefillFreezeBalls&&!CollectionWon&&!CollectionVictoryPending&&!bufferedChainShot.HasValue:(!IsCollection||(CollectionReady&&CollectionTool==0))&&rules.CanShoot;
-            bool show=canAim&&direction.HasValue&&IsPlaying&&!IsPaused&&!BossBlocksShot&&(!IsAbilityRoute||ActiveBalls==0)&&(!IsPixelDrop||(ActiveBalls==0&&!DropSettling));
+            bool show=canAim&&direction.HasValue&&IsPlaying&&!IsPaused;
             show=show&&direction.Value.sqrMagnitude>=.001f&&direction.Value.y>0;
             if(catLauncher!=null)catLauncher.SetAiming(show);
             if(!show){HideUnusedAimDots(0);if(aimEnd!=null)AimVisible(aimEnd.gameObject,false);}
@@ -412,18 +354,17 @@ namespace BounceGarden
         public void PredictAim(Vector2 direction,bool render=false)
         {
             AimPredictionCount++;Vector2 d=NormalizeAimDirection(direction),p=SpawnPosition(d);AimReflections=0;ChainTool aimedPower=null;float budget=32f,nextDot=0;int index=0;Collider2D previousWall=null,cornerWall=null;
-            bool finitePierceAim=FusionActive&&FusionDefinition.finiteBoosters&&SelectedStreakBooster==StreakBooster.Pierce;int passes=finitePierceAim?FusionDefinition.piercePerBall:int.MaxValue;
+            bool finitePierceAim=false;int passes=int.MaxValue;
             var filter=new ContactFilter2D();filter.SetLayerMask(1<<8);filter.useTriggers=false;
             for(int segment=0;segment<3&&budget>0;segment++){
                 int count=Physics2D.CircleCast(p,FlightGeometry.Radius,d,filter,aimHits,budget);
-                if(finitePierceAim)for(int i=1;i<count;i++){var candidate=aimHits[i];int j=i-1;while(j>=0&&aimHits[j].distance>candidate.distance){aimHits[j+1]=aimHits[j];j--;}aimHits[j+1]=candidate;}
                 RaycastHit2D hit=default;bool found=false;float nearest=budget;
                 for(int i=0;i<count;i++){
                     var h=aimHits[i];
-                    if((IsStreakTrial||UsesShopBoosters)&&SelectedStreakBooster==StreakBooster.Pierce&&h.collider!=null){var target=h.collider.GetComponentInParent<BrickBody>();if(target!=null&&target.Definition.kind!=BrickKind.Stone&&!FusionPierceBlocked(target)&&passes>0){passes--;continue;}}
+                    if((UsesShopBoosters)&&SelectedStreakBooster==StreakBooster.Pierce&&h.collider!=null){var target=h.collider.GetComponentInParent<BrickBody>();if(target!=null&&target.Definition.kind!=BrickKind.Stone&&passes>0){passes--;continue;}}
                     if(h.distance<=.0001f&&(h.collider==previousWall||h.collider==cornerWall))continue;
-                    if(h.collider==null||h.collider.attachedRigidbody!=null&&h.collider.attachedRigidbody.bodyType!=RigidbodyType2D.Static&&!(IsPixelDrop&&h.collider.GetComponent<PixelDropBody>()!=null)&&!(IsChainCollection&&h.collider.GetComponent<BrickBody>()!=null))continue;
-                    if(h.distance<nearest){hit=h;nearest=h.distance;found=true;if(finitePierceAim)break;}
+                    if(h.collider==null||h.collider.attachedRigidbody!=null&&h.collider.attachedRigidbody.bodyType!=RigidbodyType2D.Static&&!(IsChainCollection&&h.collider.GetComponent<BrickBody>()!=null))continue;
+                    if(h.distance<nearest){hit=h;nearest=h.distance;found=true;}
                 }
                 if(IsChainCollection&&render){var tool=NearestReadyAimTool(ChainTools,simulationClock,p,d,nearest,out float toolDistance);if(tool!=null){nearest=toolDistance;found=false;aimedPower=tool;}}
                 Vector2 end=p+d*nearest;
@@ -443,29 +384,24 @@ namespace BounceGarden
         {
             var root=new GameObject("AimPreview").transform;root.SetParent(world,false);
             aimEnd=WorldArt.Draw(root,"Aim contact endpoint","ring",Vector2.zero,Vector2.one*FlightGeometry.Radius*2, new Color(.95f,.65f,.23f,.85f),29);aimEnd.gameObject.SetActive(false);
-            for(int i=0;i<100;i++){var dot=WorldArt.Draw(root,"AimDot","circle",Vector2.zero,Vector2.one*(i<3?.085f:.065f),Color.white,28);dot.gameObject.SetActive(false);aimDots.Add(dot);}
+            for(int i=0;i<100;i++){var dot=WorldArt.Draw(root,"AimDot","circle",Vector2.zero,Vector2.one*(i<3?.102f:.078f),Color.white,28);dot.gameObject.SetActive(false);aimDots.Add(dot);}
         }
 
         void BuildGarden()
         {
             GardenDecor=new GameObject("Interactive cream cat garden").AddComponent<GardenSceneArt>();GardenDecor.transform.SetParent(world,false);GardenDecor.Initialize(this);
-            Ground=new GameObject("Shared BoardSpace debug surface").AddComponent<BoardSurface>();Ground.transform.SetParent(world,false);Ground.Initialize(Board,false);
-            JellyWalls=new GameObject("Continuous mint jelly walls").AddComponent<JellyWallFrame>();
-            JellyWalls.transform.SetParent(world,false);JellyWalls.Initialize(this);
             AddBoundary("LeftWall",new Vector2(FlightGeometry.Left-.1f,-.505f),new Vector2(.20f,15.99f));
             AddBoundary("RightWall",new Vector2(FlightGeometry.Right+.1f,-.505f),new Vector2(.20f,15.99f));
             AddBoundary("TopWall",new Vector2(0,FlightGeometry.Top+.1f),new Vector2(FlightGeometry.Right-FlightGeometry.Left+.4f,.2f));
             var water=new GameObject("WaterVolume");water.layer=10;water.transform.SetParent(world,false);
             water.transform.localPosition=new Vector2(0,ReturnLineY-.27f);
             var trigger=water.AddComponent<BoxCollider2D>();trigger.isTrigger=true;trigger.size=new Vector2(10.3f,.6f);water.AddComponent<WaterVolume>();
-            if(IsPixelDrop){foreach(float side in new[]{-1f,1f}){WorldArt.Draw(world,"Side recycle lane","brick",new Vector2(side*3.97f,.65f),new Vector2(.22f,12.8f),new Color(.62f,.86f,.67f,.65f),4);WorldArt.Text(world,"Side exit",side<0?"<":">",new Vector2(side*3.8f,.4f),.11f,UICraft.Ink,8);}}
-            else WorldArt.Draw(world,"Return band guide","brick",new Vector2(0,ReturnLineY-.16f),new Vector2(FlightGeometry.Right-FlightGeometry.Left,.32f),new Color(.83f,.72f,.55f,.30f),3);
         }
         void AddBoundary(string name,Vector2 position,Vector2 size)
         {
             var go=new GameObject(name);go.layer=8;go.transform.SetParent(world,false);go.transform.localPosition=position;
             var box=go.AddComponent<BoxCollider2D>();box.size=size;box.sharedMaterial=bounce;go.AddComponent<StaticAimWall>();
-            var contact=go.AddComponent<JellyWallContact>();contact.Frame=JellyWalls;
+            var contact=go.AddComponent<BoardWallContact>();contact.Owner=this;
             contact.Side=name=="LeftWall"?0:name=="TopWall"?1:2;
         }
         void BuildCannon()
@@ -476,19 +412,13 @@ namespace BounceGarden
             cannonVisual=new GameObject("CannonVisual").transform;cannonVisual.SetParent(cannonPivot,false);
             catLauncher=cannonVisual.gameObject.AddComponent<RearCatLauncher>();catLauncher.Initialize(this);
             loadedBall=YarnArt.DrawBall(cannonPivot,"LoadedBall",new Vector2(0,MuzzleOffset),YarnVariant).transform;
-            UpdateLoadedAbility();
         }
 
         public bool QAIgnoreFocusLoss {get;set;}
         void OnApplicationFocus(bool focus){if(!focus&&IsPlaying&&!QAIgnoreFocusLoss)SetPaused(true);}
         // Isolated deterministic QA fixture; callers use a memory-only profile.
-        public void QAAdvanceOneStep(){if(!RuntimeQA.IsIsolated)return;FixedUpdate();foreach(var obstacle in obstacles)if(obstacle!=null)obstacle.QATick();foreach(var ball in allBalls)if(ball!=null&&ball.Active)ball.QATick();Physics2D.Simulate(Time.fixedDeltaTime);LateUpdate();}
-        public string QASimulateFixedSteps(int steps,Vector2 direction){
-            var previousMode=Physics2D.simulationMode;simulationClock=0;Physics2D.simulationMode=SimulationMode2D.Script;
-            try{TryShoot(direction);for(int i=0;i<steps&&IsPlaying;i++){FixedUpdate();foreach(var obstacle in obstacles)if(obstacle!=null)obstacle.QATick();foreach(var ball in allBalls)if(ball!=null&&ball.Active)ball.QATick();Physics2D.Simulate(Time.fixedDeltaTime);}LateUpdate();
-                return Shots+","+ActiveBalls+","+PendingBurstBalls+","+RemainingTargets+","+HitCount+","+BreakCount;
-            }finally{Physics2D.simulationMode=previousMode;}
-        }
+        public void QAAdvanceOneStep(){if(!RuntimeQA.IsIsolated)return;FixedUpdate();foreach(var ball in allBalls)if(ball!=null&&ball.Active)ball.QATick();Physics2D.Simulate(Time.fixedDeltaTime);LateUpdate();}
+        
         void OnDestroy(){StopLevel();if(bounce!=null)Destroy(bounce);}
     }
 }

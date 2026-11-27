@@ -1,0 +1,25 @@
+using System;
+using UnityEngine;
+namespace BounceGarden {
+// Award-only identities are independent from the purchasable cat catalogue.
+// Historic award IDs remain readable; no pending/claimed reward is rewritten.
+public static class LeagueExclusiveCosmetics {
+ public sealed class Set {
+  public readonly int index;public readonly string id,name,avatar,frame;public readonly CatCosmeticCatalog.Item item;
+  public Set(int i,string key,string title){index=i;id=key;name=title;avatar="DressingShop044/league-avatar-"+(i+1).ToString("D2");frame="DressingShop044/league-frame-"+(i+1).ToString("D2");item=new CatCosmeticCatalog.Item{id=id,breed=name,frameName=name,avatar=new CatCosmeticCatalog.Asset{resource=avatar},frame=new CatCosmeticCatalog.Asset{resource=frame},layouts=new CatCosmeticCatalog.Layout[0]};}
+ }
+ public static readonly Set[] Items={new Set(0,"league-golden-paw-v1","金爪桂冠"),new Set(1,"league-bloom-gardener-v1","繁花花匠"),new Set(2,"league-stardew-v1","星露伙伴")};
+ public static Set ById(string value){value=Key(value);
+  foreach(var set in Items)if(set.id==value)return set;
+  switch(value){case "placeholder-avatar-v1":case "placeholder-frame-v1":case "flower-cat-v1":case "flower-frame-v1":case "reward_avatar":case "reward_frame":case "LeagueV1/reward_avatar":case "LeagueV1/reward_frame":return Items[0];}
+  return null;
+ }
+ public static Set ByResource(string resource){string key=Key(resource);foreach(var set in Items)if(key==set.avatar||key==set.frame)return set;return null;}
+ public static Set Resolve(string id,string resource)=>ById(id)??ByResource(resource);
+ public static string Key(string resource){resource=resource??"";return resource.StartsWith("Art/",StringComparison.Ordinal)?resource.Substring(4):resource;}
+ public static Set At(long startsAt,int days=7){long span=days*86400L;long n=(long)Math.Floor((startsAt-LeagueEngine.CalendarAnchor)/(double)span);return Items[(int)((n%Items.Length+Items.Length)%Items.Length)];}
+ public static void Configure(LeagueConfig config,long startsAt){var set=At(startsAt,config.periodDays);config.cosmetic=new LeagueCosmetic{avatarId=set.id,frameId=set.id,avatarResource=set.avatar,frameResource=set.frame};}
+ public static bool NeedsRefresh(LeagueState state,LeagueConfig active){var p=state.current;if(p==null||!active.rotateExclusiveCosmetics)return false;var set=At(p.startsAt,p.config.periodDays);var c=p.config.cosmetic;return !p.config.rotateExclusiveCosmetics||c.avatarId!=set.id||c.frameId!=set.id||Key(c.avatarResource)!=set.avatar||Key(c.frameResource)!=set.frame;}
+ public static void RefreshCurrent(LeagueState state,LeagueConfig active){if(!NeedsRefresh(state,active))return;state.current.config.rotateExclusiveCosmetics=true;Configure(state.current.config,state.current.startsAt);}
+}
+}

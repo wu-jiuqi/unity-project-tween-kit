@@ -18,7 +18,7 @@ public sealed class CollectionGoalEntrance:MonoBehaviour {
  public const float Duration=2.35f;
  RectTransform root,goals,home,halo;int sibling;Vector2 homePosition;Vector3 homeScale;Quaternion homeRotation;
  Image dim;CanvasGroup copy;TMPro.TMP_Text title;float age;bool restored,suspended,focused=true;
- public bool Finished=>age>=Duration;public float Elapsed=>age;
+ public bool Finished=>age>=Duration;
  public void Begin(RectTransform targets){
   root=(RectTransform)transform;root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.sizeDelta=Vector2.zero;root.anchoredPosition=Vector2.zero;
   dim=gameObject.AddComponent<Image>();dim.color=new Color(.035f,.025f,.02f,0);dim.raycastTarget=true;

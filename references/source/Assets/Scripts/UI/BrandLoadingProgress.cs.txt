@@ -1,0 +1,32 @@
+using UnityEngine;
+
+using TMPro;
+namespace BounceGarden {
+// Display only reported preparation milestones. Interpolation never invents progress.
+public sealed class BrandLoadingProgress:MonoBehaviour {
+ public float ShownProgress{get;private set;}
+ public float TargetProgress{get;private set;}
+ public bool IsComplete=>complete&&ShownProgress>=1&&Hedge.GrowthSettled;
+ public bool Failed{get;private set;}
+ public int Percent=>IsComplete?100:Mathf.Min(99,Mathf.FloorToInt(ShownProgress*100));
+ public BrandGardenHedge Hedge{get;private set;}
+ TMP_Text number,status;bool complete;
+ public void Build(){
+  var bed=UICraft.Root(transform,"Growing garden bed",0,0,1000,300);Hedge=bed.gameObject.AddComponent<BrandGardenHedge>();Hedge.Build();
+  number=UICraft.Label(transform,"0%",0,-104,360,70,48);number.color=new Color32(109,67,32,255);number.fontStyle=FontStyles.Bold;
+  status=UICraft.Label(transform,"正在准备花园…",0,-171,920,65,38);status.color=new Color32(109,67,32,255);
+ }
+ public void SetProgress(float value,string message=null){if(complete)return;TargetProgress=Mathf.Max(TargetProgress,Mathf.Clamp(value,0,.99f));if(!Failed&&message!=null)status.text=message;}
+ public void Complete(){complete=true;Failed=false;TargetProgress=1;}
+ public void Failure(string message){Failed=true;status.text=message;}
+ public void Resume(){Failed=false;status.text="正在准备花园…";}
+ // Preserve the existing startup bar's paced interpolation and stalled-frame cap.
+ public static float AdvanceProgress(float shown,float target,float delta)=>Mathf.MoveTowards(shown,Mathf.Max(shown,target),.32f*Mathf.Clamp(delta,0,.05f));
+ void Update(){
+  if(Hedge==null)return;
+  if(!Failed)ShownProgress=AdvanceProgress(ShownProgress,TargetProgress,Time.unscaledDeltaTime);
+  Hedge.SetProgress(ShownProgress);
+  number.text=Percent+"%";if(IsComplete)status.text="准备好了，喵！";
+ }
+}
+}

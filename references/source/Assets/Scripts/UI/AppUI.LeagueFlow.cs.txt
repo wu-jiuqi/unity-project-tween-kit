@@ -1,9 +1,10 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 namespace BounceGarden {
 public partial class AppUI {
- RectTransform leagueFlowRoot;float leagueFlowPoll;string leagueResultShown;
+ RectTransform leagueFlowRoot;float leagueFlowPoll;string leagueResultShown;ContentLoadOperation leagueFlowContent;
  public bool LeagueFlowActive=>leagueFlowRoot!=null&&leagueFlowRoot.gameObject.activeSelf;
  bool ShowPendingLeagueBeforeContinue(){
   if(!Profile.LeagueUnlocked||PlayerStrategyTestBuild.Enabled)return false;
@@ -11,12 +12,13 @@ public partial class AppUI {
   leagueFlowPoll=0;TickLeagueFlow();return true;
  }
  void TickLeagueFlow(){
-  if(!leagueFocused||Profile==null||!Profile.LeagueUnlocked||PlayerStrategyTestBuild.Enabled||LeagueFlowActive||busy||NavigationActive||modal!=null||overlayRoot==null)return;
+  if(!leagueFocused||Profile==null||!Profile.LeagueUnlocked||PlayerStrategyTestBuild.Enabled||LeagueFlowActive||busy||NavigationActive||modal!=null||overlayRoot==null||contentLoad!=null||leagueFlowContent!=null)return;
   bool result=playing&&RewardReady&&baseRewardSaved&&!qaResult;if(playing&&!result)return;
   if(!result&&overlayRoot.childCount>0)return;
   if(!result&&CurrentPage!="home"&&CurrentPage!="chapters"&&CurrentPage!="ranking"&&CurrentPage!="vip")return;
   if(Time.unscaledTime<leagueFlowPoll)return;leagueFlowPoll=Time.unscaledTime+.4f;
   var s=LeagueSource.Read();if(s==null)return;
+  if((s.reward!=null||!Profile.LeagueMatchSeen(s.periodId))&&!GameContent.PageReady("ranking")){leagueFlowContent=new ContentLoadOperation();StartCoroutine(PrepareLeagueFlowContent(leagueFlowContent));return;}
   if(s.reward!=null){ShowLeagueAutomaticReward(s);return;}
   if(!Profile.LeagueMatchSeen(s.periodId)){
    leagueFlowRoot=UICraft.Root(safeRoot,"Automatic league season flow");leagueFlowRoot.anchorMin=Vector2.zero;leagueFlowRoot.anchorMax=Vector2.one;leagueFlowRoot.sizeDelta=Vector2.zero;
@@ -24,19 +26,14 @@ public partial class AppUI {
   }
   if(result&&leagueResultShown!=resultKey){leagueResultShown=resultKey;if(Profile.LastLeagueMedalGain>0)LeagueMedalPresentation.Show(results,Profile.LastLeagueRankBefore,Profile.LastLeagueRankAfter,Profile.LastLeagueMedalGain);}
  }
- void ShowLeagueAutomaticReward(LeagueSnapshot s){
-  var reward=s.reward;leagueFlowRoot=UICraft.Root(safeRoot,"Automatic league season reward");leagueFlowRoot.anchorMin=Vector2.zero;leagueFlowRoot.anchorMax=Vector2.one;leagueFlowRoot.sizeDelta=Vector2.zero;
-  var dim=leagueFlowRoot.gameObject.AddComponent<Image>();dim.color=new Color32(248,244,235,255);dim.raycastTarget=true;
-  var body=UICraft.Root(leagueFlowRoot,"Season result composition");body.localScale=Vector3.one*Mathf.Min(1,Mathf.Max(.1f,(leagueFlowRoot.rect.height-160)/1500f));
-  UICraft.Label(body,"上期花园联赛已结束",0,560,1000,115,58,UICraft.Ink);LeagueMotionArt.Image(body,"season",0,300,330);
-  UICraft.Label(body,"最终第"+reward.rank+"名",0,40,920,105,64,UICraft.Ink);
-  int duplicate=Profile.LeagueDuplicateCoins(reward);
-  UICraft.Label(body,"金币 +"+(reward.coins+duplicate)+(duplicate>0?"\n含重复装扮补偿 "+duplicate:"")+(!string.IsNullOrEmpty(reward.avatarId)?"\n头像与头像框奖励":""),0,-150,940,210,40,UICraft.Ink);
-  var error=UICraft.Label(body,"新一期花园伙伴正在等你",0,-360,960,75,30,UICraft.Ink);
-  UICraft.Button(body,"领取并继续",0,-530,760,140,UICraft.Green,()=>{
-   if(!LeagueSource.Claim(reward.periodId)){error.text="奖励保存失败，请重启后重试";return;}
-   SoundService.Play("reward_claim");leagueFlowRoot.gameObject.SetActive(false);Destroy(leagueFlowRoot.gameObject);leagueFlowRoot=null;RefreshWallet();leagueFlowPoll=0;
-  },45);
+ IEnumerator PrepareLeagueFlowContent(ContentLoadOperation operation){
+  yield return operation.Run(GameContent.PreparePage("ranking"));
+  if(leagueFlowContent!=operation)yield break;
+  leagueFlowContent=null;
+  if(operation.Cancelled)yield break;
+  leagueFlowPoll=Time.unscaledTime+(operation.Succeeded?0:30);
+  if(!operation.Succeeded){Debug.LogWarning("BOUNCE_LEAGUE_LOAD_FAILED "+(operation.TimedOut?"timeout":operation.Failure?.Message));Toast("联赛资源暂未准备完成，请稍后点击花园联赛重试。");}
  }
+ void ShowLeagueAutomaticReward(LeagueSnapshot s){ShowLeagueAutomaticReward046(s);}
 }
 }

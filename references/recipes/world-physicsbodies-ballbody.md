@@ -3,28 +3,28 @@
 状态：`mixed-physics-presentation-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/PhysicsBodies.cs`
-文件 SHA-256：`4a7c2a6cede5908904f677f27deef0120740c077dad28921b906f4eedea61d21`
+文件 SHA-256：`8268081bf79afe4e362042a9bc9551939e87569979187ce1ded765462f788b53`
 [原始源码快照](../source/Assets/Scripts/World/PhysicsBodies.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### FixedUpdate · L77
+### FixedUpdate · L69
 
-方法 SHA-256：`68ebb4fc7a5c8d62a29de09fbde2bfee7f1a515c09e16410dfe8cf5207340e72`
+方法 SHA-256：`974475390bc092aae34052fc6302f509033ac8d88fa7cd32060eb004acc8a74b`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.BallBody.FixedUpdate()`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/World/PhysicsBodies.cs:129` · `BallBody.QATick` → `FixedUpdate()`
+- `Assets/Scripts/World/PhysicsBodies.cs:108` · `BallBody.QATick` → `FixedUpdate()`
 
 ```csharp
 void FixedUpdate()
         {
-            if(!Active||owner==null||!owner.IsPlaying||owner.IsPaused||owner.JuiceFrozen||owner.RefillFreezeBalls)return;
+            if(!Active||owner==null||!owner.IsPlaying||owner.IsPaused||owner.RefillFreezeBalls)return;
             for(int i=ignored.Count-1;i>=0;i--){var c=ignored[i];if(c==null){ignored.RemoveAt(i);continue;}var bounds=c.bounds;bounds.Expand(FlightGeometry.Radius*2+.03f);if(!c.enabled||!bounds.Contains(new Vector3(Body.position.x,Body.position.y,c.bounds.center.z))){Physics2D.IgnoreCollision(circle,c,false);ignored.RemoveAt(i);}}
             if(restoreStreakPierce){Body.linearVelocity=flightDirection*flightSpeed;restoreStreakPierce=false;}
             RestoreSpeed();
@@ -33,15 +33,15 @@ void FixedUpdate()
             float returnY=owner.ReturnLineY;
             if(p.y>(owner.IsChainCollection?returnY+.1f:-5.0f))enteredBoard=true;
             if((enteredBoard&&previousY>returnY&&p.y<=returnY) || p.y < -10.65f || Mathf.Abs(p.x)>6.2f || p.y>10.5f)
-            { var exit=enteredBoard&&previousY>returnY&&p.y<=returnY?Vector2.Lerp(previousPosition,p,(previousY-returnY)/(previousY-p.y)):p;trail.Sample(exit);if(owner.TryPawReturn(this,exit))return;owner.LoseBall(this,exit);return; }
+            { var exit=enteredBoard&&previousY>returnY&&p.y<=returnY?Vector2.Lerp(previousPosition,p,(previousY-returnY)/(previousY-p.y)):p;trail.Sample(exit);owner.LoseBall(this,exit);return; }
             owner.CheckChainTools(this,previousPosition,p);
             trail.Sample(p);previousPosition=p;previousY=p.y;
         }
 ```
 
-### Update · L132
+### Update · L111
 
-方法 SHA-256：`a1cf11adb56da4cb2802667cdc8a5b4b3e33055874f64a4cc62c31a1dbf01a34`
+方法 SHA-256：`5f4ca74d9db015530e1b52cea8c4e2e2d42816eb7cb6a97dde6462ac32385501`
 时间来源：Time.deltaTime
 曲线证据：Mathf.Sin
 解析符号：`BounceGarden.BallBody.Update()`
@@ -49,12 +49,12 @@ void FixedUpdate()
 Unity 引擎回调；是否创建并启用组件，见 constructionSites 与场景入口。
 
 ```csharp
-void Update(){if(!Active||owner==null||owner.IsPaused||owner.JuiceFrozen)return;impact=Mathf.Max(0,impact-Time.deltaTime);float k=FeedbackProfile.Active.enabledFeedback?Mathf.Sin(impact/.10f*Mathf.PI)*.07f:0;visual.transform.localScale=Vector3.Scale(StreakPower==StreakBooster.None?visualBaseScale:Vector3.one*StreakBallArt.BallScale(StreakPower),new Vector3(1+k,1-k,1)*(strand?.72f:1));if(StreakPower!=StreakBooster.None){streakArtAge+=Time.deltaTime;visual.sprite=StreakBallArt.Frame(StreakPower,4+(int)(streakArtAge*12)%4);}if(owner.IsJuiceStage){int power=owner.Mechanic==JuiceMechanic.Heat?(HeatHits>=8?2:HeatHits>=4?1:0):BankCharge;visual.color=power>0?Color.Lerp(Color.white,owner.Mechanic==JuiceMechanic.Bank?JuiceGardenView.Mint:JuiceGardenView.Gold,.25f*power):Color.white;}if(owner.IsAbilityRoute){abilityAge+=Time.deltaTime;visual.sprite=AbilityArt.Ball(Ability,Mathf.FloorToInt(abilityAge*(charged||piercing?16:8))%6);}}
+void Update(){if(!Active||owner==null||owner.IsPaused)return;impact=Mathf.Max(0,impact-Time.deltaTime);float k=FeedbackProfile.Active.enabledFeedback?Mathf.Sin(impact/.10f*Mathf.PI)*.07f:0;visual.transform.localScale=Vector3.Scale(StreakPower==StreakBooster.None?visualBaseScale:Vector3.one*StreakBallArt.BallScale(StreakPower),new Vector3(1+k,1-k,1)*(1));if(StreakPower!=StreakBooster.None){streakArtAge+=Time.deltaTime;visual.sprite=StreakBallArt.Frame(StreakPower,4+(int)(streakArtAge*12)%4);}}
 ```
 
-### OnCollisionEnter2D · L146
+### OnCollisionEnter2D · L119
 
-方法 SHA-256：`2febe3633caade43e400550a14cb8352054dec9246bd2af50b894a783adfcad8`
+方法 SHA-256：`b0b6abdbf9d9b38959f11cda6f1ced3bea5312b3938efe5e49e9ea42f39ad2ce`
 时间来源：Time.time
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.BallBody.OnCollisionEnter2D(UnityEngine.Collision2D)`
@@ -67,32 +67,14 @@ void OnCollisionEnter2D(Collision2D collision)
             if(!Active||owner==null||!owner.IsPlaying||owner.IsPaused||SessionGeneration!=owner.Generation)return;
             PlayerHaptics71.Pulse();
             var abilityBrick=collision.collider.GetComponentInParent<BrickBody>();
-            if((owner.IsStreakTrial||owner.UsesShopBoosters)&&StreakPower==StreakBooster.Pierce&&abilityBrick!=null&&abilityBrick.Definition.kind!=BrickKind.Stone&&!owner.FusionPierceBlocked(abilityBrick)&&owner.FusionPierceAvailable(this)){
-                IncomingDirection=flightDirection;Physics2D.IgnoreCollision(circle,collision.collider,true);if(!ignored.Contains(collision.collider))ignored.Add(collision.collider);restoreStreakPierce=true;Body.linearVelocity=flightDirection*flightSpeed;owner.HitBrick(abilityBrick,this,Body.position);owner.PlayStreakImpact(StreakBooster.Pierce,Body.position);owner.FusionConsumePierce(this);return;
-            }
-            if(owner.IsAbilityRoute&&piercing&&abilityBrick!=null&&abilityBrick.Definition.kind!=BrickKind.Stone){
-                if(pierced.Add(abilityBrick.Id)){
-                    // Preserve the incoming direction; bypass the solver's reflection.
-                    Physics2D.IgnoreCollision(circle,collision.collider,true);ignored.Add(collision.collider);
-                    Body.linearVelocity=flightDirection*flightSpeed;
-                    owner.HitBrick(abilityBrick,this,Body.position);
-                    if(pierced.Count>=3)piercing=false;
-                }return;
-            }
-            if(owner.IsAbilityRoute&&piercing)piercing=false;
             IncomingDirection=flightDirection;RestoreSpeed(collision);
             impact=.10f;if(collision.contactCount>0){var c=collision.GetContact(0);trail.Sample(c.point+c.normal*FlightGeometry.Radius);}
             var brick=collision.collider.GetComponentInParent<BrickBody>();
             Vector2 point=collision.contactCount>0?collision.GetContact(0).point:Body.position;
-            var boss=collision.collider.GetComponent<BossBody>();
-            if(boss!=null){owner.HitBoss(boss,this,point);return;}
-            var jellyWall=collision.collider.GetComponent<JellyWallContact>();
-            if(jellyWall!=null){float normalSpeed=Mathf.Abs(jellyWall.Side==1?IncomingDirection.y:IncomingDirection.x)*collision.relativeVelocity.magnitude;jellyWall.Hit(point,normalSpeed);owner.OnJuiceWall(this,jellyWall.Side,point);owner.OnChainWall(this,jellyWall.Side);}
-            if(brick!=null){if(owner.FusionActive)owner.HitFusionBallAndPower(brick,this,point);else{owner.HitBrick(brick,this,point);owner.TriggerStreakImpact(this,point);}return;}
+            var jellyWall=collision.collider.GetComponent<BoardWallContact>();
+            if(jellyWall!=null){float normalSpeed=Mathf.Abs(jellyWall.Side==1?IncomingDirection.y:IncomingDirection.x)*collision.relativeVelocity.magnitude;jellyWall.Hit(point,normalSpeed);owner.OnChainWall(this,jellyWall.Side);}
+            if(brick!=null){{owner.HitBrick(brick,this,point);owner.TriggerStreakImpact(this,point);}return;}
             if(jellyWall!=null)owner.TriggerStreakImpact(this,point);
-            var pillar=collision.collider.GetComponentInParent<ElectricPillarContact>();if(pillar!=null)pillar.Circuit.PreviewKnownConnections();
-            var mechanism=collision.collider.GetComponentInParent<MovingObstacle>();
-            if(mechanism!=null&&mechanism.IsRotor)owner.RecordRotorContact();
             var ball=collision.collider.GetComponent<BallBody>();
             if(ball!=null&&Id>ball.Id)return;
             if(Time.time-lastContactTime>.06f && collision.relativeVelocity.sqrMagnitude>1)
@@ -149,7 +131,7 @@ bool enteredBoard;
 Vector2 previousPosition;
 ```
 ```csharp
-float previousY, lastContactTime, impact;
+float previousY,lastContactTime,impact;
 ```
 ```csharp
 Vector2 flightDirection=Vector2.up;
@@ -170,31 +152,16 @@ public int ChainBreaks,ChainBankBreaks;
 public bool ChainBank,ChainGenerated;
 ```
 ```csharp
-public int HeatHits, BankCharge;
-```
-```csharp
-bool charged,piercing,strand;
-```
-```csharp
-int strandHits;
-```
-```csharp
 readonly System.Collections.Generic.HashSet<int> pierced=new System.Collections.Generic.HashSet<int>();
 ```
 ```csharp
 readonly System.Collections.Generic.List<Collider2D> ignored=new System.Collections.Generic.List<Collider2D>();
 ```
 ```csharp
-readonly RaycastHit2D[] streakPierceHits=new RaycastHit2D[24];
-```
-```csharp
 bool restoreStreakPierce;
 ```
 ```csharp
 CircleCollider2D circle;
-```
-```csharp
-float abilityAge;
 ```
 ```csharp
 Vector3 visualBaseScale;

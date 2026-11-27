@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/AppUI.LeagueActivity.cs`
-文件 SHA-256：`a28093f9025c4fefc1a781c0878c3f4df72b91de68d0bf290a9a50f5e0bfb68f`
+文件 SHA-256：`48bed91160be3ae6fead891eb0929fa7e5a043e13ba8d8c182d5ca6f95b11376`
 [原始源码快照](../source/Assets/Scripts/UI/AppUI.LeagueActivity.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -12,21 +12,21 @@
 
 ### TickLeagueActivity · L6
 
-方法 SHA-256：`d9c9025498631f38fb220a0b0f76927d185eae3f6b8ea7571eb719d013726177`
+方法 SHA-256：`6f0b733852a7bc8cff09599b2c0b8f0fc7b32d6b9a08ce89c8ad0de3c887fab5`
 时间来源：Time.unscaledDeltaTime
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.AppUI.TickLeagueActivity()`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/AppUI.cs:89` · `AppUI.Update` → `TickLeagueActivity()`
+- `Assets/Scripts/UI/AppUI.cs:92` · `AppUI.Update` → `TickLeagueActivity()`
 
 ```csharp
 void TickLeagueActivity(){
   if(Profile==null||Session==null)return;
   float dt=Mathf.Min(Time.unscaledDeltaTime,.25f);
   if(Input.touchCount>0||Input.GetMouseButton(0)||Input.anyKeyDown||aiming)leagueIdle=0;else leagueIdle+=dt;
-  bool battle=leagueFocused&&playing&&!busy&&results==null&&modal==null&&Session.IsPlaying&&!Session.IsPaused&&!Session.IsTutorial&&!Session.IsStreakTrial;
+  bool battle=leagueFocused&&playing&&!busy&&results==null&&modal==null&&Session.IsPlaying&&!Session.IsPaused;
   bool active=battle&&(Session.ActiveBalls>0||leagueIdle<45);
   if(battle)leagueMenuTime=0;else leagueMenuTime+=dt;
   if(leagueFocused&&!playing&&modal==null&&leagueMenuTime<20&&leagueIdle<20)active=true;

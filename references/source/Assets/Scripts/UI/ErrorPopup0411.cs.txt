@@ -1,0 +1,48 @@
+using System;using UnityEngine;using UnityEngine.UI;using TMPro;using DG.Tweening;
+namespace BounceGarden {
+public partial class AppUI {
+ public ErrorPopup0411 QAErrorPopup0411=>modal==null?null:modal.GetComponent<ErrorPopup0411>();
+ void OpenErrorPopup0411(string title,string message,Action retry,Action home){
+  RemoveModal(false);modal=UICraft.Root(overlayRoot,"Modal",0,0,1080,1700);
+  var view=modal.gameObject.AddComponent<ErrorPopup0411>();view.Build(this,title,message,()=>CloseErrorPopup0411(retry),()=>CloseErrorPopup0411(home));
+  modalMotion=DOTween.Sequence().SetUpdate(true).SetId(modal);view.Visual.localScale=Vector3.one*.96f;view.Group.alpha=0;
+  modalMotion.Append(view.Visual.DOScale(Vector3.one,.18f).SetEase(Ease.OutCubic));modalMotion.Join(view.Group.DOFade(1,.18f).SetEase(Ease.OutCubic));SoundService.Play("whoosh");
+ }
+ void CloseErrorPopup0411(Action action){var view=QAErrorPopup0411;if(view==null||!view.Group.blocksRaycasts)return;view.Group.blocksRaycasts=false;var old=modal;modalMotion?.Kill(false);modalMotion=DOTween.Sequence().SetUpdate(true).SetId(old);modalMotion.Append(view.Visual.DOScale(view.Visual.localScale*.94f,.14f).SetEase(Ease.InCubic));modalMotion.Join(view.Group.DOFade(0,.14f).SetEase(Ease.InCubic));modalMotion.OnComplete(()=>{if(modal!=old)return;modalMotion=null;action?.Invoke();});}
+}
+public sealed class ErrorPopup0411:MonoBehaviour {
+ public const float Width=1080,Height=1700;
+ public RectTransform Visual{get;private set;}public RectTransform Panel{get;private set;}
+ public LoadingBoxAnimation Box{get;private set;}public CanvasGroup Group{get;private set;}
+ public Button RetryButton{get;private set;}public Button HomeButton{get;private set;}
+ public TMP_Text Title{get;private set;}public TMP_Text Message{get;private set;}
+ public float Age{get;private set;}public bool LayoutFits{get;private set;}
+ RectTransform layout;AppUI app;
+ public void Build(AppUI owner,string title,string message,Action retry,Action home){
+  app=owner;gameObject.AddComponent<UILightSurface>();Group=gameObject.AddComponent<CanvasGroup>();
+  UICraft.Box(transform,"Error dimmer",0,0,18000,18000,new Color(.20f,.16f,.15f,.43f),false,true);
+  layout=UICraft.Root(transform,"Error proportional layout",0,0,Width,Height);Visual=UICraft.Root(layout,"Error popup visual",0,0,Width,Height);
+  Panel=LevelLoadingArt.Image(Visual,"panel",0,0,940);Panel.GetComponent<Image>().raycastTarget=true;
+  Title=Text(title,500,800,105,title.Length>8?60:68);
+  Box=LoadingBoxAnimation.Create(Visual,110,.86f);
+  Message=Text(message,-260,790,150,39);Message.enableWordWrapping=true;Message.fontSizeMin=34;Message.fontSizeMax=39;
+  RetryButton=CommonButtonsA.Button(Visual,"Error retry","重试",0,-465,800,128,retry,"primary",53);
+  HomeButton=CommonButtonsA.Button(Visual,"Error return home","返回花园",0,-620,800,120,home,"secondary",49);
+  Layout();
+ }
+ TMP_Text Text(string text,float y,float w,float h,int size){var t=UICraft.Label(Visual,text,0,y,w,h,size,CSettingsArt.Ink);t.color=CSettingsArt.Ink;t.fontStyle=FontStyles.Normal;return t;}
+ void Update(){Age+=Mathf.Min(Time.unscaledDeltaTime,.05f);Box?.Render(Age);}
+ void LateUpdate(){Layout();}
+ void Layout(){
+  if(layout==null||!Group.blocksRaycasts)return;var canvas=GetComponentInParent<Canvas>().rootCanvas;var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;
+  var safe=app.LoadingSafeArea;var pixels=app.MenuAvoidanceViewport;if(WeChatLayoutMetrics.TryGetBlockedRect(pixels,out var blocked))safe.yMax=Mathf.Min(safe.yMax,blocked.yMin-12);
+  Vector2 origin=RectTransformUtility.WorldToScreenPoint(camera,transform.TransformPoint(Vector3.zero));
+  float px=Vector2.Distance(origin,RectTransformUtility.WorldToScreenPoint(camera,transform.TransformPoint(Vector3.right)));
+  float py=Vector2.Distance(origin,RectTransformUtility.WorldToScreenPoint(camera,transform.TransformPoint(Vector3.up)));
+  float unit=Mathf.Min(Mathf.Max(1,safe.width)/Width,Mathf.Max(1,safe.height-40)/Height);
+  layout.localScale=new Vector3(unit/Mathf.Max(.0001f,px),unit/Mathf.Max(.0001f,py),1);
+  if(RectTransformUtility.ScreenPointToWorldPointInRectangle((RectTransform)transform,safe.center,camera,out var center))layout.position=center;
+  LayoutFits=Width*unit<=safe.width+.1f&&Height*unit<=safe.height+.1f;
+ }
+}
+}

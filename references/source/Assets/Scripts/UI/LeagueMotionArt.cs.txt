@@ -9,17 +9,18 @@ public static class LeagueMotionArt {
  public static Image Image(Transform parent,string key,float x,float y,float size){var v=UICraft.Box(parent,"League generated "+key,x,y,size,size,Color.white);v.sprite=Get(key);v.type=UnityEngine.UI.Image.Type.Simple;v.preserveAspect=true;v.raycastTarget=false;return v;}
 }
 public sealed class LeagueMedalPresentation:MonoBehaviour {
- RectTransform medal,arrow;CanvasGroup group;float age;bool moving;int delta;
- public static void Show(RectTransform parent,int before,int after,int medals){Transform target=parent;foreach(var t in parent.GetComponentsInChildren<RectTransform>())if(t.name=="Victory rewards"){target=t;break;}var root=UICraft.Root(target,"League medal and rank feedback",0,0,832,270);root.gameObject.AddComponent<LeagueMedalPresentation>().Build(before,after,medals);}
+ RectTransform medal,arrow;CanvasGroup group;float age;bool moving,compact;int delta;
+ public static void Show(RectTransform parent,int before,int after,int medals){Transform target=parent;bool compact=false;foreach(var t in parent.GetComponentsInChildren<RectTransform>())if(t.name=="League medal reward"){target=t;compact=true;break;}if(!compact)foreach(var t in parent.GetComponentsInChildren<RectTransform>())if(t.name=="Victory rewards"){target=t;break;}var root=UICraft.Root(target,"League medal and rank feedback",0,0,compact?680:832,compact?60:270);var p=root.gameObject.AddComponent<LeagueMedalPresentation>();p.compact=compact;p.Build(before,after,medals);}
  void Build(int before,int after,int medals){delta=before-after;moving=FeedbackProfile.Active.enabledFeedback;group=gameObject.AddComponent<CanvasGroup>();group.blocksRaycasts=false;
   var old=transform.parent.Find("Victory medal icon");if(old!=null)old.gameObject.SetActive(false);
+  if(compact){foreach(var t in transform.parent.GetComponentsInChildren<TMPro.TMP_Text>())t.gameObject.SetActive(false);medal=LeagueMotionArt.Image(transform,"medal",-230,0,44).rectTransform;ResultSurface048.Text(transform,"本期奖章 +"+medals+" · 第"+after+"名",30,0,540,50,27);SoundService.Play(delta>0?"rank_up":"medal_arrive");return;}
   medal=LeagueMotionArt.Image(transform,"medal",130,-35,130).rectTransform;
   
   UICraft.Label(transform,delta>0?"升至第"+after+"名":delta<0?"暂列第"+after+"名":"本期第"+after+"名",0,-111,720,44,26,UICraft.Ink);
   if(delta!=0){arrow=LeagueMotionArt.Image(transform,delta>0?"up":"down",310,-110,48).rectTransform;UICraft.Label(transform,Math.Abs(delta).ToString(),365,-110,55,44,25,UICraft.Ink);}
   SoundService.Play(delta>0?"rank_up":"medal_arrive");
  }
- void Update(){age+=Mathf.Min(Time.unscaledDeltaTime,.05f);group.alpha=Mathf.Clamp01(age/.15f);float aspect=Mathf.Abs(transform.lossyScale.x/Mathf.Max(.001f,transform.lossyScale.y));if(arrow!=null)arrow.localScale=new Vector3(1,aspect,1);if(!moving){medal.localScale=new Vector3(1,aspect,1);return;}
+ void Update(){age+=Mathf.Min(Time.unscaledDeltaTime,.05f);group.alpha=Mathf.Clamp01(age/.15f);if(compact){float p=Mathf.Clamp01(age/.55f);medal.anchoredPosition=new Vector2(-230,moving?Mathf.Sin(p*Mathf.PI)*28:0);medal.localScale=Vector3.one*(moving?Mathf.Lerp(1.2f,1,p):1);return;}float aspect=Mathf.Abs(transform.lossyScale.x/Mathf.Max(.001f,transform.lossyScale.y));if(arrow!=null)arrow.localScale=new Vector3(1,aspect,1);if(!moving){medal.localScale=new Vector3(1,aspect,1);return;}
   float enter=Mathf.Clamp01(age/.55f);medal.anchoredPosition=new Vector2(Mathf.Lerp(0,130,enter*enter),-35+Mathf.Sin(enter*Mathf.PI)*100);float size=Mathf.Lerp(1.8f,1,enter);medal.localScale=new Vector3(size,size*aspect,1);
   if(arrow!=null)arrow.anchoredPosition=new Vector2(310,-110+(delta>0?1:-1)*Mathf.Sin(Mathf.Clamp01((age-.3f)/.65f)*Mathf.PI)*45);
  }

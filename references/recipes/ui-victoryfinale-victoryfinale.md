@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/VictoryFinale.cs`
-文件 SHA-256：`74c40b616fc14db063840223dd1d7fd7a8af46ffc840345c2738a994f3998977`
+文件 SHA-256：`b71390788be035e6ad7d94771ac35071ae483921a5f7334573f32c376a4c61e7`
 [原始源码快照](../source/Assets/Scripts/UI/VictoryFinale.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -57,7 +57,7 @@ void Update(){if(handed||game==null)return;Advance(game.PresentationDelta(Mathf.
 
 ### Advance · L33
 
-方法 SHA-256：`d34c69cb3827a23f43ffab8c467e17dae16f130597188c5e8f0badb5be30bf79`
+方法 SHA-256：`d4ed2c6d32b7d75dd180e8f6aeba83c3333077a5950237ab01e06093fae8852f`
 时间来源：Time.unscaledTime
 曲线证据：Mathf.Sin
 解析符号：`BounceGarden.VictoryFinale.Advance(float)`
@@ -83,8 +83,8 @@ public void Advance(float dt){
   if(explosion>=0&&!sounded){sounded=true;SoundService.Play("victory_finale_blast");PlayerHaptics71.Pulse(PlayerHaptics71.Strength.Heavy);}
   if(explosion>=.25f&&!cleared){cleared=true;game.SweepVictoryBoard();}
   float flash=explosion-.29f;white.color=new Color(1,1,1,FeedbackProfile.Active.enabledFeedback&&flash>=0&&flash<.16f?.72f*(1-flash/.16f):0);
-  float starAge=explosion-.84f;if(starAge>=0){if(!detached){detached=true;starSoundAt=Time.unscaledTime;SoundService.Play("victory_stars_transfer");stars=meter!=null?meter.DetachVictoryStars(root):new RectTransform[0];starStarts=new Vector2[stars.Length];starSizes=new Vector2[stars.Length];for(int i=0;i<stars.Length;i++){starStarts[i]=stars[i].anchoredPosition;starSizes[i]=stars[i].rect.size;stars[i].SetAsLastSibling();}}
-   float u=Ease(starAge/.48f);for(int i=0;i<stars.Length;i++){stars[i].anchoredPosition=Vector2.Lerp(starStarts[i],new Vector2((i-1)*270,i==1?365:230),u);stars[i].sizeDelta=Vector2.Lerp(starSizes[i],Vector2.one*(i==1?360:310),u);stars[i].GetComponent<StarChargeView>()?.RefreshGeometry(dt);stars[i].localScale=Vector3.one;stars[i].localRotation=Quaternion.Euler(0,0,Mathf.Lerp(0,(i-1)*-12,u));}
+  float starAge=explosion-.84f;if(starAge>=0){if(!detached){detached=true;starSoundAt=Time.unscaledTime;SoundService.Play("victory_stars_transfer");stars=meter!=null?meter.DetachVictoryStars(root):new RectTransform[0];starStarts=new Vector2[stars.Length];starSizes=new Vector2[stars.Length];starAngles=new float[stars.Length];for(int i=0;i<stars.Length;i++){starStarts[i]=stars[i].anchoredPosition;starSizes[i]=stars[i].rect.size;starAngles[i]=stars[i].localEulerAngles.z;stars[i].SetAsLastSibling();}}
+   float u=Ease(starAge/.48f);for(int i=0;i<stars.Length;i++){stars[i].anchoredPosition=Vector2.Lerp(starStarts[i],new Vector2((i-1)*270,i==1?365:230),u);stars[i].sizeDelta=Vector2.Lerp(starSizes[i],Vector2.one*(i==1?360:310),u);stars[i].GetComponent<StarChargeView>()?.RefreshGeometry(dt);stars[i].localScale=Vector3.one;stars[i].localRotation=Quaternion.Euler(0,0,Mathf.LerpAngle(starAngles[i],(i-1)*-12,u));}
    if(starAge>=.65f&&Time.unscaledTime-starSoundAt>=.45f){handed=true;var done=complete;complete=null;done?.Invoke(stars);}
   }
  }
@@ -168,6 +168,9 @@ Vector2[] starStarts;
 ```
 ```csharp
 Vector2[] starSizes;
+```
+```csharp
+float[] starAngles;
 ```
 
 业务/组件依赖保留在上述字段、泛型 Get/AddComponent 和源方法参数中。语义解析不覆盖运行时委托结果；`nameMatchedCallSites` 仅供补充检索。

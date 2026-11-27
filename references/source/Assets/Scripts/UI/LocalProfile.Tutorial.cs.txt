@@ -2,16 +2,13 @@ using System;
 namespace BounceGarden {
 public sealed partial class LocalProfile {
  bool firstBounceComplete;uint powerPractice;
- public bool FirstBounceComplete=>firstBounceComplete;
- public bool HasPowerPractice(int kind)=>kind>=1&&kind<=3&&(powerPractice&(1u<<(kind-1)))!=0;
+ 
+ 
  public bool CompleteFirstBounce(){
   if(firstBounceComplete)return true;if(!storageHealthy)return false;string previous=Serialize();
   firstBounceComplete=true;alphabetIntroductions|=1u;
   try{SaveInternal();return true;}catch(Exception ex){Restore(previous);storageHealthy=false;UnityEngine.Debug.LogWarning("Tutorial progress could not be saved: "+ex.Message);return false;}
  }
- public bool MarkPowerPractice(int kind){
-  if(kind<1||kind>3||!storageHealthy)return false;if(HasPowerPractice(kind))return true;string previous=Serialize();powerPractice|=1u<<(kind-1);
-  try{SaveInternal();return true;}catch(Exception ex){Restore(previous);storageHealthy=false;UnityEngine.Debug.LogWarning("Power practice could not be saved: "+ex.Message);return false;}
- }
+ 
 }
 }

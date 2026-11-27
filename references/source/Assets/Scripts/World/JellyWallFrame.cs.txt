@@ -8,15 +8,15 @@ namespace BounceGarden
     {
         public const int Capacity = 16;
         public const float Duration = .50f;
-        public const float MaximumDent = .155f;
+        
         public const float HalfWidth = .18f;
         // Stop above the sleeping cat, matching the approved garden painting.
         // This is visual only; collider bounds and the return line are unchanged.
-        public const float Bottom = -7.82f;
-        public static float SideCenter => FlightGeometry.Right + HalfWidth;
+        
+        
         public static float TopCenter => FlightGeometry.Top + HalfWidth;
 
-        struct Pulse { public Vector2 point; public int side; public float age, strength; }
+        struct Pulse { public Vector2 point; public int side; public float age,strength; }
         readonly Pulse[] pulses = new Pulse[Capacity];
         readonly Vector4[] shaderPulses = new Vector4[Capacity];
         readonly Vector4[] shaderAges = new Vector4[Capacity];
@@ -24,83 +24,22 @@ namespace BounceGarden
         Material material;
         Mesh mesh;
         int count;
-        public int ActiveImpacts => count;
-        public int TotalImpacts { get; private set; }
+        
+        
 
-        public void Initialize(GameSession session)
-        {
-            owner = session;
-            mesh = new Mesh { name = "Continuous jelly wall canvas" };
-            float edge=FlightGeometry.Right+HalfWidth*2+MaximumDent+.1f;
-            // Three non-overlapping strips cover the full dent/shadow envelope.
-            // Empty board pixels no longer invoke the wall fragment shader.
-            float inner=SideCenter-.65f,ceiling=6.5f;
-            mesh.vertices = new[] {
-                new Vector3(-edge,-8.95f),new Vector3(-inner,-8.95f),new Vector3(-inner,ceiling),new Vector3(-edge,ceiling),
-                new Vector3(inner,-8.95f),new Vector3(edge,-8.95f),new Vector3(edge,ceiling),new Vector3(inner,ceiling),
-                new Vector3(-edge,ceiling),new Vector3(edge,ceiling),new Vector3(edge,8.4f),new Vector3(-edge,8.4f) };
-            mesh.triangles = new[] { 0,1,2,0,2,3,4,5,6,4,6,7,8,9,10,8,10,11 };
-            mesh.RecalculateBounds();
-            gameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
-            var renderer = gameObject.AddComponent<MeshRenderer>();
-            renderer.sortingOrder = 3;
-            material = new Material(Resources.Load<Shader>("JellyWall"));
-            var vine=Resources.Load<Texture2D>("Art/CatGardenWalls/vine-strip");
-            if(vine==null)throw new System.InvalidOperationException("Cat garden wall vine missing");
-            material.SetTexture("_WallTex",vine);
-            material.SetVector("_Frame", new Vector4(SideCenter, TopCenter, Bottom, HalfWidth));
-            renderer.sharedMaterial = material;
-            Upload();
-        }
+        
 
         // Side: 0 left, 1 ceiling, 2 right. Contacts are passed by the ball after
         // the physics solver, so no second reflection or velocity impulse occurs.
-        public void Impact(Vector2 point, int side, float speed)
-        {
-            if (owner == null || !owner.IsPlaying || owner.IsPaused || side < 0 || side > 2 ||
-                !FeedbackProfile.Active.enabledFeedback || float.IsNaN(speed) || float.IsInfinity(speed) || speed <= 0) return;
-            owner.NotifyVineBall(point,speed);
-            TotalImpacts++;
-            // Merge a tightly packed volley at the same location, without extending
-            // an old rebound indefinitely. All other contacts have independent clocks.
-            for (int i = 0; i < count; i++)
-            {
-                if (pulses[i].side != side || pulses[i].age > .045f ||
-                    (pulses[i].point - point).sqrMagnitude > .0256f) continue;
-                pulses[i].strength = Mathf.Min(1.2f, pulses[i].strength + .10f);Upload();
-                return;
-            }
-            int slot = count;
-            if (count == Capacity)
-            {
-                slot = 0;
-                for (int i = 1; i < count; i++) if (pulses[i].age > pulses[slot].age) slot = i;
-            }
-            else count++;
-            pulses[slot] = new Pulse { point = point, side = side, age = 0,
-                strength = Mathf.Clamp(speed / 12f, .22f, 1.15f) };Upload();
-        }
+        
 
-        public static float Envelope(float age)
-        {
-            float t = Mathf.Clamp01(age / Duration);
-            return Mathf.Sin(age * (Mathf.PI * 2 / .22f)) * Mathf.Exp(-9f * age) * (1-t)*(1-t) * 1.85f;
-        }
+        
 
-        public static float Influence(float distance)
-        {
-            float core=distance/.38f;return Mathf.Exp(-core*core*2);
-        }
-        static float Arc(Vector2 p,int side){float length=TopCenter-Bottom;return side==0?p.y-Bottom:side==1?length+p.x+SideCenter:length+2*SideCenter+TopCenter-p.y;}
-        public static float PulseShape(float age,float distance,float strength){float travel=age-Mathf.Abs(distance)/4f;float wave=travel>0?.04f*Envelope(travel)*Mathf.Exp(-Mathf.Abs(distance)*1.5f):0;return strength*(.14f*Envelope(age)*Influence(distance)+wave);}
+        
+        
+        
 
-        public float Deformation(Vector2 point, int side)
-        {
-            float result = 0;
-            for (int i = 0; i < count; i++)
-                result+=PulseShape(pulses[i].age,Arc(point,side)-Arc(pulses[i].point,pulses[i].side),pulses[i].strength);
-            return Mathf.Clamp(result, -MaximumDent, MaximumDent);
-        }
+        
 
         public void Advance(float deltaTime)
         {
@@ -137,10 +76,5 @@ namespace BounceGarden
         }
     }
 
-    public sealed class JellyWallContact : MonoBehaviour
-    {
-        public JellyWallFrame Frame;
-        public int Side;
-        public void Hit(Vector2 point, float speed) { if (Frame != null) Frame.Impact(point, Side, speed); }
-    }
+    
 }

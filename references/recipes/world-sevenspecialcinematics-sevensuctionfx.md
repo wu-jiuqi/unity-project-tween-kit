@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/SevenSpecialCinematics.cs`
-文件 SHA-256：`ba1d34624edba93f5a13507d89e413ace978773343f4d9bb47b5552cf3b20f7d`
+文件 SHA-256：`abeddcf4671a69c5b9b36ee0faf35bd2114fd68601f5cf76d74448d6f8c175d6`
 [原始源码快照](../source/Assets/Scripts/World/SevenSpecialCinematics.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -12,7 +12,7 @@
 
 ### Update · L34
 
-方法 SHA-256：`dd48231602816cd00026ee07415370d00e68438dd91d49dc2a49c63082aa2a9d`
+方法 SHA-256：`c5d6a4afdd7151bb288ffa5611cd5fb99d72f41ef3c4ccfb9c7e599530a5f17c`
 时间来源：Time.unscaledDeltaTime
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.SevenSuctionFx.Update()`

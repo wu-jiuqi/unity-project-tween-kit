@@ -10,10 +10,7 @@ public interface ILeagueConfigProvider { LeagueConfig Load(); }
 public sealed class ResourceLeagueConfigProvider:ILeagueConfigProvider {
  public LeagueConfig Load(){var text=Resources.Load<TextAsset>("LeagueConfig");var value=text==null?new LeagueConfig():JsonUtility.FromJson<LeagueConfig>(text.text);value.Validate();return value;}
 }
-public sealed class JsonLeagueConfigProvider:ILeagueConfigProvider {
- readonly Func<string> read;public JsonLeagueConfigProvider(Func<string> reader){read=reader??throw new ArgumentNullException(nameof(reader));}
- public LeagueConfig Load(){var c=JsonUtility.FromJson<LeagueConfig>(read());if(c==null)throw new InvalidOperationException("Empty league config");c.Validate();return c;}
-}
+
 [Serializable] public sealed class LeagueCopy {
  public string title="花园联赛",rivals="{0}位对手",ends="距离结束 {0}",rewards="前{0}名奖励",rewardContents="金币、头像与头像框",rank="我的排名：{0}",medals="奖章",next="下一位对手",you="我",pass="再获{0}枚奖章，即可超过{1}",leader="暂列第一，继续加油！",start="赢得一局，开启联赛",rules="获胜+1奖章 · 失败不扣除",play="开始挑战",claim="领取奖励",equip="立即使用",owned="已拥有",test="+{0}枚奖章（测试）",total="我的奖章：{0}";
 }
@@ -22,13 +19,13 @@ public sealed class JsonLeagueConfigProvider:ILeagueConfigProvider {
  public float enterSeconds=.55f,settleSeconds=.65f;
 }
 [Serializable] public sealed class LeagueCosmetic {
- public string avatarId="flower-cat-v1",frameId="flower-frame-v1",avatarResource="CatCosmeticsV3/avatars/02_ragdoll",frameResource="CatCosmeticsV3/frames/02_ragdoll";
+ public string avatarId="flower-cat-v1",frameId="flower-frame-v1",avatarResource="DressingShop044/league-avatar-01",frameResource="DressingShop044/league-frame-01";
 }
 [Serializable] public sealed class LeagueRewardTier {public int throughRank,coins;public bool cosmetics;public LeagueRewardTier(int r,int c,bool a){throughRank=r;coins=c;cosmetics=a;}}
 [Serializable] public sealed class LeagueRivalDefinition {public string name,portrait;public LeagueRivalDefinition(string n,string p){name=n;portrait=p;}}
 [Serializable] public sealed class LeagueConfig {
  public string version="league-v1";
- public bool calendarSeasons;public bool activeCompetition;public float medalSeconds=240,roundSeconds=120;
+ public bool calendarSeasons;public bool rotateExclusiveCosmetics;public bool activeCompetition;public float medalSeconds=240,roundSeconds=120;
  public int rivalCount=20,periodDays=7,offlineHours=6,maxOfflineRankLoss=3,refreshSeconds=60,topRewardCount=5,testMedals=1;
  public int defaultWeeklyWins=14,minWeeklyWins=7,maxWeeklyWins=35;
  public float maxPaceChange=.20f,minEventMinutes=45,lowGrowth=.10f,highGrowth=.95f;
@@ -77,6 +74,7 @@ public static partial class LeagueEngine {
   if(s.previousPace>0)pace=(int)Math.Round(Math.Max(s.previousPace*(1-c.maxPaceChange),Math.Min(s.previousPace*(1+c.maxPaceChange),pace)));
   int seed=Guid.NewGuid().GetHashCode();var rng=new System.Random(seed);var p=new LeaguePeriod{id=Guid.NewGuid().ToString("N"),seed=seed,startMedals=medals,pace=pace,startsAt=now,endsAt=checked(now+c.periodDays*86400L),lastObserved=now,config=c,playerTieOrder=c.rivalCount/2,rivals=new LeagueRival[c.rivalCount]};
   if(c.calendarSeasons){p.startsAt=CalendarStart(now,c.periodDays);p.endsAt=p.startsAt+c.periodDays*86400L;}
+  if(c.rotateExclusiveCosmetics)LeagueExclusiveCosmetics.Configure(c,p.startsAt);
   var names=c.calendarSeasons?LeagueIdentity.CreateNames(new System.Random(seed^0x13579),c.rivalCount,s.recentNames):null;
   for(int i=0;i<c.rivalCount;i++){
    var d=c.rivals[i%c.rivals.Length];double strength=1-i/(double)Math.Max(1,c.rivalCount-1);int count=(int)Math.Round(pace*(c.lowGrowth+(c.highGrowth-c.lowGrowth)*strength));
@@ -126,13 +124,13 @@ public static partial class LeagueEngine {
  }
 }
 public interface ILeagueSource {
- LeagueSnapshot Read(bool offline=false);bool Claim(string periodId);bool Equip(string avatarId,string frameId);bool AddTestMedals();
+ LeagueSnapshot Read(bool offline=false);bool Claim(string periodId);bool Equip(string avatarId,string frameId);
 }
 public sealed class LocalLeagueSource:ILeagueSource {
  readonly LocalProfile profile;public LocalLeagueSource(LocalProfile p){profile=p;}
  public LeagueSnapshot Read(bool offline=false)=>profile.ReadLeague(offline);
  public bool Claim(string id)=>profile.ClaimLeagueReward(id);
  public bool Equip(string a,string f)=>profile.EquipLeagueCosmetics(a,f);
- public bool AddTestMedals()=>profile.AddTestMedals();
+ 
 }
 }

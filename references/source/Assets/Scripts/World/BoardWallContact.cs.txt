@@ -1,0 +1,4 @@
+using UnityEngine;namespace BounceGarden {
+// Presentation notification only. The existing BoxCollider2D boundaries own reflection.
+public sealed class BoardWallContact:MonoBehaviour {public GameSession Owner;public int Side;public void Hit(Vector2 point,float speed){if(Owner==null||!Owner.IsPlaying||Owner.IsPaused||!FeedbackProfile.Active.enabledFeedback||float.IsNaN(speed)||float.IsInfinity(speed)||speed<=0)return;Owner.NotifyVineBall(point,speed);}}
+}

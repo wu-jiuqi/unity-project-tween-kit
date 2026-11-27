@@ -10,11 +10,7 @@ namespace BounceGarden
         readonly HashSet<int> balls = new HashSet<int>();
         int primaryObjective;
         // Optional encounter goal: other registered targets remain ordinary damageable bricks.
-        public void SetPrimaryObjective(int id)
-        {
-            if (!targets.ContainsKey(id)) throw new ArgumentException("Primary objective must be registered");
-            primaryObjective = id;
-        }
+        
         public bool UnlimitedShots {get;set;}
         public void CommitOutcome(bool won){Won=won;OutcomeCommitted=true;PendingBurstBalls=0;}
         public int Shots { get; private set; }
@@ -76,7 +72,7 @@ namespace BounceGarden
             PendingBurstBalls--; balls.Add(id); return true;
         }
         public bool LoseBall(int id) => balls.Remove(id);
-        public bool AddSplitBall(int id) => !OutcomeCommitted && balls.Add(id);
+        
         public void BeginTargetStage() { PendingTargetStages++; }
         public void CompleteTargetStage() { PendingTargetStages = Math.Max(0, PendingTargetStages - 1); }
         public void BeginDamageChain() { PendingDamageChains++; }

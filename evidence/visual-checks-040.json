@@ -1,0 +1,35 @@
+{
+  "method": "computer-use sky native bounded-window capture after exact-player runtime checks",
+  "testedPlayerRunSha256": "9dc5381a33f09c89e98f3d234ed6a0f6cf563ffa884ccfed3bf2d4a041f1e7dd",
+  "images": [
+    {
+      "path": "evidence/visual/loading-progress.png",
+      "sha256": "1387ed2e9120bf8b6332a3e280956e67611efb6f5a7b6733e9dee6412f6e3cd0"
+    },
+    {
+      "path": "evidence/visual/loading-startup-99.png",
+      "sha256": "079ac54fd13586b488302c213333b1d2f8ea0bbc6a062032e1ecbcd4c216ca47"
+    },
+    {
+      "path": "evidence/visual/overview.png",
+      "sha256": "b2a3369579c3016c994b578dc618f9e6944143508278b7eb4bfee6e02b909544"
+    },
+    {
+      "path": "evidence/visual/parameter-export.png",
+      "sha256": "1f634e2e0cce2303bde304a48a0f5fdf9a341548cd6ebab50f0a0c7b98a405e1"
+    }
+  ],
+  "observed": [
+    "The native gallery exposes Parameter display and One-click parameter copy/export; the former Animation Prompt/source archive navigation is absent.",
+    "The original project loading track, fill, paw, marble and numeric label render together; native task input advances the shown percentage.",
+    "The full startup view uses the original title, cat poses, island, box, background and progress driver while preserving the original portrait proportions.",
+    "Parameter summary shows current values with units, fixed curve notes and component type; the export button acknowledges copying and writing JSON.",
+    "The complete startup view visibly holds at 99 percent pending its completion signal; native task input and the required-task completion action are distinct."
+  ],
+  "automatedEvidence": "runtime-verification.json verifies all 36 parameter exports, clipboard/file equality, legacy MotionPreset loading, current RGBA/time values, loading monotonicity/99% completion gate/failure/pause, host-origin-preserving rank changes and all delivered component lifecycle regressions.",
+  "limits": [
+    "Native checks sample workflows and do not reproduce all 96 reference recipes.",
+    "The reference comparison is by project relevance and effect family, not frame-for-frame reproduction.",
+    "Older version captures remain historical evidence; hidden-window black captures are excluded."
+  ]
+}

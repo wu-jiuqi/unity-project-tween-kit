@@ -1,0 +1,8 @@
+using UnityEngine;
+namespace BounceGarden {
+// Keep score immediately under the fixed settings hit target, on either aspect ratio.
+public sealed class BattleScorePlacement050:MonoBehaviour {
+ RectTransform settings;
+ void LateUpdate(){if(settings==null){var app=GetComponentInParent<AppUI>();if(app!=null)foreach(var r in app.GetComponentsInChildren<RectTransform>())if(r.name=="Battle settings"){settings=r;break;}}if(settings==null)return;var rect=(RectTransform)transform;float correction=rect.parent.lossyScale.x/Mathf.Max(.0001f,rect.parent.lossyScale.y);rect.position=settings.position;rect.anchoredPosition+=new Vector2(95,-80*correction);}
+}
+}

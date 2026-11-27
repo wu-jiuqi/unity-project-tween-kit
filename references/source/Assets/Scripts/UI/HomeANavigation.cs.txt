@@ -1,0 +1,40 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+public sealed class HomeANavigation:MonoBehaviour {
+ readonly Button[] buttons=new Button[5];readonly RectTransform[] icons=new RectTransform[5];readonly TMP_Text[] labels=new TMP_Text[5];readonly UnityEngine.UI.Image[] paws=new UnityEngine.UI.Image[5];readonly Pose[] poses=new Pose[5];RectTransform plate;int selected=-1;float layoutScale=1,plateTime=1,plateFrom,plateTo;bool focused=true;
+ struct Pose{public float y,xs,ys,r,time,fromY,fromX,fromScaleY,fromR;public bool moving,active;}
+ public float Height=>240*layoutScale;public int Selected=>selected;public RectTransform SelectionPlate=>plate;public Button ButtonAt(int index)=>buttons[index];public RectTransform IconAt(int index)=>icons[index];
+ public void Build(Action<int> request){var root=(RectTransform)transform;root.sizeDelta=new Vector2(1080,240);HomeAArt.Image(root,"nav-dock",0,0,1088,246,true);plate=HomeAArt.Image(root,"nav-selected",-432,0,176,190,true).rectTransform;
+  string[] keys={"nav-map","nav-shop","nav-home","nav-league","nav-dressing"},names={"关卡地图","喵喵小铺","首页","花园联赛","装扮"};
+  for(int i=0;i<5;i++){int index=i;float x=-432+216*i;buttons[i]=CSettingsArt.Button(root,"A navigation "+i,"",x,-2,216,236,()=>request(index),null);var visual=buttons[i].transform.Find("ButtonVisual");icons[i]=UICraft.Root(visual,"IconPopRoot",0,26,150,135);HomeAArt.Image(icons[i],keys[i],0,0,i==3?166:150,135);labels[i]=HomeAArt.Text(visual,"Navigation label",names[i],0,-58.5f,216,45,33);paws[i]=CSettingsArt.Image(visual,"decor_paw",0,-88,20,18);poses[i]=new Pose{xs=1,ys=1};}
+ }
+ public void Layout(float height){layoutScale=Mathf.Min(1,height/1920f);transform.localScale=Vector3.one*layoutScale;((RectTransform)transform).anchoredPosition=new Vector2(0,-height*.5f+120*layoutScale);}
+ public void Select(int index){index=Mathf.Clamp(index,0,4);if(index==selected)return;selected=index;plateFrom=plate.anchoredPosition.x;plateTo=-432+216*index;plateTime=0;
+  for(int i=0;i<5;i++){var p=poses[i];p.fromY=p.y;p.fromX=p.xs;p.fromScaleY=p.ys;p.fromR=p.r;p.time=0;p.active=i==index;p.moving=true;poses[i]=p;labels[i].fontStyle=i==index?FontStyles.Bold:FontStyles.Normal;paws[i].gameObject.SetActive(i==index);}if(!FeedbackProfile.Active.enabledFeedback)Snap();
+ }
+ void Finish(int i){var p=poses[i];p.active=i==selected;p.y=p.active?12:0;p.xs=p.ys=p.active?1.06f:1;p.r=0;p.moving=false;poses[i]=p;Render(i);}
+ void Render(int i){var p=poses[i];icons[i].anchoredPosition=new Vector2(0,26+p.y);icons[i].localScale=new Vector3(p.xs,p.ys,1);icons[i].localRotation=Quaternion.Euler(0,0,p.r);}
+ void Update(){if(plate==null)return;if(!focused||!FeedbackProfile.Active.enabledFeedback){Snap();return;}float dt=Mathf.Min(Time.unscaledDeltaTime,.05f);plateTime=Mathf.Min(1,plateTime+dt/.32f);plate.anchoredPosition=new Vector2(Mathf.Lerp(plateFrom,plateTo,1-Mathf.Pow(1-plateTime,3)),0);
+  for(int i=0;i<5;i++){var p=poses[i];if(!p.moving)continue;p.time+=dt;float t=Mathf.Clamp01(p.time/(p.active?.85f:.22f));if(t>=1){Finish(i);continue;}
+   if(!p.active){float q=1-Mathf.Pow(1-t,3);p.y=Mathf.Lerp(p.fromY,0,q);p.xs=Mathf.Lerp(p.fromX,1,q);p.ys=Mathf.Lerp(p.fromScaleY,1,q);p.r=Mathf.Lerp(p.fromR,0,q);}
+   else if(t<.12f){float q=t/.12f;p.y=p.fromY-5*q;p.xs=Mathf.Lerp(p.fromX,1.16f,q);p.ys=Mathf.Lerp(p.fromScaleY,.78f,q);p.r=p.fromR*(1-q);}
+   else if(t<.38f){float q=(t-.12f)/.26f;p.y=Mathf.Lerp(p.fromY-5,80,1-Mathf.Pow(1-q,3));p.xs=Mathf.Lerp(1.16f,.92f,q);p.ys=Mathf.Lerp(.78f,1.36f,q);p.r=0;}
+   else{float q=(t-.38f)/.62f,envelope=Mathf.Exp(-5*q)*(1-q),wave=Mathf.Sin(q*Mathf.PI*4)*.16f*envelope;p.y=12+68*envelope*Mathf.Cos(q*Mathf.PI*3.5f);float v=1-Mathf.Pow(1-q,2);p.xs=Mathf.Lerp(.92f,1.06f,v)+wave;p.ys=Mathf.Lerp(1.36f,1.06f,v)-wave;p.r=-Mathf.Sin(q*11)*4*envelope;}
+   poses[i]=p;Render(i);
+  }
+ }
+ void Snap(){if(plate==null)return;plateTime=1;plate.anchoredPosition=new Vector2(-432+216*Mathf.Max(0,selected),0);for(int i=0;i<5;i++)Finish(i);}
+ void OnDisable(){Snap();}void OnApplicationFocus(bool value){focused=value;if(!value)Snap();}void OnApplicationPause(bool paused){focused=!paused;if(paused)Snap();}
+}
+public partial class AppUI {
+ HomeANavigation approvedNavigation;
+ public HomeANavigation QAHomeNavigation=>approvedNavigation;
+ float HomeNavigationReserve=>approvedNavigation==null?240:approvedNavigation.Height;
+ void BuildApprovedNavigation(){if(approvedNavigation!=null)return;approvedNavigation=UICraft.Root(navSlot,"A fixed five destination navigation").gameObject.AddComponent<HomeANavigation>();approvedNavigation.Build(index=>{approvedNavigation.Select(index);switch(index){case 0:if(CurrentPage!="chapters"||contentLoad!=null)ShowPage("chapters");break;case 1:if(CurrentPage!="shop"||contentLoad!=null){shopCategory=0;ShowPage("shop");DrawShop();}break;case 2:if(CurrentPage!="home"||contentLoad!=null)ShowPage("home");break;case 3:if(CurrentPage!="ranking"||contentLoad!=null)ShowPage("ranking");break;case 4:OpenLeagueCustomization();break;}});}
+ void LayoutApprovedNavigation(){if(approvedNavigation==null)return;navSlot.anchoredPosition=Vector2.zero;approvedNavigation.Layout(menuHeight);}
+ void ShowApprovedNavigation(string page){BuildApprovedNavigation();LayoutApprovedNavigation();navSlot.gameObject.SetActive(true);approvedNavigation.Select(page=="dressing"?4:page=="shop"||page=="shop-detail"?1:page=="ranking"||page=="vip"||page=="league-prizes"||page=="league-detail"?3:page=="chapters"?0:2);}
+}
+}

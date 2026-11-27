@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using LeagueStyle046=BounceGarden.DressingShopArt044;
+namespace BounceGarden {
+// Approved 16–24 composition; all text, ranks, dates and rewards remain model-bound.
+public static class LeagueArt046 {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ public static float Y(float y)=>y>=280?280+(y-280)*.87f:y;
+ public static Sprite Get(string key){if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/League046/"+key);if(t==null)throw new InvalidOperationException("Missing league046 art "+key);return cache[key]=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100);}
+ public static RectTransform Surface(RectTransform page,string title,string sub){
+  foreach(Transform c in page){c.gameObject.SetActive(false);UnityEngine.Object.Destroy(c.gameObject);}
+  var layout=page.GetComponent<DressingShopLayout044>()??page.gameObject.AddComponent<DressingShopLayout044>();
+  var bg=UICraft.Box(page,"046 courtyard",0,0,1080,page.rect.height,Color.white);bg.sprite=BrandSplashArt.Get("Garden/courtyard");bg.raycastTarget=false;layout.Background=bg.rectTransform;
+  var root=UICraft.Root(page,"046 approved composition",0,0,720,1130);layout.Content=root;layout.Panel=LeagueStyle046.Image(root,"panel",360,585,676,1040,true).rectTransform;
+  Text(root,title,360,207,640,52,35);Text(root,sub,360,250,630,30,18,LeagueStyle046.Muted);
+  var app=UnityEngine.Object.FindFirstObjectByType<AppUI>();layout.Layout(page.rect.height,app.LeagueTopReserve046,app.LeagueNavigationHeight046);return root;
+ }
+ public static TMP_Text Text(Transform p,string text,float x,float y,float w=600,float h=36,int size=22,Color? color=null)=>LeagueStyle046.Text(p,text,x,Y(y),w,h,size,color);
+ public static RectTransform Card(Transform p,string name,float x,float y,float w,float h)=>LeagueStyle046.Card(p,name,x,Y(y),w,h*.87f);
+ public static Button Button(Transform p,string name,string text,float x,float y,float w,float h,Action action,string kind="secondary",int size=23)=>LeagueStyle046.Button(p,name,text,x,Y(y)+h*.5f,w,h,action,kind,size);
+ public static void Icon(Transform p,string key,float x,float y,float size){var r=LeagueStyle046.Rect(p,"046 "+key,x,Y(y),size,size);HomeAArt.Image(r,key,0,0,size,size);}
+ public static void Portrait(Transform p,LocalProfile profile,string avatar,string frame,float x,float y,float size,bool own=false){var rt=LeagueStyle046.Rect(p,"046 portrait",x,Y(y),size,size);LeaguePortrait.Create(rt,profile,avatar,0,0,size,own,frame);}
+ public static Image Banner(Transform p,LeagueSnapshot s,bool friends=false){
+  var rt=LeagueStyle046.Rect(p,"046 "+(friends?"friends":"season")+" banner",360,Y(352.5f),606,126);var im=rt.gameObject.AddComponent<Image>();im.sprite=Get(friends?"friends":"season");im.preserveAspect=true;im.raycastTarget=false;
+  Text(p,friends?"花园伙伴集结":"本期花园联赛",210,340,285,36,25,new Color32(255,242,207,255));
+  var date=Text(p,friends?"新一期联赛开始啦":Dates(s),210,378,285,27,15,new Color32(255,242,207,255));date.fontSize=date.fontSizeMin=date.fontSizeMax=15;return im;
+ }
+ public static string Dates(LeagueSnapshot s){long now=DateTimeOffset.UtcNow.ToUnixTimeSeconds();var app=UnityEngine.Object.FindFirstObjectByType<AppUI>();if(app!=null)now=app.Profile.LeagueClock.UtcSeconds;long end=now+s.remaining,start=s.config.calendarSeasons?LeagueEngine.CalendarStart(now):end-s.config.periodDays*86400L;return DateTimeOffset.FromUnixTimeSeconds(start).ToOffset(TimeSpan.FromHours(8)).ToString("M月d日")+" — "+DateTimeOffset.FromUnixTimeSeconds(end-1).ToOffset(TimeSpan.FromHours(8)).ToString("M月d日");}
+ public static void RewardPair(Transform p,LocalProfile profile,string avatar,string frame,float y,bool small=false){float h=small?190:275,size=small?116:175;bool av=!string.IsNullOrEmpty(avatar),fr=!string.IsNullOrEmpty(frame);
+  if(!av&&!fr){Card(p,"046 coin-only reward",82,y,556,h);LeagueStyle046.Image(p,"coin",360,Y(y+h*.45f),130,130);Text(p,"金币奖励",360,y+h-30,500,30,25);return;}
+  for(int i=0;i<2;i++){float x=i==0?82:376;Card(p,"046 reward preview "+i,x,y,262,h);if(i==0&&av)LeagueStyle046.Avatar(p,avatar,x+131,Y(y+12+size*.5f),size);else if(fr)Portrait(p,profile,avatar,frame,x+131,y+12+size*.5f,size);Text(p,i==0?"联赛专属头像":"联赛专属头像框",x+131,y+h-30,250,30,small?19:21);}
+ }
+}
+public sealed class LeagueOverlayLayout046:MonoBehaviour {
+ public RectTransform Page;public HomeANavigation Navigation;
+ void LateUpdate(){if(Page==null||Navigation==null)return;float height=((RectTransform)transform).rect.height;Page.sizeDelta=new Vector2(1080,height);Navigation.Layout(height);var app=FindFirstObjectByType<AppUI>();Page.GetComponent<DressingShopLayout044>()?.Layout(height,app.LeagueTopReserve046,Navigation.Height);}
+}
+}

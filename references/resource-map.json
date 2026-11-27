@@ -80,7 +80,8 @@
     "sourceGuid": "f9f543bc1e37ca64396c85a4fc47b907",
     "reason": "CSettingsArt.Get / SettingsSwitch77.Create / AppUI.OpenSettingsSheetC",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "9b27b8f29d428dad14c80818f4b9b0f1144e36b312fab0827b792cf1afb5fbdf"
+    "packagedMetaSha256": "9b27b8f29d428dad14c80818f4b9b0f1144e36b312fab0827b792cf1afb5fbdf",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/SettingsC/atlas-02.png",
@@ -89,7 +90,8 @@
     "sourceGuid": "43a4e69ce582a274caef0f80ebeb1895",
     "reason": "CSettingsArt.Get / SettingsSwitch77.Create / AppUI.OpenSettingsSheetC",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "e5fb742225638a33fdaef44448e855184700ad84bd3c4639ba7dbd948e0c860e"
+    "packagedMetaSha256": "e5fb742225638a33fdaef44448e855184700ad84bd3c4639ba7dbd948e0c860e",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/SettingsC/atlas.json",
@@ -107,7 +109,8 @@
     "sourceGuid": "5b24e1818d8b4c248882730e95630c21",
     "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "1343f521db3633e6a84e9f729862f371f89f171161cafe490f65ceddd5673b19"
+    "packagedMetaSha256": "1343f521db3633e6a84e9f729862f371f89f171161cafe490f65ceddd5673b19",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ChineseV60/Logo/layout.json",
@@ -125,7 +128,8 @@
     "sourceGuid": "c1bbf92fa2624a24d980661993d239d0",
     "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "aefaa67b426f31d572fe41c65ef4011702ef07653a313549a25957256de0976d"
+    "packagedMetaSha256": "aefaa67b426f31d572fe41c65ef4011702ef07653a313549a25957256de0976d",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ChineseV60/Logo/tan.png",
@@ -134,7 +138,8 @@
     "sourceGuid": "caacb5b8593c17f44bc73ab9a8947108",
     "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "1e94f85fe6c2dd481a16e94fe4ede0cf5ca63de67ac9734d0b3163b751ff85dc"
+    "packagedMetaSha256": "1e94f85fe6c2dd481a16e94fe4ede0cf5ca63de67ac9734d0b3163b751ff85dc",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ChineseV60/Logo/xiang.png",
@@ -143,7 +148,8 @@
     "sourceGuid": "7272143de58f91046896de3befce3d0f",
     "reason": "PastelLogo.Create / JellyLogoIntro.Begin",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "a4da804eb3d2f3080b2edf4b6f614495f663a2a2d73e20aac66b89e3fe342b2a"
+    "packagedMetaSha256": "a4da804eb3d2f3080b2edf4b6f614495f663a2a2d73e20aac66b89e3fe342b2a",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/FailureCatV26/cat-atlas.png",
@@ -152,7 +158,8 @@
     "sourceGuid": "c09ac69eb2a1535478b7f9c2808cde88",
     "reason": "FailureCatAnimation.Get / FailurePresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "0a71017ab9aa7f1ac7bb98b63180fedc2471c241c36f980262fbb52c1ac75553"
+    "packagedMetaSha256": "0a71017ab9aa7f1ac7bb98b63180fedc2471c241c36f980262fbb52c1ac75553",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/VictoryCatV23/cat-atlas.png",
@@ -161,7 +168,8 @@
     "sourceGuid": "f4717097579d7b44294b2f6bedcfad07",
     "reason": "VictoryCatAnimation.Get / VictoryPresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "68d9be0781424d5d338ab96897541adde1bf7c83513625689e542554b3c16a40"
+    "packagedMetaSha256": "68d9be0781424d5d338ab96897541adde1bf7c83513625689e542554b3c16a40",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/FailureV25/atlases.json",
@@ -170,7 +178,8 @@
     "sourceGuid": "131531d95a1aec84fad16426db8b0d3a",
     "reason": "FailurePresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "334cffd29e758dc613eb0ac664d9e0a3c7132e59cb8f4ab185a2930fc44a363b"
+    "packagedMetaSha256": "334cffd29e758dc613eb0ac664d9e0a3c7132e59cb8f4ab185a2930fc44a363b",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/FailureV25/background.png",
@@ -179,7 +188,8 @@
     "sourceGuid": "cd77180310737b64f92297e678e700d0",
     "reason": "FailurePresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "902385a24770e818131e735171fecb58538f5fd01d1730beffff13b9dfe978ec"
+    "packagedMetaSha256": "902385a24770e818131e735171fecb58538f5fd01d1730beffff13b9dfe978ec",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/FailureV25/glyphs.png",
@@ -188,7 +198,8 @@
     "sourceGuid": "0cc440979ccd8ea4697ded50a63dcfab",
     "reason": "FailurePresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "0b347aee53e54e41fbe711251f21b900df244a14e91c6697bbf61a57fa913889"
+    "packagedMetaSha256": "0b347aee53e54e41fbe711251f21b900df244a14e91c6697bbf61a57fa913889",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/VictoryV23/atlases.json",
@@ -197,7 +208,8 @@
     "sourceGuid": "dcc3f192eb15b2741aaa7501505b79ae",
     "reason": "VictoryPresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "b5d1b58a9b3358a0e2d6087d18742b4eba5c5eda641f812d26dd67dbe188b970"
+    "packagedMetaSha256": "b5d1b58a9b3358a0e2d6087d18742b4eba5c5eda641f812d26dd67dbe188b970",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/VictoryV23/burst.png",
@@ -206,7 +218,8 @@
     "sourceGuid": "6b4bbc93d0f0a5647802ec5230dc9341",
     "reason": "VictoryPresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "f868a185f8306c988709e36528e88792c65069c9329e099b10090f390c745be2"
+    "packagedMetaSha256": "f868a185f8306c988709e36528e88792c65069c9329e099b10090f390c745be2",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/VictoryV23/glyphs.png",
@@ -215,7 +228,8 @@
     "sourceGuid": "fefe597eb2a7e094389c0d9172aad264",
     "reason": "VictoryPresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "c6dccc7ea71f26193877067c5aa0818a53dcb033927a53994d6e8e606c799680"
+    "packagedMetaSha256": "c6dccc7ea71f26193877067c5aa0818a53dcb033927a53994d6e8e606c799680",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/VictoryV23/halo.png",
@@ -224,7 +238,8 @@
     "sourceGuid": "44426863489f70c45880552880df6790",
     "reason": "VictoryPresentation.Render",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "e12e28a800a9af115c8a600f880da58e179512ebcf3f3517748120cf7e05111c"
+    "packagedMetaSha256": "e12e28a800a9af115c8a600f880da58e179512ebcf3f3517748120cf7e05111c",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/LeagueCalendarV1/league-motion-atlas.png",
@@ -233,7 +248,8 @@
     "sourceGuid": "c6bce0d6d1fd66a499899e3889e3df4d",
     "reason": "LeagueMedalPresentation.Build",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "da7300acd788382beab274cd53b99666c5c9443fa235f065342399511a6b22ca"
+    "packagedMetaSha256": "da7300acd788382beab274cd53b99666c5c9443fa235f065342399511a6b22ca",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/GoalCelebrationV1/confetti.png",
@@ -242,16 +258,18 @@
     "sourceGuid": "5b3c47bca1f6fba458521b799d461211",
     "reason": "CollectionGoalEntrance.Begin glow",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "bcc363d7d5493ad0a9abaf7ba72d45ada5106a6d962e67f277cb1a648bc3cb0e"
+    "packagedMetaSha256": "bcc363d7d5493ad0a9abaf7ba72d45ada5106a6d962e67f277cb1a648bc3cb0e",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/GoalCelebrationV1/halo.png",
     "target": "assets/unity-kit/Resources/Art/GoalCelebrationV1/halo.png",
     "sha256": "c92e0c096c645a8f616ea46bb6f3169730b913f3f91c17faa4915b95d082cdbb",
     "sourceGuid": "b0bf2ca831f71db4db731cde8b2e9a65",
-    "reason": "CollectionGoalEntrance.Begin glow",
-    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "286c0a99ffaa7c216a6c5da80f5beab403a15b77edb4aeab5839972bda3ea30a"
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "9ffc56009c5921997a85bda715f797037511812d639654ca53b5fafc42397f6f"
   },
   {
     "source": "Assets/Resources/Art/GoalCelebrationV1/ribbon.png",
@@ -260,7 +278,8 @@
     "sourceGuid": "b6f57db3166608846b79e1ec9c7951f9",
     "reason": "CollectionGoalEntrance.Begin glow",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "3897123547142856998661b72b400e14aa867b198f52e48c1b6204fd82675ac1"
+    "packagedMetaSha256": "3897123547142856998661b72b400e14aa867b198f52e48c1b6204fd82675ac1",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/GoalCelebrationV1/star.png",
@@ -269,7 +288,8 @@
     "sourceGuid": "b6581378433407c4c98365d4254ae9ad",
     "reason": "CollectionGoalEntrance.Begin glow",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "a0d00b9b1f269c88748e0b14815d731f294f826833d51883739102a3150c873d"
+    "packagedMetaSha256": "a0d00b9b1f269c88748e0b14815d731f294f826833d51883739102a3150c873d",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/PastelArtData.json",
@@ -278,7 +298,8 @@
     "sourceGuid": "523024ea921be664daf7f4bf1f06dfdc",
     "reason": "PastelArt.Get catalog and textures",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "1817ce89325bd3937346a068af1f300f6feee0dffe5b4f023918f9e1da943f87"
+    "packagedMetaSha256": "1817ce89325bd3937346a068af1f300f6feee0dffe5b4f023918f9e1da943f87",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_wave.png",
@@ -287,7 +308,8 @@
     "sourceGuid": "ddb5a1d3f757ce84693a4c6fe2465ade",
     "reason": "Delivered examples reference PastelArt key cat_wave",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "fa1b72bd317bf94990aece7750d84e32bf1bf0db21a9a82dca086b780e4dac55"
+    "packagedMetaSha256": "fa1b72bd317bf94990aece7750d84e32bf1bf0db21a9a82dca086b780e4dac55",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_anticipate.png",
@@ -296,7 +318,8 @@
     "sourceGuid": "1e49b3a433891504eb0d03f63ad50d7d",
     "reason": "Delivered examples reference PastelArt key cat_anticipate",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "ade1e66bbfdc8c058448a3fa65322ae00ba7f6a13375e1282fe06adb4a378ecc"
+    "packagedMetaSha256": "ade1e66bbfdc8c058448a3fa65322ae00ba7f6a13375e1282fe06adb4a378ecc",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_medal.png",
@@ -305,7 +328,8 @@
     "sourceGuid": "2a7fcc72b898c0a47977ccfe8e1d90c2",
     "reason": "Delivered examples reference PastelArt key icon_medal",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "fe0df1bcdfa9fca4f6f30bf0b04e0fb3b1e4cdcd7c7d225e6c689ca7d6ddd9dc"
+    "packagedMetaSha256": "fe0df1bcdfa9fca4f6f30bf0b04e0fb3b1e4cdcd7c7d225e6c689ca7d6ddd9dc",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_settle.png",
@@ -314,7 +338,8 @@
     "sourceGuid": "e7f4d0ff7ee10ff46b6d4046ca4cb569",
     "reason": "Delivered examples reference PastelArt key cat_settle",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "7f192de32beca6fce1050d2eeecc66490f5017dff440c55e53ee7407f63e8847"
+    "packagedMetaSha256": "7f192de32beca6fce1050d2eeecc66490f5017dff440c55e53ee7407f63e8847",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_idle.png",
@@ -323,7 +348,8 @@
     "sourceGuid": "233f824adb770c54494660b858663b0d",
     "reason": "Delivered examples reference PastelArt key cat_idle",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "7d3fb1c3fc6df1f8a26acf9f09ba56343accd7b4114800be1409def4ea3c9091"
+    "packagedMetaSha256": "7d3fb1c3fc6df1f8a26acf9f09ba56343accd7b4114800be1409def4ea3c9091",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/resource_capsule.png",
@@ -332,7 +358,8 @@
     "sourceGuid": "b99c9161a4a1d354cb3799c777f92ab4",
     "reason": "Delivered examples reference PastelArt key resource_capsule",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "2b92061434e90f68c240e364e13c3be1bb525b01e9a73abc13d38544f39da45c"
+    "packagedMetaSha256": "2b92061434e90f68c240e364e13c3be1bb525b01e9a73abc13d38544f39da45c",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/gameplay/brick_mint.png",
@@ -341,7 +368,8 @@
     "sourceGuid": "e2e5e1b45ca12b24ca47f70342f90c8c",
     "reason": "Delivered examples reference PastelArt key brick_mint",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "8656abfe64088808ca5e9c5b54214269f7d88f5417d10158634d4d9e88ce9a66"
+    "packagedMetaSha256": "8656abfe64088808ca5e9c5b54214269f7d88f5417d10158634d4d9e88ce9a66",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/cat-poses/cat_celebrate.png",
@@ -350,7 +378,8 @@
     "sourceGuid": "6e4eaef2f5658ba4aa96b0eed8e3221b",
     "reason": "Delivered examples reference PastelArt key cat_celebrate",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "7dccf376a9770c45091979f424fc5f32dbe24eda5e58b301e9d7f88e83121c03"
+    "packagedMetaSha256": "7dccf376a9770c45091979f424fc5f32dbe24eda5e58b301e9d7f88e83121c03",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_video.png",
@@ -359,7 +388,8 @@
     "sourceGuid": "65818823a9cb7524285008c9a4effc16",
     "reason": "Delivered examples reference PastelArt key icon_video",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "4d10981cf2f67450fc8d55292991cc6c6cfc5d6342ef6b575ef9056677321282"
+    "packagedMetaSha256": "4d10981cf2f67450fc8d55292991cc6c6cfc5d6342ef6b575ef9056677321282",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_coin.png",
@@ -368,7 +398,8 @@
     "sourceGuid": "10139ef72e025d74ca025ea04a99886b",
     "reason": "Delivered examples reference PastelArt key icon_coin",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "73477adcf4517681b478051341243589cc88ec6d1bc9b67f4f1624d118b301b4"
+    "packagedMetaSha256": "73477adcf4517681b478051341243589cc88ec6d1bc9b67f4f1624d118b301b4",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_home.png",
@@ -377,7 +408,8 @@
     "sourceGuid": "e33eb303ceadd7a4386721fcd6a1e11c",
     "reason": "Delivered examples reference PastelArt key icon_home",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "0c7ffb9d93bfb486c343695de8c516b9e516da18387b7ee1fefe672348f2fca5"
+    "packagedMetaSha256": "0c7ffb9d93bfb486c343695de8c516b9e516da18387b7ee1fefe672348f2fca5",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/controls/icon_restart.png",
@@ -386,7 +418,8 @@
     "sourceGuid": "8ece0b7e4d6d05e458930158c596bc82",
     "reason": "Delivered examples reference PastelArt key icon_restart",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "8c008b6474feace54f261a8b7de40adcfe16f71195dc745d86c90981fbd4fea8"
+    "packagedMetaSha256": "8c008b6474feace54f261a8b7de40adcfe16f71195dc745d86c90981fbd4fea8",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/surfaces/modal_panel.png",
@@ -395,7 +428,8 @@
     "sourceGuid": "aca35012a2a538a44b8f5a172553eacd",
     "reason": "Delivered examples reference PastelArt key modal_panel",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "78c8a721cf274481c8164e488ba1d4332be9e8ef6f1cc27c93c9d311fedca2b4"
+    "packagedMetaSha256": "78c8a721cf274481c8164e488ba1d4332be9e8ef6f1cc27c93c9d311fedca2b4",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BannerJelly/panel.png",
@@ -404,7 +438,8 @@
     "sourceGuid": "8e83bf73644831a4483833d3933e49ec",
     "reason": "ActivityCarousel.Build panel",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "33adeacc9d08b83c4a0bb2186ebac4ae4302a58465874cbf05b029e857914a36"
+    "packagedMetaSha256": "33adeacc9d08b83c4a0bb2186ebac4ae4302a58465874cbf05b029e857914a36",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BannerJelly/medal.png",
@@ -413,24 +448,27 @@
     "sourceGuid": "8c014028579e89f4080dfd6a9f32d6a0",
     "reason": "ActivityCarousel.Build medal",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "372e052dbc8f1096633fefa955430457f7232318c465788148a33c4cdb4a84c1"
+    "packagedMetaSha256": "372e052dbc8f1096633fefa955430457f7232318c465788148a33c4cdb4a84c1",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/FourthGroup/states.png",
     "target": "assets/unity-kit/Resources/Art/FourthGroup/states.png",
     "sha256": "edce284dbaadcbb7512a426956bf7666463e2b6c0145e3f56663eef16f93cc8a",
     "sourceGuid": "d79722988a285f0cb1571365f99430d4",
-    "reason": "OpeningCopperView.Render",
-    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "feae0e832ec4439f667d9bac51a5edb0aaa83bdcfd80b071386c5e9177cfec3c"
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "3619d67b2b0da61f118fa763ba55d8bd224796d338f2d037cb35f8707d041b2f"
   },
   {
     "source": "Assets/Resources/Art/FourthGroup/layout.json",
     "target": "assets/unity-kit/Resources/Art/FourthGroup/layout.json",
     "sha256": "40336a9371651f452810a3169f95006a6f78259b22a56889c9160bc13068d1d6",
     "sourceGuid": "b350b9a65b0f5c4ba4c0392a43e1b342",
-    "reason": "OpeningCopperArt.Clip",
-    "usageVerification": "source-path closure; individual atlas cells retain original catalog",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
     "packagedMetaSha256": "e6427e120d5bb07345d87ae976dcf897ab9d7b5355a8458953e1ee4c854ebdf3"
   },
   {
@@ -440,7 +478,8 @@
     "sourceGuid": "84005ea3eaf69074889a1838ad16ce92",
     "reason": "StarChargeView.Initialize",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "f18eba23fe5cbd5ca97884317212c21cd61f9f546fc829d6bcbe13f1f18c2fc2"
+    "packagedMetaSha256": "f18eba23fe5cbd5ca97884317212c21cd61f9f546fc829d6bcbe13f1f18c2fc2",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BattleJellyV5/vine-star-off.png",
@@ -449,7 +488,8 @@
     "sourceGuid": "c5643122ae2a512498fa2dae872c017d",
     "reason": "StarChargeView.Initialize",
     "usageVerification": "source-path closure; individual atlas cells retain original catalog",
-    "packagedMetaSha256": "3307a27221f988765b94512f4cc230681498ecabc3a5f5d6c9aa510f0b5211aa"
+    "packagedMetaSha256": "3307a27221f988765b94512f4cc230681498ecabc3a5f5d6c9aa510f0b5211aa",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Fonts/MaokenZhuyuanTi-OFL.txt",
@@ -1088,7 +1128,8 @@
     "sourceGuid": "483c16daad70aa44e96815dc82ec62b1",
     "packagedMetaSha256": "31a7483da873e1dc17bff91436ebb1b758ece0b0f9f6dd3804b171fea24b39a8",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ScoreV65/score_star.png",
@@ -1097,7 +1138,8 @@
     "sourceGuid": "bbdea95772a729c489bd228d11449662",
     "packagedMetaSha256": "04ff5466f2dfe3b1f3c05b7faed1023f6d7613cea3626c415414615f3763ab34",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BattleJellyV5/goal-complete.png",
@@ -1106,7 +1148,8 @@
     "sourceGuid": "ebabd12ee4ec9f94ab5e1452e12d7629",
     "packagedMetaSha256": "eef15362d5ba5ea6f8b379ce95d28d65ca4e6511de8e7ff82520c5f53c33896a",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ChineseV59/Cheers/nice.png",
@@ -1115,7 +1158,8 @@
     "sourceGuid": "e0ae740feadc02d48b41f18f22091a8d",
     "packagedMetaSha256": "99a9c617d683d3e7b1d9c152cce29f5c3519240de281add3f9857dd2e49f170d",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ChineseV59/Cheers/great.png",
@@ -1124,7 +1168,8 @@
     "sourceGuid": "da4ada87fc8ef81409fab73c61843e92",
     "packagedMetaSha256": "bd68139dcc7e3386474d1167c4c7168d822c47ccd9f6c59f977c410d0675e981",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ChineseV59/Cheers/amazing.png",
@@ -1133,7 +1178,8 @@
     "sourceGuid": "d5044fef6bbc6e04d831083f140b80fc",
     "packagedMetaSha256": "aa2faf47e509e2cc29dc9003c1ce2ba292651c1562ce5e2fb6b52cb360924ba3",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/ChineseV59/Cheers/incredible.png",
@@ -1142,7 +1188,8 @@
     "sourceGuid": "8b47ec0ad878ab348a84908ac3935449",
     "packagedMetaSha256": "fbe8fa92a34a6ae6e5f3f1c29c1cc0ea4843930b214613e1ab6e77437e32bb96",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/NativeV50/background-alphabet.png",
@@ -1151,7 +1198,8 @@
     "sourceGuid": "ab2a49c4a23c3aa45a44e7375c979d7b",
     "packagedMetaSha256": "a6c71b1bd2bd31400687bf37ffc1508658aeca2b71b474048f4453c3924de9f9",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/NativeV50/background-picnic.png",
@@ -1160,7 +1208,8 @@
     "sourceGuid": "115e255492c7de149bdf2f9d31bc534b",
     "packagedMetaSha256": "a93fe68d1d220d628b20b50ed693142048b7d3abef3d85d200777dde8c811076",
     "reason": "Current-route score/goal/rating and home-theme animation example; original image and importer",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BattleJellyV5/goal-pad-honey.png",
@@ -1169,7 +1218,8 @@
     "sourceGuid": "ad11bac9e9c2f954eb38bc94d99faf33",
     "packagedMetaSha256": "1bb48e7b8a2e26172affb8aef098d93b19ba3f7496e7a8028428fc7dab68e88c",
     "reason": "Actual current goal card and remaining-moves artwork",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BattleJellyV5/moves-badge.png",
@@ -1178,7 +1228,8 @@
     "sourceGuid": "04e5cf3c93dfa8448bf26c52969b2c0a",
     "packagedMetaSha256": "cd6d7351b81433cd6dbe0210fda66deba56ed3ab6fd322200de406b9cf281464",
     "reason": "Actual current goal card and remaining-moves artwork",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/Pastel/Sprites/vfx/fx_spark.png",
@@ -1187,7 +1238,8 @@
     "sourceGuid": "7499e6b02ff5b8a41b2ec88b3122b28c",
     "packagedMetaSha256": "12c4cedc0458b1c5abf1c4da49879644d752d7b0f85e69e866d0d44bec44ed71",
     "reason": "ChainRatingView original star/spark image",
-    "license": "Project artwork; see references/licenses.md"
+    "license": "Project artwork; see references/licenses.md",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BattleJellyV5/vine-star-junction.png",
@@ -1197,7 +1249,8 @@
     "packagedMetaSha256": "a86576c4870aaba1b03ddef564f14e7549a2cf85a8f96227ed195440f4af1008",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "main-project"
+    "scope": "main-project",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BattleJellyV5/vine-star-stem.png",
@@ -1207,7 +1260,8 @@
     "packagedMetaSha256": "c0b4bb25fd85d0d51076005cedd0346c199759e79b1825e0dae242f0612ff9fb",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "main-project"
+    "scope": "main-project",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/OnboardingV1/layout.json",
@@ -1217,7 +1271,8 @@
     "packagedMetaSha256": "9892d40228556f89e0700e3d00e0edce092f08fc976131ab270d01b4e3a9fc93",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "main-project"
+    "scope": "main-project",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/OnboardingV1/02-gesture-atlas.png",
@@ -1227,7 +1282,8 @@
     "packagedMetaSha256": "9bde8f9efc75d17074805e93eb251924a0d0a5227843500c3565d17023bdc388",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "main-project"
+    "scope": "main-project",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/TutorialV41/target-outline.png",
@@ -1237,7 +1293,8 @@
     "packagedMetaSha256": "d7bb12a80a8b43909f12a79e76da31d4c4d32d03bba0467ddfcccea9c68441c0",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "main-project"
+    "scope": "main-project",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "Assets/Resources/Art/BattleUIV42/swipe-gesture.png",
@@ -1247,7 +1304,8 @@
     "packagedMetaSha256": "3c3f8473c7cbb037e0219b7f75ee548b28c22a835c6c780a94134d80aea730fb",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "main-project"
+    "scope": "main-project",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/background.png",
@@ -1257,7 +1315,8 @@
     "packagedMetaSha256": "fcbd83e63febe5fd5e0b7663a6c192991e2414ed053a448df07fdf309d6f1f5b",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/box.png",
@@ -1267,7 +1326,8 @@
     "packagedMetaSha256": "86fba52b6dba1311f5fd5792d9b59aa239e3bd2ec068c7ba0c468ef5facd10c4",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-anticipate.png",
@@ -1277,7 +1337,8 @@
     "packagedMetaSha256": "44bd242a6858b4ad78cb07b011c65c8c8c8d6d4a11636d7c173c1fe09c1533f3",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-celebrate.png",
@@ -1287,7 +1348,8 @@
     "packagedMetaSha256": "2c108909e42aa7b528086f8c48f359257885b6a6c033f3e953d96cfeecfffa0f",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-idle.png",
@@ -1297,7 +1359,8 @@
     "packagedMetaSha256": "68b5d6f70d3e993105b731f1f82a5dedc90c45894634a92ff7464e363e4c69f3",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-settle.png",
@@ -1307,7 +1370,8 @@
     "packagedMetaSha256": "957bc3dd2233e2ee692c6d55866848c38c8883fe3a148f80abd49c9cc1511dc4",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/cat-wave.png",
@@ -1317,7 +1381,8 @@
     "packagedMetaSha256": "b40975086acd0c6b06038f007c857a6e590b1bc680688e0f109ddb6c39c4aebe",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/island.png",
@@ -1327,7 +1392,8 @@
     "packagedMetaSha256": "16f7e5242241ff2e7e44241fa1d1191953bf7e82c31cdedbe8a35115dcb4b656",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/jelly-blue.png",
@@ -1337,7 +1403,8 @@
     "packagedMetaSha256": "1acaa22c91fc1c4d4e35cc2ba59fe4b966beeeddaeef8aef6a7377830df5937c",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/jelly-blush.png",
@@ -1347,7 +1414,8 @@
     "packagedMetaSha256": "d7fb0da9aa7239dd9441fce7e6e9c3fb5c5a3fad5eeb0d31065e438b9b0aceec",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/jelly-yellow.png",
@@ -1357,7 +1425,8 @@
     "packagedMetaSha256": "64696ad77acd0578ead9c43dc2d51bbfe024a4cf6a469a491bfced460b720daf",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-chai.png",
@@ -1367,7 +1436,8 @@
     "packagedMetaSha256": "a026865df8843eee070866b3fe8681f94b23e85aff9bb0c15c0140013d164bfa",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-miao.png",
@@ -1377,7 +1447,8 @@
     "packagedMetaSha256": "ec732b7b9dce14bb81b9018b65cace545cdee4bd7adfd4afbbb67ee8a9c4472a",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-tan.png",
@@ -1387,7 +1458,8 @@
     "packagedMetaSha256": "3bec6325da417f8ecebed4c43b2f98f84aff9c1a624af1e9f7387fcbc6f9070a",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/logo-xiang.png",
@@ -1397,7 +1469,8 @@
     "packagedMetaSha256": "aa23a34fce9267b0d304a902b00de40040787424a6296c087fc21821b5a8f530",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-fill.png",
@@ -1407,7 +1480,8 @@
     "packagedMetaSha256": "9fa08ba9675829c7506128472b32150d223c860f2f8eaabbc6f355f57edc0fd2",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-marble.png",
@@ -1417,7 +1491,8 @@
     "packagedMetaSha256": "1c992af3c338ae4886d40c4fea641868268605fb8dc1c200880ca5acf011ca8e",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-paw.png",
@@ -1427,7 +1502,8 @@
     "packagedMetaSha256": "119165e02a86814eae0eaebb95bbb07bea2c8867d93f92cb1667a6b16adb8282",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-sparkle.png",
@@ -1437,7 +1513,8 @@
     "packagedMetaSha256": "658c30da81dc85cfbf5cc5c77defb422c511f71f77adac82c78ab304b2e02ab1",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
   },
   {
     "source": "../../Builds/WeChatOptimizedUnityProject/Assets/Resources/Art/StartupLoading/progress-track.png",
@@ -1447,6 +1524,1067 @@
     "packagedMetaSha256": "6b7acda8c2480904618d583f6befb048d1c25786524ee1d4e3b41a168dbd5ef5",
     "reason": "Original project startup / tutorial / hanging-star artwork, confirmed by platform or gameplay source",
     "license": "Project artwork; see references/licenses.md",
-    "scope": "project-platform"
+    "scope": "project-platform",
+    "sourceStatus": "frozen-0.4.0-reference"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/box-back.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/box-back.png",
+    "sha256": "d9b2010daceb72981fd164f003d36117507c0064fdace7c47ad6abc8369924f2",
+    "sourceGuid": "a94b41f16874e8b408062f71e405474e",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "ab869b2bf118733933fcf0c1755b55a94d64de835105333b8b5388cd660cab39"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/box-foreground.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/box-foreground.png",
+    "sha256": "add11816933ec0b6cfed34a7ecfc1b5759ec25547abca4c130f0209d391b3efe",
+    "sourceGuid": "7ae48cb8514262a43881a8aa87b177c9",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "65047170cbe22f7a39697ca5641a0559ee6eca35a9def6d3ac3f5d7fffb3192c"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/box-front.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/box-front.png",
+    "sha256": "ac5325730d764190d2c281c397e112f72a0a3a97a8f65853c83f56b2e8df7d20",
+    "sourceGuid": "97abe11f449ffc144866bb356f5dc0f9",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "4cc050bd998a715284ff98940b51b2c7e74dbe2a7cc1b163eab58e8c86eb5258"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/box-rear.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/box-rear.png",
+    "sha256": "c2570fced9d95388bbe233d2ce4ba23bd3ed630b5a62ce8502c2bd0856f843d0",
+    "sourceGuid": "f7fe2162c7553fc4c92e973bce965cb1",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "61f95066987baec6477429ab936d8ff8eb12c55fea672976bb2a2f3aebc0bb2e"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-blue.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/brick-blue.png",
+    "sha256": "c6f9ec78b8a394b449f49f351a30cd87723e5d57c49b8525596219257b69353f",
+    "sourceGuid": "c295dcb1c83e2094dbac41b823b380db",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "21b978c8b4bb1970b4c247bcccbb34f1d45449975396e40e4c6550789f9d9e32"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-coral.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/brick-coral.png",
+    "sha256": "0571709e75204bea53121fea002ca520de30fff5da3154bb5585b5bfa2299c6d",
+    "sourceGuid": "6c68da53f9687cc4d9a4434c1d5ab676",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "850359a2bebe5f730a289dc29eaaaf49a69fc021deb9bfae84ad6430c3da1939"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-green.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/brick-green.png",
+    "sha256": "13e18dfc26a440799ef20c6e216cb92cb3808f709c67ecaad2a59106a58d4832",
+    "sourceGuid": "190712a645dfd5d42a6fbf3de3c233ed",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "1eb308a2a07bedd17a57e2a2589880291e7d6e00da3e31fa01d3fc12bcce1503"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-purple.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/brick-purple.png",
+    "sha256": "84d6a0651eb00b05bec33c5d51d30df4069dde92d47593ab24f8642233fb0b11",
+    "sourceGuid": "58f9495a2c12f104f9357e4fdee0a450",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "ea92450822c301cc66dde844c28021c52bbb40e8ee1aac3a4e22db025f0c5285"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/brick-yellow.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/brick-yellow.png",
+    "sha256": "3a2520f2792e1936c55f3822156708317afab83cd622a3e7091b01bdea2ae4bf",
+    "sourceGuid": "bf2d8b8b2106d284f9bd6c0f7feebd54",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "c73cc3ede7780494281840778b67bec9fe34a709f528cdfe8d818f8e05a9219a"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/cat-body.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/cat-body.png",
+    "sha256": "5c499a70fef4d367935728924345278fe64092d517288393844a968f58cfa900",
+    "sourceGuid": "b24d7d23f417731498d82c969b329791",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "bd47371a35e330e62a49a2d5dacec77f3f3688fe4bfb17183e9971cfdec2ca40"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/cat-paws.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/cat-paws.png",
+    "sha256": "2cf61b86a56b374fc71ec16de1ddd1297c8842c090b2ce24688b6cb1bec864a5",
+    "sourceGuid": "f5af0f4ef66f41e4fa8b018b8c1dbfc4",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "476475b30e4af325b779237ae800b0f9d53435ed2713805519924a5ff6b67960"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/cat.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/cat.png",
+    "sha256": "8893b0c7409de58a1a9372784b7ee81e2d3994c6594ffcf4e86859534d432ef7",
+    "sourceGuid": "056c7fa02a7fa634ea3083054642ec11",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "a613dae99a546cbc4e5943e93db9bfcbc68e3227a1e7c8d06d4bb6326f6a6a25"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/complete-layout.json",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/complete-layout.json",
+    "sha256": "a9bb87140420077c581f7fc62c9274c7039b3136523016bf8a77808e31a6a869",
+    "sourceGuid": "17108228a4d95b84d8de908d6c533683",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "0d5c09f27e525a5d1e3d6f67f1351a9ea1f97948de7896634820fd9c6309f0e4"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/panel.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/panel.png",
+    "sha256": "0dce94ddb0aee38b504b058ffbf18b3767385ebaa53cc5de11ab6d276175dc5b",
+    "sourceGuid": "bd3dd3696d41d814c8cb753ac07ec034",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "8f59903cde1a34561739225f4991bfb5144d37a584d82ce4b271886d52b5ab49"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-box-foreground.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-box-foreground.png",
+    "sha256": "a583085271ba0a4377ddc3e4133808840781bd56830209cd90af48ca0f68123c",
+    "sourceGuid": "308660c1c805ee848b5b261e160af3cd",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "7d6f8d1cc2a5f62ca5d68f7e8a3bc9e270898f72c567b1055ee6003da9349ced"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-box-rear.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-box-rear.png",
+    "sha256": "ede13fb39e649a11c43a721ee7c32667454dba939cff04d757f9eee411d38ff4",
+    "sourceGuid": "b685f43843d79f24986ea76ac19a0834",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "d1beb3f241cd93e75f53bd031bd41b293a497a7e894af6fec7b7ac5e9b17a9ef"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-blue.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-brick-blue.png",
+    "sha256": "2e7c1e9434fdb1d2fc6bda018c5c69226f8a33ec4c82c251754b3aa13f6a5bb6",
+    "sourceGuid": "ad13ed0263279794b8a3be2528ea9d12",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "34f102d5c5cd22b2a3a2926140093887cdce00f37cf538d3b199ac30a5afe7b2"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-coral.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-brick-coral.png",
+    "sha256": "83374114455c69e8c43b3af250ba59e30ae897827d29e4b05fd7a482868e9df5",
+    "sourceGuid": "bd3df01b13f668849977034f8d811f0e",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "969954a71ac404681b17a89427748f6574b8595d96e6032259af028f337673b3"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-green.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-brick-green.png",
+    "sha256": "722443e8134968ee14f255ae0343b0103c976c00b63ee14051cdbeef3bea07f5",
+    "sourceGuid": "ecfcbaeb32325fa418fcf6d674552394",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "935605def5620023552e07f70afd8ba71a3987509651fa2dc6fbbe5ba5feaafc"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-purple.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-brick-purple.png",
+    "sha256": "9cfd9066ace84c56bdd6cb548ff373569ee4d8a9d5e89caa8894b3ba9947994a",
+    "sourceGuid": "5d5e6e14d7820874182df73b8bee4954",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "001be9739ae1825e4b274266418d95727355cf7e66f2000236b49786f8747159"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-brick-yellow.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-brick-yellow.png",
+    "sha256": "4c39f905e6c728ecbaed9d095c21d97c6c0241230ce82d22c667b81a6b3e89fd",
+    "sourceGuid": "8f77faf5d4c0c224ea6ff0a1716f5706",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "733890abf93733c9796e9deebfcf84351a36ca2ab66f6d2f5136a70dd7d8ba9b"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-cat-body.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-cat-body.png",
+    "sha256": "3aea1317690827621e0385a74286024a8b8676fbad1e3a587e98abae9dc8e40c",
+    "sourceGuid": "a9da525bbc4aa2b48941c372e680d70b",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "e77471bd6549fd3d7d7e0346bbf897916497aaeef6a59760874457e9cba74236"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-cat-paws.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-cat-paws.png",
+    "sha256": "02316dd2aa3079ceab0b099f99524d370eb3a0d8a042f7845cabc26ded62e76d",
+    "sourceGuid": "ca9abfe93db0e674a9cc1a72c38c9a04",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "204d0f9d9bf6f29ecc337ab4a2a76558992f580cb406b6ce95f8dd410c63083c"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/proto-sprout.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/proto-sprout.png",
+    "sha256": "a1b3e4baf8cb57899b757a452ad2ac7e7edaf6a7b8d8a058e77dc12619028626",
+    "sourceGuid": "199f580ec6042d24d81815339c249103",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "ec40e2bd5d50b2069e970b4cd81ced31aa563de0c4e145186e362d2d6960c185"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/prototype-layout.json",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/prototype-layout.json",
+    "sha256": "cca045a0570b1dc89d8fd597815134ebb98d2ece5243f77ea932441b39daa2bb",
+    "sourceGuid": "611216cd588ee2e49b89f8ef59cde3b3",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "08153c25efa6b53adb95e083b6ed2506f45ddb0bc23dda4d2240f3d10d4daa7e"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/shadow.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/shadow.png",
+    "sha256": "946b6bd73e81a08a79c8f578aec88b476822b1137c1f5d93341a8bdfb89cadb5",
+    "sourceGuid": "04b8141e55c2f4e439d63cb0cd54cfc1",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "e19bc88b40365a96276d7fdef2fbfcdb5fa5b2473aabc1ddab56afd8c56dfde5"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/sprout.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/sprout.png",
+    "sha256": "a8115194883ca23f748c653b48941c5d25ff7f6b9430d98cf4fc08756393a0c0",
+    "sourceGuid": "04a223664ddfe2e4383d96bc0736c169",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "19b62efb9dc7eeb9bd0b2b755e72d784a0969d661e76a3f104b8ed03bea04be2"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-box-front.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-box-front.png",
+    "sha256": "be5abe90634e9e59854d30a4eddf8ecb8c47227c2a20448272c0bb4b2377093d",
+    "sourceGuid": "f88acbd89f4db704bb4c5562cafa60eb",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "86a3e2be56b357fb8a3cec42b586d169a185968f0faeb2be53b99a6667c76cab"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-box-rear.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-box-rear.png",
+    "sha256": "c4d112ffe672fee6db20036dd01448e6b9882e330a54bc649915b50c1f8c706d",
+    "sourceGuid": "c034f1d54d4fe8f47902aec7d048fcea",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "2c3bec8f11f0799db8be20cbf0965361010d416a4fc8a9d3139fc108bda8f3df"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-blue.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-brick-blue.png",
+    "sha256": "4c2036af2d1516128b86b587e90fc9f15bce1e3f0abee3119ca08ff65362c0ff",
+    "sourceGuid": "4858ca5afd9b2e84589eec6c24c6830b",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "a5680cc4775c516ae89092bde413b88acd8105a02a55276d5c299b10028ce872"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-coral.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-brick-coral.png",
+    "sha256": "c8406be1d9c0fbda5b3edf9aec9852685aeb4467ab79c7e4905edb1fef986b17",
+    "sourceGuid": "3a2d9d75b04289c4cbce4b3a217b06ba",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "460c3dc59d582e3ecd77cf2168c963f5e203a190b3911f398146d2e25c6881f2"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-green.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-brick-green.png",
+    "sha256": "61f26b490eb20c197909d10197dddffed920e52c47a3677f3fee202287a88fa7",
+    "sourceGuid": "88775234c266ac84cabda5bfdd3302e6",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "88a77264b797a034bae816936eba3712da3f324f6e7ac34404eb399046340ff2"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-purple.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-brick-purple.png",
+    "sha256": "4ca84d74dd64deb9e104590f3bcf978bb12550e26db3c5d1c49d687423fdedf6",
+    "sourceGuid": "a8fb484551d898243a0b2862bc00bc9f",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "2f0080f5e70eda36f05d66061c29b1d119a4b7bc94a1314267e6ddf02359b591"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-brick-yellow.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-brick-yellow.png",
+    "sha256": "601135c284342b7032d58d509862659b89e317669b804a49cd4e562a24efbfa3",
+    "sourceGuid": "b04ffb316a535044d99cab819fa1a8f9",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "bd3193bd0d57cd0acd9425311f82e5c8ead80ebdd422f2c800c2ac58eda96d19"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-cat-body.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-cat-body.png",
+    "sha256": "cdd63b1008b997684f94c095d0c49aa9cb322d9015049c3646c49b7f6aa8e98b",
+    "sourceGuid": "3d0497447ef7bcb42a9c96b37d08f3aa",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "00f108a4a64809b3bec151a4dcaa2ffe8e8f2290f849cea8996c16e3e4408e58"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-cat-paw-left.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-cat-paw-left.png",
+    "sha256": "c60c689019ff590d6a2fa219d49a3ccc580f82145301f6c604c30f5c3e37b70a",
+    "sourceGuid": "68d203e6bd412ab4ebe0093afcc2b3f7",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "e52d1308a5e290d13670c5c974b9a32bc405d45aae0607f4b59321cf28c5f3fa"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-cat-paw-right.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-cat-paw-right.png",
+    "sha256": "78c2175ccb798e2263ba15f2f2738ddc32d6c47614c36791c57ac003d66ef1ea",
+    "sourceGuid": "86838fad2d93e9a459a5bbd31b487aae",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "3ff8e4b80009184e44c1f540122177dbbf59676ab42c2ee951d8fa1c2ea6590c"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-shadow.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-shadow.png",
+    "sha256": "b6bc20ed30e1fa15e06e3599d7c8a60ed53d664ac3312bc1154d1cf499aa7152",
+    "sourceGuid": "761f861780c7622469b95efe017516a2",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "f6c75d6c5cf5e23ee112573fc626e9c9873ff4517f3ed523c025d1d47752c574"
+  },
+  {
+    "source": "Assets/Resources/Art/LevelLoadingC/whole-sprout.png",
+    "target": "assets/unity-kit/Resources/Art/LevelLoadingC/whole-sprout.png",
+    "sha256": "3368bb5c8ac737c8fc00fe34dd1fd34e80ec23447c48654ce0eb03e3851efd6f",
+    "sourceGuid": "50d15e5289a61d341b46ab4eac68350d",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "9624bf3de1ac1d5b930a32af3f0e69b680cdded7ad5cd394ab84c549a5fc3e32"
+  },
+  {
+    "source": "Assets/Resources/Art/Toasts0410/icon-coins.png",
+    "target": "assets/unity-kit/Resources/Art/Toasts0410/icon-coins.png",
+    "sha256": "32ff85ebbd90d2a0fbfcdd326bd2fe4cd3bd52cf20ee890738274df61ce23459",
+    "sourceGuid": "78430674ab934fe2abeb85defa5b1adf",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "567bd6c42597e9fea6ded1332a8a8cb0a8243b04b592eac7ca158bea36820874"
+  },
+  {
+    "source": "Assets/Resources/Art/Toasts0410/icon-retry.png",
+    "target": "assets/unity-kit/Resources/Art/Toasts0410/icon-retry.png",
+    "sha256": "40d9e47ce61b66ddc5bf8f584e63441219a7a12d719d1d74652c632834ef6545",
+    "sourceGuid": "9f20f819d43b499f9c782449ad488643",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "8eed30216dcd0ca63b37c53ee78c1df2ba2c4a4048c01f344e36fc9ac74edcb5"
+  },
+  {
+    "source": "Assets/Resources/Art/Toasts0410/icon-saved.png",
+    "target": "assets/unity-kit/Resources/Art/Toasts0410/icon-saved.png",
+    "sha256": "38488acfcbebc1386289614f03f59a97ceaf8293b4cdadda1bec0259ac3b1611",
+    "sourceGuid": "f1a73c4321ae4db9808c8185f34f1d39",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "3271941d0a45389ec39c81d1d891e5544d5fe9326a701555e3a88cfba6e5d47b"
+  },
+  {
+    "source": "Assets/Resources/Art/Toasts0410/toast-panel.png",
+    "target": "assets/unity-kit/Resources/Art/Toasts0410/toast-panel.png",
+    "sha256": "8edd67ef5feb5da3a4d478c2caa505cfac30dba691037e224a2e2e2a6d1e0446",
+    "sourceGuid": "082ab3890df34e17945c211f6a2d44b9",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "7e286d50929b61a519adb318baa8e9b685ddf17924176af3a106bc01c0644230"
+  },
+  {
+    "source": "Assets/Resources/Art/ResultsC048/coin.png",
+    "target": "assets/unity-kit/Resources/Art/ResultsC048/coin.png",
+    "sha256": "5481fd36c467d1e14d6c15a7153c6b5ff0509205d90adb3a944ded71f405653b",
+    "sourceGuid": "a208eb6dbf3a4a979bae683d421c13df",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "019923491568258b14549e910251a316c6a5606928ec255b6c1c001171988eec"
+  },
+  {
+    "source": "Assets/Resources/Art/ResultsC048/failure-cat-atlas.png",
+    "target": "assets/unity-kit/Resources/Art/ResultsC048/failure-cat-atlas.png",
+    "sha256": "f7464b9acae6b252480bdff932c5313d238753f4e5f3b538604b64c349aa52f4",
+    "sourceGuid": "b7eff262b87449ccab3341c3ebcbc5a2",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "276e5bc0cd184a735bd9cc315b599b754a041ea6ca202cc695f293dbcaf61e03"
+  },
+  {
+    "source": "Assets/Resources/Art/ResultsC048/medal.png",
+    "target": "assets/unity-kit/Resources/Art/ResultsC048/medal.png",
+    "sha256": "c0d95491c94d60ad09763222f96384b3ceb327af759c3fd9a0077774d456c111",
+    "sourceGuid": "fe4c16b62e9540189a913d8d66b04ed3",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "fb377b40221b1d75a367a474657938268b83fcef4607e60f71bac7bac20b08aa"
+  },
+  {
+    "source": "Assets/Resources/Art/ResultsC048/score-star.png",
+    "target": "assets/unity-kit/Resources/Art/ResultsC048/score-star.png",
+    "sha256": "da6d6cdebc564901f923df9dd4008a36a220d6a9f9358f5b020c7de82a755175",
+    "sourceGuid": "b309fba4bc0d467a8a7a5f1502d34ad3",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "123b961609d9dd16ec6b0e8d972ba87993a51d4789cfbf9776496548141cda1e"
+  },
+  {
+    "source": "Assets/Resources/Art/ResultsC048/victory-cat-atlas.png",
+    "target": "assets/unity-kit/Resources/Art/ResultsC048/victory-cat-atlas.png",
+    "sha256": "0eef03e8eb7ab56458eb6a3b6645800ff2dba5ad9dae5bdd43579cfe9a6fedc5",
+    "sourceGuid": "fb4c1459fabc41cc902c5924908d7c73",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "6620415b5aec4a80ea9b149ac3d843c1ef145bd052692f76a08e6249056f201c"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/cat-atlas.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebration047/cat-atlas.png",
+    "sha256": "4217bc8c12503e4e8f6790eab26a511af36ae4ec4c1647585b00f7305bd79351",
+    "sourceGuid": "e93c63ccbb7342519eae24749a700adc",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "542079b4ef859ec5928157695c50a5e8e48f1f5fc8f58bf8afc5e8f67635548c"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/flowers-left.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebration047/flowers-left.png",
+    "sha256": "2b63ae69ea3dbc4c55963a9a84313f15757a392083a4d5c9da33116e3b0e61c0",
+    "sourceGuid": "1d314744edd24a4db082dc9fd5f80d0d",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "8aab74a650e350f3499c8bde792fc201bb605e7f682138200a7e704eab89af06"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/flowers-right.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebration047/flowers-right.png",
+    "sha256": "1107087d098ea76755240c857033c419c34b7783e2101cd55beb45b1be431f88",
+    "sourceGuid": "ad0a557b97464198a891af1d7847d85d",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "cce32f358c6f2dbd58855e5305aee2f9286bd256d07a40d16ded490f38f51250"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/sparkles.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebration047/sparkles.png",
+    "sha256": "47e291e00b5794631a7c36e2f641d08ae8a74172bf7e39fa7a4560b4395f8bb5",
+    "sourceGuid": "ed42481bad504c8290c298820a33e03e",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "88423869b2f28e8acbf75695af1dc3606075f792b85c364e2b969da39b4d4773"
+  },
+  {
+    "source": "Assets/Resources/Art/GoalCelebration047/title.png",
+    "target": "assets/unity-kit/Resources/Art/GoalCelebration047/title.png",
+    "sha256": "539150f8bbcc5e8a50a3350b71303d17dc578f0486f98d1b37a3a55ac3e8a338",
+    "sourceGuid": "843f184cb066444db69bfa707795c9d9",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "bc92bfe2d72245b4a7c8b5e8795ab575e5da6c2f3f2683d5d27f153b2afeabf0"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleGarden050/star-empty-v22.png",
+    "target": "assets/unity-kit/Resources/Art/BattleGarden050/star-empty-v22.png",
+    "sha256": "4171ce18c65e54effae8a9d8c3df7b68cc5ee9ad5a99ddaa67372c74c03fdda9",
+    "sourceGuid": "acb47112b83a418faf094536be3f0e61",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "f85ca0e0cf2afa531f0124ebfacf3a59bac758238caaf32e4c9bb47b33dbeccc"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleGarden050/star-gold-v18.png",
+    "target": "assets/unity-kit/Resources/Art/BattleGarden050/star-gold-v18.png",
+    "sha256": "5f78bdafffc740fad6a255030df19720575be4b4fe80e582dbea8f76cfa74a57",
+    "sourceGuid": "5a5d4a24c86b476db3b1cdc5717b945c",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "1f27f4692f0c91e07e93094eaf2e14b8709095b115c753ca359e0204fc6e9f24"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnObstacleV3/animation-layout.json",
+    "target": "assets/unity-kit/Resources/Art/YarnObstacleV3/animation-layout.json",
+    "sha256": "87b6f7232089bf60de6ce8423342fea4deb206e36ca13aed25276dfc59a444b9",
+    "sourceGuid": "0a0d8a4f3eddb564da15dab5336f8b9e",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "c6bb868a912af92b69f8d2251c382e68b2bf157f6e65b72354e857e852156969"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnObstacleV3/yarn-layer-loss-l3.png",
+    "target": "assets/unity-kit/Resources/Art/YarnObstacleV3/yarn-layer-loss-l3.png",
+    "sha256": "e220e83c2b19068c3c27d0d65289c549175ff541388804539adc750ace8b74dd",
+    "sourceGuid": "ce99011a772351c6a68aa046ef9d6d99",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "7ffd345ed9668b4a3aade739dd0d3c83fad4473ea83a056b0946aeb5c369ec83"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnObstacleV3/yarn-layer-loss.png",
+    "target": "assets/unity-kit/Resources/Art/YarnObstacleV3/yarn-layer-loss.png",
+    "sha256": "71ba6a861a8aabb92eb88983c80f2d8ce7dd40b1502f8c6d2da1ca929271a6ff",
+    "sourceGuid": "46618b52109031444a7094a95d97d416",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "42465c4ebb69ff28e31b240f518b6d751e16652eab8b09cb9fe0daf56b9100f2"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnObstacleV3/yarn-obstacle-l1.png",
+    "target": "assets/unity-kit/Resources/Art/YarnObstacleV3/yarn-obstacle-l1.png",
+    "sha256": "63fb9e4fac0429bb1e76c5cc9bba34e3c82849624896504768e0c68cc9b62e5b",
+    "sourceGuid": "9564513c91606884cb5755829eea00ca",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "b9b0ee540cf97f6f0aeaf379fc8a609539f1e8e4baf6074c7716d9660d5c8268"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnObstacleV3/yarn-obstacle-l2.png",
+    "target": "assets/unity-kit/Resources/Art/YarnObstacleV3/yarn-obstacle-l2.png",
+    "sha256": "10ca70209bf19aa04dda7da0081690dde75a38b49e25841fe772dae45fcc20a0",
+    "sourceGuid": "9b88ea4f53260f5429f59e0cd2da32ab",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "a51c1ef5f09d66ab695372d6c126325a2005f9cfdd6e65c922c333529b17ce2d"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnObstacleV3/yarn-obstacle-l3.png",
+    "target": "assets/unity-kit/Resources/Art/YarnObstacleV3/yarn-obstacle-l3.png",
+    "sha256": "1a89672413ffe5b82e795ff74f7d834146c9c5ade4dd745425d6911e6ce7ac3e",
+    "sourceGuid": "a0f6a8ff77365f7cb3e583520087c14e",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "13be73f806b517a1ea32e604cdf53df3b810e6fd42ea96c18ab3d9bce3a67df2"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnObstacleV3/yarn-unravel.png",
+    "target": "assets/unity-kit/Resources/Art/YarnObstacleV3/yarn-unravel.png",
+    "sha256": "8335341a6d5d9c2114cee7f3a60ff949e28740d350a7ce36ae1ef3924a940208",
+    "sourceGuid": "bfd88d379f2a20e4098af0ab7cd6bb44",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "f9f2ebc7ed5c390d9943edabc297a5c410982db9cecb0a9b71cb411ecdeb8506"
+  },
+  {
+    "source": "Assets/Resources/Art/ThirdGroup/cat.png",
+    "target": "assets/unity-kit/Resources/Art/ThirdGroup/cat.png",
+    "sha256": "7006392be3ecbd759729ce12d32edc2bcb6ee673491de19c90124de2566c74ea",
+    "sourceGuid": "4565512bb8781fa4c8fc0f204ff1de3c",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "d8b0dacf55a1ab24324d86d9b1c37c7b5d3439cfd06c2cb651cd225aa9707b94"
+  },
+  {
+    "source": "Assets/Resources/Art/ThirdGroup/ingot.png",
+    "target": "assets/unity-kit/Resources/Art/ThirdGroup/ingot.png",
+    "sha256": "939b0a420487f17139112452880e858934ed8cbfc203f68bc9281e3f5733d13b",
+    "sourceGuid": "221de732796ec1342849d7560f1ddb00",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "d5347aee88d61313b0f477bd684dd55cfff8268cc1711ef52ff74593480b649c"
+  },
+  {
+    "source": "Assets/Resources/Art/ThirdGroup/layout.json",
+    "target": "assets/unity-kit/Resources/Art/ThirdGroup/layout.json",
+    "sha256": "a694de2562edf2be5a4986213cd811d01e3527004b6ff4afba97a043345a87ef",
+    "sourceGuid": "9c719365180c91340873c57e2fc353eb",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "0a40da9c985e307c96eadf95aa1fcfc8e73ee9c6c31064477e62fc5327f47afa"
+  },
+  {
+    "source": "Assets/Resources/Art/ThirdGroup/ring.png",
+    "target": "assets/unity-kit/Resources/Art/ThirdGroup/ring.png",
+    "sha256": "79f899acc5792bfad11b0e8be83fc56b26a5cea6fb9097a05b9f945e9e6c18fb",
+    "sourceGuid": "d40a373c5726b1a48add1988641319a4",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "897466d291e2959ee11525ccdd525bbe20ac61c4ed16e747ff0972f0c5494a93"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-0.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-0.png",
+    "sha256": "ad92f67fe5323dc202f0ca02b6715a27453c2e8e825af7432c25ab85a8b7479b",
+    "sourceGuid": "bd62ef30c15c5891a6e9953b17b42e6b",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "20e2194e83f7a48b7409dfc6f5eb97d92bab07483333d36dddd961355016d961"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-1.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-1.png",
+    "sha256": "5adc385cc58b5d31d0294b3e1739a6a3ad0b2bf03c3bfcd0cc59087d5d39ba4d",
+    "sourceGuid": "fe4235b485c65de4bd2ba9d901c42874",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "c4da96e3aa9fa6cf23ca2a9fd8f2913f7f12283b76e4316faf5d8295405aa19d"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-2.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-2.png",
+    "sha256": "cdb3247bbb1a5357d0753a73377eb74ffbcd202525bac006e9c344b8f218934b",
+    "sourceGuid": "9cace4a5027c5afca30410b0de1290ed",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "804926d5e6b5b9579c15a65ba07fed41f3afc423b0b84e6493d480c1472fb039"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-3.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-3.png",
+    "sha256": "099a4d9693b07dc67a03575f74ef4951202e77c06e516ecebe7bf5cdd013cd3f",
+    "sourceGuid": "f58ba8d943cb59958c03d925b6c711f2",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "0a43957ccf9b670ed7fa1c8706f496ff5f007b7aeaed646acb1e43a6297b1cb8"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-4.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-4.png",
+    "sha256": "cfbac53fc4566227d5bd716d5edfc00cd3b2ea9fcba1aedb5c0bf1d460fb8991",
+    "sourceGuid": "c3d505d6b55d5a619b22e741c2e4607d",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "5c06b7c56dfd2f5e9ad87ae87155fc0754bad9a4daa0ebbe37e5b64c98c2f05d"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-5.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-5.png",
+    "sha256": "f8a70ef462eca7f4def0c2e30adbce80e2d033f907cd73a3827ccb2911bf2599",
+    "sourceGuid": "9ea7b87bc81a527fbdeb4e40552a6e7a",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "5785a3cc5d2acaa03085ff6b8e4eaa3766a7bc2bf0bea392c647384f4f6a3acf"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-6.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-6.png",
+    "sha256": "0ba535655c29a6a3e73cff3076fdc2484037f63c46cc17e03444b727a5e1dd9d",
+    "sourceGuid": "e4a237ed2027523bbbc00c64e90f2891",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "58222dde665010cf763364e2501a547c3e30c4f336ec372d9132b0de421f30d8"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-7.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-7.png",
+    "sha256": "d4659c377e772082dd7e9964a9f2604a68af047cc091797479a675fc2de83a67",
+    "sourceGuid": "0c726e4969b8520b970481a3cef4a1eb",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "aa898bf3732ca2a3e683977fc877027124fafcc038097ac05540a5051b0e7c6f"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-8.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-8.png",
+    "sha256": "0cbe76a77c677caf06dca64c2c3c916d60615ce881e7686a800ee0ff44240582",
+    "sourceGuid": "fb2da048b7755caa9f016fa1bc3c1b75",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "f869bc79a2ee29980ac4777e4cad01bd48f194830a9e22eb3bb008273f0fe461"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/box-closed.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/box-closed.png",
+    "sha256": "399be0641b9b46c30a1bab6012e2acabf15e6611d8ec73755c7cfe76920bf2dc",
+    "sourceGuid": "5b58c9dfe69d5e19ba41ddea52370da6",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "f00887520ffb75e42e48168b9682c99a12b4eb3f2888a4154727418c812d95f3"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/CookieBox2x2.prefab",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/CookieBox2x2.prefab",
+    "sha256": "92715f1727c0a3662c422666945ee5f2237a21a2c8fccb63c949ac9c252e449b",
+    "sourceGuid": "844377d593236a14482e571b2168de66",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "b0baf2a3694616513032d1d0607685dc7e17e44a4e298e0dd9ac9a6fdf12eccf"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/fish-biscuit.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/fish-biscuit.png",
+    "sha256": "bacc6847779faea8f8ed0509b403cda01b0b7a2b4b436106319a2a664ec545c5",
+    "sourceGuid": "9e70ef09d13e5dc9814ec71f481b248b",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "7ce6951c92b8d4947fb49fc66d8ecc4375007da35247de856b68fa76ee95d1f0"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/manifest.json",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/manifest.json",
+    "sha256": "1229e9d751833af63689a3efc0a66a074dea51685f3a52355a22eeed407c2251",
+    "sourceGuid": "9f8cbcb4deb257e4a4d8db2c48a9b829",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "6b075998d06f1a0ed723520cb975a9d9e32031437d8fdfbdee590c68f6b23ef4"
+  },
+  {
+    "source": "Assets/Resources/Art/SecondGroupProduction/yarn-3.png",
+    "target": "assets/unity-kit/Resources/Art/SecondGroupProduction/yarn-3.png",
+    "sha256": "1a89672413ffe5b82e795ff74f7d834146c9c5ade4dd745425d6911e6ce7ac3e",
+    "sourceGuid": "a9ea006be6ab59f9aae11b9216a902e3",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "2f575f9eaa9344967ffd5785e2ed5d8eb332562e3e926454ad579db585bdc7dd"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/bomb-five-colors.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/bomb-five-colors.png",
+    "sha256": "9c61d807b093aa04a25bd2e868ccb4e34b3090afe437e3f33d7b73cb85912267",
+    "sourceGuid": "44425a0ca2df8ea4d880acdefe1d8b24",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "30ac076ce5fe6e4cef0d75b5f5f503b2841299c381cc39593c185e0a0129a1e3"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/cross-five-colors.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/cross-five-colors.png",
+    "sha256": "b32351e29b81ff0269a06894e6fb1cb14342f230b3a63587e4c7e949c025c7dc",
+    "sourceGuid": "4d2f2dbeabaa2d64b8a3ac83478ccd10",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "94ad51c63ae669e5adcab0f170f5422c74effc864e17ab53acdfc04fc0a95f8d"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/flower-five-colors.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/flower-five-colors.png",
+    "sha256": "f7b8952a21365915cf2bd7b9804ea8b374dcf8247288a5c67f7bb2f287f47213",
+    "sourceGuid": "e2d9b63a4e153a248970c5d56539226d",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "454016a18eb4a7b7734e7b5bf9b2c03b6e2639462a66e470e455924d8cda72fb"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/footprints.json",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/footprints.json",
+    "sha256": "9232b1ef266383e11f5ee97393e84b7582f5e062a9c4efa4cc5ad0bafa04aa89",
+    "sourceGuid": "cb3574b516da4e843b1690e1aaafa0ef",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "d65af46b9728a5629a9ab95e5167576d79be72043b745de419b292f91091f53a"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/horizontal-five-colors.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/horizontal-five-colors.png",
+    "sha256": "c37b666d78d765b3fb8aa05f9f57b68f07ef6bb21a974e2602b317ef276e5e2d",
+    "sourceGuid": "4dc1f96845bb51e48a3868aed44352cb",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "7718ab08c89c513cf69406c2addd060c7532d9f2baf75c94a10de331088b332c"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/ordinary-blue.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/ordinary-blue.png",
+    "sha256": "d404faa3255b28deb0ad880ffbc870826643709c64916749fff1d368c67f10a1",
+    "sourceGuid": "354d6fc2e68481d4480a700f154ef71f",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "d6333e73b2ea8a437f9f158e7440bcde104bd12ce896befbf9b63b6b558cbea4"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/ordinary-lilac.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/ordinary-lilac.png",
+    "sha256": "18ecb855a27f9fddbd6f535544baa749bf0d55d432f89668d1c768a277dff586",
+    "sourceGuid": "cbcdc0c295728fc4f93e044f64155ee3",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "577ded72c1f07fd2dbb18e58b0fb49509422d301fe70ec44f2379b955e2baec2"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/ordinary-mint.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/ordinary-mint.png",
+    "sha256": "14a04f5936a3fed901f61efb3f9338d79b35fafbc045d37ecc34c64a82692749",
+    "sourceGuid": "6b150f5aee5168e4f8089fd248169cc6",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "9b44a11a85bc0d94eef1bb3eca59c5cb1f0b8e271e9376fc5ebd8b70c13de744"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/ordinary-pink.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/ordinary-pink.png",
+    "sha256": "f407d21d99efd77550e7ea95ceed173bb455e95a274dc1f74f1f84f32c16717d",
+    "sourceGuid": "58e22bcce98e40846b84c8dd6ab0e723",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "fd831e68aaf31a742d3188940866c9ca06dfed9d3c02ebe162a32c39e6fa1fee"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/ordinary-yellow.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/ordinary-yellow.png",
+    "sha256": "4c1d23c9112194ea3d9dfe81472f6351511a144cf2e0118222cbb0e4e1662401",
+    "sourceGuid": "e34c0657142793542a5bf1e0b7f7d687",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "202e1ea369b9638e9a0f8c418f51a94fce53f2fbdc0e94062f241fa6f1920c90"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/sequence-layout.json",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/sequence-layout.json",
+    "sha256": "ef3a8393f763e248f2b2effe21d341608fccd753096954f9fbe0836d0a20bdb4",
+    "sourceGuid": "5d2dded418695fb692cb07448523e83d",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "eeb80e387753508ac3458e5a3439fb9167a9678efe95665aa1d9c9f8dac0f582"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/square-layout-v2.json",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/square-layout-v2.json",
+    "sha256": "c284ca7f2be65319032ff656e8476c830e8198efd870d32c2868b9a67371d7c0",
+    "sourceGuid": "c2ccca0c361d908459090e090208beca",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "313d464677289a29f357eb270085e706c092486aaa40cdda19e6b6050418f3ea"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/square-specials-v2.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/square-specials-v2.png",
+    "sha256": "03d0b75ae81e3b36020f3375b1a01ae398f5fc2dc8591e06b110ef6e445e470b",
+    "sourceGuid": "c196551d95990834286ddbe905bfb4bb",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "d51781cfd919a0ef66d062e5d36e43c37e7f2902032cdf32f512437596e408b1"
+  },
+  {
+    "source": "Assets/Resources/Art/FiveBakedV80/vertical-five-colors.png",
+    "target": "assets/unity-kit/Resources/Art/FiveBakedV80/vertical-five-colors.png",
+    "sha256": "b97ca38ee9aecb9f6af4aaac55f3097f21c984a9bb36900f2de9647c3f30a261",
+    "sourceGuid": "84cc03ffb4bb70c47bfc06db1fc6372d",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "353103ef7875ea04e6b0c646369065f84cf9d7718e707724edfd06293a922fc5"
+  },
+  {
+    "source": "Assets/Resources/OpeningStory049UI.shader",
+    "target": "assets/unity-kit/Resources/OpeningStory049UI.shader",
+    "sha256": "9ba3b65ca1da87de7c3cb95fa37cbc8eed554aa28a61726a13dd0290009c6535",
+    "sourceGuid": "e5ed3a9cab9790744af6890dbed5b142",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "a6a58a2cdeec449a926148c1b435b5afa2f698ba415834650f1b3a4cdf180b21"
+  },
+  {
+    "source": "Assets/Resources/Art/YarnV19/ball_yarn_apricot.png",
+    "target": "assets/unity-kit/Resources/Art/YarnV19/ball_yarn_apricot.png",
+    "sha256": "7d1f4427d3ba0730662a46fe848819d4be87cc8cba96450a1e0444a04bc88f18",
+    "sourceGuid": "149abca3ea2bd4743a1a654ee6c3ab8e",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "8d91534d36532df8736927fbb0fe719c8f6b3bcc23d8d5853e8162cb107efc8d"
+  },
+  {
+    "source": "Assets/Resources/Art/BattleUIV42/goals-tray.png",
+    "target": "assets/unity-kit/Resources/Art/BattleUIV42/goals-tray.png",
+    "sha256": "7558f4d84e30ea33ec2743482e85c50ff74a8edfcc2c81febb9e8fa3ca0ad8dc",
+    "sourceGuid": "a96409b23d211dd4190f4fd1f6f3a44a",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "a3d607f20b93bb5dee4a70482ce89a672796c9ff7bda9cf3f42156692e8a8e60"
+  },
+  {
+    "source": "Assets/Resources/Art/FourthGroup/burst.png",
+    "target": "assets/unity-kit/Resources/Art/FourthGroup/burst.png",
+    "sha256": "65b27e4afdb6d1e81dae9ea4ece003a535b45dea31a6ecdcb2eb83d5eb5bdece",
+    "sourceGuid": "6520941ead375326a1c5e91afa6c9690",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "410a9d56423b026069b7de86fd636b128f5d07816e186fe88022c43c5cd0ea7b"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/primary-normal.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/primary-normal.png",
+    "sha256": "97328461738afede343ae53fb76ee998a7b1e5e0cd02200ee39dc2681e625b3d",
+    "sourceGuid": "58d39e831d7698c45a1cbdb9aab14f6a",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "fa3af00adb10c982efef57035691f47c239a04cdcb03ba60f2696cd92f8ac4c7"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/primary-pressed.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/primary-pressed.png",
+    "sha256": "73f481e43e8d455d2a3c0efa1196b4aaf10d29fbfbc8ba506031edcf8dbdfa82",
+    "sourceGuid": "4764b1088d63f2144b46e8b1a698db76",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "32363c519796a36e2baef23f53f6d166dc29738dba8ace72837599b2a7f910f6"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/round-normal.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/round-normal.png",
+    "sha256": "a93efad5c22c6fdbaf2ec98f3363b64dab9a4b91ac785d5c0652ab64d9deca58",
+    "sourceGuid": "a1c7ece705949b44f942f0a3494200e5",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "7de0f504bebbfd2259fe5565eff239ed79e41a621ac736bd87726c4bc391318a"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/round-pressed.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/round-pressed.png",
+    "sha256": "c135463ed7585b9ac89e26f60ce123cfa72478e1907cdb30b48c3233ba02207f",
+    "sourceGuid": "6edfa52691b13e346abaa7e9bf5b1438",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "f65683a85f306b5ddd72489a9ecbcfec689f7329823f7102ed6da6367ed4b78c"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/secondary-normal.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/secondary-normal.png",
+    "sha256": "80dae9254f3260b87cddd38a2ca9645ab665f93e8b4b4754126ae1c8f6082e43",
+    "sourceGuid": "7b7b1022902b8c64e91070a72b9cd61e",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "24839e5c40b50da378d5a31218fa222d991c2f226e9b14a0c5b31db31f562ecf"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/secondary-pressed.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/secondary-pressed.png",
+    "sha256": "48f1618a79db43d0f4913f19bcca926028654f507c706d10b4d20027159aac9c",
+    "sourceGuid": "a761403378e3a7f41ba8a24915a37571",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "9a25dbd3dfe8e19031d9d8b3c27e021a958898ab116e86d508ff8e7b5acc8467"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/selected-normal.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/selected-normal.png",
+    "sha256": "6a5183730976a404cac7a2640a600a09ea98a14671e0e3b250910d3c1c3f89a1",
+    "sourceGuid": "d2e2496aad2d0b24594ae866a2882c90",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "34edc0643c5da3224911aee8881d369d9be05bf281917469d208f96f1164d9ca"
+  },
+  {
+    "source": "Assets/Resources/Art/CommonButtonsA/selected-pressed.png",
+    "target": "assets/unity-kit/Resources/Art/CommonButtonsA/selected-pressed.png",
+    "sha256": "1b08e3cec3752aeea2eb07179febf000e25edfefaf396e95a5280637f3e76be0",
+    "sourceGuid": "dec2beb3b5bc51e4bb527b7bc0d09be9",
+    "reason": "0.5.1 reviewed presentation closure",
+    "license": "Project assets; permission unchanged; consult licenses.md",
+    "sourceVersion": "0.5.1",
+    "packagedMetaSha256": "f449f605a9f63f62143fc6515b614e72f21e94f12ae0ce0ae4eb0fd98ceb8b64"
   }
 ]

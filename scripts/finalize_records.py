@@ -16,9 +16,13 @@ def main():
     path=KIT/'references/source-map.json';source=json.loads(path.read_text(encoding='utf-8'));source['evidencePolicy']='Conservative syntax candidates plus partial semantic call resolution. Explicit source-route reviews are applied by catalog.py; unknown is never promoted to active.';write(path,source)
     runtime=json.loads((KIT/'evidence/runtime-verification.json').read_text(encoding='utf-8-sig'));clean=json.loads((KIT/'evidence/clean-import-result.json').read_text(encoding='utf-8-sig'));summary=json.loads((KIT/'references/review-summary.json').read_text(encoding='utf-8'))
     acceptance=json.loads((KIT/'references/acceptance.json').read_text(encoding='utf-8'));acceptance['deliveredGalleryEntries']=len(json.loads((KIT/'references/parameter-catalog.json').read_text(encoding='utf-8'))['entries']);acceptance['reference96Comparison']=json.loads((KIT/'references/reference96-comparison.json').read_text(encoding='utf-8'))['counts'];acceptance['runtimeChecks']={'passed':runtime['passed'],'failed':runtime['failed'],'errors':len(runtime['errors'])};acceptance['independentImport']=clean;acceptance['sourceReviewCounts']=summary['counts'];write(KIT/'references/acceptance.json',acceptance)
-    text=f'''# 阶段验证记录
+    acceptance['currentScope'].pop('passed',None)
+    acceptance['currentScope']['automatedPassed']=runtime['failed']==0 and not runtime['errors'] and clean['result']=='passed'
+    acceptance['currentScope']['visualReview']='partial-user-stopped; see evidence/current-051-visual-review.json'
+    write(KIT/'references/acceptance.json',acceptance)
+    text=f'''# 阶段验证记录 · 工具包0.5.0-preview / 游戏0.5.1
 
-此包尚未完成全量覆盖验收。36个展馆条目有可运行交付；来源清单的待审阅项不计作已完成动画。
+此包尚未完成全量覆盖验收。44个展馆条目有可运行交付；来源清单的待审阅项不计作已完成动画。本轮范围是否通过见acceptance.json的currentScope，历史全量标志不因此自动改为true。
 
 - 玩家程序：Unity {runtime['unityVersion']}，{runtime['platform']}；{runtime['passed']}项通过、{runtime['failed']}项失败、{len(runtime['errors'])}个运行错误。
 - 独立空工程：只导入导出的unitypackage，{clean['scripts']}个脚本、{clean['prefabs']}个组合预制体，{clean['missingScripts']}个缺失脚本；结果{clean['result']}。
@@ -26,11 +30,13 @@ def main():
 - 0.2.0流程回归覆盖：原生主动作、搜索空态及恢复、切换条目清理反馈与暂停、满星后新一轮体验、恢复默认不影响其他项，以及放大舞台的进入和返回。
 - 0.3.0回归覆盖：当前参数与RGBA复制、移除源码入口、分数变色放大与归位、加分合并/暂停/清空、任务印章、步数挤压、连击星光、排行重入和换景。
 - 0.4.0回归覆盖：36项当前参数JSON、复制与文件一致、旧读取器载入、Loading单调/99%门控/完成/中断/暂停、完整启动页同源、页面反向、错峰归位、排行榜保持宿主原点、手势输入抑制、提示淡出、分层入场、摆动和呼吸。
+- 本轮0.5.1范围：44项参数与暂停；Toast续时/最新消息替换/后台清理；共享箱体4.2秒循环；异常页一次关闭意图与取消；五页20种方向组合、相邻一屏、加载取消/失败/重试；原生旋转充星与满星隐藏底色；庆祝重入/落位/循环；低步数三次整体警告；七页教学逐相位与不等距切片边界；八帧结算与共享底板。
+- 人工桌面复查由用户通过物理Escape中止；新增条目导航可达性和专属操作提示另有自动断言。最终全量人工视觉验收未完成，见current-051-visual-review.json。visual/内旧图片不是当前构建验收。
 - 独立导入的预制体构建在Editor中执行；未把它写成完整的独立玩家流程测试，也未执行真人5分钟首次接入计时。
 - 真实被测文件集、退出码和运行报告哈希见[player-run.json](player-run.json)；来源与展馆代码身份见[build-inputs.json](build-inputs.json)；导入包身份见[clean-import-run.json](clean-import-run.json)。
 - 隐藏窗口ScreenCapture全黑，未作为视觉通过或发布预览图。可见原生窗口的检查证据另放visual目录；工具调用中的可见窗口观察与自动事件派发是两种不同证据。
 
-当前还有{summary['counts'].get('requires-route-review',0)}个源分组待核对入口，另有混合物理/表现、旧导航和预览类单列。完整后续工作见[验收状态](../references/acceptance.json)。
+当前还有{summary['counts'].get('requires-route-review',0)}个源分组待核对入口，混合物理/表现单列。旧版已移除来源见source-transition-051.json，不混入当前覆盖数量。完整后续工作见[验收状态](../references/acceptance.json)。
 '''
     (KIT/'evidence/VERIFICATION.md').write_text(text,encoding='utf-8')
     print('Finalized metadata; full acceptance remains false')

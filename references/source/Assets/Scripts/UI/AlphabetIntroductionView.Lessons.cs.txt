@@ -1,22 +1,30 @@
-using TMPro;
 using UnityEngine;
 namespace BounceGarden {
 public sealed partial class AlphabetIntroductionView {
- public bool UsesDimMechanismLayout=>OpeningIntroduction.IsPage(PageId);
+ 
+ void StoryText(string text,float x,float y,float width,int size,Color color){var t=Caption(content,text,x,y,width,70,size,color);t.fontStyle=TMPro.FontStyles.Normal;t.raycastTarget=false;}
  void BuildGardenOpening(){
-  // Keep the actual paused board visible, without a large modal panel.
-  var cream=new Color(1,.96f,.84f);
-  var title=Caption(content,page.title,0,720,900,130,72,cream);Enter(title.rectTransform,0,.96f);
-  var demo=UICraft.Root(content,"Mechanism animation over actual board",0,140,780,850);
-  demo.gameObject.AddComponent<OpeningRuleDemo>().Initialize(page.id,true);
-  demo.gameObject.AddComponent<LessonCollectionFlight>().Begin(page.id);
-  Enter(demo,.04f,.98f);
-  var rule=Caption(content,GardenOpeningRule(page.id),0,-430,900,160,46,cream);rule.textWrappingMode=TextWrappingModes.Normal;
-  var limit=Caption(content,GardenOpeningLimit(page.id),0,-585,900,110,34,new Color(.89f,.88f,.83f));limit.textWrappingMode=TextWrappingModes.Normal;
-  var next=UICraft.Button(content,"知道了",0,-805,530,128,UICraft.Green,Advance,49);next.gameObject.name="Mechanism understood immediately";
-  LoadedArtCount=6;AnimatedElementCount=6;ready=true;Layout();SoundService.Play("whoosh");
+  var copy=OpeningStory049.GetCopy(page.id);
+  StoryText(page.id==501?"闯关目标":"新机关",0,851,860,24,OpeningStory049.Mint);
+  StoryText(copy.Title,0,771,960,58,OpeningStory049.Gold);
+  StoryText(copy.Subtitle,0,693,1000,29,OpeningStory049.Cream);
+  var story=UICraft.Root(content,"Three-step mechanism story",0,0,1080,1920);story.gameObject.AddComponent<OpeningStory049>().Build(page.id);
+  for(int i=0;i<3;i++){
+   float x=i==1?-207:207,y=562-i*395;
+   var dot=UICraft.Box(content,"Step number "+(i+1),x,y,40,40,new Color32(244,210,148,255));dot.raycastTarget=false;
+   StoryText((i+1).ToString(),x,y,40,24,CSettingsArt.Ink);
+   StoryText(copy.Heads[i],x,y-66,455,33,OpeningStory049.Cream);
+   StoryText(copy.Bodies[i],x,y-125,455,26,OpeningStory049.Muted);
+  }
+  for(int i=0;i<2;i++){
+   var node=UICraft.Root(content,"Story flow arrow "+i,0,260-i*395,200,170);var arrow=node.gameObject.AddComponent<OpeningStoryArrow049>();arrow.color=OpeningStory049.Gold;arrow.raycastTarget=false;
+   if(i==1)node.localScale=new Vector3(-1,1,1);
+  }
+  var divider=UICraft.Box(content,"Story note divider",0,-552,696,1,new Color32(109,102,83,255));divider.raycastTarget=false;
+  StoryText(copy.Note,0,-602,1000,24,OpeningStory049.Mint);
+  CommonButtonsA.Button(content,"Mechanism understood immediately","知道了，开始闯关",0,-754,740,123,Advance,"primary",39);
+  StoryText("演示自动循环",0,-875,900,22,OpeningStory049.Muted);
+  LoadedArtCount=12;AnimatedElementCount=3;ready=true;Layout();SoundService.Play("whoosh");
  }
- static string GardenOpeningRule(int id)=>id==511?"消除盒子旁的砖块，收集小鱼干。":id==505?"消除旁边的砖块，解开毛线。":id==506?"先解开紫色外圈，再解开内芯。":id==518?"从外到内解开三层，收集毛线。":id==521?"在猫咪旁消除三次，生成5枚元宝。":id==531?"消除铜钱旁的砖块，直接收集。":"打碎目标颜色的砖块，完成收集。";
- static string GardenOpeningLimit(int id)=>id==511||id==505?"球直接撞击无效":id==506||id==518?"每次有效消除解一层，全部解开才计数":id==521?"猫咪不会被消除，收集生成的元宝":id==531?"也可直接撞击：打掉25点血量后收集":"无需清空棋盘";
 }
 }

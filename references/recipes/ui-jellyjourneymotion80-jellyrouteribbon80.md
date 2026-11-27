@@ -3,30 +3,29 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/JellyJourneyMotion80.cs`
-文件 SHA-256：`2f0ec3a0621f8caee7a79ea09238457dbe6459196c3b66f0297732337db992bd`
+文件 SHA-256：`03c5ac68c7c3f15a1d9602399a3b064b6ae514ff746384240e55b113f6f2162b`
 [原始源码快照](../source/Assets/Scripts/UI/JellyJourneyMotion80.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Configure · L60
+### Configure · L61
 
-方法 SHA-256：`7fab735115e0ccffa657b8c9b6045debd5051561c3cab11d7af312004dbadcf3`
+方法 SHA-256：`67c925b62fbfd2d0965d042f2e9dd40120bd7868c523e00f4f4da3fc132120bf`
 时间来源：本方法未直接取时；查调用者/字段
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.JellyRouteRibbon80.Configure(BounceGarden.JellyJourney80, int, int)`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/JellyRibbonTexture80QA.cs:14` · `JellyRibbonTexture80QA.Start` → `ribbon.Configure(map,32,39)`
-- `Assets/Scripts/UI/JellyJourney80.cs:64` · `JellyJourney80.RefreshVisible` → `route.Configure(this,min,max)`
+- `Assets/Scripts/UI/JellyJourney80.cs:65` · `JellyJourney80.RefreshVisible` → `route.Configure(this,min,max)`
 
 ```csharp
-public void Configure(JellyJourney80 map,int min,int max){owner=map;if(textureSprite==null)textureSprite=JellyJourneyArt80.Get("route-material");first=Mathf.Max(-1,min-1);last=Mathf.Min(map.LevelCount,max+1);raycastTarget=false;SetMaterialDirty();SetVerticesDirty();}
+public void Configure(JellyJourney80 map,int min,int max){owner=map;if(textureSprite==null)textureSprite=JourneyGardenArt043.Get("route-material");first=Mathf.Max(-1,min-1);last=Mathf.Min(map.LevelCount,max+1);raycastTarget=false;SetMaterialDirty();SetVerticesDirty();}
 ```
 
-### RefreshMotion · L61
+### RefreshMotion · L62
 
 方法 SHA-256：`21b93ffdea3cd4a054742a46591edc6579730290acbf1890358b16b9c007a424`
 时间来源：本方法未直接取时；查调用者/字段
@@ -35,16 +34,15 @@ public void Configure(JellyJourney80 map,int min,int max){owner=map;if(textureSp
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/UI/JellyJourney80.cs:59` · `JellyJourney80.AuditMotion` → `route.RefreshMotion()`
-- `Assets/Scripts/UI/JellyJourney80.cs:73` · `JellyJourney80.LateUpdate` → `route.RefreshMotion()`
-- `Assets/Scripts/UI/JellyJourney80.cs:73` · `JellyJourney80.LateUpdate` → `route.RefreshMotion()`
-- `Assets/Scripts/UI/JellyJourney80.cs:76` · `JellyJourney80.CancelMotion` → `route.RefreshMotion()`
+- `Assets/Scripts/UI/JellyJourney80.cs:74` · `JellyJourney80.LateUpdate` → `route.RefreshMotion()`
+- `Assets/Scripts/UI/JellyJourney80.cs:74` · `JellyJourney80.LateUpdate` → `route.RefreshMotion()`
+- `Assets/Scripts/UI/JellyJourney80.cs:77` · `JellyJourney80.CancelMotion` → `route.RefreshMotion()`
 
 ```csharp
 public void RefreshMotion(){SetVerticesDirty();}
 ```
 
-### OnPopulateMesh · L62
+### OnPopulateMesh · L63
 
 方法 SHA-256：`5fd4ae379b30ff783bd0f6d7dc6e94934096a165d6ebef9d5a15594fdbbeceb4`
 时间来源：本方法未直接取时；查调用者/字段

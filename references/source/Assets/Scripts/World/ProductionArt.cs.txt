@@ -2,10 +2,10 @@ using UnityEngine;
 namespace BounceGarden {
 public static class ProductionArt {
  public static Sprite Get(string key)=>PastelArt.Resolve(key);
- public static string BrickKey(int index,int hp=1)=>"pastel/"+(hp>1?(Mathf.Abs(index)%2==0?"brick_blank_yellow":"brick_blank_lavender"):(Mathf.Abs(index)%2==0?"brick_mint":"brick_blush"));
+ 
  public static string ButtonKey(Color color)=>color.g>color.r&&color.g>color.b?"MainCTA":color.b>color.r?"HomeCTA":"SecondaryCTA";
- public static int Count=>PastelArt.Count;
- public static int Round3Count=>0;
- public static int Round4Count=>0;
+ 
+ 
+ 
 }
 }

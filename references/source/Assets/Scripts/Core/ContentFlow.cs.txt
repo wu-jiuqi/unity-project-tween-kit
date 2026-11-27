@@ -10,7 +10,7 @@ public static class GameContent {
  public static Func<int,IEnumerator> Prefetch;
  public static Func<string,IEnumerator> Page;
  public static Func<string,bool> Ready;
- public static Func<string> Error, Status;
+ public static Func<string> Error;
  public static Func<long> Progress;
  public static bool PageReady(string page)=>Ready==null||Ready(page);
  public static IEnumerator PrepareLevel(int level){if(Level!=null)yield return Level(level);if(!string.IsNullOrEmpty(Error?.Invoke()))throw new InvalidOperationException(Error());}

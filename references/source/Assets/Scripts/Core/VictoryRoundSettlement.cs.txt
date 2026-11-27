@@ -7,11 +7,11 @@ public sealed partial class GameSession {
  public bool VictorySpecialsReleased{get;private set;}
  readonly Dictionary<int,int> victoryDeferredGroups=new Dictionary<int,int>();readonly Queue<int> victoryDeferredTools=new Queue<int>();int victoryDeferredSupply;
  readonly Queue<int> victoryUnplacedRewards=new Queue<int>();
- public int VictoryUnplacedRewards=>victoryUnplacedRewards.Count;
- public int VictoryDeferredGroups=>victoryDeferredGroups.Count;
+ 
+ 
  void ClearVictoryDeferred(){FinishVictoryPlayback();victoryDeferredGroups.Clear();victoryDeferredTools.Clear();victoryUnplacedRewards.Clear();victoryDeferredSupply=0;}
  void DeferVictoryGroup(ChainLiveBurst group){if(!victoryDeferredGroups.ContainsKey(group.Id))victoryDeferredGroups.Add(group.Id,group.Tier);}
- void PreserveVictorySupply(){if(IsTutorial||IsStreakTrial)return;victoryDeferredSupply+=refillRemaining;foreach(int kind in chainReplacementRewards)victoryDeferredTools.Enqueue(kind);}
+ void PreserveVictorySupply(){victoryDeferredSupply+=refillRemaining;foreach(int kind in chainReplacementRewards)victoryDeferredTools.Enqueue(kind);}
  public int VictoryGroupsClosed{get;private set;}public int VictorySpecialsTriggered{get;private set;}
  public bool VictoryRoundReady=>ChainGridReady&&!RefillPendingSettlement&&chainReplacementRewards.Count==0&&!ChainEffectsPending&&!SevenAnimationsPending;
  public bool VictoryEffectsReady=>victoryUnplacedRewards.Count==0&&!ChainEffectsPending&&!SevenAnimationsPending&&!OpeningCatBusy;

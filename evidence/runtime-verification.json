@@ -1,6 +1,6 @@
 {
     "unityVersion": "6000.0.26f1",
-    "applicationVersion": "0.4.0",
+    "applicationVersion": "0.5.0",
     "platform": "WindowsPlayer",
     "checks": [
         {
@@ -436,6 +436,102 @@
             "passed": true
         },
         {
+            "name": "toast: component exists",
+            "passed": true
+        },
+        {
+            "name": "toast: pause clock",
+            "passed": true
+        },
+        {
+            "name": "toast: pause pose",
+            "passed": true
+        },
+        {
+            "name": "loadingbox: component exists",
+            "passed": true
+        },
+        {
+            "name": "loadingbox: pause clock",
+            "passed": true
+        },
+        {
+            "name": "loadingbox: pause pose",
+            "passed": true
+        },
+        {
+            "name": "errorpopup: component exists",
+            "passed": true
+        },
+        {
+            "name": "errorpopup: pause clock",
+            "passed": true
+        },
+        {
+            "name": "errorpopup: pause pose",
+            "passed": true
+        },
+        {
+            "name": "pageflow: component exists",
+            "passed": true
+        },
+        {
+            "name": "pageflow: pause clock",
+            "passed": true
+        },
+        {
+            "name": "pageflow: pause pose",
+            "passed": true
+        },
+        {
+            "name": "nativecharge: component exists",
+            "passed": true
+        },
+        {
+            "name": "nativecharge: pause clock",
+            "passed": true
+        },
+        {
+            "name": "nativecharge: pause pose",
+            "passed": true
+        },
+        {
+            "name": "celebration: component exists",
+            "passed": true
+        },
+        {
+            "name": "celebration: pause clock",
+            "passed": true
+        },
+        {
+            "name": "celebration: pause pose",
+            "passed": true
+        },
+        {
+            "name": "lowmoves: component exists",
+            "passed": true
+        },
+        {
+            "name": "lowmoves: pause clock",
+            "passed": true
+        },
+        {
+            "name": "lowmoves: pause pose",
+            "passed": true
+        },
+        {
+            "name": "teaching: component exists",
+            "passed": true
+        },
+        {
+            "name": "teaching: pause clock",
+            "passed": true
+        },
+        {
+            "name": "teaching: pause pose",
+            "passed": true
+        },
+        {
             "name": "press deforms only visual",
             "passed": true
         },
@@ -604,11 +700,11 @@
             "passed": true
         },
         {
-            "name": "scrollbar handle stays inside visible track: Parameter scroll",
+            "name": "scrollbar handle stays inside visible track: Effect directory",
             "passed": true
         },
         {
-            "name": "scrollbar handle stays inside visible track: Effect directory",
+            "name": "scrollbar handle stays inside visible track: Parameter scroll",
             "passed": true
         },
         {
@@ -984,7 +1080,527 @@
             "passed": true
         },
         {
+            "name": "toast: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "loadingbox: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "errorpopup: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "pageflow: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "nativecharge: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "celebration: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "lowmoves: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
+            "name": "teaching: loadable current parameter export without prompt or source navigation",
+            "passed": true
+        },
+        {
             "name": "gallery removes source-navigation interface",
+            "passed": true
+        },
+        {
+            "name": "toast: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "toast: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "loadingbox: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "loadingbox: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "errorpopup: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "errorpopup: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "pageflow: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "pageflow: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "nativecharge: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "nativecharge: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "celebration: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "celebration: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "lowmoves: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "lowmoves: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "teaching: specific operation guidance",
+            "passed": true
+        },
+        {
+            "name": "teaching: gallery navigation remains reachable through UI raycast",
+            "passed": true
+        },
+        {
+            "name": "toast duplicate extends hold without restarting entry",
+            "passed": true
+        },
+        {
+            "name": "toast keeps only latest pending replacement",
+            "passed": true
+        },
+        {
+            "name": "toast never blocks input",
+            "passed": true
+        },
+        {
+            "name": "toast background clears pending and hides",
+            "passed": true
+        },
+        {
+            "name": "toast disable restores visual baseline",
+            "passed": true
+        },
+        {
+            "name": "shared loading starts brick pop after box bounce",
+            "passed": true
+        },
+        {
+            "name": "shared loading repeats same pose after 4.2 seconds",
+            "passed": true
+        },
+        {
+            "name": "shared loading restore returns to drop start",
+            "passed": true
+        },
+        {
+            "name": "error popup shares exact loading actor",
+            "passed": true
+        },
+        {
+            "name": "error popup accepts one close intent",
+            "passed": true
+        },
+        {
+            "name": "error popup delivers intent once after closed",
+            "passed": true
+        },
+        {
+            "name": "cancelled error popup never dispatches stale intent",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 0-1",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 0-1",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 0-1",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 0-2",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 0-2",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 0-2",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 0-3",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 0-3",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 0-3",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 0-4",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 0-4",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 0-4",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 1-0",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 1-0",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 1-0",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 1-2",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 1-2",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 1-2",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 1-3",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 1-3",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 1-3",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 1-4",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 1-4",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 1-4",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 2-0",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 2-0",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 2-0",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 2-1",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 2-1",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 2-1",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 2-3",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 2-3",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 2-3",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 2-4",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 2-4",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 2-4",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 3-0",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 3-0",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 3-0",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 3-1",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 3-1",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 3-1",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 3-2",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 3-2",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 3-2",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 3-4",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 3-4",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 3-4",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 4-0",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 4-0",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 4-0",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 4-1",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 4-1",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 4-1",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 4-2",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 4-2",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 4-2",
+            "passed": true
+        },
+        {
+            "name": "page wait keeps previous input 4-3",
+            "passed": true
+        },
+        {
+            "name": "page direct one-screen transition 4-3",
+            "passed": true
+        },
+        {
+            "name": "page settles destination input 4-3",
+            "passed": true
+        },
+        {
+            "name": "select current cancels stale resource completion",
+            "passed": true
+        },
+        {
+            "name": "failed resource load retains previous page",
+            "passed": true
+        },
+        {
+            "name": "resource retry can enter destination",
+            "passed": true
+        },
+        {
+            "name": "page rejects invalid destination before mutation",
+            "passed": true
+        },
+        {
+            "name": "native charge horizontal mask at 0",
+            "passed": true
+        },
+        {
+            "name": "native charge horizontal mask at 45",
+            "passed": true
+        },
+        {
+            "name": "native charge horizontal mask at 90",
+            "passed": true
+        },
+        {
+            "name": "native charge horizontal mask at 135",
+            "passed": true
+        },
+        {
+            "name": "native charge horizontal mask at 225",
+            "passed": true
+        },
+        {
+            "name": "native charge horizontal mask at 315",
+            "passed": true
+        },
+        {
+            "name": "full star hides pink base and fill edge",
+            "passed": true
+        },
+        {
+            "name": "star transfer preserves native mask",
+            "passed": true
+        },
+        {
+            "name": "celebration reentry does not duplicate artwork",
+            "passed": true
+        },
+        {
+            "name": "celebration docks at authored final time",
+            "passed": true
+        },
+        {
+            "name": "celebration twelve-frame loop survives docking",
+            "passed": true
+        },
+        {
+            "name": "celebration stop resets elapsed",
+            "passed": true
+        },
+        {
+            "name": "low moves warning scales both axes and turns red",
+            "passed": true
+        },
+        {
+            "name": "low moves completes exactly three cycles",
+            "passed": true
+        },
+        {
+            "name": "low moves disable restores baseline",
+            "passed": true
+        },
+        {
+            "name": "teaching page 0 samples all source phases",
+            "passed": true
+        },
+        {
+            "name": "teaching page 1 samples all source phases",
+            "passed": true
+        },
+        {
+            "name": "teaching page 2 samples all source phases",
+            "passed": true
+        },
+        {
+            "name": "teaching page 3 samples all source phases",
+            "passed": true
+        },
+        {
+            "name": "teaching page 4 samples all source phases",
+            "passed": true
+        },
+        {
+            "name": "teaching page 5 samples all source phases",
+            "passed": true
+        },
+        {
+            "name": "teaching page 6 samples all source phases",
+            "passed": true
+        },
+        {
+            "name": "three-step begins first step and samples all views",
+            "passed": true
+        },
+        {
+            "name": "three-step advances second step",
+            "passed": true
+        },
+        {
+            "name": "three-step advances third step",
+            "passed": true
+        },
+        {
+            "name": "three-step loops at 6.72 seconds",
+            "passed": true
+        },
+        {
+            "name": "reviewed uneven atlas slices stay inside source textures",
+            "passed": true
+        },
+        {
+            "name": "current result cats preserve eight frames and duration",
+            "passed": true
+        },
+        {
+            "name": "current victory surface and eight-frame cat render",
+            "passed": true
+        },
+        {
+            "name": "current failure surface and eight-frame cat render",
             "passed": true
         },
         {
@@ -993,6 +1609,6 @@
         }
     ],
     "errors": [],
-    "passed": 247,
+    "passed": 401,
     "failed": 0
 }

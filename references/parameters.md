@@ -82,19 +82,19 @@ Duration=.45秒，Amplitude=.28；sin(4πt)×exp(-5t)。只变形视觉层。
 
 ## 星星飞光与材质充能 · charge
 
-飞光.24秒，填充.36秒；保留透明处理、填充遮罩与随时间变化的材质参数。
+已同步原生UI旋转充能实现；彗星.24秒，填充.36秒，满星脉冲.38秒；原接口保留。
 
 时间来源：`KitClock.Delta`。
 
 ## 胜利猫非均匀序列帧 · victorycat
 
-Victory=true，16帧非均匀时长，总长1.92秒；PlaybackSpeed为倍率，Loop控制循环。不要平均化每帧时长。
+新版8帧，4×2图集；胜利1.92秒，失败2.32秒；ResultsC048Art保留各帧非均匀时长。
 
 时间来源：`KitClock.Delta`。
 
 ## 失败猫非均匀序列帧 · failurecat
 
-Victory=false，16帧非均匀时长，总长2.32秒；PlaybackSpeed为倍率。不要复用胜利帧时长。
+新版8帧，4×2图集；胜利1.92秒，失败2.32秒；ResultsC048Art保留各帧非均匀时长。
 
 时间来源：`KitClock.Delta`。
 
@@ -215,5 +215,53 @@ Spring=30，Damping=3.6，四子步；MaxAngle=36度，碰边速度×-.25；Impu
 ## 联赛徽章轻微呼吸 · breath
 
 Amplitude=.035，AngularSpeed=3 rad/s；相对原比例乘1+Amplitude×sin(age×AngularSpeed)。
+
+时间来源：`KitClock.Delta`。
+
+## 轻提示续时与替换 · toast
+
+EnterDuration=.18秒 OutCubic，ExitDuration=.14秒 InCubic；HoldDuration=3.2秒，EnterScale=.96，ExitScale=.94。最新待显示消息覆盖旧消息；宿主输入类型与停留时长。
+
+时间来源：`KitClock.Delta`。
+
+## 共享箱体与猫咪循环 · loadingbox
+
+箱体落下.38秒、回弹.24秒；猫与砖块循环4.2秒；Render绝对时间，不驱动真实进度。
+
+时间来源：`KitClock.Delta`。
+
+## 异常弹窗与共享循环 · errorpopup
+
+开.18秒/关.14秒；共享LoadingBoxAnimation；关闭按钮意图至多交付一次，取消/禁用丢弃意图。
+
+时间来源：`KitClock.Delta`。
+
+## 五页切换与资源等待 · pageflow
+
+Width=920设计单位，Duration=.27秒 OutCubic；一次只显示出发与目的页，跨标签只移动一屏；请求票据阻止过期完成。
+
+时间来源：`KitClock.Delta`。
+
+## 旋转星星原生遮罩充能 · nativecharge
+
+原生RectMask2D+星形Mask；136单位方形覆盖旋转对角线；彗星.24秒、填充.36秒；满星隐藏底色。
+
+时间来源：`KitClock.Delta`。
+
+## 目标达成移至底部循环 · celebration
+
+标题关键帧0/.14/.26/.40/.56/.78秒；1.65秒预备，1.8–2.4秒弧线下移，2.85秒落位；12fps、12帧持续循环。
+
+时间来源：`KitClock.Delta`。
+
+## 低步数三次缩放警告 · lowmoves
+
+WarningCycle=.48秒，WarningLoops=3，WarningAmplitude=.10，整体峰值1.2倍；业务阈值与400ms震动由宿主处理。
+
+时间来源：`KitClock.ScaledDelta`。
+
+## 三步机关教学循环 · teaching
+
+LoopDuration=6.72秒，每步2.24秒；七种现用教学页的原素材、实际轴心和静态相位，点击切换机关；业务进度不提交。
 
 时间来源：`KitClock.Delta`。

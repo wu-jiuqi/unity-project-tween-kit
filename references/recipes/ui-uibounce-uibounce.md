@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/UIBounce.cs`
-文件 SHA-256：`9b21795211036a85c7f5d6c6c771108b2798cb2c2a7d5e09637809174be3d34f`
+文件 SHA-256：`1b77e68db3f5fe0713dd8c7a69cc2cd591fb3efc528f41a6fad970b27c2cadc3`
 [原始源码快照](../source/Assets/Scripts/UI/UIBounce.cs.txt)
 
 用在哪里：Bootstrap.Boot → AppUI.Awake → ShowPage → CSettingsArt.Button / UICraft.Button
@@ -121,13 +121,13 @@ Quaternion restRotation;
 JellyButtonMesh[] meshes;
 ```
 ```csharp
-Vector2 start, pull;
+Vector2 start,pull;
 ```
 ```csharp
-float pose, shear, idleTime;
+float pose,shear,idleTime;
 ```
 ```csharp
-bool initialized, hovered, held, dragged, focused=true;
+bool initialized,hovered,held,dragged,focused=true;
 ```
 ```csharp
 int pointer=-999;

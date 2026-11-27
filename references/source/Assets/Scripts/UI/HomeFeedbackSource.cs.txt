@@ -48,7 +48,7 @@ public sealed class LocalHomeFeedbackSource:IHomeFeedbackSource {
  }
  readonly IHomeFeedbackStorage storage;readonly Func<DateTime> clock;
  State state=new State();bool healthy=true,isPreview;
- public bool StorageHealthy=>healthy;
+ 
  public LocalHomeFeedbackSource(IHomeFeedbackStorage storage,Func<DateTime> clock=null){
   this.storage=storage;this.clock=clock??(()=>DateTime.Now);
   try{var json=storage.Load();if(!string.IsNullOrEmpty(json))state=Decode(json);}
@@ -119,27 +119,7 @@ public sealed class LocalHomeFeedbackSource:IHomeFeedbackSource {
  public static LocalHomeFeedbackSource Preview(int days,int wins,bool played){
   var source=new LocalHomeFeedbackSource(new MemoryHomeFeedbackStorage());source.isPreview=true;source.state.loginDays=days;source.state.totalVisitDays=days;source.state.lastVisit=Day(DateTime.Now);source.state.playedDay=played?source.state.lastVisit:"";source.state.winStreak=wins;source.state.lastResult="preview-"+wins;return source;
  }
- public static string RunSelfTests(){
-  int checks=0;Action<bool,string> check=(ok,message)=>{checks++;if(!ok)throw new InvalidOperationException("Home feedback: "+message);};
-  var now=new DateTime(2026,10,25,23,59,0);var disk=new MemoryHomeFeedbackStorage();var p=new LocalHomeFeedbackSource(disk,()=>now);
-  check(p.Visit()&&p.Read().LoginDays==1&&!p.Read().PlayedToday,"first visit");string first=disk.Json;check(p.Visit()&&disk.Json==first,"same-day visit is idempotent");
-  p.StartLevel();check(p.Read().PlayedToday&&p.Read().WinStreak==0,"start switches to play feedback without inventing a win");
-  check(p.RecordResult("a",0,true,true)&&p.Read().WinStreak==1,"first valid win");check(!p.RecordResult("a",0,true,true)&&p.Read().WinStreak==1,"duplicate result ignored");
-  check(p.RecordResult("replay",0,true,true)&&p.Read().WinStreak==1,"same completed level cannot farm wins");
-  check(p.RecordResult("replay-loss",0,false,false)&&p.Read().WinStreak==1,"replay loss ignored");
-  now=now.AddMinutes(2);p.Visit();check(p.Read().LoginDays==2&&!p.Read().PlayedToday&&p.Read().WinStreak==1,"midnight changes visit phase and preserves wins");
-  p.StartLevel();p.RecordResult("b",1,true,true);p.RecordResult("c",2,true,true);check(p.Read().WinStreak==3&&p.Read().Milestone,"three-win milestone");var key=p.Read().Key;
-  check(p.ConsumeCelebration(key)&&!p.ConsumeCelebration(key),"milestone celebrated once");
-  p=new LocalHomeFeedbackSource(disk,()=>now);check(p.Read().WinStreak==3&&p.Read().PlayedToday&&!p.ConsumeCelebration(key),"reload retains streak, daily phase and celebration ledger");
-  p.RecordResult("loss",3,false,true);check(p.Read().WinStreak==0&&p.Read().AfterLoss&&p.Read().Detail=="每次尝试，都会更进一步。","failure clears count and encourages");
-  p.RecordResult("retry",3,true,true);check(p.Read().WinStreak==1,"retry begins a fresh streak");
-  now=now.AddDays(2);p.Visit();check(p.Read().LoginDays==1&&p.Read().Title=="新的一天，新的开始","missed day resets visits, without shaming");
-  now=now.AddDays(-4);p.Visit();check(p.Read().LoginDays==1,"clock rollback cannot add visits");
-  check(p.Reset(),"scoped reset accepted");p.Visit();check(p.Read().LoginDays==1&&p.Read().WinStreak==0&&!p.Read().PlayedToday,"reset returns to first visit");
-  foreach(int n in new[]{1,2,3,5,7,10,14,20,30,60,100,101}){var daily=Preview(n,0,false).Read();check(!string.IsNullOrEmpty(daily.Title)&&!daily.PlayedToday,"daily copy tier "+n);var win=Preview(n,n,true).Read();check(win.WinStreak==n&&win.PlayedToday,"win copy tier "+n);}
-  check(Preview(7,0,false).Read().Title=="一起度过一整周！","weekly copy");check(Preview(1,10,true).Read().Title=="不可思议！","ten-win copy");
-  return "PASS: "+checks+" local feedback persistence, date, result and copy checks (memory storage only).";
- }
+ 
 }
 public static class LocalTestTools {public static bool Available=>RuntimeQA.IsIsolated;}
 }

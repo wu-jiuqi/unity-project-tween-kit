@@ -41,7 +41,7 @@ public sealed partial class Gallery {
   case "breath":{
    var icon=LeagueMotionArt.Image(root,"season",0,0,360);var c=root.gameObject.AddComponent<DecorativeBreath>();c.Target=icon.transform;component=c;break;
   }
-  default:throw new System.InvalidOperationException("No example for "+Current.id);
+  default:BuildCurrent(root);break;
  }}
 }
 }

@@ -5,7 +5,7 @@ namespace BounceGarden {public partial class AppUI {
  ContentLoadOperation contentLoad,contentPrefetch;string loadingMenuPage;
  int prefetchLevelIndex=-1;string prefetchMenuPage;
  partial void StartIdleContentPrefetch();
- public string PendingMenuPage=>loadingMenuPage;
+ 
  void CancelContentLoad(bool keepPrefetch=false){contentLoad?.Cancel();contentLoad=null;if(!keepPrefetch){contentPrefetch?.Cancel();contentPrefetch=null;prefetchLevelIndex=-1;prefetchMenuPage=null;}loadingMenuPage=null;}
  void CancelContentForLevel(int index){CancelContentLoad(contentPrefetch!=null&&prefetchLevelIndex==index);}
  void FinishPrefetch(ContentLoadOperation operation){if(contentPrefetch==operation){contentPrefetch=null;prefetchLevelIndex=-1;prefetchMenuPage=null;}}
@@ -44,32 +44,25 @@ namespace BounceGarden {public partial class AppUI {
   contentLoad=null;loadingMenuPage=null;
   if(operation.Succeeded){Destroy(root.gameObject);OnOutcome(win);yield break;}
   Debug.LogWarning("BOUNCE_RESULT_LOAD_FAILED "+(operation.TimedOut?"timeout":operation.Failure?.Message));
-  Destroy(root.gameObject);OpenModal("网络连接中断",UICraft.Blue,860,600);
-  UICraft.Label(modal,"本局仍可继续结算，请重试连接。",0,120,780,100,34,UICraft.Ink);
-  UICraft.Button(modal,"重试",0,-40,560,110,UICraft.Green,()=>{RemoveModal(false);PrepareOutcomeContent(win);},40);
-  UICraft.Button(modal,"返回花园",0,-190,560,100,UICraft.Blue,()=>{RemoveModal(false);CancelLoadingToHome();},36);
+  Destroy(root.gameObject);OpenErrorPopup0411("网络连接中断","本局仍可继续结算，请重试连接。",()=>{RemoveModal(false);PrepareOutcomeContent(win);},()=>{RemoveModal(false);CancelLoadingToHome();});
  }
  void CancelLoadingToHome(){CancelContentLoad();viewGeneration++;busy=false;Session.StopLevel();ShowPage("home",false);}
  IEnumerator RunLevelLoad(RectTransform loading,int generation,int index,bool tutorialMode,bool skipOnboarding,int trial){
   var operation=new ContentLoadOperation();contentLoad=operation;
   var presentation=loading.GetComponent<LoadingPresentation>();
-  presentation.SetStatus("正在准备本关资源…");
-  UICraft.Button(loading,"返回花园",0,-800,560,120,UICraft.Blue,CancelLoadingToHome,40);
   yield return operation.Run(StartPreparedLevel(loading,generation));
   if(operation.Cancelled||generation!=viewGeneration)yield break;
   if(contentLoad==operation)contentLoad=null;
   if(!operation.Succeeded){
    Session.StopLevel();busy=false;playing=false;
-   OpenModal("暂时未能进入关卡",UICraft.Blue,920,900);
-   UICraft.Label(modal,operation.TimedOut?"等待时间较长，请检查网络。\n已准备的资源会保留，可重试或返回花园。":"本关准备未完成。\n请重试，或返回花园。",0,140,800,160,36,UICraft.Ink);
-   UICraft.Button(modal,"重试",0,-80,640,120,UICraft.Green,()=>BeginLevel(index,tutorialMode,skipOnboarding,trial),40);
-   UICraft.Button(modal,"返回花园",0,-250,640,120,UICraft.Blue,CancelLoadingToHome,40);
+   if(presentation!=null)presentation.SuspendForError();
+   OpenErrorPopup0411("暂时未能进入关卡",operation.TimedOut?"等待时间较长，请检查网络。\n已准备的资源会保留，可重试或返回花园。":"本关准备未完成。\n请重试，或返回花园。",()=>BeginLevel(index,tutorialMode,skipOnboarding,trial),CancelLoadingToHome);
    Debug.LogWarning("BOUNCE_LEVEL_LOAD_FAILED "+(operation.TimedOut?"timeout":operation.Failure?.Message));
   }
  }
  void PrepareMenuContent(string page,bool animate){if(contentLoad!=null&&loadingMenuPage==page)return;CancelContentLoad(contentPrefetch!=null&&prefetchMenuPage==page);loadingMenuPage=page;var operation=new ContentLoadOperation();contentLoad=operation;StartCoroutine(PrepareMenuContentRoutine(page,animate,operation));}
  IEnumerator PrepareMenuContentRoutine(string page,bool animate,ContentLoadOperation operation){
-  Toast(page=="shop"?"正在准备小铺…":"正在准备关卡地图…");
+  Toast(page=="ranking"||page=="vip"||page=="league-detail"||page=="league-prizes"?"正在准备花园联赛…":page=="shop"||page=="shop-detail"?"正在准备小铺…":page=="dressing"?"正在准备装扮…":"正在准备关卡地图…");
   yield return operation.Run(GameContent.PreparePage(page));
   if(operation.Cancelled||contentLoad!=operation)yield break;
   contentLoad=null;loadingMenuPage=null;

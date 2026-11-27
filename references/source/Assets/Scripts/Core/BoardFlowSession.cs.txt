@@ -2,7 +2,7 @@ using UnityEngine;
 namespace BounceGarden {
 public sealed partial class GameSession {
  long powerAttackSerial,powerAttack;
- bool FlowReserved(int c,int r,int size=1)=>CatReservedCell(c,r,size)||FusionActive&&FusionReservedCell(c,r,size);
- bool FixedChainPiece(ChainGridPiece p){if(SevenSpecialActive&&SevenWaitingPiece(p))return true;if(FusionActive)return FusionGridFixed(p);var b=p.GetComponent<BrickBody>();return b!=null&&(OpeningCatBrick(b)||b.Definition.kind==BrickKind.Stone);}
+ bool FlowReserved(int c,int r,int size=1)=>CatReservedCell(c,r,size);
+ bool FixedChainPiece(ChainGridPiece p){if(SevenSpecialActive&&SevenWaitingPiece(p))return true;var b=p.GetComponent<BrickBody>();return b!=null&&(OpeningCatBrick(b)||b.Definition.kind==BrickKind.Stone);}
 }
 }

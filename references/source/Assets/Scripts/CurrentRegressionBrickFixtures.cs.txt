@@ -1,0 +1,9 @@
+#if UNITY_EDITOR || BOUNCE_QA
+using System;using System.Linq;using System.Collections.Generic;using UnityEngine;namespace BounceGarden {public sealed partial class GameSession {
+ public BrickBody QASevenBrick(int col,int row,int hp,int color=0,int size=1,int layers=0,bool terrain=false){
+  CreateBrick(new BrickSpawn{position=ChainGridRules.Center(col,row,size),size=Vector2.one*(CollectionLevels.Pitch*size-.06f),hp=hp,colorIndex=color,kind=terrain?BrickKind.Stone:layers>0?BrickKind.Armor:BrickKind.Normal,armorLayers=Mathf.Max(1,layers),juiceGroup=0,reveal=size>1?"chain-nest":"",chainContents=new int[4]},0);
+  var b=CollectionBricks.Last();b.Definition.colorIndex=color;if(!terrain)b.ApplySevenFace();var grid=b.GetComponent<ChainGridPiece>();grid.Col=col;grid.Row=row;grid.Size=size;return b;
+ }
+
+}}
+#endif

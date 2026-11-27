@@ -2,7 +2,7 @@ namespace BounceGarden {
 public sealed partial class GameSession {
  // Earned HUD flights already belong to the player. Once this is true, future
  // board supply and rating replacements cannot become prerequisites for victory.
- bool CollectionGoalEarned=>IsPlaying&&IsChainCollection&&!FusionActive&&(CollectionVictoryPending||CollectionWon||EarnedChainGoal());
+ bool CollectionGoalEarned=>IsPlaying&&IsChainCollection&&(CollectionVictoryPending||CollectionWon||EarnedChainGoal());
  void FinishEarnedCollectionSupply(){
   if(!CollectionGoalEarned)return;
   PreserveVictorySupply();

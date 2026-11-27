@@ -1,0 +1,87 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+namespace ProjectTweenKit {
+// The opening owns the input blocker; the same instance keeps looping beneath the finale once docked.
+public sealed class GoalCelebration:MonoBehaviour {
+ public const float Duration=2.85f;
+ float age;public float Elapsed=>age;public bool Docked=>age>=Duration;public bool ReducedMotion;public float PlaybackSpeed=1;
+ RectTransform fitRoot,content,character,word,rays;Image dim,cat;CanvasGroup characterAlpha,flowersAlpha;
+ readonly RectTransform[] sparkles=new RectTransform[3];
+ 
+ bool suspended,focused=true;Vector3 basis;Vector2 center,destination;float unit;
+ public bool LayoutFits{get;private set;}
+ public int FrameIndex{get;private set;}
+ 
+ public void Begin(){
+  if(content!=null){age=0;Render();return;}
+  Stretch();dim=gameObject.AddComponent<Image>();dim.color=Color.clear;dim.raycastTarget=true;
+  fitRoot=UICraft.Root(transform,"047 safe aspect fitting",0,0,1280,1152);content=UICraft.Root(fitRoot,"047 approved C v4 celebration",0,0,1280,1152);content.gameObject.AddComponent<CanvasGroup>().blocksRaycasts=false;
+  rays=Art(content,"047 warm halo",GoalCelebrationArt.Get("halo"),0,0,1260,1260);
+  var image=Art(content,"047 head and two front paws sequence",GoalCelebration047Art.Frame(0),0,206,900,900);character=image;cat=image.GetComponent<Image>();characterAlpha=image.gameObject.AddComponent<CanvasGroup>();
+  var flowers=UICraft.Root(content,"047 flower end caps",0,0,1280,1152);flowersAlpha=flowers.gameObject.AddComponent<CanvasGroup>();
+  Art(flowers,"047 left flowers",GoalCelebration047Art.Get("flowers-left"),-375,-169,190,190);
+  Art(flowers,"047 right flowers",GoalCelebration047Art.Get("flowers-right"),375,-169,190,190);
+  var positions=new[]{new Vector2(-485,276),new Vector2(475,396),new Vector2(480,46)};
+  for(int i=0;i<3;i++)sparkles[i]=Art(content,"047 restrained sparkles "+i,GoalCelebration047Art.Get("sparkles"),positions[i].x,positions[i].y,90,90);
+  word=Art(content,"047 foreground peach title",GoalCelebration047Art.Get("title"),0,-184,800,800*GoalCelebration047Art.TitleAspect);
+  Layout();Render();SoundService.Play("result_win_burst");
+ }
+ void Stretch(){var r=(RectTransform)transform;r.anchorMin=Vector2.zero;r.anchorMax=Vector2.one;r.sizeDelta=Vector2.zero;r.anchoredPosition=Vector2.zero;r.localScale=Vector3.one;}
+ static RectTransform Art(Transform parent,string name,Sprite sprite,float x,float y,float w,float h){var im=UICraft.Box(parent,name,x,y,w,h,Color.white);im.sprite=sprite;im.type=Image.Type.Simple;im.preserveAspect=true;im.raycastTarget=false;return im.rectTransform;}
+ public void DockTo(Transform host){transform.SetParent(host,false);Stretch();dim.raycastTarget=false;Layout();Render();}
+ public void Cancel(){gameObject.SetActive(false);Destroy(gameObject);}
+ void Layout(){
+  var r=((RectTransform)transform).rect;float aw=r.width>1?r.width:1080,ah=r.height>1?r.height:1920;
+  unit=Mathf.Min(aw/1080,ah/1920);basis=Vector3.one*unit;center=Vector2.zero;destination=new Vector2(0,-ah*.32f);
+  LayoutFits=unit>0&&1060*unit<=aw+.5f&&1040*unit<=ah+.5f;
+ }
+ static float S(float x)=>Mathf.SmoothStep(0,1,Mathf.Clamp01(x));
+ static readonly Vector4[] TitleKeys={new Vector4(.12f,.12f,-22,110),new Vector4(1.48f,1.65f,12,-50),new Vector4(1.30f,.62f,-10,32),new Vector4(.82f,1.28f,7,-20),new Vector4(1.14f,.88f,-4,12),new Vector4(1,1,0,0)};
+ static readonly float[] TitleTimes={0,.14f,.26f,.40f,.56f,.78f};
+ static Vector4 TitlePose(float t){for(int i=1;i<TitleTimes.Length;i++)if(t<=TitleTimes[i])return Vector4.Lerp(TitleKeys[i-1],TitleKeys[i],S((t-TitleTimes[i-1])/(TitleTimes[i]-TitleTimes[i-1])));return TitleKeys[TitleKeys.Length-1];}
+ void Update(){
+  if(suspended||!focused)return;age+=Mathf.Min(KitClock.Delta,.05f)*PlaybackSpeed;Layout();Render();
+ }
+ public void Sample(float seconds){age=Mathf.Max(0,seconds);Layout();Render();}
+ public void StopAndRestore(){Sample(0);}
+ void Render(){
+  bool motion=!ReducedMotion;float clock=motion?age:1;
+  FrameIndex=motion?(int)(age*12)%12:0;cat.sprite=GoalCelebration047Art.Frame(FrameIndex);
+  Vector4 pose;
+  if(clock<.78f)pose=TitlePose(clock);else{float p=(clock-.78f)*Mathf.PI*2;pose=motion?new Vector4(1+.18f*Mathf.Sin(p),1-.16f*Mathf.Sin(p),6*Mathf.Sin(p),22*Mathf.Sin(p)):new Vector4(1,1,0,0);}
+  float h=800*GoalCelebration047Art.TitleAspect*pose.y,follow=Mathf.Max(0,760+pose.w-h*.5f-600);
+  float reveal=motion?S((age-.64f)/.24f):1;
+  character.anchoredPosition=new Vector2(0,206-follow-60*(1-reveal));characterAlpha.alpha=reveal;flowersAlpha.alpha=reveal;
+  word.sizeDelta=new Vector2(800*pose.x,h);word.anchoredPosition=new Vector2(0,-184-pose.w);word.localRotation=Quaternion.Euler(0,0,pose.z);word.GetComponent<Image>().color=new Color(1,1,1,motion?Mathf.Clamp01(age/.14f):1);
+  float w=940,rotation=0,dimAlpha=1;Vector2 point=center;
+  if(age>=1.65f&&age<1.8f){float p=S((age-1.65f)/.15f);point.y+=75*unit*p;w=Mathf.Lerp(940,990,p);rotation=-5*p;}
+  else if(age>=1.8f&&age<2.4f){float u=(age-1.8f)/.6f,p=1-Mathf.Pow(1-u,3);point=Vector2.Lerp(center+Vector2.up*75*unit,destination-Vector2.up*80*unit,p);point.x+=90*unit*Mathf.Sin(Mathf.PI*u);w=Mathf.Lerp(990,540,p);rotation=-5*(1-u)+18*Mathf.Sin(Mathf.PI*u);dimAlpha=1-p;}
+  else if(age>=2.4f){
+   point=destination;dimAlpha=0;
+   if(age<2.56f){float p=S((age-2.4f)/.16f);point.y+=Mathf.Lerp(-80,40,p)*unit;w=Mathf.Lerp(540,620,p);}
+   else if(age<2.7f){float p=S((age-2.56f)/.14f);point.y+=Mathf.Lerp(40,-25,p)*unit;w=Mathf.Lerp(620,560,p);}
+   else{float p=S((age-2.7f)/.15f);point.y+=Mathf.Lerp(-25,0,p)*unit;w=Mathf.Lerp(560,580,p);}
+  }
+  if(motion&&age<.6f){float[] times={0,.18f,.32f,.46f,.6f};float[] scales={.5f,1.13f,.93f,1.06f,1};float[] angles={-8,4,-2,1,0};for(int i=1;i<times.Length;i++)if(age<=times[i]){float p=S((age-times[i-1])/(times[i]-times[i-1]));w*=Mathf.Lerp(scales[i-1],scales[i],p);rotation+=Mathf.Lerp(angles[i-1],angles[i],p);break;}}
+  if(!motion)rotation=0;
+  // Scale compensation lives on an unrotated fitting root, so rotating its child stays circular on short screens.
+  fitRoot.localScale=new Vector3(basis.x*w/1280,basis.y*w/1280,1);
+  fitRoot.anchoredPosition=point;
+  content.localRotation=Quaternion.Euler(0,0,motion?rotation:0);
+  dim.raycastTarget=age<Duration;
+  dim.color=new Color(.035f,.025f,.02f,.37f*dimAlpha*Mathf.Clamp01(age/.1f));
+  rays.GetComponent<Image>().color=new Color(1,1,1,.65f*dimAlpha);rays.localRotation=Quaternion.Euler(0,0,motion?age*10:0);
+  for(int i=0;i<3;i++){float p=motion?.7f+.55f*Mathf.Pow(Mathf.Sin(age*Mathf.PI*3+i),2):1;sparkles[i].localScale=Vector3.one*p;sparkles[i].localRotation=Quaternion.Euler(0,0,motion?8*Mathf.Sin(age*Mathf.PI*2+i):0);}
+ }
+ void OnApplicationPause(bool value){suspended=value;}void OnApplicationFocus(bool value){focused=value;}
+ void OnDisable(){if(content!=null)StopAndRestore();}
+}
+public static class GoalCelebration047Art {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();static Sprite[] frames;
+ public static float TitleAspect{get{var s=Get("title");return s.rect.height/s.rect.width;}}
+ public static Sprite Get(string key){if(cache.TryGetValue(key,out var value))return value;var tex=Resources.Load<Texture2D>("Art/GoalCelebration047/"+key);if(tex==null)throw new InvalidOperationException("047 celebration art missing: "+key);value=Sprite.Create(tex,new Rect(0,0,tex.width,tex.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);value.name="Goal047 "+key;cache[key]=value;return value;}
+ public static Sprite Frame(int index){if(frames==null){var tex=Resources.Load<Texture2D>("Art/GoalCelebration047/cat-atlas");if(tex==null||tex.width!=2048||tex.height!=1536)throw new InvalidOperationException("047 cat atlas must be 2048x1536");frames=new Sprite[12];for(int i=0;i<12;i++){frames[i]=Sprite.Create(tex,new Rect(i%4*512,tex.height-(i/4+1)*512,512,512),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);frames[i].name="Goal047 face paws "+i;}}return frames[Mathf.Clamp(index,0,11)];}
+}
+}

@@ -3,27 +3,27 @@
 状态：`non-animation`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/BalanceStatistics.cs`
-文件 SHA-256：`bf4eaef05676ab6299bc96dd225de57b5faa22a53a07eb827282674cda63d8d0`
+文件 SHA-256：`f9a7b7d34f131f8c8f3460b1ebe57f6996b9624adedd189abcda79edffbe5cfa`
 [原始源码快照](../source/Assets/Scripts/BalanceStatistics.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Begin · L69
+### Begin · L70
 
-方法 SHA-256：`e7020e5ca27a7f0b881d3273d115654604e293183e4c2969e55d6e96188c9cae`
+方法 SHA-256：`168262421662fb4b98001293b56e7e4584b1aebb4c500710a3e8f43d4051da37`
 时间来源：Time.UtcNow, Time.unscaledTime
 曲线证据：查原式或下级调用
 解析符号：`BounceGarden.BalanceStatistics.Begin()`
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/PlaytestMetrics76.cs:33` · `PlaytestMetrics76.BeginRound` → `.Begin()`
+- `Assets/Scripts/PlaytestMetrics76.cs:32` · `PlaytestMetrics76.BeginRound` → `.Begin()`
 
 ```csharp
 public void Begin(){Guard(()=>{
-  if(!initialized||game.IsTutorial||game.IsStreakTrial)return;
+  if(!initialized)return;
   Finish("restarted");lastLoss=null;generation=game.Generation;launch=null;
   string config=Configuration(game),hash=BalanceReport.Hash(config);int level=game.LevelIndex+1;
   var previous=History.rounds.Where(r=>r.level==level).ToArray();
@@ -34,7 +34,7 @@ public void Begin(){Guard(()=>{
  });}
 ```
 
-### Update · L103
+### Update · L104
 
 方法 SHA-256：`6c3f233d0288bbc81530981b6109f7c76126006715c42132f5c972762d324358`
 时间来源：Time.unscaledDeltaTime, Time.unscaledTime
@@ -59,7 +59,7 @@ void Update(){Guard(()=>{
  });}
 ```
 
-### Save · L116
+### Save · L117
 
 方法 SHA-256：`d20e9bed63788108702a309cc462bc12766af402b6b8b920206b8f8adc603153`
 时间来源：Time.unscaledTime
@@ -68,14 +68,10 @@ void Update(){Guard(()=>{
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/BalanceStatistics.cs:101` · `BalanceStatistics.Finish` → `Save()`
-- `Assets/Scripts/BalanceStatistics.cs:113` · `BalanceStatistics.Update` → `Save()`
+- `Assets/Scripts/BalanceStatistics.cs:102` · `BalanceStatistics.Finish` → `Save()`
 - `Assets/Scripts/BalanceStatistics.cs:114` · `BalanceStatistics.Update` → `Save()`
-- `Assets/Scripts/BalanceStatistics.cs:138` · `BalanceStatistics.Checkpoint` → `Save()`
-- `Assets/Scripts/BalanceStatisticsQA.cs:86` · `BalanceStatisticsQA.Start` → `stats.Save()`
-- `Assets/Scripts/BalanceStatisticsQA.cs:87` · `BalanceStatisticsQA.Start` → `stats.Save()`
-- `Assets/Scripts/BalanceStatisticsQA.cs:87` · `BalanceStatisticsQA.Start` → `stats.Save()`
-- `Assets/Scripts/BalanceStatisticsQA.cs:88` · `BalanceStatisticsQA.Start` → `stats.Save()`
+- `Assets/Scripts/BalanceStatistics.cs:115` · `BalanceStatistics.Update` → `Save()`
+- `Assets/Scripts/BalanceStatistics.cs:139` · `BalanceStatistics.Checkpoint` → `Save()`
 
 ```csharp
 public void Save(){

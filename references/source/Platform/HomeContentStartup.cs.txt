@@ -15,13 +15,13 @@ public sealed class HomeContentStartup : MonoBehaviour {
  public static bool StartupMenusReady86=>StartupHomeReady;
  Action ready; bool busy,sdkReady,appCreated; StartupLoadingView86 view; TMPro.TMP_Text status; GameObject retry;
  public static void Begin(Action ready){
-  StartupHomeReady=false;
+  StartupHomeReady=false;JellyLogoIntro.ExternalStartupOwnsIntro=true;
   var loader=new GameObject("Home content startup").AddComponent<HomeContentStartup>();
   DontDestroyOnLoad(loader.gameObject);loader.ready=ready;loader.Build();loader.StartCoroutine(loader.Load());
  }
  void Build(){
   var canvas=gameObject.AddComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=30000;
-  var scaler=gameObject.AddComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(900,1600);scaler.matchWidthOrHeight=.5f;
+  var scaler=gameObject.AddComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1080,2340);scaler.matchWidthOrHeight=1f;
   gameObject.AddComponent<GraphicRaycaster>();
   if(EventSystem.current==null){var events=new GameObject("Startup events",typeof(EventSystem),typeof(StandaloneInputModule));events.transform.SetParent(transform,false);}
   view=gameObject.AddComponent<StartupLoadingView86>();view.Build();view.SetProgress(1f/8);
@@ -41,7 +41,7 @@ public sealed class HomeContentStartup : MonoBehaviour {
    sdkReady=true;view.SetProgress(2f/8);
   }
   status.text="正在准备花园…";
-  MobileStartup72.Mark("loading-home");
+  Debug.Log("BOUNCE_STARTUP loading-home");
   int completed=0;var groups=WeChatContent.StartupGroups;
   foreach(var group in groups){
    var operation=new ContentLoadOperation();yield return operation.Run(WeChatContent.PrepareGroups(new[]{group}));
@@ -55,7 +55,7 @@ public sealed class HomeContentStartup : MonoBehaviour {
   if(!pages.Succeeded){ShowFailure("页面准备未完成，请重试。");yield break;}
   // Home is ready; optional pages and first-level content must not delay interaction.
   StartupHomeReady=true;view.Complete();while(!view.IsComplete)yield return null;yield return new WaitForSecondsRealtime(.5f);busy=false;
-  MobileStartup72.Mark("home-ready");
+  Debug.Log("BOUNCE_STARTUP home-ready");
   app.StartHomePrefetch020();
   var startupEvents=GetComponentInChildren<EventSystem>();
   if(startupEvents!=null){var currentApp=FindFirstObjectByType<AppUI>();if(currentApp!=null)startupEvents.transform.SetParent(currentApp.transform,false);}
@@ -65,6 +65,8 @@ public sealed class HomeContentStartup : MonoBehaviour {
 #endif
   Destroy(gameObject);
  }
+ void LateUpdate(){if(retry!=null&&view!=null)retry.GetComponent<RectTransform>().anchoredPosition=new Vector2(0,-view.ContentRoot.rect.height*.375f);}
+ void OnDestroy(){JellyLogoIntro.ExternalStartupOwnsIntro=false;}
  void ShowFailure(string text){busy=false;view.Failure(text);status.text=text;retry.SetActive(true);
 #if UNITY_WEBGL && !UNITY_EDITOR
   WX.HideLoadingPage();

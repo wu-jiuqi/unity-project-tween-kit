@@ -1,0 +1,30 @@
+#if UNITY_EDITOR || BOUNCE_QA
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class BreakPetalsQA:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Array.IndexOf(Environment.GetCommandLineArgs(),"--break-petals-qa")>=0)new GameObject("Prototype match runtime QA").AddComponent<BreakPetalsQA>();}
+ string dir;int checks,failed,errors,w=540,h=960;AppUI app;Camera cam;
+ void Check(bool ok,string label){checks++;if(!ok)failed++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+label+"\n");}
+ 
+ 
+ IEnumerator Capture(string label){yield return new WaitForEndOfFrame();var canvas=FindFirstObjectByType<Canvas>();var prevMode=canvas.renderMode;var prevCamera=canvas.worldCamera;var target=new RenderTexture(w,h,24);target.Create();var oldTarget=cam.targetTexture;cam.targetTexture=target;cam.Render();
+  var node=new GameObject("QA overlay capture camera");var ui=node.AddComponent<Camera>();ui.orthographic=true;ui.orthographicSize=h/200f;ui.aspect=w/(float)h;ui.nearClipPlane=.1f;ui.farClipPlane=100;ui.transform.position=new Vector3(0,0,-20);ui.clearFlags=CameraClearFlags.Depth;ui.cullingMask=1<<31;ui.targetTexture=target;var transforms=canvas.GetComponentsInChildren<Transform>(true);var layers=new int[transforms.Length];for(int i=0;i<transforms.Length;i++){layers[i]=transforms[i].gameObject.layer;transforms[i].gameObject.layer=31;}canvas.renderMode=RenderMode.ScreenSpaceCamera;canvas.worldCamera=ui;canvas.planeDistance=1;Canvas.ForceUpdateCanvases();ui.Render();var prior=RenderTexture.active;RenderTexture.active=target;var image=new Texture2D(w,h,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,w,h),0,0);image.Apply();File.WriteAllBytes(dir+"/"+label+".png",image.EncodeToPNG());Destroy(image);RenderTexture.active=prior;canvas.renderMode=prevMode;canvas.worldCamera=prevCamera;for(int i=0;i<transforms.Length;i++)if(transforms[i]!=null)transforms[i].gameObject.layer=layers[i];Canvas.ForceUpdateCanvases();cam.targetTexture=oldTarget;Destroy(node);target.Release();Destroy(target);}
+
+ IEnumerator Load(int level){app.QAStartLevel(level);yield return app.QAWaitForLevel();yield return new WaitForSecondsRealtime(2.7f);for(int i=0;i<90;i++){app.QAAdvanceAlphabetIntro();yield return new WaitForSecondsRealtime(.025f);}yield return new WaitForSecondsRealtime(.3f);app.Session.QAIgnoreFocusLoss=true;app.Session.SetPaused(false);}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");
+ Application.logMessageReceived+=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception){errors++;File.AppendAllText(dir+"/errors.txt",m+"\n"+s+"\n");}};
+ yield return new WaitForSecondsRealtime(3);app=FindFirstObjectByType<AppUI>();cam=Camera.main;app.QASetViewport(new Vector2Int(w,h));yield return Load(20);var g=app.Session;var feel=g.CombatFeel;Check(RuntimeQA.IsIsolated,"isolated save profile");
+ var brick=g.CollectionBricks.First(b=>b.Alive&&b.Definition.kind==BrickKind.Normal);int breaks=feel.Breaks;
+ g.ApplyChainImpact(brick,999,Vector2.up,brick.transform.position,true);Check(feel.Breaks==breaks+1,"actual brick destruction emits petal burst");
+ yield return new WaitForSecondsRealtime(.18f);var views=feel.GetComponentsInChildren<SpriteRenderer>().Where(v=>v.name=="Pooled break petal"&&v.gameObject.activeSelf).ToArray();Check(views.Length==12,"twelve petals alive after brief original flash");Check(views.All(v=>v.sprite.name.StartsWith("break-petal-")&&v.color==Color.white),"atlas colors survive material tint");Check(views.Select(v=>v.sprite.name).Distinct().Count()>=4,"multiple petal variants in one burst");Check(feel.GetComponentsInChildren<Collider2D>().Length==0,"petals have no gameplay colliders");yield return Capture("01-petals-airborne");
+ g.SetPaused(true);var poses=views.Select(v=>v.transform.position).ToArray();yield return new WaitForSecondsRealtime(.25f);Check(views.Select((v,i)=>Vector3.Distance(v.transform.position,poses[i])<.0001f).All(x=>x),"pause freezes petal motion");g.SetPaused(false);
+ yield return new WaitForSecondsRealtime(1.55f);Check(feel.ActiveLandedPetals==12,"all petals settle and remain visible");Check(views.All(v=>v.sortingOrder==-22),"landed petals lie behind bricks");Check(views.All(v=>{var p=BoardDisplay.Forward(v.transform.position);return p.x>=-4.36f&&p.x<=4.36f&&p.y>=-9.01f&&p.y<=7.01f;}),"landings stay inside play area");yield return Capture("02-petals-landed");
+ yield return new WaitForSecondsRealtime(2.8f);Check(feel.ActiveParticles==0,"petals fade and return to pool");yield return Capture("03-petals-cleared");
+ for(int i=0;i<40;i++)g.EmitFeedback(new Vector2((i%5-2)*.8f,0),"break",Color.red);Check(feel.ActiveParticles<=128&&feel.GetComponentsInChildren<SpriteRenderer>(true).Count(v=>v.name=="Pooled break petal")==128,"dense breaks preserve fixed 128-slot pool");yield return Capture("04-dense-burst");
+ yield return new WaitForSecondsRealtime(4.5f);Check(feel.ActiveParticles==0,"saturated pool fully recovers");g.EmitFeedback(Vector2.zero,"break",Color.green);Check(feel.ActiveParticles==13,"recovered pool accepts full burst");feel.enabled=false;Check(feel.ActiveParticles==0,"disable releases particle presentation");feel.enabled=true;
+ app.QANavigate("home");yield return new WaitForSecondsRealtime(.2f);Check(FindObjectsByType<CombatFeedback79>(FindObjectsSortMode.None).Length==0,"leaving battle destroys owned pool");Check(errors==0,"no runtime errors");File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failed\":"+failed+",\"errors\":"+errors+"}");Application.Quit(failed==0?0:3);
+ }
+}
+}
+
+#endif

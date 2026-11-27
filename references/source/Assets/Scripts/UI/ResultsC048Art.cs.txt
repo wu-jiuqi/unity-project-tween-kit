@@ -1,0 +1,22 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+namespace BounceGarden {
+public static class ResultsC048Art {
+ 
+ 
+ static readonly float[] victoryTimes={.30f,.18f,.18f,.24f,.18f,.20f,.28f,.36f};
+ static readonly float[] failureTimes={.30f,.24f,.24f,.28f,.26f,.30f,.24f,.46f};
+ static readonly Sprite[] victory=new Sprite[8],failure=new Sprite[8];
+ static readonly Dictionary<string,Sprite> icons=new Dictionary<string,Sprite>();
+ public static int FrameAt(bool win,float age){var times=win?victoryTimes:failureTimes;for(int i=0;i<7;i++){if(age<times[i])return i;age-=times[i];}return 7;}
+ public static Sprite Frame(bool win,int index){
+  var frames=win?victory:failure;index=Mathf.Clamp(index,0,7);if(frames[index]!=null)return frames[index];
+  var t=Resources.Load<Texture2D>("Art/ResultsC048/"+(win?"victory":"failure")+"-cat-atlas");if(t==null)throw new InvalidOperationException("Missing C result cat atlas");
+  float w=t.width/4f,h=t.height/2f;
+  for(int i=0;i<8;i++){frames[i]=Sprite.Create(t,new Rect(i%4*w,(1-i/4)*h,w,h),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);frames[i].name="ResultsC048/"+(win?"victory":"failure")+"-"+i;}
+  return frames[index];
+ }
+ public static Sprite Icon(string key){if(icons.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/ResultsC048/"+key);if(t==null)throw new InvalidOperationException(key);s=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);s.name="ResultsC048/"+key;return icons[key]=s;}
+}
+}

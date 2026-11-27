@@ -1,7 +1,7 @@
 {
-  "project": "D:\\Game\\unity-project-tween-kit\\work\\clean-import-runs\\0cc15275d0",
-  "packageSha256": "b28027c4be50f8c20dfa46177e1b3b211d769578b2130e6de14be8cc801f1bc6",
-  "resultSha256": "f8140737315f4cbb20f908e245efd5912a7b767cff9ceb766eeea26194a781a4",
+  "project": "D:\\Game\\unity-project-tween-kit\\work\\clean-import-runs\\a8be1b436a",
+  "packageSha256": "22704be8e310c1a1f26caec1a4ee8de7a50002dd826a1ad607d42456bb384fd0",
+  "resultSha256": "d91ab28e7e7b00f48ac1c37283328376e304b76f87777cc1a39c79f781506ae3",
   "exitCode": 0,
-  "verification": "New empty project; compile and instantiate all eleven composed prefabs including both loading examples in the Editor; no gallery/source Library references."
+  "verification": "New empty project; compile and instantiate all nineteen composed prefabs including current 0.5.1 examples in the Editor; no gallery/source Library references."
 }

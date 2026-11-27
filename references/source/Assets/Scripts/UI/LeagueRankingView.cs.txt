@@ -7,14 +7,12 @@ using TMPro;
 using DG.Tweening;
 
 namespace BounceGarden {
-public static class LeagueSurface {
- // Size the visible face, not its transparent padding and baked shadow.
- public static void Fit(Image image,string key,float width,float height){var info=PastelArt.Info(key);float scale=height/info.visible[3];image.type=Image.Type.Sliced;image.preserveAspect=false;image.rectTransform.sizeDelta=new Vector2(width+(info.size[0]-info.visible[2])*scale,info.size[1]*scale);image.rectTransform.anchoredPosition=new Vector2((info.size[0]*.5f-info.visible[0]-info.visible[2]*.5f)*scale,(info.visible[1]+info.visible[3]*.5f-info.size[1]*.5f)*scale);image.pixelsPerUnitMultiplier=1/scale;}
-}
+
 public static class LeaguePortrait {
  public static RectTransform Create(Transform parent,LocalProfile profile,string resource,float x,float y,float size,bool own=false,string opponentFrame=null){
   string avatar=own?profile?.EquippedAvatarResource:resource;
   string frame=own?profile?.EquippedFrameResource:opponentFrame;
+  if(own&&profile!=null){avatar=LeagueExclusiveCosmetics.ById(profile.EquippedAvatarId)?.avatar??avatar;frame=LeagueExclusiveCosmetics.ById(profile.EquippedFrameId)?.frame??frame;}
   if(own&&string.IsNullOrEmpty(frame))frame=CatCosmeticCatalog.Default.frame.resource;
   return CatCosmeticCatalog.Create(parent,avatar,frame,x,y,size);
  }
@@ -28,66 +26,30 @@ public sealed class LeagueJelly:MonoBehaviour {
  void OnDisable(){if(ready){transform.localScale=rest;transform.localRotation=rotation;}}
 }
 public sealed class LeagueRankingView:MonoBehaviour {
- sealed class Row {public RectTransform root,visual,portrait;public TMP_Text rank,name,score,hint;public Image face,rankPlate,crown,gift,direction;public int oldScore=-1,oldRank;public string style;public Tween move;}
- LocalProfile profile;ILeagueSource source;Action play,rewards,back;LeagueSnapshot snapshot;RectTransform root,content,viewport;ScrollRect scroll;LeaguePodiumView podium;
- TMP_Text countdown,rankText,rewardLink,pressureText;readonly Dictionary<string,Row> rows=new Dictionary<string,Row>();float lastHeight=-1,nextTick,nextClockTick,readTime;bool dirty=true,initialized;
- public LeagueSnapshot Snapshot=>snapshot;public int RowCount=>rows.Count;public RectTransform Viewport=>viewport;public RectTransform ListContent=>content;
+ sealed class Row {public RectTransform root,visual;public TMP_Text rank,name,score;public Image face;public int oldRank,oldScore=-1;public Tween move;public string style;public RectTransform portrait;}
+ LocalProfile profile;ILeagueSource source;Action play,rewards,back;LeagueSnapshot snapshot;RectTransform root,content,viewport,composition;ScrollRect scroll;TMP_Text rankText,medalsText;readonly Dictionary<string,Row> rows=new Dictionary<string,Row>();bool dirty=true,initialized;float nextTick,lastHeight=-1;const float Stride=66.12f;
+ public int RowCount=>rows.Count;public RectTransform Viewport=>viewport;public RectTransform ListContent=>content;
  public void Initialize(LocalProfile p,ILeagueSource s,Action onPlay,Action onRewards,Action onBack=null){profile=p;source=s;play=onPlay;rewards=onRewards;back=onBack;root=(RectTransform)transform;initialized=true;profile.Changed+=MarkDirty;Refresh(true);}
- void MarkDirty(){dirty=true;}
- void OnDestroy(){if(profile!=null)profile.Changed-=MarkDirty;foreach(var row in rows.Values)row.move?.Kill();}
- void Update(){if(!initialized)return;bool visible=GetComponentInParent<CanvasGroup>()?.interactable??true;if(!visible)return;if(Mathf.Abs(root.rect.height-lastHeight)>.5f){Build();dirty=true;}if(dirty||Time.unscaledTime>=nextTick)Refresh(false);else if(Time.unscaledTime>=nextClockTick)UpdateClock();}
- public void Enter(){if(initialized)Refresh(true);}
- public void SetSource(ILeagueSource value){source=value??throw new ArgumentNullException(nameof(value));lastHeight=-1;Refresh(true);}
- void Build(){
-  foreach(var row in rows.Values)row.move?.Kill();rows.Clear();for(int i=transform.childCount-1;i>=0;i--){var go=transform.GetChild(i).gameObject;go.SetActive(false);Destroy(go);}lastHeight=root.rect.height;
-  var c=snapshot.config;float top=lastHeight/2,bottom=-top;
-  countdown=LeaguePageHeader.Build(root,top,back,rewards);
-
-  UICraft.Button(root,"积分纪录",330,top-280,250,48,UICraft.Green,()=>FindFirstObjectByType<AppUI>().OpenScoreRecords(),27);
-  float podiumHeight=Mathf.Clamp(lastHeight*.28f,480,600);podium=LeaguePodiumView.Create(root,top-300-podiumHeight/2,podiumHeight,rewards);
-  float listTop=top-300-podiumHeight-32,listBottom=bottom+330,listHeight=Mathf.Max(240,listTop-listBottom);
-  UICraft.Box(root,"League list panel",0,(listTop+listBottom)/2,1020,listHeight+30,Color.white);
-  viewport=UICraft.Root(root,"League scroll viewport",0,(listTop+listBottom)/2,990,listHeight);viewport.gameObject.AddComponent<RectMask2D>();var hit=viewport.gameObject.AddComponent<Image>();hit.color=Color.clear;hit.raycastTarget=true;
-  content=UICraft.Root(viewport,"League rows",0,0,990,0);content.anchorMin=content.anchorMax=new Vector2(.5f,1);content.pivot=new Vector2(.5f,1);
-  scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.content=content;scroll.horizontal=false;scroll.vertical=true;scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=50;
-  var mine=UICraft.Button(root,"",-190,bottom+215,570,70,UICraft.Green,FocusPlayer);mine.name="League locate player";mine.transform.Find("ButtonVisual").gameObject.SetActive(false);rankText=UICraft.Label(mine.transform,"",0,0,565,60,29);
-  var link=UICraft.Button(root,"",330,bottom+215,330,70,UICraft.Gold,rewards);link.name="League reward details";link.transform.Find("ButtonVisual").gameObject.SetActive(false);rewardLink=UICraft.Label(link.transform,"",0,0,330,60,29);
-  pressureText=UICraft.Label(root,"",0,bottom+280,940,45,27,UICraft.Ink);
-  var button=UICraft.Button(root,c.copy.play,0,bottom+110,840,156,UICraft.Gold,play,62);button.name="League play round";var face=button.transform.Find("ButtonVisual/Face").GetComponent<Image>();face.sprite=PastelArt.Get("button_yellow");face.type=Image.Type.Sliced;face.preserveAspect=false;face.color=new Color32(255,181,99,255);button.GetComponentInChildren<TMP_Text>().color=Color.white;
+ void MarkDirty(){dirty=true;}void OnDestroy(){if(profile!=null)profile.Changed-=MarkDirty;foreach(var row in rows.Values)row.move?.Kill();}
+ void Update(){if(!initialized||!(GetComponentInParent<CanvasGroup>()?.interactable??true))return;if(Mathf.Abs(root.rect.height-lastHeight)>.5f){Build();dirty=true;}if(dirty||Time.unscaledTime>=nextTick)Refresh(false);}
+ public void Enter(){Refresh(true);}
+ void Build(){foreach(var row in rows.Values)row.move?.Kill();rows.Clear();lastHeight=root.rect.height;composition=LeagueArt046.Surface(root,"花园联赛","通关赢奖章，冲刺好名次");LeagueArt046.Banner(composition,snapshot);
+  foreach(int i in new[]{0,1}){float x=57+i*312;LeagueArt046.Card(composition,"046 my status "+i,x,448,294,102);LeagueArt046.Text(composition,i==0?"我的名次":"本期奖章",x+147,476,280,30,19,DressingShopArt044.Muted);var t=LeagueArt046.Text(composition,"",x+147,520,280,42,31);if(i==0)rankText=t;else medalsText=t;}
+  var locate=CSettingsArt.Button(composition,"League locate player","",204-360,565-LeagueArt046.Y(499),294,88,FocusPlayer,null);
+  LeagueArt046.Text(composition,"名次",97,576,90,30,19,DressingShopArt044.Muted);LeagueArt046.Text(composition,"花园伙伴",312,576,260,30,19,DressingShopArt044.Muted);LeagueArt046.Text(composition,"奖章",600,576,90,30,19,DressingShopArt044.Muted);
+  content=AppUI.LeagueScroll046(composition,"League",57,LeagueArt046.Y(596),606,Stride*5,Mathf.Max(Stride*5,snapshot.entries.Length*Stride));viewport=(RectTransform)content.parent;scroll=viewport.GetComponent<ScrollRect>();
+  LeagueArt046.Button(composition,"League reward details","联赛奖励",204,1000,294,47,rewards);LeagueArt046.Button(composition,"046 score records","积分纪录",516,1000,294,47,()=>FindFirstObjectByType<AppUI>().OpenScoreRecords());LeagueArt046.Button(composition,"League play round",snapshot.config.copy.play,360,1080,528,64,play,"primary",29);
  }
- Row Create(LeagueEntry e){
-  var c=snapshot.config;var rt=UICraft.Root(content,"League row "+e.id,0,0,980,c.layout.rowHeight);rt.anchorMin=rt.anchorMax=new Vector2(.5f,1);var visual=UICraft.Root(rt,"Row visual",0,0,980,c.layout.rowHeight);
-  var face=UICraft.Box(visual,"Ranking row face",0,0,970,c.layout.rowHeight-8,new Color32(250,245,239,255));var hit=rt.gameObject.AddComponent<Image>();hit.color=Color.clear;hit.raycastTarget=true;
-  var row=new Row{root=rt,visual=visual,face=face};row.rankPlate=UICraft.Box(visual,"Rank medallion",-435,0,78,78,UICraft.Gold,true);row.crown=UICraft.Art(visual,"pastel/icon_crown",-435,38,48,35);row.rank=UICraft.Label(visual,"",-435,0,90,90,44);row.portrait=LeaguePortrait.Create(visual,profile,e.portrait,-315,0,130,e.player,e.frame);
-  row.name=UICraft.Label(visual,e.name,-85,19,300,67,43,UICraft.Ink,TextAnchor.MiddleLeft);row.hint=UICraft.Label(visual,"",-85,-36,300,34,25,UICraft.Ink,TextAnchor.MiddleLeft);
-  var score=UICraft.Box(visual,"Medal score capsule",245,0,235,60,new Color32(255,253,246,255));UICraft.Art(score.transform,"pastel/icon_medal",-76,0,51,51);row.score=UICraft.Label(score.transform,"",28,0,150,57,42);
-  row.direction=LeagueMotionArt.Image(visual,"up",95,-37,40);row.direction.gameObject.SetActive(false);
-  row.gift=UICraft.Art(visual,"pastel/chest_blush",423,0,99,99);row.gift.name="Rank reward chest";
-  rt.gameObject.AddComponent<LeagueScrollJelly>().Target=visual;visual.gameObject.AddComponent<LeagueJelly>().duration=c.layout.settleSeconds;return row;
- }
- void UpdateClock(){
-  long seconds=Math.Max(0,snapshot.remaining-(long)(Time.unscaledTime-readTime));var remaining=TimeSpan.FromSeconds(seconds);
-  countdown.text=(remaining.TotalDays>=1?((int)remaining.TotalDays)+"天":"")+remaining.Hours.ToString("00")+":"+remaining.Minutes.ToString("00")+":"+remaining.Seconds.ToString("00");nextClockTick=Time.unscaledTime+1;
- }
- public void FocusPlayer(){if(snapshot==null||scroll==null)return;float stride=snapshot.config.layout.rowHeight+snapshot.config.layout.rowGap;float desired=(snapshot.player.rank-.5f)*stride-viewport.rect.height*.5f;content.anchoredPosition=new Vector2(0,Mathf.Clamp(desired,0,Mathf.Max(0,content.rect.height-viewport.rect.height)));scroll.StopMovement();}
- public void Refresh(bool focus){
-  string previousPeriod=snapshot?.periodId;snapshot=source.Read();if(snapshot==null)return;if(lastHeight<0||previousPeriod!=snapshot.periodId)Build();dirty=false;readTime=Time.unscaledTime;nextTick=readTime+snapshot.config.refreshSeconds;var c=snapshot.config;UpdateClock();podium.Bind(snapshot,profile);
-  rankText.text=string.Format(c.copy.rank,snapshot.player.rank)+"  ·  "+snapshot.player.medals.ToString("N0")+"枚奖章";rewardLink.text=snapshot.reward!=null?"领取奖励 >":"前"+c.topRewardCount+"名奖励 >";
-  float stride=c.layout.rowHeight+c.layout.rowGap;content.sizeDelta=new Vector2(990,snapshot.entries.Length*stride);
-  var ids=new HashSet<string>(snapshot.entries.Select(e=>e.id));foreach(var id in rows.Keys.Where(id=>!ids.Contains(id)).ToArray()){rows[id].move?.Kill();rows[id].root.gameObject.SetActive(false);Destroy(rows[id].root.gameObject);rows.Remove(id);}
-  foreach(var e in snapshot.entries){if(!rows.TryGetValue(e.id,out var row)){row=Create(e);rows.Add(e.id,row);row.root.anchoredPosition=new Vector2(0,-(e.rank-.5f)*stride);}
-   row.name.text=e.name;row.rank.text=e.rank.ToString();row.rank.color=e.rank<=3?Color.white:UICraft.Ink;
-   row.rankPlate.gameObject.SetActive(e.rank<=3);row.crown.gameObject.SetActive(e.rank<=3);if(e.rank<=3){row.rankPlate.color=e.rank==1?new Color32(246,187,64,255):e.rank==2?new Color32(117,173,226,255):new Color32(224,145,93,255);row.crown.color=row.rankPlate.color;}
-   row.hint.text=e.player?c.copy.you:snapshot.next?.id==e.id?c.copy.next:"";row.score.text=e.medals.ToString("N0");row.face.color=e.player?new Color32(217,247,224,255):e.rank==1?new Color32(255,236,194,255):e.rank==2?new Color32(235,238,254,255):e.rank==3?new Color32(255,232,218,255):new Color32(250,245,239,255);
-   row.gift.gameObject.SetActive(e.rank<=3);if(e.rank<=3)row.gift.sprite=PastelArt.Get(e.rank==1?"chest_blush":e.rank==2?"chest_blue":"chest_lavender");
-   string style=profile.EquippedAvatarResource+"/"+profile.EquippedFrameResource;if(e.player&&row.style!=style){row.style=style;row.portrait.gameObject.SetActive(false);Destroy(row.portrait.gameObject);row.portrait=LeaguePortrait.Create(row.visual,profile,"",-315,0,130,true);}
-   Vector2 target=new Vector2(0,-(e.rank-.5f)*stride);if(row.oldRank!=e.rank){if(row.oldRank>0){row.direction.sprite=LeagueMotionArt.Get(row.oldRank>e.rank?"up":"down");row.direction.gameObject.SetActive(true);row.direction.rectTransform.DOKill();row.direction.rectTransform.anchoredPosition=new Vector2(95,-37+(row.oldRank>e.rank?18:-18));DOTween.To(()=>row.direction.rectTransform.anchoredPosition,v=>row.direction.rectTransform.anchoredPosition=v,new Vector2(95,-37),.6f).SetTarget(row.direction.rectTransform).SetUpdate(true);}
-   if(e.player&&row.oldRank>e.rank&&row.oldRank>0)SoundService.Play("rank_up");row.move?.Kill();if(row.oldRank>0&&FeedbackProfile.Active.enabledFeedback)row.move=DOTween.To(()=>row.root.anchoredPosition,v=>row.root.anchoredPosition=v,target,.48f).SetEase(Ease.OutCubic).SetUpdate(true);else row.root.anchoredPosition=target;}
-   if(row.oldScore>=0&&(row.oldScore!=e.medals||row.oldRank!=e.rank))row.visual.GetComponent<LeagueJelly>().Play();else if(row.oldScore<0)row.visual.GetComponent<LeagueJelly>().Play(Mathf.Min(.30f,e.rank*.025f));row.oldRank=e.rank;row.oldScore=e.medals;
-  }
-  if(pressureText!=null)pressureText.text=LeagueEngine.Pressure(snapshot);
-  if(focus)FocusPlayer();
-  // Season entry is scheduled by AppUI, independently of this page.
+ Row Create(LeagueEntry e){var row=new Row();row.root=UICraft.Root(content,"League row "+e.id,0,0,606,59);row.root.anchorMin=row.root.anchorMax=new Vector2(.5f,1);row.visual=UICraft.Root(row.root,"Row visual",0,0,606,59);row.face=UICraft.Box(row.visual,"046 ranking face",0,0,606,59,Color.white);row.face.raycastTarget=false;var hit=row.root.gameObject.AddComponent<Image>();hit.color=new Color(1,1,1,.001f);
+  row.rank=UICraft.Label(row.visual,"",-266,0,65,44,26,DressingShopArt044.Ink);row.name=UICraft.Label(row.visual,"",-48,0,275,44,24,DressingShopArt044.Ink);HomeAArt.Image(row.visual,"nav-league",174,0,35,35);row.score=UICraft.Label(row.visual,"",241,0,94,44,27,DressingShopArt044.Ink);row.visual.gameObject.AddComponent<LeagueJelly>().duration=snapshot.config.layout.settleSeconds;row.root.gameObject.AddComponent<LeagueScrollJelly>().Target=row.visual;return row;}
+ public void FocusPlayer(){if(snapshot==null||scroll==null)return;float desired=(snapshot.player.rank-.5f)*Stride-viewport.rect.height*.5f;content.anchoredPosition=new Vector2(0,Mathf.Clamp(desired,0,Mathf.Max(0,content.rect.height-viewport.rect.height)));scroll.StopMovement();}
+ public void Refresh(bool focus){if(!initialized)return;var oldPeriod=snapshot?.periodId;snapshot=source.Read();if(snapshot==null)return;if(lastHeight<0||oldPeriod!=snapshot.periodId)Build();dirty=false;nextTick=Time.unscaledTime+snapshot.config.refreshSeconds;rankText.text="第"+snapshot.player.rank+"名";medalsText.text=snapshot.player.medals+" 枚";content.sizeDelta=new Vector2(606,snapshot.entries.Length*Stride);
+  foreach(var e in snapshot.entries){if(!rows.TryGetValue(e.id,out var row)){row=Create(e);rows.Add(e.id,row);row.root.anchoredPosition=new Vector2(0,-(e.rank-.5f)*Stride);}
+   row.name.text=e.player?"我":e.name;row.rank.text=e.rank.ToString();row.score.text=e.medals.ToString("N0");row.face.sprite=e.player?CommonButtonsA.Get("selected-normal"):DressingShopArt044.Get("inset");row.face.type=Image.Type.Sliced;row.face.pixelsPerUnitMultiplier=e.player?row.face.sprite.rect.height/59:1.5f;row.face.color=Color.white;
+   string style=e.player?profile.EquippedAvatarResource+"/"+profile.EquippedFrameResource:e.portrait+"/"+e.frame;if(row.portrait==null||row.style!=style){if(row.portrait!=null){row.portrait.gameObject.SetActive(false);Destroy(row.portrait.gameObject);}row.portrait=LeaguePortrait.Create(row.visual,profile,e.portrait,-198,0,54,e.player,e.frame);row.style=style;}
+   var target=new Vector2(0,-(e.rank-.5f)*Stride);if(row.oldRank!=e.rank){row.move?.Kill();if(row.oldRank>0&&FeedbackProfile.Active.enabledFeedback){row.move=DOTween.To(()=>row.root.anchoredPosition,v=>row.root.anchoredPosition=v,target,.48f).SetEase(Ease.OutCubic).SetUpdate(true);if(e.player&&row.oldRank>e.rank)SoundService.Play("rank_up");}else row.root.anchoredPosition=target;}
+   if(row.oldScore!=e.medals||row.oldRank!=e.rank)row.visual.GetComponent<LeagueJelly>().Play(Mathf.Min(.3f,e.rank*.025f));row.oldRank=e.rank;row.oldScore=e.medals;
+  }if(focus)FocusPlayer();
  }
 }
 // A list row does not intercept drag events: the ScrollRect remains the drag owner.

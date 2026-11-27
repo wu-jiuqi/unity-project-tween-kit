@@ -1,0 +1,39 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace BounceGarden {
+// Startup art stays in local Resources, including on WeChat: no network dependency.
+public static class BrandSplashArt {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ public static Sprite Get(string key){
+  if(cache.TryGetValue(key,out var sprite))return sprite;
+  var texture=Resources.Load<Texture2D>("Art/BrandSplashV1/"+key);
+  if(texture==null)throw new InvalidOperationException("Missing startup art: "+key);
+  sprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect);
+  sprite.name="BrandSplash/"+key;cache.Add(key,sprite);return sprite;
+ }
+ public static RectTransform Image(Transform parent,string key,float x,float y,float width){
+  var sprite=Get(key);var image=UICraft.Box(parent,key,x,y,width,width*sprite.rect.height/sprite.rect.width,Color.white);
+  image.sprite=sprite;image.type=UnityEngine.UI.Image.Type.Simple;image.preserveAspect=true;image.raycastTarget=false;
+  return image.rectTransform;
+ }
+ public static void Background(Image image){
+  image.sprite=Get("Garden/courtyard");image.type=UnityEngine.UI.Image.Type.Simple;image.color=Color.white;
+  image.preserveAspect=false;image.gameObject.AddComponent<BrandSplashCover>();
+ }
+}
+// Cover the physical canvas as well as its safe-area inset, without stretching the artwork.
+public sealed class BrandSplashCover:MonoBehaviour {
+ RectTransform rect;Canvas canvas;Sprite sprite;readonly Vector3[] corners=new Vector3[4];
+ void Awake(){rect=(RectTransform)transform;canvas=GetComponentInParent<Canvas>();sprite=GetComponent<Image>().sprite;}
+ void LateUpdate(){
+  var root=canvas.rootCanvas.transform as RectTransform;root.GetWorldCorners(corners);
+  var parent=(RectTransform)rect.parent;Vector3 min=parent.InverseTransformPoint(corners[0]),max=parent.InverseTransformPoint(corners[2]);
+  rect.localPosition=(min+max)*.5f;float width=max.x-min.x,height=max.y-min.y;
+  float fit=Mathf.Max(width/sprite.rect.width,height/sprite.rect.height);
+  rect.sizeDelta=new Vector2(sprite.rect.width*fit+2,sprite.rect.height*fit+2);
+ }
+}
+}

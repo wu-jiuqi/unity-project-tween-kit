@@ -6,29 +6,20 @@ namespace BounceGarden {
 public sealed class SoundService:MonoBehaviour {
  public static event Action<string> Played;
  bool mixDirty;float mixChangedAt;public static int MixSaveCount {get;private set;}
- public static bool MixPending=>instance!=null&&instance.mixDirty;
+ 
  static SoundService instance;AudioSource[] voices,music;AudioSource speech,cat;int musicIndex,cursor,voicePriority;string musicCue;bool muted,suspended;float voiceUntil,catUntil,voiceGate;Coroutine fade;
  readonly Dictionary<string,string> clipPaths=new Dictionary<string,string>();readonly Dictionary<string,AudioClip> clips=new Dictionary<string,AudioClip>();readonly Dictionary<string,float> last=new Dictionary<string,float>();readonly Dictionary<string,int> variants=new Dictionary<string,int>();readonly Dictionary<string,string> buses=new Dictionary<string,string>();readonly Dictionary<string,string[]> groups=new Dictionary<string,string[]>();readonly string[] playingCue=new string[14];readonly float[] gains=new float[14];readonly float[] ends=new float[14];float musicLevel=.7f,sfxLevel=.8f,voiceLevel=1;float musicBlend;float catGain;
- [Serializable]class Manifest{public Clip[] clips;}[Serializable]class Clip{public string cue,path,bus;public bool loop;}
+ [Serializable]class Manifest{public Clip[] clips;public GroupSpec[] groups;}[Serializable]class GroupSpec{public string cue;public string[] variants;}[Serializable]class Clip{public string cue,path,bus;public bool loop;}
  static SoundService Ensure(){if(instance==null){var go=new GameObject("Garden audio mixer");DontDestroyOnLoad(go);go.AddComponent<SoundService>();}return instance;}
  static bool IsQA=>RuntimeQA.IsIsolated;
- static bool AllowQAMusic=>Array.IndexOf(Environment.GetCommandLineArgs(),"--snow-preview")>=0||Array.IndexOf(Environment.GetCommandLineArgs(),"--journey-preview")>=0||Array.IndexOf(Environment.GetCommandLineArgs(),"--garden-preview")>=0||Array.IndexOf(Environment.GetCommandLineArgs(),"--qa-audio-playback")>=0;
- public static bool MusicPlaying=>Ensure().music[Ensure().musicIndex].isPlaying;
- public static float MusicEnergy(){var samples=new float[512];Ensure().music[Ensure().musicIndex].GetOutputData(samples,0);float sum=0;foreach(float v in samples)sum+=v*v;return sum/samples.Length;}
- public static float MusicVolume=>Ensure().music[Ensure().musicIndex].volume;
+ static bool AllowQAMusic=>Array.IndexOf(Environment.GetCommandLineArgs(),"--qa-audio-playback")>=0;
+ 
+ 
+ 
  void Awake(){instance=this;muted=IsQA?false:PlayerPrefs.GetInt("sfxMuted",0)!=0;musicLevel=IsQA?.7f:PlayerPrefs.GetFloat("audio.music.v65",.7f);sfxLevel=IsQA?.8f:PlayerPrefs.GetFloat("audio.sfx.v65",.8f);voiceLevel=IsQA?1:PlayerPrefs.GetFloat("audio.voice.v65",1);voices=new AudioSource[14];for(int i=0;i<14;i++)voices[i]=Source(false);music=new[]{Source(true),Source(true)};speech=Source(false);cat=Source(false);
- foreach(var key in new[]{"wall","shoot","hit","break","splash","click","coin","win","lose","whoosh","jelly_land"})clipPaths[key]="Audio/Jelly/"+key;
- var legacy=Resources.Load<TextAsset>("Audio/Jelly/AI/manifest");if(legacy!=null)foreach(var e in JsonUtility.FromJson<Manifest>(legacy.text).clips){if(!e.cue.StartsWith("amb_"))clipPaths[e.cue]="Audio/Jelly/AI/"+(e.cue.StartsWith("bgm_")?"bgm":"sfx")+"/"+e.cue;}
- var delivery=Resources.Load<TextAsset>("Audio/DeliveryV68/manifest");if(delivery!=null)foreach(var e in JsonUtility.FromJson<Manifest>(delivery.text).clips){clipPaths[e.cue]=e.path;buses[e.cue]=e.bus;}
- var v87=Resources.Load<TextAsset>("Audio/DeliveryV87/manifest");if(v87!=null)foreach(var e in JsonUtility.FromJson<Manifest>(v87.text).clips){clipPaths[e.cue]=e.path;buses[e.cue]=e.bus;}
- if(!clipPaths.ContainsKey("bgm_snow_garden"))clipPaths["bgm_snow_garden"]=clipPaths["bgm_gameplay"];
- foreach(string cue in new[]{"snow_ice_break","snow_block_shrink","snowdrift_layer","snow_clear","snow_cocoa_activate"})Group(cue,2);
- foreach(string cue in new[]{"yarn_layer_remove","yarn_final_unravel","ingot_transform_land","copper_hit","copper_collect","flower_suction","victory_bomb_throw","victory_score_arrive"})Group(cue,2);
- Group("cat_happy",3);Group("cat_retry",3);Group("cat_encourage",2);Group("cat_collect_trill",2);Group("cat_reward_surprise",2);Group("cat_home_greeting",2);Group("cookie_break",3);Group("pierce_pass",2);
- foreach(string tier in new[]{"nice","great","amazing","incredible"}){Group("vo_cheer_"+tier+"_en",2);groups["vo_cheer_"+tier+"_zh"]=groups["vo_cheer_"+tier+"_en"];}
+ var asset=Resources.Load<TextAsset>("Audio/Current051/manifest");if(asset==null)throw new InvalidOperationException("Missing current audio registry");var manifest=JsonUtility.FromJson<Manifest>(asset.text);foreach(var e in manifest.clips){clipPaths.Add(e.cue,e.path);buses.Add(e.cue,e.bus);}foreach(var e in manifest.groups)groups.Add(e.cue,e.variants);
  if(IsQA){foreach(var key in clipPaths.Keys)LoadClip(key);}else StartCoroutine(WarmEffects());
  }
- void Group(string cue,int count){var a=new string[count];for(int i=0;i<count;i++)a[i]=cue+"_"+(char)('a'+i);groups[cue]=a;}
  string Variant(string cue){if(!groups.TryGetValue(cue,out var group))return cue;int n=UnityEngine.Random.Range(0,group.Length);if(variants.TryGetValue(cue,out int old)&&n==old)n=(n+1)%group.Length;variants[cue]=n;return group[n];}
  AudioClip LoadClip(string cue){if(clips.TryGetValue(cue,out var found))return found;if(!clipPaths.TryGetValue(cue,out var path))return null;var c=Resources.Load<AudioClip>(path);if(c!=null)clips[cue]=c;return c;}
  IEnumerator WarmEffects(){yield return null;foreach(var key in clipPaths.Keys){if(!key.StartsWith("bgm_")&&!key.StartsWith("candidate_"))LoadClip(key);yield return null;}}
@@ -45,11 +36,11 @@ public sealed class SoundService:MonoBehaviour {
  if(cue=="score_star_full")return .15f;if(cue=="victory_stars_transfer")return .50f;
  if(cue=="score_count_tick")return .03f;if(cue.StartsWith("cookie_box_"))return .10f;
  if(cue.StartsWith("orb_jelly_"))return .12f;
-if(cue.StartsWith("snow_"))return .12f;if(cue=="cross_laser"||cue=="bomb"||cue=="cookie_break"||cue=="pierce_pass")return .16f;if(cue=="basket_hit"||cue=="strawberry_hit")return .12f;if(cue=="orb_bounce")return .18f;if(cue=="orb_stretch")return .5f;if(cue=="cat_home_greeting")return 45;if(cue=="cat_collect_trill")return 6;if(cue.StartsWith("cat_"))return 2.5f;if(cue=="hit"||cue=="break")return .055f;if(cue=="wall")return .045f;return .06f;}
+if(cue=="cross_laser"||cue=="bomb"||cue=="cookie_break"||cue=="pierce_pass")return .16f;if(cue=="basket_hit"||cue=="strawberry_hit")return .12f;if(cue=="orb_bounce")return .18f;if(cue=="orb_stretch")return .5f;if(cue=="cat_home_greeting")return 45;if(cue=="cat_collect_trill")return 6;if(cue.StartsWith("cat_"))return 2.5f;if(cue=="hit"||cue=="break")return .055f;if(cue=="wall")return .045f;return .06f;}
  void Trigger(string cue,float pitch){if(muted||suspended||sfxLevel<=0)return;if(cue=="win")cue="result_win_stinger";else if(cue=="lose")cue="result_lose_stinger";float now=Time.unscaledTime;if(last.TryGetValue(cue,out float prior)&&now-prior<Limit(cue))return;string key=Variant(cue);var clip=LoadClip(key);if(clip==null)return;bool isCat=buses.TryGetValue(key,out var bus)&&bus=="cat";
  if(isCat){if(cat.isPlaying||speech.isPlaying)return;last[cue]=now;cat.clip=clip;catGain=.68f;cat.volume=catGain*sfxLevel;cat.pitch=1;catUntil=now+clip.length;cat.Play();Played?.Invoke(cue);return;}
  int same=0;for(int i=0;i<12;i++)if(voices[i].isPlaying&&playingCue[i]==cue)same++;if(same>=2)return;int chosen=cue=="result_win_stinger"||cue=="result_lose_stinger"||cue=="goal_complete"||cue=="victory_finale_blast"||cue=="victory_stars_transfer"||cue=="score_star_full"?12:cue=="coin"||cue=="reward_claim"?13:-1;if(chosen<0)for(int i=0;i<12;i++)if(!voices[i].isPlaying){chosen=i;break;}if(chosen<0)chosen=cursor++%12;
- var v=voices[chosen];v.Stop();v.clip=clip;gains[chosen]=cue=="score_count_tick"?.35f:cue=="lucky_cat_charge_ready"?.45f:cue=="victory_finale_blast"||cue=="victory_stars_transfer"?.85f:cue.StartsWith("snow_")?.45f:cue=="bomb"||cue=="cross_laser"?.42f:cue=="basket_hit"||cue=="pierce_pass"||cue=="cookie_break"?.48f:cue.StartsWith("result_")?.85f:.7f;v.volume=gains[chosen]*sfxLevel;v.pitch=Mathf.Clamp(pitch+(cue=="shoot"||cue=="wall"||cue=="hit"?UnityEngine.Random.Range(-.05f,.05f):0),.85f,1.15f);playingCue[chosen]=cue;ends[chosen]=now+clip.length/v.pitch;last[cue]=now;v.Play();Played?.Invoke(cue);
+ var v=voices[chosen];v.Stop();v.clip=clip;gains[chosen]=cue=="score_count_tick"?.35f:cue=="lucky_cat_charge_ready"?.45f:cue=="victory_finale_blast"||cue=="victory_stars_transfer"?.85f:cue=="bomb"||cue=="cross_laser"?.42f:cue=="basket_hit"||cue=="pierce_pass"||cue=="cookie_break"?.48f:cue.StartsWith("result_")?.85f:.7f;v.volume=gains[chosen]*sfxLevel;v.pitch=Mathf.Clamp(pitch+(cue=="shoot"||cue=="wall"||cue=="hit"?UnityEngine.Random.Range(-.05f,.05f):0),.85f,1.15f);playingCue[chosen]=cue;ends[chosen]=now+clip.length/v.pitch;last[cue]=now;v.Play();Played?.Invoke(cue);
  if(cue=="goal_complete")Trigger("cat_collect_trill",1);
  }
  public static bool Speak(string cue,int priority=40){var s=Ensure();if(s.muted||s.suspended||s.voiceLevel<=0)return false;float now=Time.unscaledTime;if(s.speech.isPlaying&&priority<=s.voicePriority||priority<70&&now<s.voiceGate)return false;var c=s.LoadClip(s.Variant(cue));if(c==null)return false;s.speech.Stop();s.speech.clip=c;s.speech.pitch=1;s.speech.volume=s.voiceLevel;s.voicePriority=priority;s.voiceUntil=now+c.length;s.voiceGate=now+Mathf.Max(2.5f,c.length+.25f);s.speech.Play();Played?.Invoke(cue);return true;}
@@ -66,10 +57,10 @@ if(cue.StartsWith("snow_"))return .12f;if(cue=="cross_laser"||cue=="bomb"||cue==
  void ApplyPlayback(){if(muted||suspended){foreach(var v in music)v.Pause();}else if(!IsQA||AllowQAMusic){var v=music[musicIndex];if(v.clip!=null){v.UnPause();if(!v.isPlaying)v.Play();}}}
  void OnApplicationPause(bool pause){suspended=pause;if(pause){CancelTransient();SaveMix();}ApplyPlayback();}
  void OnApplicationQuit(){SaveMix();}
- public static string CurrentMusic=>Ensure().musicCue;
- public static AudioClip QAClip(string cue)=>Ensure().LoadClip(cue);
- public static bool SpeechPlaying=>Ensure().speech.isPlaying;
- public static bool HasCue(string cue){var s=Ensure();return s.clipPaths.ContainsKey(cue)||s.groups.ContainsKey(cue);}
- public static void ExportQAClips(string directory){if(instance==null)return;System.IO.Directory.CreateDirectory(directory);foreach(var pair in instance.clips){var clip=pair.Value;var samples=new float[clip.samples*clip.channels];clip.GetData(samples,0);using(var writer=new System.IO.BinaryWriter(System.IO.File.Create(System.IO.Path.Combine(directory,pair.Key+".wav")))){int bytes=samples.Length*2;writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));writer.Write(36+bytes);writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "));writer.Write(16);writer.Write((short)1);writer.Write((short)clip.channels);writer.Write(clip.frequency);writer.Write(clip.frequency*clip.channels*2);writer.Write((short)(clip.channels*2));writer.Write((short)16);writer.Write(System.Text.Encoding.ASCII.GetBytes("data"));writer.Write(bytes);foreach(float sample in samples)writer.Write((short)(Mathf.Clamp(sample,-1,1)*32767));}}}
+ 
+ 
+ 
+ 
+ 
 }
 }

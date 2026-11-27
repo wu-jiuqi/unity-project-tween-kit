@@ -27,9 +27,9 @@ REVIEWS={
  'ActivityJellyMotion':('控件交互','宿主适配配方','ChapterHomeView.Build → ActivityCarousel.Create / Build → ActivityJellyMotion.Initialize','活动卡悬停、按下、松开与初次入场','ActivityJellyMotion','activity'),
  'CollectionFlightMotion':('奖励与目标','独立组件','GameSession.OpeningCollect → chainLoot → TickChainCollection → CollectionFlightMotion.Apply；ChainCollectionHUD 计算真实目标','主线收集物飞向目标卡；收集计数留在 GameSession','RewardFlight','reward'),
  'CollectionGoalEntrance':('奖励与目标','宿主适配配方','AppUI.StartPreparedLevel → ShowCollectionGoalEntrance → CollectionGoalEntrance.Begin(hud.GoalsRect)','本关目标先居中展示，再返回真实 HUD 容器','CollectionGoalEntrance','goal'),
- 'StarChargeView':('奖励与目标','独立组件','BattleScoreMeter.Initialize → StarChargeView.Initialize；Place → Charge；Advance 驱动','分数星光到达、材质边缘填充和满星脉冲','StarChargeView','charge'),
- 'VictoryCatAnimation':('配套编排','独立组件','AppUI.ShowResults → VictoryPresentation.Render → VictoryCatAnimation.FrameAt/Get','胜利猫16帧，逐帧时间原样保留','FrameSequence','victorycat'),
- 'FailureCatAnimation':('配套编排','独立组件','AppUI.ShowResults → FailurePresentation.Render → FailureCatAnimation.FrameAt/Get','失败猫16帧，逐帧时间原样保留','FrameSequence','failurecat'),
+ 'StarChargeView':('奖励与目标','独立组件','BattleScoreMeter.Initialize → StarChargeView.Initialize；Place → Charge；Advance 驱动','分数星光到达、原生UI遮罩填充和满星脉冲','StarChargeView','charge'),
+ 'VictoryCatAnimation':('配套编排','独立组件','AppUI.ShowResults → VictoryPresentation.Render → VictoryCatAnimation.FrameAt/Get','当前胜利猫8帧，逐帧时间原样保留','FrameSequence','victorycat'),
+ 'FailureCatAnimation':('配套编排','独立组件','AppUI.ShowResults → FailurePresentation.Render → FailureCatAnimation.FrameAt/Get','当前失败猫8帧，逐帧时间原样保留','FrameSequence','failurecat'),
  'VictoryPresentation':('奖励与目标','组合预制体','AppUI.ShowResults(win) → VictoryPresentation.Begin → Render / RenderHeaderStars','结算页面猫、光环、奖励卡、按钮与星级；结果已由宿主计算','VictoryPresentation','victory'),
  'FailurePresentation':('奖励与目标','组合预制体','AppUI.ShowResults(!win) → FailurePresentation.Begin → Render','失败页的背景帧、猫、逐字标题、动作区入场','FailurePresentation','failure'),
  'LeagueMedalPresentation':('奖励与目标','宿主适配配方','AppUI.TickLeagueFlow → LeagueMedalPresentation.Show(results, before, after, medals)','胜利结算奖励区的奖章和名次变化','LeagueMedalPresentation','medal'),
@@ -48,6 +48,8 @@ def main():
     data=json.loads((KIT/'references/source-map.json').read_text(encoding='utf-8'));entries=[]
     extraPath=KIT/'references/supplemental-deliveries.json'
     supplemental=json.loads(extraPath.read_text(encoding='utf-8'))['entries'] if extraPath.exists() else []
+    currentPath=KIT/'references/current-051-deliveries.json'
+    if currentPath.exists():supplemental+=json.loads(currentPath.read_text(encoding='utf-8'))['entries']
     for f in data['families']:
         cls=f['class'].split('.')[-1];review=REVIEWS.get(cls)
         extras=[r for r in supplemental if r['source']==f['source'] and r.get('owner')==cls]
@@ -61,6 +63,8 @@ def main():
         elif cls=='Round6Nav':f.update(usageStatus='legacy-route-disabled',scopeReason='当前 AppUI.BuildNav 只禁用 navSlot；保留旧实现供追溯')
         elif cls in ['BallBody','BrickBody','MovingObstacle','BossBody']:
             f['usageStatus']='mixed-physics-presentation-review';f['scopeReason']='须把视觉分量与 Rigidbody/碰撞/业务规则逐方法拆分'
+        if extras and cls not in ['AppUI','ChainCollectionHUD'] and f['classification']=='runtime-candidate':
+            f.update(usageStatus='source-route-reviewed',deliveryStatus='extracted-component',deliveredComponent=extras[0]['component'],galleryEntry=extras[0]['galleryEntry'])
         # AppUI is a large partial host. Only the reviewed subsets are marked.
         if f['source']=='Assets/Scripts/UI/AppUI.cs':
             for m in f['methods']:
@@ -108,7 +112,7 @@ def main():
     write(KIT/'references/source-map.json',data);write(KIT/'references/catalog-index.json',entries)
     grouped={}
     for e in entries:grouped.setdefault(e['status'],[]).append(e)
-    lines=['# 项目动画来源目录','','扫描主工程 `BounceGarden/BounceGarden`；以 `DEVELOPMENT_BASELINE.json` 的0.4.0工作版为场景背景。数量由每次真实扫描产生。','','这是来源清单及交付进度表。`source-route-reviewed` 表示核对了源码入口链，不等于已在正常游戏中实测每个调用点。其余候选保持待核对；最终全量验收尚未通过。','',f"本次有 {len(data['families'])} 个源文件／类分组，含测试、编辑器与非动画候选；{len(data['nonAnimationFiles'])} 个未命中动画模式的源码文件另列。",'','[机器清单](source-map.json) · [源码指纹](source-fingerprints.json) · [完整资源扫描](resource-inventory.json) · [交付素材映射](resource-map.json) · [提取差异](extraction-diffs.json) · [验收状态](acceptance.json)','']
+    lines=['# 项目动画来源目录','','扫描主工程 `BounceGarden/BounceGarden`；以 `DEVELOPMENT_BASELINE.json` 的0.5.1工作版为场景背景。数量由每次真实扫描产生。','','这是来源清单及交付进度表。`source-route-reviewed` 表示核对了源码入口链，不等于已在正常游戏中实测每个调用点。其余候选保持待核对；最终全量验收尚未通过。','',f"本次有 {len(data['families'])} 个源文件／类分组，含测试、编辑器与非动画候选；{len(data['nonAnimationFiles'])} 个未命中动画模式的源码文件另列。",'','[机器清单](source-map.json) · [源码指纹](source-fingerprints.json) · [完整资源扫描](resource-inventory.json) · [交付素材映射](resource-map.json) · [提取差异](extraction-diffs.json) · [验收状态](acceptance.json)','']
     for status,items in sorted(grouped.items()):
         lines+=['## '+status+' · '+str(len(items)),'','| 条目 | 源文件 | 交付 |','|---|---|---|']
         for e in items:lines.append(f"| [{e['class']}](recipes/{e['id']}.md) | `{e['source']}` | {e['component'] or e['delivery']} |")

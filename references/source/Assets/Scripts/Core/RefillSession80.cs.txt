@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BounceGarden {
 public sealed partial class GameSession {
  public bool RefillActive=>SevenSpecialActive;
- public int RefillSettledGroups=>refillSettledGroups.Count;
+ 
  public int RefillLastSettledGroup {get;private set;}
  public int RefillGapSnapshot {get;private set;}
  public int RefillShots {get;private set;}
@@ -20,7 +20,7 @@ public sealed partial class GameSession {
  // special-brick replacement. Count objects, never HP or occupied cells.
  public int RefillDirectBreakables=>CollectionBricks.Count(b=>b.Alive&&!RefillProtected(b)&&(!SevenTerrain(b)||OpeningCopperBrick(b))&&b.GetComponent<ChainTileVisibility>()?.Hidden!=true)+ChainTools.Count(t=>!t.Consumed&&!t.Waiting&&t.View!=null&&t.View.GetComponent<ChainTileVisibility>()?.Hidden!=true);
  int refillPreviousDirect=-1;bool refillDirectArmed=true,refillDirectRequested;
- public int RefillPending=>refillRemaining;
+ 
  public bool RefillPendingSettlement=>RefillActive&&(refillRemaining>0||CollectionBricks.Any(b=>b.Alive&&RefillProtected(b)));
  public bool RefillFreezeBalls=>RefillActive&&refillFreeze;
  int refillRemaining;

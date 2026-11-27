@@ -3,10 +3,10 @@ using System.Linq;
 using UnityEngine;
 namespace BounceGarden {
 public static class ChainGridRules {
- public const int Columns=9,Rows=9,Moves=20;
+ public const int Columns=9,Rows=9;
  public const float FlightLimit=12f,FallSpeed=5.5f,FallDelay=2f;
- public static readonly string[] Cat={"BBYBBBYBB","BBPYBYPBB","BYYYYYYYB","BYNYYYNYB","BYWYYYWYB","BYYYNYYYB","BBYYYYYBB","BBBYYYBBB","BBBBBBBBB"};
- public static int Pixel(int col,int row){char p=Cat[row][col];return p=='Y'?4:p=='N'?1:p=='P'?2:p=='W'?0:3;}
+ 
+ 
  public static Vector2 Center(int col,int row,int size=1)=>CollectionLevels.Cell(col,row)+new Vector2(1,-1)*(size-1)*CollectionLevels.Pitch*.5f;
 }
 public sealed class ChainGridPiece:MonoBehaviour {public int Col,Row,Size=1;public float FallAt=-1;public int MotionVersion;public bool RefillProtected;}
@@ -14,7 +14,7 @@ public sealed partial class GameSession {
  public bool ChainFalling {get;private set;}
  public bool ChainGridReady=>!ChainFalling&&!chainGravityDirty&&!RefillPendingSettlement;
  public int ChainRefills {get;private set;}
- public int ChainSafeRepositions=>0; // Live gravity never teleports a ball.
+  // Live gravity never teleports a ball.
  public int ChainAutoReturns {get;private set;}
  
  bool chainGravityDirty;float chainGravityDelay;
@@ -22,7 +22,7 @@ public sealed partial class GameSession {
  // Rewards replace visible ordinary cells; they never enter the supply queue.
  readonly Queue<int> chainReplacementRewards=new Queue<int>();
  System.Random chainRewardRandom;
- public int ChainPendingReplacements=>chainReplacementRewards.Count;
+ 
  sealed class GridMotion {public Transform View;public Vector2 From,To;public bool Arrival;public List<Vector2> Path;public List<float> PathStarts,PathEnds;public int PathIndex,Version;}
  readonly List<GridMotion> chainMotions=new List<GridMotion>();
  readonly List<ChainGridPiece> chainSupportPieces=new List<ChainGridPiece>(96);
@@ -30,17 +30,17 @@ public sealed partial class GameSession {
  void RegisterChainGrid(Transform view,int size){var p=view.gameObject.AddComponent<ChainGridPiece>();p.Size=size;p.Col=Mathf.RoundToInt(view.position.x/CollectionLevels.Pitch+4-(size-1)*.5f);p.Row=Mathf.RoundToInt((CollectionLevels.Top-view.position.y)/CollectionLevels.Pitch-(size-1)*.5f);view.gameObject.AddComponent<ChainTileVisibility>().Initialize(size);}
  void FillChainPieces(List<ChainGridPiece> pieces){pieces.Clear();foreach(var brick in CollectionBricks)if(brick.Alive){var grid=brick.GetComponent<ChainGridPiece>();if(grid!=null)pieces.Add(grid);}foreach(var tool in ChainTools){var grid=tool.View.GetComponent<ChainGridPiece>();if(grid!=null)pieces.Add(grid);}}
  List<ChainGridPiece> ChainPieces(){var pieces=new List<ChainGridPiece>(CollectionBricks.Count+ChainTools.Count);FillChainPieces(pieces);return pieces;}
- void StartChainGrid(){if(FusionActive){InitializeFusionGrid();return;}InitializeAlphabetGrid();}
+ void StartChainGrid(){InitializeAlphabetGrid();}
  void ScheduleChainGravity(){chainGravityDirty=true;chainGravityDelay=0;changed=true;}
  static bool GridFits(bool[,] occupied,int col,int row,int size){if(col<0||row<0||col+size>ChainGridRules.Columns||row+size>ChainGridRules.Rows)return false;for(int y=row;y<row+size;y++)for(int x=col;x<col+size;x++)if(occupied[x,y])return false;return true;}
  static void GridMark(bool[,] occupied,ChainGridPiece piece){for(int y=piece.Row;y<piece.Row+piece.Size;y++)for(int x=piece.Col;x<piece.Col+piece.Size;x++)occupied[x,y]=true;}
  public int ChainOccupiedCells(){return ChainPieces().Sum(p=>p.Size*p.Size);}
  public bool ChainGridValid(bool full=true){var occupied=new bool[ChainGridRules.Columns,ChainGridRules.Rows];foreach(var p in ChainPieces()){if(!GridFits(occupied,p.Col,p.Row,p.Size))return false;GridMark(occupied,p);if(!ChainFalling&&Vector2.Distance(ChainPiecePosition(p),ChainGridRules.Center(p.Col,p.Row,p.Size))>.002f)return false;}return !full||ChainOccupiedCells()==81;}
- public int ChainSupplyCount(int kind)=>CollectionBricks.Count(b=>b.Alive&&b.Definition.juiceGroup==kind)+CollectionBricks.Where(b=>b.Alive&&ChainPowerRules.IsNest(b.Definition)&&b.Definition.chainContents!=null).Sum(b=>b.Definition.chainContents.Count(v=>v==kind));
- int ChainMissingSupply(int kind)=>Mathf.Max(0,CollectionGoal[kind-1]-Collected[kind-1]-chainLoot.Count(l=>l.Kind==kind)-ChainSupplyCount(kind));
- int[] SupplyNestContents(){var contents=new int[4];if(ChainMissingSupply(1)>0)contents[0]=1;if(ChainMissingSupply(2)>0)contents[3]=2;return contents;}
+ 
+ 
+ 
  void BeginChainGravity(){
-  if(RefillActive||IsAlphabet&&!IsTutorial){BeginBoardFlowGravity();return;}
+  if(RefillActive||IsAlphabet){BeginBoardFlowGravity();return;}
   ChainFalling=true;chainGravityDirty=false;chainMotions.Clear();
   RetireDeadChainBricks();
   var occupied=new bool[ChainGridRules.Columns,ChainGridRules.Rows];

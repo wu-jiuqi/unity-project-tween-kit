@@ -34,25 +34,25 @@ namespace BounceGarden
         {
             public int schema = SchemaVersion;
             public int coins = 400;
-            public int economyVersion, rescueLevel=-1, rescueFailures; public bool rescueReady;
+            public int economyVersion,rescueLevel=-1,rescueFailures; public bool rescueReady;
             public int campaignWinStreak,streakRoundLevel=-1;public string lastStreakWin="",streakRoundToken="";public int[] streakRoundTools=new int[4];
             public int badges;
             public int unlockedLevel;
             public string campaignRoute="";public int alphabetUnlocked,legacyRouteUnlocked;public uint alphabetIntroductions,picnicIntroductions;public int picnicIntroRevision;public bool firstBounceComplete;public uint powerPractice;
-            public int[] boosters = new int[4], bestScores = new int[AlphabetCampaign.Count];
+            public int[] boosters = new int[4],bestScores = new int[AlphabetCampaign.Count];
             public bool soundEnabled = true;
             public string[] committedKeys = new string[0];
             public LeagueState league = new LeagueState();
-            public string[] ownedAvatars = new string[0], ownedFrames = new string[0];
-            public string equippedAvatar = "", equippedFrame = "";
-            public string equippedAvatarResource = "", equippedFrameResource = "";
+            public string[] ownedAvatars = new string[0],ownedFrames = new string[0];
+            public string equippedAvatar = "",equippedFrame = "";
+            public string equippedAvatarResource = "",equippedFrameResource = "";
         }
 
         public int Coins { get; private set; } = 400;
         public int Badges { get; private set; }
         public int UnlockedLevel { get; private set; }
         public bool StorageHealthy { get { return storageHealthy; } }
-        public int CommittedTransactionCount { get { return committed.Count; } }
+        
 
         public bool SoundEnabled
         {
@@ -122,10 +122,7 @@ namespace BounceGarden
         }
 
         /// <summary>Checks are useful when an offline mock repeats a Completed callback.</summary>
-        public bool HasBaseReward(string resultKey)
-        {
-            return ValidKey(resultKey) && committed.Contains(resultKey + "/base");
-        }
+        
 
         public bool HasAdBonus(string resultKey)
         {

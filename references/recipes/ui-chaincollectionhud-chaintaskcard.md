@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/ChainCollectionHUD.cs`
-文件 SHA-256：`2953ce988acbd87980173e979b2d0ce9f600bd19771161e61af2df2fbbc56e40`
+文件 SHA-256：`59bec3d2199b846dc60952d4ef4cc38a2003f6d9bf1ba16280634324839ac868`
 [原始源码快照](../source/Assets/Scripts/UI/ChainCollectionHUD.cs.txt)
 
 用在哪里：ChainCollectionHUD.Initialize → AddCard → ChainTaskCard.Initialize / Refresh
@@ -13,7 +13,7 @@
 
 ## 源方法、参数与曲线
 
-### Update · L53
+### Update · L52
 
 方法 SHA-256：`848a02225fc5f0beac477b38b653bfaa5dc400630ead81dacec3c074b651630f`
 时间来源：Time.deltaTime

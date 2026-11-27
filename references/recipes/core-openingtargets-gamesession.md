@@ -19,7 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/Core/OpeningCampaign.cs:107` · `GameSession.OpeningYarnArrived` → `OpeningCollect("yarn",position)`
+- `Assets/Scripts/Core/OpeningCampaign.cs:106` · `GameSession.OpeningYarnArrived` → `OpeningCollect("yarn",position)`
 - `Assets/Scripts/Core/OpeningCookieSession.cs:36` · `GameSession.OpeningCookieApply` → `OpeningCollect("cookie",box.Cell(slot))`
 - `Assets/Scripts/Core/OpeningCopperSession.cs:46` · `GameSession.OpeningCopperArrived` → `OpeningCollect("copper_coin",p)`
 - `Assets/Scripts/Core/OpeningTargets.cs:30` · `GameSession.OpeningCreditTool` → `OpeningCollect(OpeningThirdArt.KindName(tool.Kind),tool.Position,tool.ColorIndex,tool.Ingot)`

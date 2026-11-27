@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/UICraft.cs`
-文件 SHA-256：`1ffef55e3a848a9b068d062396f727d5fc6f739d1ca3e59ec342a3dd9b0db0c6`
+文件 SHA-256：`51c3aa8b4c0bb5203257961084c4e10cce0345821c8f7dcade4eefd73e44b69a`
 [原始源码快照](../source/Assets/Scripts/UI/UICraft.cs.txt)
 
 用在哪里：OpenSettingsSheetC 猫头 amplitude=3/speed=1.4；About 插画 amplitude=4/speed=1.3

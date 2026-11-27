@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+namespace BounceGarden {
+public static class DressingShopArt044 {
+ [Serializable] public sealed class Frame {public string key;public float scale,x,y;}
+ [Serializable] sealed class Layouts {public Frame[] frames;}
+ static Layouts layouts;static readonly Dictionary<string,Sprite> sprites=new Dictionary<string,Sprite>();static Material goldTitle,goldSubtitle;
+ public static readonly string[] Names={"元气橘橘","俏皮蓝蓝","好奇布偶","机灵三花","晚安云朵","开心虎斑"};
+ public static readonly string[] FrameNames={"薄荷新芽","奶油猫耳","丁香蝴蝶结","雏菊花园","星月晴空","金爪桂冠"};
+ public static readonly string[] RewardNames={"金爪桂冠","繁花花匠","星露伙伴"};
+ public static readonly Color Ink=new Color32(121,80,46,255),Muted=new Color32(163,123,85,255);
+ public static Sprite Get(string key){if(sprites.TryGetValue(key,out var sprite))return sprite;var t=Resources.Load<Texture2D>("Art/DressingShop044/"+key);if(t==null)throw new InvalidOperationException("Missing approved 044 art: "+key);Vector4 b=key=="panel"?new Vector4(110,110,110,190):key=="inset"?new Vector4(45,45,45,45):Vector4.zero;sprite=Sprite.Create(t,new Rect(0,0,t.width,t.height),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,b);sprite.name="DressingShop044/"+key;return sprites[key]=sprite;}
+ public static bool OverrideSprite(string resource,out Sprite sprite){sprite=null;if(string.IsNullOrEmpty(resource))return false;string key=resource.StartsWith("Art/")?resource.Substring(4):resource;if(key.StartsWith("DressingShop044/")){sprite=Get(key.Substring(16));return true;}var items=CatCosmeticCatalog.Items;for(int i=0;i<6;i++){if(key==items[i].avatar.resource.Replace("Art/","")){sprite=Get("avatar-"+(i+1).ToString("D2"));return true;}if(key==items[i].frame.resource.Replace("Art/","")){sprite=Get("frame-"+(i+1).ToString("D2"));return true;}}return false;}
+ public static Frame Measure(string key){if(layouts==null)layouts=JsonUtility.FromJson<Layouts>(Resources.Load<TextAsset>("Art/DressingShop044/layouts").text);foreach(var f in layouts.frames)if(f.key==key)return f;return null;}
+ public static string FrameKey(CatCosmeticCatalog.Item item){var exclusive=LeagueExclusiveCosmetics.ById(item.id);if(exclusive!=null)return "league-frame-"+(exclusive.index+1).ToString("D2");int i=Array.IndexOf(CatCosmeticCatalog.Items,item);return i>=0&&i<6?"frame-"+(i+1).ToString("D2"):null;}
+ public static RectTransform Rect(Transform parent,string name,float x,float y,float w,float h){var p=(RectTransform)parent;return UICraft.Root(parent,name,x-p.rect.width*.5f,p.rect.height*.5f-y,w,h);}
+ public static Image Image(Transform parent,string key,float x,float y,float w,float h,bool sliced=false){var rt=Rect(parent,key,x,y,w,h);var im=rt.gameObject.AddComponent<Image>();im.sprite=Get(key);im.color=Color.white;im.type=sliced?UnityEngine.UI.Image.Type.Sliced:UnityEngine.UI.Image.Type.Simple;im.preserveAspect=!sliced;im.raycastTarget=false;if(sliced)im.pixelsPerUnitMultiplier=1.5f;return im;}
+ public static TMP_Text Text(Transform parent,string value,float x,float y,float w,float h,int size=22,Color? color=null){var p=(RectTransform)parent;var t=UICraft.Label(parent,value,x-p.rect.width*.5f,p.rect.height*.5f-y,w,h,size,color??Ink);size=Mathf.Max(19,size);t.fontSize=size;t.color=color??Ink;t.font=GameTypography.Font;t.fontStyle=FontStyles.Normal;t.enableAutoSizing=false;t.fontSizeMin=size*.78f;t.fontSizeMax=size;t.textWrappingMode=TextWrappingModes.NoWrap;t.raycastTarget=false;return t;}
+ public static TMP_Text BannerText(Transform parent,string value,float x,float y,float w,float h,int size,bool title){
+  var t=Text(parent,value,x,y,w,h,size,new Color32(255,246,218,255));t.fontStyle=FontStyles.Bold;
+  var material=title?goldTitle:goldSubtitle;if(material==null){material=new Material(GameTypography.Font.material);material.name=title?"044 gold outline banner title":"044 gold outline banner subtitle";material.EnableKeyword("OUTLINE_ON");material.SetColor(ShaderUtilities.ID_OutlineColor,new Color32(221,161,52,255));material.SetFloat(ShaderUtilities.ID_OutlineWidth,title?.16f:.11f);material.SetFloat("_OutlineSoftness",0);material.SetFloat("_FaceDilate",title?.025f:.012f);if(title)goldTitle=material;else goldSubtitle=material;}
+  t.fontSharedMaterial=material;t.UpdateMeshPadding();return t;
+ }
+ public static Button Button(Transform parent,string name,string text,float x,float y,float w,float h,Action action,string family="secondary",int size=23){var p=(RectTransform)parent;var b=CommonButtonsA.Button(parent,name,text,x-p.rect.width*.5f,p.rect.height*.5f-y,w,h,action,family,size);b.gameObject.AddComponent<ShopScrollDrag>();return b;}
+ public static RectTransform Card(Transform parent,string name,float x,float y,float w,float h){var r=Rect(parent,name,x+w*.5f,y+h*.5f,w,h);Image(r,"inset",w*.5f,h*.5f,w,h,true);return r;}
+ public static void Avatar(Transform parent,string resource,float x,float y,float size){var r=Rect(parent,"044 avatar",x,y,size,size);var im=r.gameObject.AddComponent<Image>();im.sprite=CatCosmeticCatalog.Sprite(resource);im.preserveAspect=true;im.raycastTarget=false;}
+ public static RectTransform RewardPortrait(Transform parent,int index,float x,float y,float size){return Portrait(parent,"DressingShop044/league-avatar-"+(index+1).ToString("D2"),"DressingShop044/league-frame-"+(index+1).ToString("D2"),x,y,size);}
+ public static RectTransform Portrait(Transform parent,string avatarResource,string frameResource,float x,float y,float size){
+  string key=(frameResource??"").Replace("Art/","").Replace("DressingShop044/","");var frame=Measure(key);if(frame==null)return CatCosmeticCatalog.Create(parent,avatarResource,frameResource,x,y,size);
+  if(string.IsNullOrEmpty(avatarResource))avatarResource=CatCosmeticCatalog.Default.avatar.resource;var root=UICraft.Root(parent,"044 reward portrait",x,y,size,size);var av=UICraft.Box(root,"Avatar",frame.x*size,frame.y*size,size*frame.scale,size*frame.scale,Color.white);av.sprite=CatCosmeticCatalog.Sprite(avatarResource);av.preserveAspect=true;av.raycastTarget=false;var rim=UICraft.Box(root,"Frame",0,0,size,size,Color.white);rim.sprite=Get(key);rim.preserveAspect=true;rim.raycastTarget=false;return root;
+ }
+}
+// The content composition remains uniformly scaled; the fixed navigation is its sibling.
+public sealed class DressingShopLayout044:MonoBehaviour {
+ public RectTransform Content,Panel,Background;public float Scale{get;private set;}
+ public void Layout(float height,float top,float navigation){if(Content==null)return;Scale=Mathf.Min(1.5f,Mathf.Max(.6f,(height-navigation-top-20)/1130));Content.localScale=Vector3.one*Scale;Content.anchoredPosition=new Vector2(0,(navigation-top)*.5f);if(Background!=null){var sprite=Background.GetComponent<Image>().sprite;float ratio=sprite.rect.width/sprite.rect.height;float w=Mathf.Max(1080,height*ratio);Background.sizeDelta=new Vector2(w,w/ratio);}}
+}
+}

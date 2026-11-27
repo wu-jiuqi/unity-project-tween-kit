@@ -1,13 +1,10 @@
 {
   "counts": {
-    "editor-tool": 1,
-    "test-fixture": 115,
-    "non-animation": 15,
-    "requires-route-review": 94,
-    "source-route-reviewed": 27,
-    "inactive-preview": 1,
-    "legacy-route-disabled": 1,
-    "mixed-physics-presentation-review": 4
+    "test-fixture": 2,
+    "non-animation": 9,
+    "requires-route-review": 67,
+    "source-route-reviewed": 33,
+    "mixed-physics-presentation-review": 2
   },
   "legacyHostMethods": [
     "Pop",
@@ -19,6 +16,6 @@
     "Spark",
     "Confetti"
   ],
-  "unresolvedInvocationCount": 5022,
+  "unresolvedInvocationCount": 1152,
   "scope": "Syntax + partial semantic resolution + explicitly reviewed source routes; no blanket reachability claim."
 }

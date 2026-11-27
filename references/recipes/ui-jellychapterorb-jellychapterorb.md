@@ -3,14 +3,14 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/UI/JellyChapterOrb.cs`
-文件 SHA-256：`73ea83e802fa764f683675321c89809d25ce3ca0bb3ba3ff55409daebdfc507a`
+文件 SHA-256：`59552a136c50ddf11ddfb19228c263daff98490b443e953a9b2a925ba720bea6`
 [原始源码快照](../source/Assets/Scripts/UI/JellyChapterOrb.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Update · L28
+### Update · L20
 
 方法 SHA-256：`bc015e9b93d4bfe92a9802b4f88449c967773150d14ec1f0cd233faecf6bd0d2`
 时间来源：Time.unscaledDeltaTime

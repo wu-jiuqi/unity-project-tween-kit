@@ -3,16 +3,16 @@
 状态：`mixed-physics-presentation-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/PhysicsBodies.cs`
-文件 SHA-256：`4a7c2a6cede5908904f677f27deef0120740c077dad28921b906f4eedea61d21`
+文件 SHA-256：`8268081bf79afe4e362042a9bc9551939e87569979187ce1ded765462f788b53`
 [原始源码快照](../source/Assets/Scripts/World/PhysicsBodies.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Update · L294
+### Update · L204
 
-方法 SHA-256：`ed5a0dfa64559efe9eb9dbaae24c6b0641ff48478b09180a8adf0e1fc31f3a72`
+方法 SHA-256：`90c803c05c032970665cdfaedab8cc71138e28c790fecfb531810ffc9a902515`
 时间来源：Time.deltaTime
 曲线证据：Mathf.Sin
 解析符号：`BounceGarden.BrickBody.Update()`
@@ -22,7 +22,7 @@ Unity 引擎回调；是否创建并启用组件，见 constructionSites 与场�
 ```csharp
 void Update()
         {
-            if(!Alive||owner==null||owner.IsPaused||owner.IsPixelDrop)return;
+            if(!Alive||owner==null||owner.IsPaused)return;
             // ChainTileVisibility owns chain colliders. Never briefly re-enable
             // hidden supply tiles or rebuild unchanged broadphase proxies here.
             if(!owner.IsChainCollection){bool enabled=age>=delay+.28f;if(hitCollider.enabled!=enabled)hitCollider.enabled=enabled;}
@@ -94,10 +94,6 @@ float footprintWidth;
 ```
 ```csharp
 SpriteRenderer groundShadow;
-```
-```csharp
-// Optional supplied static state sprites; never use destruction animation frames as damage skins.
-        Sprite damagedSkin,criticalSkin;
 ```
 ```csharp
 bool visualSettled;

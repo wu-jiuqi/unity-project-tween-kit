@@ -72,11 +72,6 @@ public static partial class LeagueEngine {
   if(p.returnRounds>0)p.returnRounds--;
   p.roundActiveSeconds=0;p.roundStartRank=Standings(p,after).First(e=>e.player).rank;
  }
- public static string Pressure(LeagueSnapshot s){
-  if(s.next==null){var second=s.entries.FirstOrDefault(e=>e.rank==2);return second==null?"暂列第一":s.player.medals>second.medals?"暂列第一 · 领先第2名"+(s.player.medals-second.medals)+"枚奖章":"暂列第一 · 对手已追平奖章";}
-  var behind=s.entries.FirstOrDefault(e=>e.rank==s.player.rank+1);
-  if(behind!=null&&s.player.medals-behind.medals<=1)return behind.name+"紧随其后 · "+(s.player.medals-behind.medals==0?"奖章已追平":"仅落后1枚奖章");
-  return "再获"+((long)s.next.medals-s.player.medals+1)+"枚奖章，即可超过"+s.next.name;
- }
+ 
 }
 }

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || BOUNCE_QA
 using System;
 using System.Collections;
 using System.IO;
@@ -29,3 +30,5 @@ public sealed class PackageCleanupQA:MonoBehaviour {
  }
 }
 }
+
+#endif

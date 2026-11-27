@@ -20,7 +20,7 @@ public partial class AppUI {
             if(outcome!=MockOutcome.Completed){Toast(outcome==MockOutcome.Cancelled?"广告已取消，未增加次数。":"广告暂不可用，请重试。");return;}
             if(!Session.TryContinueAfterAd())return;
             RemoveModal(false);owner.gameObject.SetActive(false);Destroy(owner.gameObject);results=null;skipResult=null;viewGeneration++;
-            SoundService.CancelTransient();SoundService.Music(Session.IsBossTrial?"bgm_boss":"bgm_gameplay");SoundService.Play("continue_restore");SoundService.Speak("vo_continue_zh",80);resultKey=Guid.NewGuid().ToString("N");hudRoot.gameObject.SetActive(true);RefreshHUD();Toast("增加5次机会，继续加油！");
+            SoundService.CancelTransient();SoundService.Music("bgm_gameplay");SoundService.Play("continue_restore");SoundService.Speak("vo_continue_zh",80);resultKey=Guid.NewGuid().ToString("N");hudRoot.gameObject.SetActive(true);RefreshHUD();Toast("增加5次机会，继续加油！");
         };
         if(RewardedContinueAds.Show!=null){try{RewardedContinueAds.Show(resolve);}catch(Exception e){Debug.LogWarning("Rewarded continue unavailable: "+e.Message);resolve(MockOutcome.Failed);}return;}
         OpenModal("本地广告演示",new Color32(151,96,49,255),930,1030);var adModal=modal;

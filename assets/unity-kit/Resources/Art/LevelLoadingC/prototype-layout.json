@@ -1,0 +1,96 @@
+{
+  "width": 646,
+  "height": 586,
+  "sprites": [
+    {
+      "key": "proto-box-rear",
+      "rect": [
+        60,
+        296,
+        526,
+        283
+      ]
+    },
+    {
+      "key": "proto-brick-coral",
+      "rect": [
+        59,
+        164,
+        187,
+        183
+      ]
+    },
+    {
+      "key": "proto-brick-yellow",
+      "rect": [
+        451,
+        166,
+        165,
+        184
+      ]
+    },
+    {
+      "key": "proto-cat-body",
+      "rect": [
+        148,
+        21,
+        361,
+        261
+      ]
+    },
+    {
+      "key": "proto-brick-green",
+      "rect": [
+        113,
+        250,
+        171,
+        170
+      ]
+    },
+    {
+      "key": "proto-brick-blue",
+      "rect": [
+        241,
+        238,
+        161,
+        156
+      ]
+    },
+    {
+      "key": "proto-brick-purple",
+      "rect": [
+        393,
+        262,
+        144,
+        153
+      ]
+    },
+    {
+      "key": "proto-cat-paws",
+      "rect": [
+        193,
+        195,
+        255,
+        87
+      ]
+    },
+    {
+      "key": "proto-box-foreground",
+      "rect": [
+        16,
+        300,
+        628,
+        282
+      ]
+    },
+    {
+      "key": "proto-sprout",
+      "rect": [
+        455,
+        458,
+        137,
+        123
+      ]
+    }
+  ]
+}

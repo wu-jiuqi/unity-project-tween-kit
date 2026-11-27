@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/CameraJuice.cs`
-文件 SHA-256：`99bb025f045000ffdb85f66bb75d913b5d05e2fc843e592dbfc19ece3ca3c9e3`
+文件 SHA-256：`424592abcbfe92fd7403d823fbfd2e82667a6ea9786495a77328b71a469ec73e`
 [原始源码快照](../source/Assets/Scripts/World/CameraJuice.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

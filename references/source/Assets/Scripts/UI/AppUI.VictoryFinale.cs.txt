@@ -1,24 +1,26 @@
 using UnityEngine;
 namespace BounceGarden {
 public partial class AppUI {
- GoalCelebration victoryCelebration;bool victoryCelebrated;
+ GoalCelebration victoryCelebration,victoryBadge;bool victoryCelebrated;
  public GoalCelebration QAGoalCelebration=>victoryCelebration;
+ 
+ void CloseGoalCelebration(){var a=victoryCelebration;var b=victoryBadge;victoryCelebration=null;victoryBadge=null;if(a!=null)a.Cancel();if(b!=null&&b!=a)b.Cancel();}
  void BeginGoalCelebration(){
-  CancelAim();CloseTutorialGuide();CloseAlphabetIntroduction();
+  CancelAim();CloseAlphabetIntroduction();
   GetComponentInChildren<ChainCollectionHUD>()?.ShowVictorySteps(Session.Shots);
   var generation=Session.Generation;var view=viewGeneration;
   var root=UICraft.Root(overlayRoot,"Goal complete celebration before rewards");
   var controller=root.gameObject.AddComponent<GoalCelebration>();victoryCelebration=controller;
   controller.Begin(this,Session,()=>{
    if(Session.Generation!=generation||viewGeneration!=view||victoryCelebration!=controller)return;
-   victoryCelebration=null;victoryCelebrated=true;OnOutcome(true);
+   victoryCelebration=null;victoryBadge=controller;controller.DockTo(hudRoot);victoryCelebrated=true;OnOutcome(true);
   });
  }
  VictoryFinale victoryFinale;VictoryRoundPreparation victoryPreparation;bool victoryRoundPrepared;int victoryScoreFrom;
- public VictoryRoundPreparation QAVictoryPreparation=>victoryPreparation;
+ 
  void BeginVictoryPreparation(){GetComponentInChildren<ChainCollectionHUD>()?.ShowVictorySteps(Session.Shots);PrepareVictoryCounter();var generation=Session.Generation;var root=UICraft.Root(overlayRoot,"Close last volley and trigger all specials");victoryPreparation=root.gameObject.AddComponent<VictoryRoundPreparation>();victoryPreparation.Begin(Session,GetComponentInChildren<BattleHUDSummary>(),GetComponentInChildren<BattleScoreMeter>(),()=>{if(Session.Generation!=generation)return;victoryPreparation=null;victoryRoundPrepared=true;OnOutcome(true);});}
  public VictoryFinale QAVictoryFinale=>victoryFinale;public VictoryPresentation QAVictoryPage=>victory;
- bool UsesVictoryFinale=>Session.IsChainCollection&&!Session.IsTutorial&&!Session.IsStreakTrial;
+ bool UsesVictoryFinale=>Session.IsChainCollection;
  void PrepareVictoryCounter(){victoryScoreFrom=Session.Score;GetComponentInChildren<BattleHUDSummary>()?.ShowVictoryScore(victoryScoreFrom);GetComponentInChildren<BattleScoreMeter>()?.CountVictoryScore(victoryScoreFrom);}
  void BeginVictoryFinale(){
   CloseAlphabetIntroduction();CancelAim();Clear(overlayRoot);

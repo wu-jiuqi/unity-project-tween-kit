@@ -28,11 +28,11 @@ public sealed partial class Gallery:MonoBehaviour {
   E("activity","活动卡果冻弹簧","控件交互","UI/ActivityJellyMotion.cs","悬停、按下与松开","固定卡 → visual → icon；事件桥调用原组件","弹性155、阻尼10，四次子步；图标有持续浮动。",true),
   E("hit","方向受击挤压","场景表现","World/JellyMotion.cs::HitStretch","点击砖块或改变方向","JellyHit.Target 仅绑定视觉；碰撞体留宿主","0.45秒、四倍π正弦、e^-5t衰减、幅度0.28。",true,true),
   E("goal","目标居中后归位","奖励与目标","UI/CollectionGoalEntrance.cs","进入后自动放大并飞回","将真实目标容器传入 Begin；Restore 恢复原父级","2.35秒；1.45秒起飞，0.75秒 SmoothStep；中断恢复层级。",false,false,true),
-  E("charge","星星飞光与材质充能","奖励与目标","UI/StarChargeView.cs","点击增加充能","Image + 容器；Initialize → Charge → Advance","彗星0.24秒，填充0.36秒；保留 StarCharge 透明Shader及 _Clock。",true),
-  E("victorycat","胜利猫非均匀序列帧","配套编排","UI/VictoryCatAnimation.cs","进入播放16帧","FrameSequence.Target → Image；原4×4图集","各帧时长原样保留，总长1.92秒；可拖动时间轴。",false,true),
-  E("failurecat","失败猫非均匀序列帧","配套编排","UI/FailureCatAnimation.cs","进入播放16帧","FrameSequence.Victory=false；Target → Image","各帧时长原样保留，总长2.32秒；可拖动时间轴。",false,true),
+  E("charge","星星飞光与旋转充能","奖励与目标","UI/StarChargeView.cs","点击增加充能","Image + 容器；Initialize → Charge → Advance","彗星0.24秒，填充0.36秒；原生UI遮罩；水平填充与旋转图案分层。",true),
+  E("victorycat","胜利猫非均匀序列帧","配套编排","UI/VictoryCatAnimation.cs","进入播放8帧","FrameSequence.Target → Image；当前4×2图集","各帧时长原样保留，总长1.92秒；可拖动时间轴。",false,true),
+  E("failurecat","失败猫非均匀序列帧","配套编排","UI/FailureCatAnimation.cs","进入播放8帧","FrameSequence.Victory=false；Target → Image","各帧时长原样保留，总长2.32秒；可拖动时间轴。",false,true),
   E("victory","胜利结算页面编排","奖励与目标","UI/VictoryPresentation.cs + .Stars.cs","进入自动演出；按钮仅更新本地展示状态","Begin(actionsFactory, level, first, coins, medals)","原光环96帧、爆发16帧、猫、星级与奖励卡；无奖励系统。",false,false,true),
-  E("failure","失败结算页面编排","奖励与目标","UI/FailurePresentation.cs","进入自动演出；重试／广告为本地展示回调","Begin(retry, home, watch, canContinue)","原96帧背景、失败猫、逐字标题与按钮入场；不导航、不播广告。",false,false,true),
+  E("failure","失败结算页面编排","奖励与目标","UI/FailurePresentation.cs","进入自动演出；重试／广告为本地展示回调","Begin(retry, home, watch, canContinue)","原96帧背景、八帧失败猫与按钮入场；不导航、不播广告。",false,false,true),
   E("medal","联赛奖章与升降名次","奖励与目标","UI/LeagueMotionArt.cs","进入展示奖章飞入与箭头","LeagueMedalPresentation.Show(parent,before,after,medals)","0.55秒入场，保留父级非等比补偿；名次只为显示数据。"),
   E("scoreimpact","分数变色放大计分","文字与数值","UI/BattleHUDSummary.cs","得分星光到达时脉冲","ScoreImpact.Target → TMP；宿主单独更新真实分数","0.25秒正弦脉冲；峰值1.2倍、金色，回到原色与原比例。",true,true),
   E("scoregain","加分合并与上浮淡出","文字与数值","UI/ScoreGainPresentation.cs","连续增加演示分值；只改变显示","ScoreGain → 数字、视觉容器、CanvasGroup","0.07秒合并窗口；0.65秒上移32单位，0.05秒淡入，6%正弦放大。",true),
@@ -50,7 +50,15 @@ public sealed partial class Gallery:MonoBehaviour {
   E("hintfade","操作后提示平滑淡出","页面与布局","UI/BattleUIArt.cs","模拟已操作/等待操作切换提示","HintFade.Group → 非交互提示组","alpha每秒变化2；隐藏提示不挡住输入。",true),
   E("homefeedback","欢迎语分层入场与呼吸","文字与数值","UI/HomeFeedbackView.cs","点击播放分层弹入；平时轻微呼吸","HomeLayeredFeedback → Title / Detail / Decoration","副文案延后0.13秒；cos(17t)×exp(-4.7t)衰减；1.35秒收尾。",true),
   E("pendulum","星星挂件受力摆动","持续表现","UI/BattleScoreMeter.cs","点击从两侧交替施加视觉冲量","PendantSwing.Target → 挂点；不绑定碰撞体","弹性30、阻尼3.6、四子步、限角36度、碰边反弹系数0.25。",true),
-  E("breath","联赛徽章轻微呼吸","持续表现","UI/LeagueMatchPresentation.cs","进入后持续运行","DecorativeBreath.Target → 徽章视觉","1 + 0.035×sin(3t)，禁用还原原比例。")
+  E("breath","联赛徽章轻微呼吸","持续表现","UI/LeagueMatchPresentation.cs","进入后持续运行","DecorativeBreath.Target → 徽章视觉","1 + 0.035×sin(3t)，禁用还原原比例。"),
+  E("toast","轻提示续时与替换","配套编排","0.5.1表现切片","在舞台操作或重播","ToastMotion","EnterDuration=.18秒 OutCubic，ExitDuration=.14秒 InCubic；HoldDuration=3.2秒，EnterScale=.96，ExitScale=.94。最新待显示消息覆盖旧消息；宿主输入类型与停留时长。",true,false,false),
+  E("loadingbox","共享箱体与猫咪循环","配套编排","0.5.1表现切片","在舞台操作或重播","LoadingBoxAnimation","箱体落下.38秒、回弹.24秒；猫与砖块循环4.2秒；Render绝对时间，不驱动真实进度。",false,false,false),
+  E("errorpopup","异常弹窗与共享循环","配套编排","0.5.1表现切片","在舞台操作或重播","ErrorPopupMotion","开.18秒/关.14秒；共享LoadingBoxAnimation；关闭按钮意图至多交付一次，取消/禁用丢弃意图。",true,false,true),
+  E("pageflow","五页切换与资源等待","配套编排","0.5.1表现切片","在舞台操作或重播","PageTransition","Width=920设计单位，Duration=.27秒 OutCubic；一次只显示出发与目的页，跨标签只移动一屏；请求票据阻止过期完成。",true,false,false),
+  E("nativecharge","旋转星星原生遮罩充能","配套编排","0.5.1表现切片","在舞台操作或重播","StarChargeView","原生RectMask2D+星形Mask；136单位方形覆盖旋转对角线；彗星.24秒、填充.36秒；满星隐藏底色。",true,false,false),
+  E("celebration","目标达成移至底部循环","配套编排","0.5.1表现切片","在舞台操作或重播","GoalCelebration","标题关键帧0/.14/.26/.40/.56/.78秒；1.65秒预备，1.8–2.4秒弧线下移，2.85秒落位；12fps、12帧持续循环。",false,false,true),
+  E("lowmoves","低步数三次缩放警告","配套编排","0.5.1表现切片","在舞台操作或重播","MovesFeedback","WarningCycle=.48秒，WarningLoops=3，WarningAmplitude=.10，整体峰值1.2倍；业务阈值与400ms震动由宿主处理。",true,false,false),
+  E("teaching","三步机关教学循环","配套编排","0.5.1表现切片","在舞台操作或重播","ThreeStepLoop","LoopDuration=6.72秒，每步2.24秒；七种现用教学页的原素材、实际轴心和静态相位，点击切换机关；业务进度不提交。",true,false,true),
  };
  static Entry E(string id,string title,string cat,string source,string trigger,string binding,string notes,bool interactive=false,bool timeline=false,bool tall=false)=>new Entry{id=id,title=title,category=cat,source=source,trigger=trigger,binding=binding,notes=notes,interactive=interactive,timeline=timeline,tall=tall};
  public Entry Current=>Entries[index];public MonoBehaviour CurrentComponent=>component;
@@ -58,7 +66,7 @@ public sealed partial class Gallery:MonoBehaviour {
  int index,filter,typeFilter;bool immediate;float elapsed,timeline;string search="",message="",lastCue="";Vector2 scroll,inspectorScroll;Font guiFont;
  readonly string[] categories={"全部","控件交互","页面与布局","文字与数值","奖励与目标","持续表现","场景表现","配套编排"};
  readonly string[] animationTypes={"全部类型","DOTween","协程","数学曲线","弹簧","序列帧","材质"};
- static string TypesFor(string id)=>id=="pendulum"?"弹簧 数学曲线":id=="press"||id=="switch"||id=="modal"?"DOTween":id=="logo"?"DOTween 协程 数学曲线":id=="activity"||id=="drag"?"弹簧 数学曲线":id=="victorycat"||id=="failurecat"?"序列帧":id=="victory"||id=="failure"?"序列帧 数学曲线":id=="charge"?"材质 数学曲线":"数学曲线";
+ static string TypesFor(string id)=>id=="pendulum"?"弹簧 数学曲线":id=="press"||id=="switch"||id=="modal"?"DOTween":id=="logo"?"DOTween 协程 数学曲线":id=="activity"||id=="drag"?"弹簧 数学曲线":id=="victorycat"||id=="failurecat"?"序列帧":id=="victory"||id=="failure"?"序列帧 数学曲线":id=="charge"?"数学曲线":"数学曲线";
  readonly Dictionary<string,MotionPreset> retained=new Dictionary<string,MotionPreset>();
  void Awake(){Application.targetFrameRate=60;Application.runInBackground=true;KitClock.Manual=true;KitClock.Reset();DOTween.Init(false,true,LogBehaviour.ErrorsOnly);SoundService.Cue+=OnCue;
   if(Camera.main==null){var camera=new GameObject("Main Camera",typeof(Camera));camera.tag="MainCamera";camera.GetComponent<Camera>().clearFlags=CameraClearFlags.SolidColor;camera.GetComponent<Camera>().backgroundColor=new Color(.98f,.96f,.92f);}
@@ -72,6 +80,7 @@ public sealed partial class Gallery:MonoBehaviour {
  void Update(){KitClock.Frame(Time.unscaledDeltaTime);elapsed+=KitClock.Delta;
   UpdateInterface();
   if(component is StarChargeView charge)charge.Advance(KitClock.Delta);
+  if(component is LoadingBoxAnimation actor)actor.Render(actor.Elapsed+KitClock.Delta);
  }
  public void Select(int value){KitClock.Paused=false;message="";hasTriggered=false;primaryAction=null;if(component!=null)retained[Current.id]=MotionPreset.Capture(component);if(demo!=null){foreach(var borrowed in demo.GetComponentsInChildren<CollectionGoalEntrance>(true))borrowed.Restore();demo.SetActive(false);Destroy(demo);}SoundService.CancelTransient();index=Mathf.Clamp(value,0,Entries.Length-1);elapsed=timeline=0;lastCue="";component=null;play=null;sample=null;
   demo=UICraft.Root(stage,"Example "+Current.id).gameObject;Build((RectTransform)demo.transform);if(component!=null)defaults[Current.id]=MotionPreset.Capture(component);if(component!=null&&retained.TryGetValue(Current.id,out var preset))preset.Apply(component);if(!Current.interactive){play?.Invoke(immediate);hasTriggered=true;triggeredAt=elapsed;}RefreshInterface();

@@ -3,14 +3,14 @@
 状态：`non-animation`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/PlaytestMetrics76.cs`
-文件 SHA-256：`eae832cc7a3e4e6a00e8fdb4fbc999b4ee96e183aba773b052f259de4c3d0c3a`
+文件 SHA-256：`103919f9a06b61d18a9b60d872dd7e882a7232e3d3790d4bdb8ffa124fc83383`
 [原始源码快照](../source/Assets/Scripts/PlaytestMetrics76.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
 
 ## 源方法、参数与曲线
 
-### Update · L38
+### Update · L37
 
 方法 SHA-256：`5240ff4bdf9717dffa80dbdaac37582df6de96424fcce1a10f07326e6011b7c3`
 时间来源：Time.unscaledDeltaTime, Time.unscaledTime

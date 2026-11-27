@@ -1,0 +1,11 @@
+using UnityEngine;
+namespace BounceGarden {
+public sealed class BattleHudAspect050:MonoBehaviour {void LateUpdate(){var p=transform.parent;if(p!=null)transform.localScale=new Vector3(1,p.lossyScale.x/Mathf.Max(.0001f,p.lossyScale.y),1);}}
+public sealed class BattleGardenPresentation050:MonoBehaviour {
+ bool ready;void LateUpdate(){if(ready)return;var app=FindFirstObjectByType<AppUI>();var hud=app!=null?app.GetComponentInChildren<ChainCollectionHUD>():null;if(hud==null)return;ready=true;
+  var instruction=UICraft.Root(hud.transform,"Garden launch instruction",0,-1065,576,62);instruction.gameObject.AddComponent<BattleHudAspect050>();BattleGardenArt050.Image(instruction,"hud-panel",0,0,576,62);UICraft.Label(instruction,"拖动瞄准 · 松手发射",0,0,550,50,28,BattleGardenArt050.Ink);
+  foreach(var cushion in FindObjectsByType<LauncherCushion>(FindObjectsSortMode.None))foreach(var r in cushion.GetComponentsInChildren<Renderer>())r.enabled=true;
+  var guide=GameObject.Find("Return band guide");if(guide!=null)foreach(var r in guide.GetComponentsInChildren<Renderer>())r.enabled=false;
+ }
+}
+}

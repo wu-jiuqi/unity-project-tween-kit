@@ -1,0 +1,15 @@
+#if UNITY_EDITOR || BOUNCE_QA
+using System;using System.IO;using System.Linq;using System.Collections;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+public sealed class StarFill051QA:MonoBehaviour {
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Array.IndexOf(Environment.GetCommandLineArgs(),"--star-fill051-qa")>=0)new GameObject("Rotating star fill QA").AddComponent<StarFill051QA>();}
+ string dir;int checks,failed;
+ void Check(bool ok,string text){checks++;if(!ok)failed++;File.AppendAllText(dir+"/checks.txt",(ok?"PASS ":"FAIL ")+text+"\n");}
+ IEnumerator Start(){var args=Environment.GetCommandLineArgs();dir=args[Array.IndexOf(args,"--qa-out")+1];Directory.CreateDirectory(dir);File.WriteAllText(dir+"/checks.txt","");yield return new WaitForSecondsRealtime(.8f);var host=UICraft.Root(FindFirstObjectByType<Canvas>().transform,"Star clip test",0,0,360,500);var rt=UICraft.Root(host,"Star test",0,0,90,82);rt.gameObject.AddComponent<Image>();var charge=rt.gameObject.AddComponent<StarChargeView>();charge.Initialize(host,1);var gold=rt.GetComponentsInChildren<Image>().First(i=>i.name=="Rotating golden star");var empty=rt.GetComponentsInChildren<Image>().First(i=>i.name=="Rotating empty star");
+  foreach(float angle in new[]{0f,45f,74f,90f,125f,135f,180f,230f,251f,315f}){charge.SetImmediate(1);charge.SetRotation(angle);Canvas.ForceUpdateCanvases();var corners=new Vector3[4];gold.rectTransform.GetWorldCorners(corners);bool fits=corners.Select(p=>(Vector2)charge.FillMask.InverseTransformPoint(p)).All(p=>charge.FillMask.rect.Contains(p));Check(fits,"full gold artwork fits clipping rectangle at angle "+angle);Check(!empty.enabled&&gold.enabled&&!charge.EdgeVisible,"full star hides pink base and fill edge at angle "+angle);charge.PrepareVictoryTransfer();charge.RefreshGeometry();Check(!empty.enabled,"victory transfer keeps full star gold at angle "+angle);}
+  foreach(float fill in new[]{0f,.25f,.5f,.75f,1f}){charge.SetImmediate(fill);Check(empty.enabled==(fill<.999f),"pink base only exists on unfilled stars "+fill);Check(charge.UsesNativeUIFill,"retains native UI fill and material "+fill);}
+  File.WriteAllText(dir+"/result.json","{\"checks\":"+checks+",\"failed\":"+failed+"}");Application.Quit(failed==0?0:3);
+ }
+}
+}
+#endif

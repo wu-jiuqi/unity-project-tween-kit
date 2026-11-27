@@ -3,7 +3,7 @@
 状态：`source-route-reviewed`；交付：`extracted-component`。
 
 源文件：`Assets/Scripts/UI/LeagueRankingView.cs`
-文件 SHA-256：`e02ec449c21cb64354b47245aee1f660e2a05b161062dc9e25a30388c720d753`
+文件 SHA-256：`04143f33f8a659d50a1c82925fad238eeb83aaeb08bbf1345da6910054f29356`
 [原始源码快照](../source/Assets/Scripts/UI/LeagueRankingView.cs.txt)
 
 用在哪里：LeagueRankingView.Refresh / LeaguePodiumView.Build → LeagueJelly.Play
@@ -13,7 +13,7 @@
 
 ## 源方法、参数与曲线
 
-### Update · L26
+### Update · L24
 
 方法 SHA-256：`792ba5dd562b98b45543a716e0509da3a9076150e90eac1d75b74825345ede04`
 时间来源：Time.unscaledDeltaTime

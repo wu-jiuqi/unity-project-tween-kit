@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/OpeningCookieBoxView.cs`
-文件 SHA-256：`83e1e3cd03dfb582eb07fa083727dca266b8e9b6a622ce2f0a4563bdf79cd7d9`
+文件 SHA-256：`aa83c9e4274356a7f657e6c255d4e7f2596c20f98a13e68137c7c0d8fde696f5`
 [原始源码快照](../source/Assets/Scripts/World/OpeningCookieBoxView.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。
@@ -19,13 +19,7 @@
 
 Roslyn 已解析的实际源码调用位置：
 
-- `Assets/Scripts/CookieColliderGravityQA.cs:51` · `CookieColliderGravityQA.Start` → `isolated.Tick(.08f)`
-- `Assets/Scripts/Core/OpeningCampaign.cs:62` · `GameSession.TickOpeningYarn` → `box.Tick(dt)`
-- `Assets/Scripts/SecondGroupIntegrationQA.cs:37` · `SecondGroupIntegrationQA.Start` → `box1.Tick(.07f)`
-- `Assets/Scripts/SecondGroupIntegrationQA.cs:37` · `SecondGroupIntegrationQA.Start` → `box1.Tick(.1f)`
-- `Assets/Scripts/SecondGroupIntegrationQA.cs:37` · `SecondGroupIntegrationQA.Start` → `box1.Tick(.4f)`
-- `Assets/Scripts/SecondGroupIntegrationQA.cs:54` · `SecondGroupIntegrationQA.Start` → `box1.Tick(.08f)`
-- `Assets/Scripts/SfxV87QA.cs:35` · `SfxV87QA.Start` → `box.Tick(.5f)`
+- `Assets/Scripts/Core/OpeningCampaign.cs:61` · `GameSession.TickOpeningYarn` → `box.Tick(dt)`
 
 ```csharp
 public void Tick(float dt){

@@ -3,8 +3,8 @@ namespace BounceGarden {
 // Input stays on a fixed rectangle; only the nested artwork is pulled around.
 public sealed class EncouragementDrag:MonoBehaviour,IPointerDownHandler,IPointerUpHandler,IBeginDragHandler,IDragHandler,IEndDragHandler {
  RectTransform visual,hit;TMP_Text title,detail;Func<bool> permitted;Vector2 start,pull,velocity;int pointer=int.MinValue;bool held,focused=true;
- public Vector2 Pull=>pull;
- public bool Held=>held;
+ 
+ 
  bool Allowed=>focused&&FeedbackProfile.Active.enabledFeedback&&(permitted==null||permitted());
  public void Initialize(RectTransform target,TMP_Text heading,TMP_Text caption,Func<bool> allowed){visual=target;hit=(RectTransform)transform;title=heading;detail=caption;permitted=allowed;}
  public void OnPointerDown(PointerEventData e){if(!Allowed||held||e.button!=PointerEventData.InputButton.Left)return;held=true;pointer=e.pointerId;velocity=Vector2.zero;RectTransformUtility.ScreenPointToLocalPointInRectangle(hit,e.position,e.pressEventCamera,out start);}

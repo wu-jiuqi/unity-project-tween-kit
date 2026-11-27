@@ -22,7 +22,7 @@ public partial class AppUI {
 public sealed class StreakRewardPresentation:MonoBehaviour,UnityEngine.EventSystems.IPointerClickHandler {
  readonly List<CanvasGroup> hidden=new List<CanvasGroup>();
  public string Phase{get;private set;}="dim";
- bool canAccelerate,accelerated;public bool Accelerated=>accelerated;
+ bool canAccelerate,accelerated;
  public void OnPointerClick(UnityEngine.EventSystems.PointerEventData data){if(canAccelerate)accelerated=true;}
  public IEnumerator Play(int wins,List<StreakBooster> kinds,List<RectTransform> targets,bool repeated=false){
   canAccelerate=repeated;

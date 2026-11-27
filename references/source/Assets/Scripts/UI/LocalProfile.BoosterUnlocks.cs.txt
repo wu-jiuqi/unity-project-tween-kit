@@ -2,13 +2,10 @@ namespace BounceGarden {
 public sealed partial class LocalProfile {
  public static int BoosterUnlockLevel(StreakBooster k)=>k==StreakBooster.Pierce?1:k==StreakBooster.Bomb?3:k==StreakBooster.Super?10:999;
  public bool BoosterUnlocked(StreakBooster k,int playingIndex=-1)=>System.Math.Max(AlphabetUnlocked,playingIndex)+1>=BoosterUnlockLevel(k);
- public bool BoosterIntroSeen(StreakBooster k)=>committed.Contains("booster-v69/intro/"+k);
- public bool BoosterGuideSeen(StreakBooster k)=>committed.Contains("booster-v69/guide/"+k);
- public bool GrantBoosterUnlock(StreakBooster k,int level){if(!BoosterUnlocked(k,level))return false;string key="booster-v69/gift/"+k;if(committed.Contains(key))return true;
-  // The existing starter kit's sealed item becomes available on unlock. Never erase old stock.
-  return LeagueTransaction(()=>{if(boosters[(int)k]==0)boosters[(int)k]=1;committed.Add(key);});
- }
- public bool MarkBoosterIntro(StreakBooster k)=>LeagueTransaction(()=>committed.Add("booster-v69/intro/"+k));
+ 
+ 
+ 
+ 
  public bool MarkBoosterGuide(StreakBooster k)=>LeagueTransaction(()=>committed.Add("booster-v69/guide/"+k));
 }
 }

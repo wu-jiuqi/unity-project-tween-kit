@@ -4,7 +4,7 @@ namespace ProjectTweenKit {
 // Composed prefabs reconstruct the original runtime-created sprites and delegates.
 // They intentionally do not serialize temporary Sprite.Create or TMP font instances.
 public sealed class ExamplePrefab:MonoBehaviour {
- public enum Kind {Press,Switch,Modal,Number,Float,Hit,Sequence,ScoreImpact,ScoreGain,LoadingProgress,StartupLoading}
+ public enum Kind {Press,Switch,Modal,Number,Float,Hit,Sequence,ScoreImpact,ScoreGain,LoadingProgress,StartupLoading,LoadingBox,ErrorPopup,GoalCelebration,ThreeStepLoop,NativeCharge,LowMoves,Toast,PageTransition}
  public Kind Example;
  public bool InitialValue=true;
  public UnityEvent Clicked=new UnityEvent();
@@ -26,7 +26,17 @@ public sealed class ExamplePrefab:MonoBehaviour {
    case Kind.LoadingProgress:{var progress=ProjectTweenKit.LoadingProgress.Create(transform);Component=progress;CSettingsArt.Button(transform,"Advance demo progress","模拟任务进度 +20%",-220,-250,410,110,()=>progress.SetProgress(progress.TargetValue+.2f));CSettingsArt.Button(transform,"Required tasks completed","任务完成",250,-250,340,110,()=>progress.Complete());break;}
    case Kind.StartupLoading:{var page=gameObject.AddComponent<StartupLoadingPresentation>();page.Build();Component=page.Progress;CSettingsArt.Button(transform,"Advance startup progress","模拟任务进度 +20%",-220,-1050,410,110,()=>page.Progress.SetProgress(page.Progress.TargetValue+.2f));CSettingsArt.Button(transform,"Startup completed","任务完成",250,-1050,340,110,()=>page.Progress.Complete());break;}
 
+   case Kind.LoadingBox:Component=LoadingBoxAnimation.Create(transform);break;
+   case Kind.ErrorPopup:var error=gameObject.AddComponent<ErrorPopupMotion>();error.Build();Component=error;CurrentKitArt.Button(error.Motion.Target,"Retry","重试",0,-465,800,128,()=>error.CloseWithIntent(()=>Clicked.Invoke()),"primary",53);error.Open();break;
+   case Kind.GoalCelebration:var goal=gameObject.AddComponent<GoalCelebration>();Component=goal;goal.Begin();break;
+   case Kind.ThreeStepLoop:var loop=gameObject.AddComponent<ThreeStepLoop>();var storyRoot=UICraft.Root(transform,"Three teaching steps");var story=storyRoot.gameObject.AddComponent<OpeningStory049>();story.Build(501);loop.RenderStep=(i,p)=>story.SampleStep(i,p);Component=loop;break;
+   case Kind.NativeCharge:var star=CurrentKitArt.StarImage(transform,"star-empty-v22",0,0,200,200);var charge=star.gameObject.AddComponent<StarChargeView>();charge.Initialize((RectTransform)transform,.5f);Component=charge;break;
+   case Kind.LowMoves:var warning=gameObject.AddComponent<MovesFeedback>();warning.Label=UICraft.Label(transform,"5",0,0,300,200,100);warning.Target=warning.Label.rectTransform;Component=warning;warning.Warn();break;
+   case Kind.Toast:var toast=gameObject.AddComponent<ToastMotion>();toast.Visual=UICraft.Root(transform,"Toast visual",0,0,900,180);CSettingsArt.Image(toast.Visual,"card_cream_help",0,0,900,180,true);toast.Group=gameObject.AddComponent<CanvasGroup>();toast.Label=UICraft.Label(toast.Visual,"",0,0,850,140,45);Component=toast;toast.Show("已保存装扮");break;
+   case Kind.PageTransition:var nav=gameObject.AddComponent<PageTransition>();nav.Pages=new RectTransform[2];for(int i=0;i<2;i++){nav.Pages[i]=UICraft.Root(transform,"Page "+i);UICraft.Label(nav.Pages[i],"Page "+i,0,0,600,100,60);}nav.Go(0,true);Component=nav;break;
+
   }
  }
+ void Update(){if(Component is LoadingBoxAnimation actor)actor.Render(actor.Elapsed+KitClock.Delta);if(Component is StarChargeView charge)charge.Advance(KitClock.Delta);}
 }
 }

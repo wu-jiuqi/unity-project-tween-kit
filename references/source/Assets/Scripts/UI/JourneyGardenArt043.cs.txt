@@ -1,0 +1,11 @@
+using System;using System.Collections.Generic;using UnityEngine;using UnityEngine.UI;
+namespace BounceGarden {
+// Approved HTML source pixels; shared controls remain owned by HomeAArt/CommonButtonsA/SettingsC.
+public static class JourneyGardenArt043 {
+ static readonly Dictionary<string,Sprite> cache=new Dictionary<string,Sprite>();
+ public static Sprite Get(string key){if(cache.TryGetValue(key,out var s))return s;var t=Resources.Load<Texture2D>("Art/JourneyGarden043/"+key);if(t==null)throw new InvalidOperationException("Missing approved journey art: "+key);Rect r=new Rect(0,0,t.width,t.height);if(key=="icon-locate")r=new Rect(7,7,266,269);s=Sprite.Create(t,r,Vector2.one*.5f,100,0,SpriteMeshType.FullRect);s.name="JourneyGarden043/"+key;cache[key]=s;return s;}
+ public static Image Image(Transform parent,string key,float x,float y,float w,float h){var i=UICraft.Box(parent,key,x,y,w,h,Color.white);i.sprite=Get(key);i.raycastTarget=false;return i;}
+ public static Image Title(Transform parent){var i=UICraft.Box(parent,"Approved map title pill",0,0,565,124,Color.white);i.sprite=CommonButtonsA.Get("selected-normal");i.type=UnityEngine.UI.Image.Type.Sliced;i.pixelsPerUnitMultiplier=i.sprite.rect.height/124;i.raycastTarget=false;return i;}
+ public static Sprite BackIcon(){const string key="__back";if(cache.TryGetValue(key,out var s))return s;var original=CSettingsArt.Get("icon_back");var r=original.rect;var crop=new Rect(r.x+r.width*5/53,r.y+r.height*6/54,r.width*43/53,r.height*40/54);s=Sprite.Create(original.texture,crop,Vector2.one*.5f,original.pixelsPerUnit,0,SpriteMeshType.FullRect);s.name="Shared C back icon centered";cache[key]=s;return s;}
+}
+}

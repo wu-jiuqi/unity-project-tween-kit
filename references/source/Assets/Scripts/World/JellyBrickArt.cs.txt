@@ -8,28 +8,11 @@ namespace BounceGarden
         public const string SpriteName = "jelly_blue";
         public const int FrameCount = 16;
         public const float FramesPerSecond = 25f;
-        public const float Duration = FrameCount / FramesPerSecond;
-        static Sprite[] frames;
+        
+        
         public static bool Enabled(int level) => level >= 0 && level < 6;
         public static Sprite Rest => Frames[0];
-        public static Sprite[] Frames
-        {
-            get
-            {
-                if (frames != null) return frames;
-                var texture = Resources.Load<Texture2D>("Art/Jelly/blue_jelly_pop");
-                if (texture == null) throw new System.InvalidOperationException("Jelly atlas missing");
-                frames = new Sprite[FrameCount];
-                int cell = texture.width / 4;
-                for (int i = 0; i < FrameCount; i++)
-                {
-                    frames[i] = Sprite.Create(texture, new Rect(i % 4 * cell, (3 - i / 4) * cell, cell, cell),
-                        new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect);
-                    frames[i].name = i == 0 ? SpriteName : SpriteName + "_" + i;
-                }
-                return frames;
-            }
-        }
+        public static Sprite[] Frames=>SevenSpecialArt.OrdinaryFrames(0);
 
         public static void Fit(SpriteRenderer face, float width, float height)
         {
@@ -46,7 +29,7 @@ namespace BounceGarden
         Slot[] slots;
         GameSession owner;
         int cursor;
-        public int Capacity => slots == null ? 0 : slots.Length;
+        
         public int ActiveCount { get; private set; }
         public int Peak { get; private set; }
         public int Played { get; private set; }

@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace BounceGarden
 {
-    public enum BallAbility { Heavy, Pierce, Bloom, Split }
+    
     public enum BrickKind { Normal, Stone, Armor, Frost, Bomb, Rainbow, Resonance, Switch, Seal, Core, Guide, RearWeak }
     [Serializable]
     public sealed class LevelData
     {
-        public bool mainline,pixelPainting,pixelDrop,alphabetCampaign,tutorial;
+        public bool alphabetCampaign;
         public string artName,series,designQuestion,mechanism,difficulty;
         public string[] layout;
         public string label;
@@ -19,12 +19,8 @@ namespace BounceGarden
         public float ballInterval = 0.10f;
         public float ballSpeed = 15.7f;
         public float gravity = 0f;
-        public bool abilityRoute;
-        public bool colorMatch;
-        public bool bossTrial;
-        public JuiceMechanic juiceMechanic;
-        public string paintingId = "";
-        public BallAbility[] ballQueue = Array.Empty<BallAbility>();
+        
+        
         public BrickSpawn[] bricks = new BrickSpawn[0];
         public ObstacleSpawn[] obstacles = new ObstacleSpawn[0];
     }

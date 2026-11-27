@@ -1,0 +1,8 @@
+#if UNITY_EDITOR || BOUNCE_QA
+using System;namespace BounceGarden {public static class LeagueSelfTests {
+ public sealed class Clock:ILeagueClock {public long Now=1900000000;public long UtcSeconds=>Now;}
+ public sealed class ConfigProvider:ILeagueConfigProvider {public LeagueConfig Value=new LeagueConfig();public LeagueConfig Load()=>LeagueConfig.Clone(Value);}
+ 
+
+}}
+#endif

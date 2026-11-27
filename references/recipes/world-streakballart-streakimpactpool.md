@@ -3,7 +3,7 @@
 状态：`requires-route-review`；交付：`source-evidence-only`。
 
 源文件：`Assets/Scripts/World/StreakBallArt.cs`
-文件 SHA-256：`8fcead37d6992a1f5a2038b7ee56d122340d32408ed3ef58875d043899f0ee19`
+文件 SHA-256：`bb602fc2d117add41954dbf80144c904e43c45ed54807defee0c4418b26e870e`
 [原始源码快照](../source/Assets/Scripts/World/StreakBallArt.cs.txt)
 
 此页是来源证据，尚未构成可独立导入的组件或完整适配配方。不能据此宣称当前页面已启用或已覆盖交付。

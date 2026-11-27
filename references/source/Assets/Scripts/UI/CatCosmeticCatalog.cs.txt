@@ -17,20 +17,26 @@ public static class CatCosmeticCatalog {
  public static Item Default=>Items[0];
  static string Key(string value){value=value??"";return value.StartsWith("Art/",StringComparison.Ordinal)?value.Substring(4):value;}
  public static Item FindAvatar(string resource){
+  var exclusive=LeagueExclusiveCosmetics.ById(resource)??LeagueExclusiveCosmetics.ByResource(resource);if(exclusive!=null)return exclusive.item;
   string key=Key(resource);if(key.StartsWith("LeagueV1/",StringComparison.Ordinal))key=key.Substring(9);
   switch(key){case "flower-cat-v1":case "reward_avatar":case "avatar_luna":key="02_ragdoll";break;case "avatar_mochi":key="09_exotic_shorthair";break;case "avatar_sunny":key="04_maine_coon";break;case "avatar_clover":key="08_scottish_fold";break;case "avatar_poppy":key="03_siamese";break;case "HomeV7/garden_avatar":case "pastel/cat_avatar":key="01_british_shorthair";break;}
   foreach(var item in Items)if(item.id==key||Key(item.avatar.resource)==key)return item;return null;
  }
- public static Item FindFrame(string resource){string key=Key(resource);if(key=="LeagueV1/reward_frame"||key=="reward_frame"||key=="flower-frame-v1")key="02_ragdoll";if(key=="HomeV7/garden_frame"||key=="pastel/avatar_ring")key=Default.id;foreach(var item in Items)if(item.id==key||Key(item.frame.resource)==key)return item;return null;}
- public static Layout Pair(Item avatar,Item frame){foreach(var layout in avatar.layouts)if(layout.frameId==frame.id)return layout;throw new InvalidOperationException("Missing cosmetic layout "+avatar.id+"/"+frame.id);}
- public static Sprite Sprite(string resource){if(!sprites.TryGetValue(resource,out var sprite)){sprite=Resources.Load<Sprite>(resource);if(sprite==null)throw new InvalidOperationException("Missing cosmetic sprite "+resource);sprites.Add(resource,sprite);}return sprite;}
+ public static Item FindFrame(string resource){var exclusive=LeagueExclusiveCosmetics.ById(resource)??LeagueExclusiveCosmetics.ByResource(resource);if(exclusive!=null)return exclusive.item;string key=Key(resource);if(key=="HomeV7/garden_frame"||key=="pastel/avatar_ring")key=Default.id;foreach(var item in Items)if(item.id==key||Key(item.frame.resource)==key)return item;return null;}
+ public static Layout Pair(Item avatar,Item frame){var key=DressingShopArt044.FrameKey(frame);if(key!=null){var m=DressingShopArt044.Measure(key);return new Layout{frameId=frame.id,scale=m.scale,offsetX=m.x,offsetY=-m.y};}if(LeagueExclusiveCosmetics.ById(avatar.id)!=null)return Pair(Default,frame);foreach(var layout in avatar.layouts)if(layout.frameId==frame.id)return layout;throw new InvalidOperationException("Missing cosmetic layout "+avatar.id+"/"+frame.id);}
+ public static Sprite Sprite(string resource){
+  // Older league rewards saved CatCosmeticsV3 paths without the Art/ resource root.
+  // Resolve that display alias without changing ownership IDs or saved reward data.
+  if((resource??"/").StartsWith("CatCosmeticsV3/",StringComparison.Ordinal))resource="Art/"+resource;
+  if(DressingShopArt044.OverrideSprite(resource,out var approved))return approved;if(!sprites.TryGetValue(resource,out var sprite)){sprite=Resources.Load<Sprite>(resource);if(sprite==null)throw new InvalidOperationException("Missing cosmetic sprite "+resource);sprites.Add(resource,sprite);}return sprite;}
  public static RectTransform Create(Transform parent,string avatarResource,string frameResource,float x,float y,float size){
+  if((frameResource??"").Contains("DressingShop044/"))return DressingShopArt044.Portrait(parent,avatarResource,frameResource,x,y,size);
   var avatar=FindAvatar(avatarResource)??Default;
   var frame=string.IsNullOrEmpty(frameResource)?avatar:FindFrame(frameResource)??Default;
   var layout=Pair(avatar,frame);
   var root=UICraft.Root(parent,"Cat cosmetic portrait",x,y,size,size);
   var marker=root.gameObject.AddComponent<CatCosmeticPortrait>();marker.AvatarId=avatar.id;marker.FrameId=frame.id;
-  Layer(root,"Avatar",Sprite(avatar.avatar.resource),layout.scale,layout.offsetX,-layout.offsetY);
+  Layer(root,"Avatar",Sprite((avatarResource??"").Contains("DressingShop044/league-avatar-")?avatarResource:avatar.avatar.resource),layout.scale,layout.offsetX,-layout.offsetY);
   Layer(root,"Frame",Sprite(frame.frame.resource),1,0,0);
   return root;
  }
